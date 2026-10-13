@@ -8,18 +8,12 @@ importers:
 
   .:
     devDependencies:
-      '@esbuild/win32-x64':
-        specifier: ^0.21.5
-        version: 0.21.5
       '@fontsource/dm-sans':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource/syne':
         specifier: ^5.3.0
         version: 5.3.0
-      '@rollup/rollup-win32-x64-msvc':
-        specifier: ^4.64.5
-        version: 4.64.5
       esbuild:
         specifier: ^0.21.5
         version: 0.21.5
@@ -440,7 +434,8 @@ snapshots:
   '@esbuild/win32-ia32@0.21.5':
     optional: true
 
-  '@esbuild/win32-x64@0.21.5': {}
+  '@esbuild/win32-x64@0.21.5':
+    optional: true
 
   '@fontsource/dm-sans@5.3.0': {}
 
@@ -521,7 +516,8 @@ snapshots:
   '@rollup/rollup-win32-x64-gnu@4.64.5':
     optional: true
 
-  '@rollup/rollup-win32-x64-msvc@4.64.5': {}
+  '@rollup/rollup-win32-x64-msvc@4.64.5':
+    optional: true
 
   '@types/estree@1.0.9': {}
 

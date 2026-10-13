@@ -6,6 +6,7 @@ import "./styles/index.css";
 import { HUBApp } from "./app.ts";
 import { logger } from "@shared/infrastructure/logger.infrastructure.ts";
 import { iniciarVigia } from "./vigia.ts";
+import { iniciarControlesShell } from "./interfaz.ts";
 import { auth, SessionUsuario } from "./auth-client.ts";
 import { resolverTenant } from "./tenant-client.ts";
 import { cargarInbox } from "./inbox-client.ts";
@@ -22,6 +23,7 @@ const FASE = "FASE_F";
 
 export async function inicializarHUB(root: HTMLElement): Promise<void> {
   iniciarVigia(FASE);
+  iniciarControlesShell();
   const config = (globalThis as HubConfigGlobal).__HUB_CONFIG__;
   const sesion = config?.supabaseUrl ? auth.leer() : null;
   if (!sesion) {

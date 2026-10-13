@@ -366,6 +366,32 @@
   display: flex;
   gap: 4px;
 }
+.nav-tools {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.nav-tool {
+  appearance: none;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--card-soft));
+  color: hsl(var(--text-muted));
+  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+.nav-tool:hover {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.6);
+}
 .nav-item {
   appearance: none;
   border: none;
