@@ -18,7 +18,10 @@ CREATE TABLE public.messages (
   template_name     text,
   template_params   jsonb,
   has_attachments   boolean NOT NULL DEFAULT false,
-  reply_to_message_id uuid REFERENCES public.messages(id),
+  -- reply_to_message_id sin FK: messages es particionada por created_at con
+  -- PK (created_at, id); una FK self-referencial a id solo no es posible en
+  -- una tabla particionada. La relacion de reply se valida en la app.
+  reply_to_message_id uuid,
   status            text NOT NULL DEFAULT 'sent'
     CHECK (status IN ('draft','sending','sent','delivered','read','failed','received')),
   error_code        text,
