@@ -50,25 +50,21 @@ function unwrapError<T>(res: RestRes<T>): Error {
  * Retorna el primer registro (se asume uno por tenant).
  */
 export async function getPrivacyConfig(): Promise<Result<PrivacyConfig, Error>> {
-  return toResult(async () => {
-    const res = await restGet<PrivacyConfig>("privacy_config", "ai_disclosure_accepted,ai_disclosure_accepted_at,privacy_policy_version,tos_version,data_retention_days,updated_at");
-    if (!res.ok) {
-      throw unwrapError(res);
-    }
-    const rows = res.value;
-    if (!rows || rows.length === 0) {
-      // Sin datos configurados → valores por defecto honestos (N5)
-      return {
-        ai_disclosure_accepted: false,
-        ai_disclosure_accepted_at: null,
-        privacy_policy_version: null,
-        tos_version: null,
-        data_retention_days: null,
-        updated_at: null,
-      };
-    }
-    return rows[0];
-  });
+  const res = await restGet<PrivacyConfig>("privacy_config", "ai_disclosure_accepted,ai_disclosure_accepted_at,privacy_policy_version,tos_version,data_retention_days,updated_at");
+  if (!res.ok) return { ok: false, error: unwrapError(res) };
+  const row = res.value[0];
+  if (!row) {
+    // Sin datos configurados → valores por defecto honestos (N5)
+    return { ok: true, value: Object.freeze({
+      ai_disclosure_accepted: false,
+      ai_disclosure_accepted_at: null,
+      privacy_policy_version: null,
+      tos_version: null,
+      data_retention_days: null,
+      updated_at: null,
+    }) };
+  }
+  return { ok: true, value: row };
 }
 
 /**
