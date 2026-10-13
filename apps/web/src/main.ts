@@ -1,39 +1,29 @@
 /**
  * HUB by Raisen — bootstrap (entrada de la app)
- * Importa el sistema de estilos OMEGA y monta login o shell con tenant.
+ * Flujo: login -> resolver tenant -> (si falta) onboarding -> shell.
  */
 import "./styles/index.css";
 import { HUBApp } from "./app.ts";
 import { auth, SessionUsuario } from "./auth-client.ts";
 import { resolverTenant } from "./tenant-client.ts";
 import { cargarInbox } from "./inbox-client.ts";
+import { crearTenant } from "./onboarding-client.ts";
 import { montarLogin } from "./login-view.ts";
+import { montarOnboarding } from "./onboarding-view.ts";
 import type { AppContext } from "./types.ts";
 
 interface HubConfigGlobal {
   __HUB_CONFIG__?: { supabaseUrl: string; anonKey: string };
 }
 
-interface MountTarget {
-  innerHTML: string;
-}
-
 export async function inicializarHUB(root: HTMLElement): Promise<void> {
   const config = (globalThis as HubConfigGlobal).__HUB_CONFIG__;
-  if (!config?.supabaseUrl) {
-    montarLogin(root, {
-      onAutenticado: () => void montarShellAutenticado(root),
-    });
+  const sesion = config?.supabaseUrl ? auth.leer() : null;
+  if (!sesion) {
+    montarLogin(root, { onAutenticado: () => void montarShellAutenticado(root) });
     return;
   }
-  const session = auth.leer();
-  if (!session) {
-    montarLogin(root, {
-      onAutenticado: () => void montarShellAutenticado(root),
-    });
-    return;
-  }
-  await montarShellAutenticado(root, session);
+  await montarShellAutenticado(root, sesion);
 }
 
 async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionUsuario): Promise<void> {
@@ -44,7 +34,14 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
   }
   const tenResult = await resolverTenant(sesion);
   if (!tenResult.ok) {
-    root.innerHTML = `<div class="login-wrap"><p class="text-sm text-muted">Sesion activa pero sin tenant asignado.</p></div>`;
+    // Sin tenant: el registro completo -> onboarding para crearlo.
+    montarOnboarding(root, async (datos) => {
+      const res = await crearTenant(sesion, datos);
+      if (!res.ok) return mensajeOnboarding(res.error.kind);
+      auth.guardar({ ...sesion, tenant: { tenantId: res.value, name: datos.tenantName, plan: datos.plan, slug: datos.slug } });
+      await montarShellAutenticado(root, sessionConTenant(sesion, res.value, datos));
+      return null;
+    });
     return;
   }
   const t = tenResult.value;
@@ -61,6 +58,24 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
   });
   await app.iniciar();
   root.innerHTML = app.renderCurrentTab();
+}
+
+function sessionConTenant(
+  base: SessionUsuario,
+  tenantId: string,
+  datos: { tenantName: string; plan: string; slug: string },
+): SessionUsuario {
+  return Object.freeze({
+    ...base,
+    tenant: { tenantId, name: datos.tenantName, plan: datos.plan, slug: datos.slug },
+  });
+}
+
+function mensajeOnboarding(kind: string): string | null {
+  if (kind === "no_autorizado") return "Sesion invalida. Vuelve a iniciar sesion.";
+  if (kind === "validacion") return "No se pudo crear el espacio. Verifica el identificador.";
+  if (kind === "red") return "Error de conexion. Intenta de nuevo.";
+  return null;
 }
 
 if (typeof document !== "undefined") {
