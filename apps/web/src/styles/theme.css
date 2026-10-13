@@ -1,0 +1,59 @@
+/**
+ * HUB by Raisen — Aplicacion del tema
+ * Oscuro por defecto (tokens-omega). El modo claro conmuta via [data-theme].
+ */
+
+html {
+  color-scheme: light dark;
+  background-color: hsl(var(--background));
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+a {
+  color: hsl(var(--primary));
+  text-decoration: none;
+}
+
+a:hover {
+  color: hsl(var(--primary-hover));
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+/* Cardas re-mapean el token de card */
+.card,
+[class*="card"] {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 14px;
+}
+
+::placeholder {
+  color: hsl(var(--text-dim));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

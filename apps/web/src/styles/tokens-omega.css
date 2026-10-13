@@ -1,0 +1,58 @@
+/**
+ * HUB by Raisen — Paleta OMEGA (tema oscuro, por defecto)
+ * Tripletas HSL crudas para componer opacidad: hsl(var(--primary) / .5).
+ *
+ * Identidad: negro-navy de fondo + UN solo acento: el DORADO Raisen.
+ * Nada de violeta/cian/azul en la identidad (el azul solo para "proceso").
+ */
+
+:root {
+  /* --- Núcleo --- */
+  --background: 225 15% 5%;      /* negro-navy, el fondo */
+  --foreground: 40 6% 90%;       /* texto hueso */
+  --card: 225 15% 8%;            /* tarjetas */
+  --card-soft: 225 14% 10%;
+  --primary: 38 85% 55%;         /* el DORADO Raisen (identidad) */
+  --primary-hover: 38 90% 62%;   /* dorado al pasar */
+  --primary-soft: 38 85% 55%;    /* dorado para fondos suaves via / */
+  --ring: 38 85% 55%;            /* foco (dorado) */
+  --border: 225 12% 42%;         /* borde, subido a L42% por WCAG 3:1 */
+
+  /* --- Texto derivado --- */
+  --text-muted: 40 8% 66%;
+  --text-dim: 40 8% 56%;
+
+  /* --- Superficies / líneas compat para widgets existentes --- */
+  --surface: 225 15% 8%;
+  --line: 225 12% 42%;
+  --muted: 40 8% 66%;
+  --dim: 40 8% 56%;
+
+  /* --- FORTRESS: escala de severidad (derivada, nunca hardcodeada) --- */
+  --critical: 0 72% 64%;        /* rojo   -> energia */
+  --high: 25 88% 55%;           /* naranja */
+  --medium: 45 90% 55%;         /* ambar  */
+  --low: 225 8% 55%;            /* gris */
+  --success: 145 60% 45%;       /* verde */
+
+  /* --- Fuera de la escala, a propósito --- */
+  --process: 205 85% 58%;       /* azul = "esto corre ahora", NO es un nivel de riesgo */
+
+  /* --- Colores de actividad del chat (8 tools) --- */
+  --tool-glob: 190 90% 55%;
+  --tool-read: 38 90% 60%;
+  --tool-grep: 160 80% 45%;
+  --tool-bash: 265 70% 68%;
+  --tool-write: 12 90% 62%;
+  --tool-task: 45 95% 55%;
+  --tool-web: 220 85% 58%;
+  --tool-other: 225 8% 60%;
+
+  /* --- Compat back-compat con prototipo (alias al dorado) --- */
+  --hub: var(--primary);
+  --hub-deep: 38 62% 40%;
+  --good: var(--success);
+  --danger: var(--critical);
+  --agent: var(--primary);
+  --nucleo: 225 15% 5%;
+}

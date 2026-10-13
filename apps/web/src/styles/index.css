@@ -1,0 +1,17 @@
+/**
+ * HUB by Raisen — Sistema de estilos OMEGA
+ * Punto de entrada unico. Los archivos se componen en este orden estricto:
+ *   tailwindcss -> fonts -> tokens-omega -> tokens-light -> theme
+ *   -> animations -> base -> components
+ *
+ * Sin emojis. Sin CDN. Sin dependencias externas de runtime.
+ */
+
+@import "./tailwindcss.css";
+@import "./fonts.css";
+@import "./tokens-omega.css";
+@import "./tokens-light.css";
+@import "./theme.css";
+@import "./animations.css";
+@import "./base.css";
+@import "./components.css";
