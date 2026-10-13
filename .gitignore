@@ -37,3 +37,4 @@ desktop.ini
 
 # Supabase CLI state (local, no versionar)
 supabase/.temp/
+.vercel
