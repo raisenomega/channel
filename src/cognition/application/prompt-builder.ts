@@ -1,6 +1,6 @@
 import { Result } from "../../shared/domain/result.ts";
-import { AIProvider, AICompletionParams, AICompletionResult, AIError } from "../domain/ai-provider.ts";
-import { AIProviderRegistry, RegistryError } from "../infrastructure/ai-provider.registry.ts";
+import { AICompletionParams, AICompletionResult, AIError } from "../domain/ai-provider.ts";
+import { AIProviderRegistry, RegistryError } from "../domain/ai-provider-registry.ts";
 
 export type ModelProvider = "anthropic" | "deepseek" | "qwen";
 

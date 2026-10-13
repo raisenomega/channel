@@ -2,7 +2,7 @@ import { Result, err, ok } from "../../shared/domain/result.ts";
 import { ConversationId, ContactId, TenantId, InboxId } from "../../shared/domain/ids.ts";
 import { ChannelType } from "../../shared/domain/types.ts";
 import { crearConversacion, ConversationState } from "../domain/conversation.entity.ts";
-import { crearMensaje, MessageContent, MessageState } from "../domain/message.entity.ts";
+import { MessageContent } from "../domain/message.entity.ts";
 import { ConversationRepository } from "../domain/inbox.repository.ts";
 
 export interface ReceiveMessageCommand {

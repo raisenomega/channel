@@ -1,5 +1,5 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
-import { ChannelAdapter, NormalizedMessage, ParseError, AdapterError } from "../domain/channel.adapter.ts";
+import { Result, err } from "../../shared/domain/result.ts";
+import { NormalizedMessage, ParseError, AdapterError } from "../domain/channel.adapter.ts";
 import { ChannelRouter, RouterError } from "./channel.router.ts";
 
 export interface ProcessWebhookCommand {

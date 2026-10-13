@@ -1,7 +1,10 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { AIProvider, AICompletionParams, AICompletionResult, AIError, ProviderType } from "../domain/ai-provider.ts";
+import { AIProviderRegistry, RegistryError } from "../domain/ai-provider-registry.ts";
 
-export class AIProviderRegistry {
+export type { RegistryError } from "../domain/ai-provider-registry.ts";
+
+export class AIProviderRegistryImpl implements AIProviderRegistry {
   private readonly adapters = new Map<ProviderType, AIProvider>();
 
   registrar(a: AIProvider): void {
@@ -20,9 +23,6 @@ export class AIProviderRegistry {
   ): Promise<Result<AICompletionResult, AIError | RegistryError>> {
     const adapterResult = this.resolver(primary);
     if (!adapterResult.ok) return err(adapterResult.error);
-
     return adapterResult.value.completar(params);
   }
 }
-
-export type RegistryError = { readonly kind: "provider_no_registrado"; readonly provider: ProviderType };

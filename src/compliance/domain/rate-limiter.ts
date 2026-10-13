@@ -1,4 +1,3 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
 import { TenantId } from "../../shared/domain/ids.ts";
 
 export interface RateLimitState {

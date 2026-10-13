@@ -1,29 +1,7 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
-import { TenantId } from "../../shared/domain/ids.ts";
-import { SAFEEvaluationState, EvalType, EvalStatus, FinalDecision } from "./safe-governance.entity.ts";
+import { Result, ok } from "../../shared/domain/result.ts";
+import { SAFEEvaluator, SafeEvalContext, SafeEvalResult, SAFEEvaluation, SafeEvalError } from "./safe-evaluator.types.ts";
 
-export interface SAFEEvaluator {
-  readonly provider: string;
-  evaluar(context: SafeEvalContext): Promise<Result<SafeEvalResult, string>>;
-}
-
-export interface SafeEvalContext {
-  readonly interactionId: string | null;
-  readonly inputMessage: string;
-  readonly agentResponse: string;
-  readonly actionTaken: Readonly<Record<string, unknown>> | null;
-  readonly confidence: number;
-  readonly channel: string;
-  readonly contactSegment: string | null;
-  readonly tenantId: TenantId;
-}
-
-export interface SafeEvalResult {
-  readonly approved: boolean;
-  readonly score: number;
-  readonly reason: string;
-  readonly metadata: Readonly<Record<string, unknown>>;
-}
+export type { SAFEEvaluator, SafeEvalContext, SafeEvalResult, SAFEEvaluation, SafeEvalError } from "./safe-evaluator.types.ts";
 
 export class SafePreSendHandler {
   private readonly evaluators: SAFEEvaluator[] = [];
@@ -60,15 +38,6 @@ export class SafePreSendHandler {
     }));
   }
 }
-
-export interface SAFEEvaluation {
-  readonly decision: "approved" | "blocked" | "abstained";
-  readonly disagreementPct: number;
-  readonly details: Readonly<Record<string, unknown>>;
-}
-
-export type SafeEvalError =
-  | { readonly kind: "evaluator_failed"; readonly cause: string };
 
 export class SafePostSendHandler {
   private readonly SAMPLE_RATE = 0.10;

@@ -1,6 +1,5 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { TenantId } from "../../shared/domain/ids.ts";
-import { IntegrationEvent, IntegrationEventType, IntegracionRepository } from "../domain/integration.entity.ts";
+import { IntegrationEvent, IntegracionRepository } from "../domain/integration.entity.ts";
 
 export type EventHandler = (event: IntegrationEvent) => Promise<Result<void, string>>;
 

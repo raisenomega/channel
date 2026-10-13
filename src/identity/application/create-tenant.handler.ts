@@ -1,5 +1,5 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { TenantState, TenantCreateError, crearTenant } from "../domain/tenant.entity.ts";
+import { TenantCreateError, crearTenant } from "../domain/tenant.entity.ts";
 import { TenantRepository, RepoError } from "../domain/identity.repository.ts";
 import { TenantPlan } from "../../shared/domain/types.ts";
 import { TenantId } from "../../shared/domain/ids.ts";

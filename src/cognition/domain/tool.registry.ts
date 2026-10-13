@@ -1,5 +1,3 @@
-import { Result } from "../../shared/domain/result.ts";
-
 export type ContentType =
   | "text" | "template" | "image" | "video" | "audio" | "document"
   | "location" | "contact_card" | "sticker" | "reaction" | "system_event";

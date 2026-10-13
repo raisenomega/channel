@@ -14,6 +14,39 @@
         anonKey: "sb_publishable_2L3-FfRoCdSyqyIwjVqbJQ_8uix05Ti"
       };
     </script>
+    <!-- Rudimentario y a prueba de fallos: tema aplicado antes del primer render (evita flash).
+         Delega los clicks de tema/idioma a nivel de documento para que funcionen siempre,
+         independientemente del estado de montaje del bundle principal. -->
+    <script>
+      (function () {
+        var TEMA = "hub.tema";
+        var IDIOMA = "hub.idioma";
+        function leer(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }
+        function aplicar() {
+          var t = leer(TEMA, "dark");
+          document.documentElement.setAttribute("data-theme", t);
+        }
+        aplicar();
+        document.addEventListener("click", function (ev) {
+          var el = ev.target && ev.target.closest ? ev.target.closest("[data-theme-toggle],[data-lang-toggle]") : null;
+          if (!el) return;
+          if (el.hasAttribute("data-theme-toggle")) {
+            var nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", nt);
+            try { localStorage.setItem(TEMA, nt); } catch (e) {}
+            var p = document.querySelector("[data-theme-icon]");
+            if (p) p.setAttribute("d", nt === "dark" ? "M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z" : "M11 1v2M11 19v2M1 11h2M19 11h2M3.5 3.5 5 5M17 17l1.5 1.5M3.5 18.5 5 17M17 5l1.5-1.5M11 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8");
+            window.dispatchEvent(new CustomEvent("hub:ui-changed"));
+          } else {
+            var ni = leer(IDIOMA, "es") === "en" ? "es" : "en";
+            try { localStorage.setItem(IDIOMA, ni); } catch (e) {}
+            var lb = document.querySelector("[data-lang-label]");
+            if (lb) lb.textContent = ni.toUpperCase();
+            window.dispatchEvent(new CustomEvent("hub:ui-changed"));
+          }
+        });
+      })();
+    </script>
     <link rel="manifest" href="/manifest.json" />
     <!-- Sistema de estilos OMEGA: entrada unica que compone tailwind -> fonts -> tokens -> theme -> animations -> base -> components -->
     <link rel="stylesheet" href="/src/styles/index.css" />

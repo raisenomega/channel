@@ -1,5 +1,5 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
-import { ContactId, TenantId } from "../../shared/domain/ids.ts";
+import { Result, err } from "../../shared/domain/result.ts";
+import { TenantId } from "../../shared/domain/ids.ts";
 import { NUCLEOGateway, IntegracionError } from "../domain/integration.gateways.ts";
 import { IntegracionRepository } from "../domain/integration.entity.ts";
 

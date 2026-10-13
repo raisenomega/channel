@@ -1,7 +1,7 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { TenantId } from "../../shared/domain/ids.ts";
 import { SLAPolicyState } from "../domain/sla-bizhours.entity.ts";
-import { SLAPolicyRepository, RepoError } from "../domain/automation.repository.ts";
+import { SLAPolicyRepository } from "../domain/automation.repository.ts";
 
 export interface CheckSLACommand {
   readonly tenantId: TenantId;

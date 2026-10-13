@@ -1,5 +1,5 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { UserState, UserCreateError, crearUser } from "../domain/user.entity.ts";
+import { UserCreateError, crearUser } from "../domain/user.entity.ts";
 import { UserRepository, RepoError } from "../domain/identity.repository.ts";
 import { Email } from "../../shared/domain/email.vo.ts";
 import { Role } from "../../shared/domain/types.ts";

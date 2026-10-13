@@ -1,6 +1,5 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
+import { Result } from "../../shared/domain/result.ts";
 import { ContactId, TenantId, QuoteId } from "../../shared/domain/ids.ts";
-import { IntegrationConfigState } from "./integration.entity.ts";
 
 export interface NUCLEOGateway {
   syncContact(tenantId: TenantId, contactId: ContactId): Promise<Result<void, IntegracionError>>;

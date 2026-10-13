@@ -1,7 +1,7 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { ContactId, TenantId } from "../../shared/domain/ids.ts";
+import { TenantId } from "../../shared/domain/ids.ts";
 import { ContactState } from "../domain/contact.entity.ts";
-import { ContactRepository, RepoError } from "../domain/contact.repository.ts";
+import { ContactRepository } from "../domain/contact.repository.ts";
 
 export interface FindContactQuery {
   readonly tenantId: TenantId;

@@ -1,6 +1,6 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
+import { Result } from "../../shared/domain/result.ts";
 import { ContactId, TenantId } from "../../shared/domain/ids.ts";
-import { ConsentRecord, ConsentAction, ConsentSource, ChannelType } from "../domain/compliance.entity.ts";
+import { ConsentRecord, ChannelType, AuditEntry } from "../domain/compliance.entity.ts";
 
 export interface ConsentRepository {
   guardar(record: ConsentRecord): Promise<Result<void, RepoError>>;
@@ -25,4 +25,8 @@ export type RepoError =
   | { readonly kind: "not_found" }
   | { readonly kind: "persistence_failure"; readonly cause: string };
 
-import { AuditEntry } from "../domain/compliance.entity.ts";
+/** Puerta de acceso a los datos del tenant para exportacion/borrado seguro. */
+export interface TenantDataPort {
+  exportar(tenantId: TenantId, tablas: readonly string[]): Promise<Result<Record<string, unknown>[], RepoError>>;
+  borrarDatos(tenantId: TenantId, tablas: readonly string[]): Promise<Result<void, RepoError>>;
+}

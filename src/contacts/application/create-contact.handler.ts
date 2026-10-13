@@ -1,6 +1,6 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { ContactId, TenantId } from "../../shared/domain/ids.ts";
-import { ContactState, ContactError, crearContacto, ContactSegment } from "../domain/contact.entity.ts";
+import { ContactError, crearContacto, ContactSegment } from "../domain/contact.entity.ts";
 import { ContactRepository, RepoError } from "../domain/contact.repository.ts";
 import { Language } from "../../shared/domain/locale.vo.ts";
 

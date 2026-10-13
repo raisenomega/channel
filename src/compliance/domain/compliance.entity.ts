@@ -1,22 +1,12 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { TenantId, ContactId } from "../../shared/domain/ids.ts";
+import {
+  ChannelType, ConsentAction, ConsentSource, ConsentRecord, ConsentError, AuditEntry,
+} from "./compliance.types.ts";
 
-export type ChannelType = "whatsapp" | "email" | "sms" | "phone" | "web";
-export type ConsentAction = "opt_in" | "opt_out" | "withdrawn" | "expired";
-export type ConsentSource = "explicit" | "implied" | "legal_requirement" | "system";
-
-export interface ConsentRecord {
-  readonly id: string;
-  readonly tenantId: TenantId;
-  readonly contactId: ContactId;
-  readonly channel: ChannelType;
-  readonly action: ConsentAction;
-  readonly source: ConsentSource;
-  readonly consentedAt: Date;
-  readonly expiresAt: Date | null;
-}
-
-export type ConsentError = { readonly kind: "ya_opt_in" } | { readonly kind: "ya_opt_out" };
+export type {
+  ChannelType, ConsentAction, ConsentSource, ConsentRecord, ConsentError, PrivacyConfigState, AuditEntry,
+} from "./compliance.types.ts";
 
 export const registrarConsent = (
   contactId: ContactId,
@@ -34,29 +24,6 @@ export const registrarConsent = (
   consentedAt: new Date(),
   expiresAt: action === "opt_in" ? new Date(Date.now() + 365 * 86_400_000) : null,
 });
-
-export interface PrivacyConfigState {
-  readonly tenantId: TenantId;
-  readonly privacyPolicyUrl: string | null;
-  readonly gdprMode: boolean;
-  readonly ccpaMode: boolean;
-  readonly aiDisclosure: boolean;
-  readonly aiDisclosureText: string;
-  readonly dataRetentionDays: number;
-  readonly auditRetentionYears: number;
-}
-
-export interface AuditEntry {
-  readonly id: string;
-  readonly tenantId: TenantId;
-  readonly actorId: string | null;
-  readonly actorType: "user" | "ai_agent" | "system" | "integration";
-  readonly action: string;
-  readonly resource: string;
-  readonly resourceId: string | null;
-  readonly details: Readonly<Record<string, unknown>>;
-  readonly createdAt: Date;
-}
 
 export const crearAuditEntry = (
   tenantId: TenantId,
@@ -77,3 +44,9 @@ export const crearAuditEntry = (
   details: Object.freeze(details ?? {}),
   createdAt: new Date(),
 });
+
+export const validarTransicionConsent = (prev: ConsentAction, next: ConsentAction): Result<void, ConsentError> => {
+  if (prev === "opt_out" && next !== "opt_in") return err({ kind: "ya_opt_out" });
+  if (prev === "opt_in" && next === "opt_in") return err({ kind: "ya_opt_in" });
+  return ok(undefined);
+};

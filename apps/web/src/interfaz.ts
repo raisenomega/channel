@@ -1,8 +1,8 @@
 /**
  * HUB by Raisen — Preferencias de interfaz (tema claro/oscuro + idioma ES/EN).
- * Fueente unica del estado de preferencias, persistida en localStorage.
- * Emite el CustomEvent "hub:ui-changed" cuando alguna preferencia cambia;
- * la app se suscribe para re-renderizar la vista con el idioma/tema vigente.
+ * El acceso a la prefencia se lee del DOM (data-theme) y de localStorage,
+ * coherente con el script inline de index.html que delega los clicks.
+ * Emite el CustomEvent "hub:ui-changed" para que la app re-renderice.
  */
 import type { Idioma } from "./i18n.ts";
 
@@ -12,25 +12,24 @@ const KEY_TEMA = "hub.tema";
 const KEY_IDIOMA = "hub.idioma";
 export const EVENTO_UI = "hub:ui-changed";
 
-let temaActual: Tema = "dark";
-let idiomaActual: Idioma = "es";
-
-function leerTema(): Tema {
+function leer(key: string, def: string): string {
   try {
-    const v = localStorage.getItem(KEY_TEMA);
-    return v === "light" ? "light" : "dark";
+    return localStorage.getItem(key) || def;
   } catch {
-    return "dark";
+    return def;
   }
 }
 
-function leerIdioma(): Idioma {
-  try {
-    const v = localStorage.getItem(KEY_IDIOMA);
-    return v === "en" ? "en" : "es";
-  } catch {
-    return "es";
+export function getTema(): Tema {
+  if (typeof document !== "undefined") {
+    const t = document.documentElement.getAttribute("data-theme");
+    return t === "light" ? "light" : "dark";
   }
+  return (leer(KEY_TEMA, "dark") as Tema);
+}
+
+export function getIdioma(): Idioma {
+  return leer(KEY_IDIOMA, "es") as Idioma;
 }
 
 function notificar(): void {
@@ -38,54 +37,33 @@ function notificar(): void {
   window.dispatchEvent(new CustomEvent(EVENTO_UI));
 }
 
-function aplicarTema(tema: Tema): void {
-  temaActual = tema;
+export function setTema(tema: Tema): void {
   if (typeof document !== "undefined") {
     document.documentElement.setAttribute("data-theme", tema);
-    const icon = document.querySelector<SVGPathElement>("[data-theme-icon]");
-    if (icon) icon.setAttribute("d", tema === "dark" ? MOON_PATH : SUN_PATH);
   }
   try {
     localStorage.setItem(KEY_TEMA, tema);
   } catch {
     // ignora
   }
-}
-
-// Simbolos del icono de tema (sin libreria, SVG inline).
-const SUN_PATH = "M11 1v2M11 19v2M1 11h2M19 11h2M3.5 3.5 5 5M17 17l1.5 1.5M3.5 18.5 5 17M17 5l1.5-1.5M11 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8";
-const MOON_PATH = "M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z";
-
-export function getTema(): Tema {
-  return temaActual;
-}
-
-export function getIdioma(): Idioma {
-  return idiomaActual;
-}
-
-export function setTema(tema: Tema): void {
-  if (tema === temaActual) return;
-  aplicarTema(tema);
   notificar();
 }
 
 export function toggleTema(): Tema {
-  const nuevo = temaActual === "dark" ? "light" : "dark";
-  aplicarTema(nuevo);
-  notificar();
+  const nuevo = getTema() === "dark" ? "light" : "dark";
+  setTema(nuevo);
   return nuevo;
 }
 
 export function toggleIdioma(): Idioma {
-  idiomaActual = idiomaActual === "es" ? "en" : "es";
+  const nuevo = getIdioma() === "es" ? "en" : "es";
   try {
-    localStorage.setItem(KEY_IDIOMA, idiomaActual);
+    localStorage.setItem(KEY_IDIOMA, nuevo);
   } catch {
     // ignora
   }
   notificar();
-  return idiomaActual;
+  return nuevo;
 }
 
 export function suscribirAlCambio(handler: () => void): () => void {
@@ -93,25 +71,8 @@ export function suscribirAlCambio(handler: () => void): () => void {
   return () => window.removeEventListener(EVENTO_UI, handler);
 }
 
-/** Aplica el tema guardado y cablea los botones del shell. */
+/** Aplica el tema guardado y sincroniza el label de idioma. */
 export function iniciarControlesShell(): void {
-  temaActual = leerTema();
-  idiomaActual = leerIdioma();
-  aplicarTema(temaActual);
-
-  const themeBtn = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
-  themeBtn?.addEventListener("click", () => {
-    toggleTema();
-  });
-
-  const langBtn = document.querySelector<HTMLButtonElement>("[data-lang-toggle]");
   const langLabel = document.querySelector<HTMLElement>("[data-lang-label]");
-  const actualizarLabel = () => {
-    if (langLabel) langLabel.textContent = leerIdioma().toUpperCase();
-  };
-  langBtn?.addEventListener("click", () => {
-    toggleIdioma();
-    actualizarLabel();
-  });
-  actualizarLabel();
+  if (langLabel) langLabel.textContent = getIdioma().toUpperCase();
 }

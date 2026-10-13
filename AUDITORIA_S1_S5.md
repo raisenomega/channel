@@ -148,3 +148,18 @@ Nota: no llevan `Refs: #issue`, pero son descriptivos (requisito principal de S4
 4. **N4:** cifrar `webhook_provider_configs.secret` con `pgp_sym_encrypt` / pgsodium (Vault) y descifrar solo en infra.
 5. **Tests:** añadir unit para los 15 handlers críticos (al menos los de inbox, cognition, commerce, compliance).
 6. **Lint:** limpiar los 51 `no-unused-vars` (imports muertos).
+
+---
+
+## Resolución de violaciones (2026-10-13) — ESTADO FINAL
+
+| Violación | Estado | Qué se hizo |
+|-----------|--------|-------------|
+| C4 (6 archivos >75 líneas) | ✅ **RESUELTO** | Tipos/data extraídos a `*.types.ts`: `contact.types.ts`, `conversation.types.ts`, `compliance.types.ts`, `safe-governance.types.ts`, `safe-evaluator.types.ts`; adapters verticales divididos en `health/home/fleet.adapter.ts` con helper `vertical-http.ts`. Recheck: 0 archivos >75. |
+| Capas DDD (2 fallos) | ✅ **RESUELTO** | `AIProviderRegistry` → interfaz movida a `domain/ai-provider-registry.ts` (impl `AIProviderRegistryImpl` en infra; `prompt-builder.ts` importa la interfaz). `audit-logger.ts` → `DataExport`/`DataCleanupService` usan interfaz `TenantDataPort` inyectada (impl en `infrastructure/compliance.repository.supabase.ts`); sin `supabase` en application. Recheck: 0 imports app→infra. |
+| S1 (Source of Truth) | ✅ **RESUELTO** | `meta/source-of-truth.meta.md` y `GO_PRODUCTION.md` actualizados a estado real (22 migraciones, toggles funcionales, auditoría). |
+| §2.5 Lint warnings (51) | ✅ **RESUELTO** | Imports muertos `no-unused-vars` limpiados en ~20 archivos. `eslint src/` = 0 errores, 0 warnings. |
+| N4 (`webhook_provider_configs.secret`) | ⚠️ **PENDIENTE** | Requiere migración SQL (pgcrypto/pgsodium). Documentado en deuda del SoT. |
+| §2.3 Tests (15 handlers) | ⚠️ **PENDIENTE** | Deuda de cobertura; no bloquea el merge funcional. |
+
+**Verificación final:** `tsc -p` backend 0 errores · `tsc` frontend 0 errores · `eslint src/` 0 errores 0 warnings · C4 0 violaciones · capas 0 violaciones.

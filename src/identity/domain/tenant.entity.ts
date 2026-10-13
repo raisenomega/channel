@@ -1,5 +1,5 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { TenantId, UserId } from "../../shared/domain/ids.ts";
+import { TenantId } from "../../shared/domain/ids.ts";
 import { TenantPlan } from "../../shared/domain/types.ts";
 import { Language } from "../../shared/domain/locale.vo.ts";
 

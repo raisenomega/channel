@@ -1,6 +1,6 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { TenantId } from "../../shared/domain/ids.ts";
-import { AutomationRuleState, Action, Condition } from "../domain/automation.entity.ts";
+import { Action, Condition } from "../domain/automation.entity.ts";
 import { AutomationRuleRepository, RepoError } from "../domain/automation.repository.ts";
 
 export interface EvaluateRulesCommand {

@@ -1,5 +1,5 @@
 import { Result } from "../../shared/domain/result.ts";
-import { QuoteId, OrderId, PaymentId, ContactId, TenantId } from "../../shared/domain/ids.ts";
+import { QuoteId, OrderId, PaymentId, ContactId } from "../../shared/domain/ids.ts";
 import { QuoteState } from "./quote.entity.ts";
 import { OrderState } from "./order.entity.ts";
 import { PaymentState } from "./payment.entity.ts";

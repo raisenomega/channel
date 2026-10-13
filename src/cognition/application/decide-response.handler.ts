@@ -1,4 +1,4 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
+import { Result, ok } from "../../shared/domain/result.ts";
 import { ConversationId, ContactId, TenantId } from "../../shared/domain/ids.ts";
 import { EthicsGuard } from "../domain/ethics.guard.ts";
 import { decidirAccionPorConfianza, AutonomyConfigState } from "../domain/confidence.vo.ts";

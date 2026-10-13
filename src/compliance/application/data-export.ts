@@ -34,5 +34,3 @@ export function formatAsCSV(data: Record<string, unknown>[]): string {
   ).join("\n");
   return `${headers}\n${rows}`;
 }
-
-declare class DataCleanupService {};

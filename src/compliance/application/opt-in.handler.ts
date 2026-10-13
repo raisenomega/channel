@@ -1,6 +1,6 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { ContactId, TenantId } from "../../shared/domain/ids.ts";
-import { registrarConsent, ConsentRecord, ConsentAction, ConsentSource, ChannelType } from "../domain/compliance.entity.ts";
+import { registrarConsent, ConsentSource, ChannelType } from "../domain/compliance.entity.ts";
 import { ConsentRepository, RepoError } from "../domain/compliance.repository.ts";
 
 export type OptInError = RepoError | { readonly kind: "ya_opt_in" };

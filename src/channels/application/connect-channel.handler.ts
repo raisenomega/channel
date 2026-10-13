@@ -1,7 +1,7 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { InboxId, TenantId } from "../../shared/domain/ids.ts";
 import { ChannelType } from "../../shared/domain/types.ts";
-import { ProviderType, InboxState, InboxCreateError, crearInbox, activarInbox } from "../domain/inbox.entity.ts";
+import { ProviderType, InboxCreateError, crearInbox, activarInbox } from "../domain/inbox.entity.ts";
 import { InboxRepository, RepoError } from "../domain/channels.repository.ts";
 
 export interface ConnectChannelCommand {

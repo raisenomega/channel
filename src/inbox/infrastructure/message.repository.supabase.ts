@@ -1,5 +1,5 @@
-﻿import { Result, err, ok } from "../../shared/domain/result.ts";
-import { MessageId, ConversationId, TenantId } from "../../shared/domain/ids.ts";
+import { Result, err, ok } from "../../shared/domain/result.ts";
+import { MessageId, ConversationId } from "../../shared/domain/ids.ts";
 import { MessageState } from "../../inbox/domain/message.entity.ts";
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 import { desdeRowMessage } from "./message.mapper.ts";

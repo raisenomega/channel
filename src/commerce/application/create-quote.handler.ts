@@ -1,6 +1,6 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { QuoteId, ContactId, TenantId } from "../../shared/domain/ids.ts";
-import { QuoteState, QuoteError, QuoteLineItem, CreateByType, crearQuote } from "../domain/quote.entity.ts";
+import { QuoteError, QuoteLineItem, CreateByType, crearQuote } from "../domain/quote.entity.ts";
 import { QuoteRepository, RepoError } from "../domain/commerce.repository.ts";
 
 export interface CreateQuoteCommand {
