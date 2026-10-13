@@ -8,6 +8,7 @@ import { ChannelsRoute } from "@/routes/channels";
 import { AgentRoute } from "@/routes/agent";
 import { SettingsRoute } from "@/routes/settings";
 import { LegalRoute } from "@/routes/settings.legal";
+import { IntegrationsRoute } from "@/routes/settings.integrations";
 
 const routeTree = rootRoute.addChildren([
   IndexRoute,
@@ -18,6 +19,7 @@ const routeTree = rootRoute.addChildren([
   AgentRoute,
   SettingsRoute,
   LegalRoute,
+  IntegrationsRoute,
 ]);
 
 const router = createRouter({ routeTree, defaultNotFoundComponent: NotFoundPage });

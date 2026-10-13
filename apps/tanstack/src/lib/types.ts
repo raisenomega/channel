@@ -110,3 +110,55 @@ export interface RowPayment {
   currency: string;
   created_at: string;
 }
+
+// ── IA Agent ────────────────────────────────────────────────
+export interface RowAgentInteraction {
+  id: string;
+  conversation_id: string;
+  was_correct: boolean | null;
+  was_distinguishable: boolean | null;
+  resolved_autonomously: boolean | null;
+  latency_seconds: number | null;
+  provider: string | null;
+  model: string | null;
+  created_at: string;
+  tenant_id: string | null;
+}
+
+export interface RowSafeEvaluation {
+  id: string;
+  interaction_id: string;
+  decision: "approved" | "blocked" | "abstained";
+  disagreement_pct: number | null;
+  autonomy_phase: number | null;
+  is_kill_switched: boolean | null;
+  kill_switch_reason: string | null;
+  created_at: string;
+  tenant_id: string | null;
+}
+
+export interface AgentMetrics {
+  wasCorrectPct: number | null;
+  indistinguishabilityPct: number | null;
+  autoResolvePct: number | null;
+  avgLatencyMs: number | null;
+  totalInteractions: number;
+  providerName: string;
+  modelName: string;
+  byokConfigured: boolean;
+  fallbackProvider: string | null;
+}
+
+export type AutonomyPhase = 0 | 1 | 2 | 3 | 4;
+
+export interface SafeStats {
+  totalEvaluaciones: number;
+  approved: number;
+  blocked: number;
+  abstained: number;
+  disagreementAvgPct: number | null;
+  currentPhase: AutonomyPhase;
+  isKillSwitched: boolean;
+  killSwitchReason: string | null;
+  sinDatos: boolean;
+}

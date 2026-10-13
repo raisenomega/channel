@@ -89,3 +89,30 @@ export async function restPost<T>(
     return { ok: false, kind: "red", cause: String(e) };
   }
 }
+
+/** PATCH a Supabase REST (upsert por primary key). */
+export async function restPatch<T>(
+  path: string,
+  body: Record<string, unknown>,
+): Promise<RestRes<T>> {
+  const base = supabaseRestBase();
+  const authHeaders = supabaseAuthHeaders();
+  if (!base || !authHeaders) return { ok: false, kind: "config_incompleta" };
+  try {
+    const res = await fetch(`${base}/${path}`, {
+      method: "PATCH",
+      headers: {
+        ...authHeaders,
+        "content-type": "application/json",
+        prefer: "return=representation",
+      },
+      body: JSON.stringify(body),
+    });
+    if (res.status === 401 || res.status === 403) return { ok: false, kind: "no_autorizado" };
+    if (!res.ok) return { ok: false, kind: "red", cause: `status ${res.status}` };
+    const data = (await res.json()) as T;
+    return { ok: true, value: data };
+  } catch (e) {
+    return { ok: false, kind: "red", cause: String(e) };
+  }
+}
