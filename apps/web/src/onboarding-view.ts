@@ -33,16 +33,25 @@ export function renderOnboarding(): string {
 
       <button type="submit" class="login-submit tap" data-onboarding-submit>Crear mi espacio</button>
       <p class="login-hint">Quedarás como owner del tenant y podrás invitar a tu equipo luego.</p>
+      <button type="button" class="login-tab logout-btn tap" data-onboarding-logout>Cerrar sesion</button>
     </form>
   </div>`;
 }
 
-export function montarOnboarding(root: HTMLElement, submit: (d: OnboardingData) => Promise<string | null>): void {
+export function montarOnboarding(
+  root: HTMLElement,
+  submit: (d: OnboardingData) => Promise<string | null>,
+  onLogout?: () => void,
+): void {
   root.innerHTML = renderOnboarding();
   const form = root.querySelector<HTMLFormElement>("[data-onboarding-form]");
   const errEl = root.querySelector<HTMLElement>("[data-onboarding-error]");
   const btn = root.querySelector<HTMLButtonElement>("[data-onboarding-submit]");
+  const logout = root.querySelector<HTMLButtonElement>("[data-onboarding-logout]");
   if (!form || !errEl || !btn) return;
+  logout?.addEventListener("click", () => {
+    if (onLogout) void onLogout();
+  });
 
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();

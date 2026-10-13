@@ -42,6 +42,12 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
   logger.info("tenant_resuelto", { fase: FASE, uid: sesion.uid, tenantId: tenResult.ok ? tenResult.value.tenantId : undefined });
   if (!tenResult.ok) {
     logger.warn("tenant_no_encontrado", { fase: FASE, uid: sesion.uid, causa: tenResult.error.kind });
+    // Token invalido (caducado o usuario borrado): cerrar sesion y volver al login.
+    if (tenResult.error.kind === "no_autorizado") {
+      await auth.cerrar();
+      montarLogin(root, { onAutenticado: () => void montarShellAutenticado(root) });
+      return;
+    }
     // Sin tenant: el registro completo -> onboarding para crearlo.
     montarOnboarding(root, async (datos) => {
       const res = await crearTenant(sesion, datos);
@@ -53,6 +59,9 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
       auth.guardar({ ...sesion, tenant: { tenantId: res.value, name: datos.tenantName, plan: datos.plan, slug: datos.slug } });
       await montarShellAutenticado(root, sessionConTenant(sesion, res.value, datos));
       return null;
+    }, async () => {
+      await auth.cerrar();
+      montarLogin(root, { onAutenticado: () => void montarShellAutenticado(root) });
     });
     return;
   }
