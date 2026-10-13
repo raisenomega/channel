@@ -3,7 +3,7 @@
  * Sin dependencias externas (uso fetch) -> respeta la CSP (sin CDN).
  * El anon key/url se inyectan en runtime via window.__HUB_CONFIG__.
  */
-import { Result, err, ok } from "../../../src/shared/domain/result.ts";
+import { Result, err, ok } from "@shared/domain/result.ts";
 
 export interface TenantKey {
   readonly tenantId: string;

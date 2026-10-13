@@ -2,7 +2,7 @@
  * HUB by Raisen — Datos del inbox (solo tenant del usuario via RLS)
  * Consulta conversations con el JWT del usuario; el RLS filtra por tenant.
  */
-import { Result, err, ok } from "../../../src/shared/domain/result.ts";
+import { Result, err, ok } from "@shared/domain/result.ts";
 import type { SessionUsuario } from "./auth-client.ts";
 import type { InboxItem } from "./types.ts";
 

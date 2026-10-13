@@ -3,7 +3,7 @@
  * Consulta `users` y `tenants` con el JWT del usuario (RLS por auth.uid()).
  * Sin dependencias externas; respeta la CSP.
  */
-import { Result, err, ok } from "../../../src/shared/domain/result.ts";
+import { Result, err, ok } from "@shared/domain/result.ts";
 import { auth, SessionUsuario } from "./auth-client.ts";
 
 export interface TenantContext {

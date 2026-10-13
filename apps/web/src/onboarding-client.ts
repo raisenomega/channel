@@ -2,7 +2,7 @@
  * HUB by Raisen — Onboarding de tenant (llama al RPC seguro)
  * Crea el tenant del usuario autenticado y lo deja como owner.
  */
-import { Result, err, ok } from "../../../src/shared/domain/result.ts";
+import { Result, err, ok } from "@shared/domain/result.ts";
 import type { SessionUsuario } from "./auth-client.ts";
 
 export interface OnboardingData {

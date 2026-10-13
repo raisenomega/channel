@@ -1,4 +1,4 @@
-import { lucide } from "../../../src/shared/domain/lucide-icons.ts";
+import { lucide } from "@shared/domain/lucide-icons.ts";
 import type { InboxItem, InboxFilter } from "./types.ts";
 
 export function renderInboxList(items: InboxItem[], filters: InboxFilter[]): string {
