@@ -30,7 +30,7 @@ function renderItem(item: InboxItem): string {
   const modeIcon = item.mode === "autonomous" ? "agent" : item.mode === "human" ? "contacts" : "inbox";
   const slaBadge = item.slaViolated ? `<span class="badge badge-danger text-xs">SLA</span>` : "";
   return `<div class="list-item flex items-center gap p-sm px-lg" onclick="openConversation('${item.conversationId}')">
-    <div class="avatar" style="background:var(--hub-deep)">${item.contactName[0].toUpperCase()}
+    <div class="avatar" style="background:var(--hub-deep)">${item.contactName.charAt(0).toUpperCase()}
       <span class="channel-badge" style="background:var(--hub)">${lucide(modeIcon, { size: 12 })}</span>
     </div>
     <div class="body flex-1 min-width-0">

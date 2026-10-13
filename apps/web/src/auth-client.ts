@@ -4,6 +4,7 @@
  * El anon key/url se inyectan en runtime via window.__HUB_CONFIG__.
  */
 import { Result, err, ok } from "@shared/domain/result.ts";
+import { logger } from "@shared/infrastructure/logger.infrastructure.ts";
 
 export interface TenantKey {
   readonly tenantId: string;
@@ -64,8 +65,10 @@ export const auth = {
         body: JSON.stringify({ email, password }),
       });
       const body = (await res.json()) as Record<string, unknown>;
+      logger.info(`signup_status=${res.status}`, { fase: "FASE_D" });
       if (!res.ok) {
         const code = body.error_code as string | undefined;
+        logger.warn(`signup_error_code=${code ?? "desconocido"}`, { fase: "FASE_D" });
         if (code === "email_exists" || code === "user_already_exists") return err({ kind: "email_existe" });
         return err({ kind: "no_autorizado" });
       }

@@ -14,7 +14,7 @@ export function createInitialState(): PageState {
 export function cycleMode(state: PageState): PageState {
   const modes: OperationMode[] = ["lite", "ecosystem", "autonomous"];
   const next = (modes.indexOf(state.mode) + 1) % modes.length;
-  return { ...state, mode: modes[next] };
+  return { ...state, mode: modes[next] ?? "lite" };
 }
 
 export function toggleTheme(state: PageState): PageState {
