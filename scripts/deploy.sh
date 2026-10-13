@@ -36,7 +36,6 @@ echo "[4/5] Ejecutando migrations en Supabase..."
 # Metodo 1: Usando Supabase CLI (recomendado)
 if command -v supabase &> /dev/null; then
   supabase db push
-  supabase db execute --file supabase/seed.sql 2>/dev/null || true
   echo "  Migrations ejecutadas via Supabase CLI"
 else
   echo "  WARN: Supabase CLI no disponible. Usando metodo alternativo..."

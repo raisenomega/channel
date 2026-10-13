@@ -29,26 +29,13 @@ if [ ! -f "supabase/config.toml" ]; then
   exit 1
 fi
 
-echo "[1/4] Ejecutando rollback completo..."
-for i in $(seq 17 -1 1); do
-  file=$(printf "supabase/migrations/%03d_*.down.sql" $i)
-  if ls $file 1> /dev/null 2>&1; then
-    echo "  Aplicando rollback: $(ls $file)"
-    supabase db execute --file $(ls $file) 2>/dev/null || true
-  fi
-done
+echo "[1/3] Ejecutando reset completo (borra esquema y re-aplica)..."
+supabase db reset --linked
 
-echo "[2/4] Ejecutando migrations (UP)..."
-supabase db push
+echo "[2/3] Verificando migraciones..."
+supabase migration list 2>/dev/null || true
 
-echo "[3/4] Cargando seed data..."
-supabase db execute --file supabase/seed.sql 2>/dev/null || {
-  echo "  NOTA: Seed data parcial. Crear auth user manualmente despues."
-  echo "  Ejecutar: supabase auth signup --email admin@saborcriollo.com --password test123"
-}
-
-echo "[4/4] Verificando... (opcional, requiere psql)"
-echo "  Para verificar: supabase db dump | head -50"
+echo "[3/3] Listo."
 echo ""
 
 echo "=============================================="
