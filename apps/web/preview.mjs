@@ -9,7 +9,8 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const ts = require("typescript");
-const ROOT = fileURLToPath(new URL(".", import.meta.url));
+const ROOT = fileURLToPath(new URL(".", import.meta.url)); // apps/web/
+const REPO = normalize(join(ROOT, "../.."));                 // raiz del repo
 const PORT = Number(process.env.PORT || 5174);
 
 const MIME = {
@@ -24,13 +25,16 @@ const MIME = {
   ".ico": "image/x-icon",
 };
 
+// Resuelve /src/shared/... contra la carpeta compartida del repo (raiz).
 function safePath(urlPath) {
   const clean = decodeURIComponent(urlPath.split("?")[0]);
-  // raiz -> index.html ; normalizar y bloquear salidas del directorio
-  const target = clean === "/" || clean === "" ? "index.html" : clean.replace(/^\/+/, "");
-  const abs = normalize(join(ROOT, target));
-  if (!abs.startsWith(normalize(ROOT))) return null;
-  return abs;
+  if (clean === "/" || clean === "") return join(ROOT, "index.html");
+  const target = clean.replace(/^\/+/, "");
+  // Dominio compartido del repo -> <repo>/src/shared/...
+  if (target.startsWith("src/shared/")) {
+    return normalize(join(REPO, target));
+  }
+  return normalize(join(ROOT, target));
 }
 
 function transpile(code, filename) {
