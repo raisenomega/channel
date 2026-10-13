@@ -12,7 +12,7 @@ import { cargarInbox } from "./inbox-client.ts";
 import { crearTenant } from "./onboarding-client.ts";
 import { montarLogin } from "./login-view.ts";
 import { montarOnboarding } from "./onboarding-view.ts";
-import type { AppContext } from "./types.ts";
+import type { AppContext, TabId } from "./types.ts";
 
 interface HubConfigGlobal {
   __HUB_CONFIG__?: { supabaseUrl: string; anonKey: string };
@@ -78,7 +78,7 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
     return res.ok ? res.value : [];
   });
   await app.iniciar();
-  root.innerHTML = app.renderCurrentTab();
+  renderVista(root, app);
 }
 
 function sessionConTenant(
@@ -102,6 +102,24 @@ function mensajeOnboarding(kind: string, cause?: string): string | null {
 // Extrae la causa de un error de onboarding cuando el kind la expone.
 function causaDe(e: { readonly kind: string; readonly cause?: string }): string | undefined {
   return e.cause;
+}
+
+// Pinta la vista actual en el area #app y conecta la navegacion del shell.
+function renderVista(root: HTMLElement, app: HUBApp): void {
+  root.innerHTML = app.renderCurrentTab();
+  cablearNavegacion(root, app);
+}
+
+function cablearNavegacion(root: HTMLElement, app: HUBApp): void {
+  const tabButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-tab]"));
+  tabButtons.forEach((btn) => {
+    btn.onclick = () => {
+      const tab = btn.dataset.tab as TabId;
+      app.handleAction("navigate", { tab });
+      tabButtons.forEach((b) => b.setAttribute("aria-selected", b === btn ? "true" : "false"));
+      root.innerHTML = app.renderCurrentTab();
+    };
+  });
 }
 
 if (typeof document !== "undefined") {
