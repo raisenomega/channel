@@ -4,6 +4,10 @@ port = 54321
 [db]
 major_version = 17
 
+# Seed deshabilitado por ley N5 (datos simulados prohibidos)
+[db.seed]
+enabled = false
+
 [studio]
 enabled = true
 
