@@ -34,6 +34,10 @@ function safePath(urlPath) {
   if (target.startsWith("src/shared/")) {
     return normalize(join(REPO, target));
   }
+  // assets de la carpeta public/ -> apps/web/public/...
+  if (target.startsWith("manifest.json") || clean.endsWith(".svg") || clean.endsWith(".png")) {
+    return normalize(join(ROOT, "public", target));
+  }
   return normalize(join(ROOT, target));
 }
 
