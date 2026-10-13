@@ -1,6 +1,7 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { ContactId, TenantId, UserId } from "../../shared/domain/ids.ts";
-import { Language, ChannelType } from "../../shared/domain/types.ts";
+import { ChannelType } from "../../shared/domain/types.ts";
+import { Language } from "../../shared/domain/locale.vo.ts";
 import { Email } from "../../shared/domain/email.vo.ts";
 import { Phone } from "../../shared/domain/phone.vo.ts";
 

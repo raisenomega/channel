@@ -1,6 +1,7 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { ConversationId, TenantId, ContactId, InboxId, AgentId } from "../../shared/domain/ids.ts";
-import { ConversationStatus, OperationMode, ChannelType, Language } from "../../shared/domain/types.ts";
+import { ConversationStatus, OperationMode, ChannelType } from "../../shared/domain/types.ts";
+import { Language } from "../../shared/domain/locale.vo.ts";
 
 export interface ConversationState {
   readonly id: ConversationId;

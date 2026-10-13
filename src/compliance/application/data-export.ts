@@ -24,12 +24,12 @@ export class DataExportValidator {
 
 export function formatAsCSV(data: Record<string, unknown>[]): string {
   if (!data || data.length === 0) return "";
-  const headers = Object.keys(data[0]).join(",");
+  const headers = Object.keys(data[0] ?? {}).join(",");
   const rows = data.map((row) =>
     Object.values(row).map((v) => {
       if (v === null) return "";
       const s = String(v);
-      return s.includes(",") || s.includes('"') ? `"${s.Replace('"', '""')}"` : s;
+      return s.includes(",") || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
     }).join(",")
   ).join("\n");
   return `${headers}\n${rows}`;

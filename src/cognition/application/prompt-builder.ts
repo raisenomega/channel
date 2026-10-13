@@ -1,8 +1,10 @@
 import { Result } from "../../shared/domain/result.ts";
 import { AIProvider, AICompletionParams, AICompletionResult, AIError } from "../domain/ai-provider.ts";
-import { AIProviderRegistry } from "../infrastructure/ai-provider.registry.ts";
+import { AIProviderRegistry, RegistryError } from "../infrastructure/ai-provider.registry.ts";
 
 export type ModelProvider = "anthropic" | "deepseek" | "qwen";
+
+type MessageRole = AICompletionParams["messages"][number]["role"];
 
 export const buildSystemPrompt = (
   brandVoice: string,
@@ -34,10 +36,10 @@ export async function completarConProvider(
   provider: ModelProvider,
   systemPrompt: string,
   messages: readonly { role: string; content: string }[],
-): Promise<Result<AICompletionResult, AIError>> {
+): Promise<Result<AICompletionResult, AIError | RegistryError>> {
   const params: AICompletionParams = {
     systemPrompt,
-    messages: messages.map((m) => ({ role: m.role as never, content: m.content })),
+    messages: messages.map((m) => ({ role: m.role as MessageRole, content: m.content })),
     tools: null,
     maxTokens: 4096,
     temperature: 0.7,

@@ -14,7 +14,7 @@ export class CheckSLAHandler {
 
   async ejecutar(cmd: CheckSLACommand): Promise<Result<SLAPolicyState | null, CheckSLAError>> {
     const policiesResult = await this.slaRepo.buscarActivas(cmd.tenantId);
-    if (!policiesResult.ok) return err({ kind: "persistence_failure", cause: policiesResult.error.cause });
+    if (!policiesResult.ok) return err({ kind: "persistence_failure", cause: causaDe(policiesResult.error) });
 
     for (const policy of policiesResult.value) {
       if (cmd.elapsedSeconds > policy.firstResponseSeconds) {
@@ -27,3 +27,7 @@ export class CheckSLAHandler {
 
 export type CheckSLAError =
   | { readonly kind: "persistence_failure"; readonly cause: string };
+
+function causaDe(e: { readonly kind: string; readonly cause?: string }): string {
+  return e.cause ?? "fallo_persistencia";
+}

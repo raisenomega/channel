@@ -22,8 +22,10 @@ export class DeepSeekAdapter implements AIProvider {
       });
       if (!resp.ok) return err({ kind: "provider_unavailable" });
       const data = await resp.json() as Record<string, unknown>;
+      const choirst = (data.choices as Array<Record<string, unknown>> | undefined)?.[0];
+      const firstMsg = choirst?.message as Record<string, unknown> | undefined;
       return ok(Object.freeze({
-        response: String((data.choices as Record<string, unknown>[])?.[0]?.message as Record<string, string>).content ?? "",
+        response: String(firstMsg?.content as string | undefined ?? ""),
         tokensInput: (data.usage as Record<string, number>)?.prompt_tokens ?? 0,
         tokensOutput: (data.usage as Record<string, number>)?.completion_tokens ?? 0,
         latencyMs: Date.now() - startMs,

@@ -1,5 +1,5 @@
 import { Result } from "../../shared/domain/result.ts";
-import { ChannelAdapter, OutboundMessage, AdapterError } from "./channel.adapter.ts";
+import { ChannelAdapter, OutboundMessage, AdapterError } from "../domain/channel.adapter.ts";
 import { ChannelType } from "../../shared/domain/types.ts";
 
 export class ChannelRouter {

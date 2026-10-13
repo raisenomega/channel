@@ -25,7 +25,7 @@ export class ReceiveMessageHandler {
 
   async ejecutar(cmd: ReceiveMessageCommand): Promise<Result<ConversationId, ReceiveMessageError>> {
     const activas = await this.convRepo.buscarActivos(cmd.tenantId);
-    if (!activas.ok) return err({ kind: "persistence_failure", cause: activas.error.cause });
+    if (!activas.ok) return err(causaDe(activas.error));
 
     const existente = activas.value.find(c => c.contactId === cmd.contactId && c.primaryChannel === cmd.channel);
     const conv = existente ?? ((r: Result<ConversationState, ConversationError>) =>
@@ -35,7 +35,7 @@ export class ReceiveMessageHandler {
 
     if (!existente) {
       const guardado = await this.convRepo.guardar(conv);
-      if (!guardado.ok) return err({ kind: "persistence_failure", cause: guardado.error.cause });
+      if (!guardado.ok) return err(causaDe(guardado.error));
     }
 
     return ok(conv.id);
@@ -43,3 +43,8 @@ export class ReceiveMessageHandler {
 }
 
 type ConversationError = { readonly kind: "contacto_requerido" };
+
+// Extrae una causa de persistencia del error de repo, con fallback generico.
+function causaDe(e: { readonly kind: string; readonly cause?: string }): ReceiveMessageError {
+  return { kind: "persistence_failure", cause: e.cause ?? "fallo_persistencia" };
+}

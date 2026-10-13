@@ -32,6 +32,12 @@
     "typescript": "^5"
   },
   "lint-staged": {
-    "*.ts": ["pnpm lint:fix", "pnpm format"]
+    "*.ts": [
+      "pnpm lint:fix",
+      "pnpm format"
+    ]
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.3"
   }
 }

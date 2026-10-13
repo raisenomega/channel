@@ -2,9 +2,10 @@ import { Result, err, ok } from "../../shared/domain/result.ts";
 import { UserState, UserCreateError, crearUser } from "../domain/user.entity.ts";
 import { UserRepository, RepoError } from "../domain/identity.repository.ts";
 import { Email } from "../../shared/domain/email.vo.ts";
-import { Role, TenantId } from "../../shared/domain/types.ts";
-import { UserId } from "../../shared/domain/ids.ts";
+import { Role } from "../../shared/domain/types.ts";
+import { TenantId } from "../../shared/domain/ids.ts";
 import { Language } from "../../shared/domain/locale.vo.ts";
+import { UserId } from "../../shared/domain/ids.ts";
 
 export interface CrearUserCommand {
   readonly email: string;

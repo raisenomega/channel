@@ -35,7 +35,7 @@ export class SafePreSendHandler {
 
   async evaluar(context: SafeEvalContext): Promise<Result<SAFEEvaluation, SafeEvalError>> {
     if (this.evaluators.length === 0) {
-      return ok(Object.freeze({ decision: "approved", disagreementPct: 0, details: "no_evaluators" }));
+      return ok(Object.freeze({ decision: "approved", disagreementPct: 0, details: { motivo: "no_evaluators" } }));
     }
 
     const results = await Promise.all(this.evaluators.map((e) => e.evaluar(context)));

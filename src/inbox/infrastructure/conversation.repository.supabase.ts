@@ -1,4 +1,4 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
+﻿import { Result, err, ok } from "../../shared/domain/result.ts";
 import { ConversationId, TenantId, ContactId } from "../../shared/domain/ids.ts";
 import { ConversationState } from "../../inbox/domain/conversation.entity.ts";
 import { ConversationRepository, RepoError } from "../../inbox/domain/inbox.repository.ts";
@@ -41,7 +41,7 @@ export class ConversationRepositorySupabase implements ConversationRepository {
       const { data, error } = await supabase.from("conversations").select("*")
         .eq("tenant_id", tenantId).eq("contact_id", contactId);
       if (error) return err({ kind: "persistence_failure", cause: error.message });
-      return ok((data ?? []).map((r) => desdeRowConversation(r)));
+      return ok((data ?? []).map((r: Record<string, unknown>) => desdeRowConversation(r)));
     } catch (e) {
       return err({ kind: "persistence_failure", cause: String(e) });
     }
@@ -53,7 +53,7 @@ export class ConversationRepositorySupabase implements ConversationRepository {
         .eq("tenant_id", tenantId).in("status", ["open", "pending", "snoozed"])
         .order("last_message_at", { ascending: false });
       if (error) return err({ kind: "persistence_failure", cause: error.message });
-      return ok((data ?? []).map((r) => desdeRowConversation(r)));
+      return ok((data ?? []).map((r: Record<string, unknown>) => desdeRowConversation(r)));
     } catch (e) {
       return err({ kind: "persistence_failure", cause: String(e) });
     }

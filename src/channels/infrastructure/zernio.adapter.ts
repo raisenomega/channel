@@ -1,5 +1,5 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { ChannelAdapter, OutboundMessage, SendTemplateParams, NormalizedMessage, AdapterError } from "../../channels/domain/channel.adapter.ts";
+import { ChannelAdapter, OutboundMessage, SendTemplateParams, NormalizedMessage, AdapterError, ParseError } from "../../channels/domain/channel.adapter.ts";
 import { ChannelType } from "../../shared/domain/types.ts";
 
 export class ZernioAdapter implements ChannelAdapter {
@@ -36,9 +36,9 @@ export class ZernioAdapter implements ChannelAdapter {
     }
   }
 
-  parseInboundWebhook(payload: unknown): Result<readonly NormalizedMessage[], AdapterError> {
+  parseInboundWebhook(payload: unknown): Result<readonly NormalizedMessage[], ParseError> {
     if (typeof payload !== "object" || payload === null) {
-      return err({ kind: "invalid_payload" });
+      return err({ kind: "invalid_webhook_payload", cause: "cuerpo_invalido" });
     }
     try {
       const data = payload as Record<string, unknown>;
@@ -51,7 +51,7 @@ export class ZernioAdapter implements ChannelAdapter {
       }));
       return ok(Object.freeze(messages));
     } catch {
-      return err({ kind: "invalid_payload" });
+      return err({ kind: "invalid_webhook_payload", cause: "parseo_fallo" });
     }
   }
 

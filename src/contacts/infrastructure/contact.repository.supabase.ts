@@ -1,4 +1,4 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
+﻿import { Result, err, ok } from "../../shared/domain/result.ts";
 import { ContactState } from "../domain/contact.entity.ts";
 import { ContactRepository, RepoError } from "../domain/contact.repository.ts";
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
@@ -40,7 +40,7 @@ export class ContactRepositorySupabase implements ContactRepository {
     try {
       const { data, error } = await supabase.from("contacts").select("*").eq("tenant_id", tenantId);
       if (error) return err({ kind: "persistence_failure", cause: error.message });
-      return ok((data ?? []).map((r) => desdeRowContact(r)));
+      return ok((data ?? []).map((r: Record<string, unknown>) => desdeRowContact(r)));
     } catch (e) {
       return err({ kind: "persistence_failure", cause: String(e) });
     }
@@ -65,7 +65,7 @@ export class ContactRepositorySupabase implements ContactRepository {
         .textSearch("display_name", query, { type: "websearch", config: "spanish" })
         .limit(20);
       if (error) return err({ kind: "persistence_failure", cause: error.message });
-      return ok((data ?? []).map((r) => desdeRowContact(r)));
+      return ok((data ?? []).map((r: Record<string, unknown>) => desdeRowContact(r)));
     } catch (e) {
       return err({ kind: "persistence_failure", cause: String(e) });
     }

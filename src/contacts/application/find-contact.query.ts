@@ -17,7 +17,7 @@ export class FindContactHandler {
     if (porEmail.ok && porEmail.value) return ok([porEmail.value]);
 
     const fuzzy = await this.contactRepo.buscarFuzzy(q.tenantId, q.query);
-    if (!fuzzy.ok) return err({ kind: "persistence_failure", cause: fuzzy.error.cause });
+    if (!fuzzy.ok) return err({ kind: "persistence_failure", cause: causaDe(fuzzy.error) });
 
     return ok(fuzzy.value.slice(0, q.limit));
   }
@@ -25,3 +25,7 @@ export class FindContactHandler {
 
 export type FindContactError =
   | { readonly kind: "persistence_failure"; readonly cause: string };
+
+function causaDe(e: { readonly kind: string; readonly cause?: string }): string {
+  return e.cause ?? "fallo_persistencia";
+}

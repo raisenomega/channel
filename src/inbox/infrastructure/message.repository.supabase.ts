@@ -1,4 +1,4 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
+﻿import { Result, err, ok } from "../../shared/domain/result.ts";
 import { MessageId, ConversationId, TenantId } from "../../shared/domain/ids.ts";
 import { MessageState } from "../../inbox/domain/message.entity.ts";
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
@@ -52,7 +52,7 @@ export class MessageRepositorySupabase implements MessageRepository {
         .eq("conversation_id", convId)
         .order("created_at", { ascending: false }).limit(limit);
       if (error) return err({ kind: "persistence_failure", cause: error.message });
-      return ok((data ?? []).map((r) => desdeRowMessage(r)));
+      return ok((data ?? []).map((r: Record<string, unknown>) => desdeRowMessage(r)));
     } catch (e) {
       return err({ kind: "persistence_failure", cause: String(e) });
     }

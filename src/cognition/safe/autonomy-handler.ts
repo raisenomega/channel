@@ -1,5 +1,5 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { AutonomyProgressionState, AutonomyPhase, AUTONOMY_PHASES, avanzarFaseAutonomia, activarKillSwitch } from "./safe-governance.entity.ts";
+import { AutonomyProgressionState, AutonomyPhase, AUTONOMY_PHASES, avanzarFaseAutonomia, activarKillSwitch, ProgressionError } from "./safe-governance.entity.ts";
 
 export class AutonomyProgressionHandler {
   async avanzar(
@@ -7,7 +7,7 @@ export class AutonomyProgressionHandler {
     metrics: { wasCorrect: number; indistinguishability: number; csat: number },
   ): Promise<Result<AutonomyPhase, string>> {
     const result = avanzarFaseAutonomia(progression, metrics);
-    if (!result.ok) return err(result.error.reason);
+    if (!result.ok) return err(progressionMsg(result.error));
     return ok(result.value);
   }
 
@@ -19,4 +19,10 @@ export class AutonomyProgressionHandler {
     const found = AUTONOMY_PHASES.find((p) => p.phase === phase);
     return found?.description ?? "Fase desconocida";
   }
+}
+
+function progressionMsg(e: ProgressionError): string {
+  if (e.kind === "threshold_not_met") return e.reason;
+  if (e.kind === "kill_switch_active") return "Kill switch activo";
+  return "Fase invalida";
 }
