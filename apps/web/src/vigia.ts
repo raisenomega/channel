@@ -4,6 +4,7 @@
  * Toggle: clic en el icono o el area del vigia.
  */
 import { logger, LogContext } from "@shared/infrastructure/logger.infrastructure.ts";
+import { publicar } from "./telemetria-client.ts";
 
 interface EventoVigia {
   readonly ts: string;
@@ -30,6 +31,7 @@ function push(nivel: EventoVigia["nivel"], msg: string, ctx: LogContext = {}): v
   buffer.push({ ts: new Date().toISOString(), msg, nivel, uid, fase: ctx.fase ?? "", causa: ctx.causa ?? "" });
   if (buffer.length > MAX) buffer.shift();
   if (visible) renderVentana();
+  void publicar({ nivel, mensaje: msg, fase: ctx.fase, causa: ctx.causa });
 }
 
 function alcanzarUid(): string | undefined {
