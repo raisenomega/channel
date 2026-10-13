@@ -3,7 +3,8 @@
   "version": 2,
   "rootDirectory": "apps/tanstack",
   "framework": "vite",
-  "buildCommand": "pnpm build",
+  "buildCommand": "npx vinxi build",
   "installCommand": "pnpm install",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "node": "20.x"
 }
