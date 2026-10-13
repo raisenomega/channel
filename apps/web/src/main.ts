@@ -119,9 +119,34 @@ function causaDe(e: { readonly kind: string; readonly cause?: string }): string 
 function renderVista(root: HTMLElement, app: HUBApp): void {
   root.innerHTML = app.renderCurrentTab();
   cablearNavegacion(root, app);
+  // Dispatcher global para botones renderizados dentro de #app.
+  (globalThis as Record<string, unknown>).handleAction = (
+    action: string,
+    params?: Record<string, unknown>,
+  ) => {
+    app.handleAction(action, params);
+    appActual = app;
+    raizActual = root;
+    root.innerHTML = app.renderCurrentTab();
+    sincronizarNav(app);
+    cablearNavegacion(root, app);
+  };
   const themeSwitch = document.querySelector<HTMLButtonElement>("[data-settings-theme]");
   themeSwitch?.addEventListener("click", () => {
     toggleTema();
+  });
+  // Handlers globales para acciones renderizadas en #app (no lanzan error).
+  (globalThis as Record<string, unknown>).toggleFilter = () => {};
+  (globalThis as Record<string, unknown>).openConversation = (id: string) => {
+    if (id) renderVista(root, app);
+  };
+}
+
+function sincronizarNav(app: HUBApp): void {
+  const tabButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-tab]"));
+  const actual = app.currentTab();
+  tabButtons.forEach((b) => {
+    b.setAttribute("aria-selected", b.dataset.tab === actual ? "true" : "false");
   });
 }
 

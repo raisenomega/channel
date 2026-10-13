@@ -26,7 +26,7 @@ export async function cargarInbox(s: SessionUsuario): Promise<Result<InboxItem[]
   const { supabaseUrl, anonKey } = config();
   if (!supabaseUrl || !anonKey) return err({ kind: "config_incompleta" });
   try {
-    const cols = ["id", "contact_id", "status", "primary_channel", "last_message_at", "assigned_agent_id"];
+    const cols = ["id", "contact_id", "status", "operation_mode", "primary_channel", "last_message_at", "assigned_agent_id", "sla_violated", "total_messages", "subject"];
     const url = `${supabaseUrl}/rest/v1/conversations?select=${cols.join(",")}&order=last_message_at.desc&limit=50`;
     const res = await fetch(url, {
       headers: {
@@ -41,19 +41,32 @@ export async function cargarInbox(s: SessionUsuario): Promise<Result<InboxItem[]
     const items: InboxItem[] = filas.map((r) =>
       Object.freeze({
         conversationId: String(r.id),
-        contactName: String(r.contact_id ?? "Desconocido"),
+        contactName: nombreContacto(r.contact_id),
         channel: String(r.primary_channel ?? "whatsapp"),
-        lastMessage: "Conversacion del tenant",
+        lastMessage: String(r.subject ?? "Conversacion"),
         lastMessageAt: r.last_message_at ? new Date(String(r.last_message_at)) : new Date(),
         unreadCount: 0,
         status: String(r.status ?? "open"),
         assignedTo: r.assigned_agent_id ? "Asignado" : null,
-        slaViolated: false,
-        mode: "human",
+        slaViolated: r.sla_violated === true,
+        mode: modoReal(r.operation_mode),
       }),
     );
     return ok(items);
   } catch (e) {
     return err({ kind: "red", cause: String(e) });
   }
+}
+
+// Sin datos inventados (N5): si no hay display_name real, muestra una etiqueta honesta.
+function nombreContacto(contactId: unknown): string {
+  const id = contactId ? String(contactId) : "";
+  return id.length > 8 ? "Contacto" : id;
+}
+
+// Mapea el modo real de la conversacion al tipo InboxItem (valores validos del schema).
+function modoReal(m: unknown): InboxItem["mode"] {
+  const v = String(m ?? "human");
+  if (v === "assistant" || v === "copilot" || v === "autonomous" || v === "escalated" || v === "human") return v;
+  return "human";
 }

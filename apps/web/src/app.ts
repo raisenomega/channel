@@ -1,8 +1,8 @@
 import type { PageState, TabId, InboxItem, AppContext } from "./types.ts";
 import { createInitialState, cycleMode, navigate, popSubPage } from "./navigation.ts";
-import { renderInboxList, renderFilterChips } from "./inbox-widget.ts";
 import { renderAgentDashboard } from "./agent-dashboard.ts";
 import { renderChannelSettings } from "./channel-settings.ts";
+import { renderDashboard } from "./dashboard-widget.ts";
 import { t, type Idioma } from "./i18n.ts";
 import { getTema, getIdioma } from "./interfaz.ts";
 
@@ -25,23 +25,15 @@ export class HUBApp {
     }
   }
 
+  currentTab(): TabId {
+    return this.state.currentTab;
+  }
+
   renderCurrentTab(): string {
     const lang: Idioma = getIdioma();
-    const nav = this.context.tenantName;
     switch (this.state.currentTab) {
       case "inbox":
-        return `<div class="view">
-          <div class="kpis">
-            <div class="kpi"><div class="kpi-label">${t(lang, "kpi.tenant")}</div><div class="kpi-value"><small>${nav}</small></div></div>
-            <div class="kpi"><div class="kpi-label">${t(lang, "kpi.wasCorrect")}</div><div class="kpi-value" style="color:var(--good)">94<small>%</small></div></div>
-            <div class="kpi"><div class="kpi-label">${t(lang, "kpi.salesChat")}</div><div class="kpi-value" style="color:var(--hub)">$0<small>hoy</small></div></div>
-            <div class="kpi"><div class="kpi-label">${t(lang, "kpi.autonomy")}</div><div class="kpi-value">87<small>%</small></div></div>
-          </div>
-          <div class="section text-sm font-bold text-muted">${t(lang, "inbox.channels")} <span class="more text-xs text-hub">${t(lang, "inbox.seeAll")}</span></div>
-          ${renderFilterChips([], ["whatsapp", "email", "instagram"])}
-          <div class="section text-sm font-bold text-muted">${t(lang, "inbox.active")} <span class="more text-xs text-hub">${this.inbox.length} ${t(lang, "inbox.total")}</span></div>
-          <div class="list">${this.inbox.length ? renderInboxList(this.inbox, [], lang) : `<p class="text-sm text-muted p-md">${t(lang, "inbox.empty")}</p>`}</div>
-        </div>`;
+        return renderDashboard(this.inbox, this.context, lang);
 
       case "agent":
         return renderAgentDashboard(94, 92, 87, "1.45s", "Anthropic Claude", "claude-sonnet-4-6", true, "DeepSeek", this.state.mode, lang);

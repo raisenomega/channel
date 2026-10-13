@@ -41,6 +41,7 @@
 .gap-lg { gap: 20px; }
 
 .px-lg { padding-left: 20px; padding-right: 20px; }
+.px-sm { padding-left: 10px; padding-right: 10px; }
 .py-sm { padding-top: 8px; padding-bottom: 8px; }
 .py-md { padding-top: 16px; padding-bottom: 16px; }
 .p-sm { padding: 8px; }

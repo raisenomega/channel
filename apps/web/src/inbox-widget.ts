@@ -2,7 +2,7 @@ import { lucide } from "@shared/domain/lucide-icons.ts";
 import type { InboxItem, InboxFilter } from "./types.ts";
 import { t, type Idioma } from "./i18n.ts";
 
-export function renderInboxList(items: InboxItem[], filters: InboxFilter[], lang: Idioma): string {
+export function renderInboxList(items: readonly InboxItem[], filters: readonly InboxFilter[], lang: Idioma): string {
   const filtrados = items.filter((item) => {
     return filters.length === 0 || filters.every((f) => {
       switch (f.type) {

@@ -3,7 +3,7 @@
  * Acumula eventos de logger, errores globales y muestras en pantalla.
  * Toggle: clic en el icono o el area del vigia.
  */
-import { logger, LogContext } from "@shared/infrastructure/logger.infrastructure.ts";
+import { LogContext } from "@shared/infrastructure/logger.infrastructure.ts";
 import { publicar } from "./telemetria-client.ts";
 
 interface EventoVigia {

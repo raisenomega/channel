@@ -8,7 +8,7 @@ export interface LoginCallbacks {
   readonly onAutenticado: (session: SessionUsuario) => void;
 }
 
-export function renderLogin(cb: LoginCallbacks): string {
+export function renderLogin(): string {
   return `<div class="login-wrap">
     <form class="login-card glass" data-login-form novalidate>
       <div class="login-brand">
@@ -58,7 +58,7 @@ export function renderLogin(cb: LoginCallbacks): string {
 }
 
 export function montarLogin(container: HTMLElement, cb: LoginCallbacks): void {
-  container.innerHTML = renderLogin(cb);
+  container.innerHTML = renderLogin();
 
   const form = container.querySelector<HTMLFormElement>("[data-login-form]");
   const errEl = container.querySelector<HTMLElement>("[data-login-error]");
