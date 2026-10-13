@@ -26,3 +26,10 @@ _AUDIT_OMEGA_*/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Datos simulados (PROHIBIDO por ley)
+*seed*.sql
+*mock*.sql
+*placeholder*.sql
+*sample*.sql
+*dummy*.sql

@@ -10,7 +10,7 @@ Deno.test("CrearTenantHandler — debe crear tenant y retornar id", async () => 
   };
   const handler = new CrearTenantHandler(mockRepo);
   const result = await handler.ejecutar({
-    name: "Test", slug: "test", plan: "lite_starter", ownerEmail: "test@test.com",
+    name: "Test", slug: "test", plan: "lite_starter", ownerEmail: "anon@example.com",
   });
   assert(result.ok, "debería crear tenant");
   assertEquals(typeof result.value, "string");
@@ -24,7 +24,7 @@ Deno.test("CrearTenantHandler — debe fallar si el repo falla", async () => {
   };
   const handler = new CrearTenantHandler(mockRepo);
   const result = await handler.ejecutar({
-    name: "Test", slug: "test", plan: "lite_starter", ownerEmail: "test@test.com",
+    name: "Test", slug: "test", plan: "lite_starter", ownerEmail: "anon@example.com",
   });
   assert(!result.ok);
   assertEquals(result.error.kind, "persistence_failure");

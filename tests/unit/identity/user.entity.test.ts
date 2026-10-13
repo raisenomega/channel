@@ -5,7 +5,7 @@ import { Email } from "../../../src/shared/domain/email.vo.ts";
 const TEST_TENANT = crypto.randomUUID() as never;
 
 Deno.test("crearUser — debe crear usuario en español por defecto", () => {
-  const emailResult = Email.crear("juan@example.com");
+  const emailResult = Email.crear("anon@example.com");
   assert(emailResult.ok);
   const result = crearUser(emailResult.value, "Juan Pérez", "agent", TEST_TENANT);
   assert(result.ok);
@@ -13,7 +13,7 @@ Deno.test("crearUser — debe crear usuario en español por defecto", () => {
 });
 
 Deno.test("crearUser — debe aceptar idioma explícito", () => {
-  const emailResult = Email.crear("john@example.com");
+  const emailResult = Email.crear("user@example.com");
   assert(emailResult.ok);
   const result = crearUser(emailResult.value, "John", "agent", TEST_TENANT, "en");
   assert(result.ok);
@@ -21,7 +21,7 @@ Deno.test("crearUser — debe aceptar idioma explícito", () => {
 });
 
 Deno.test("crearUser — debe fallar con idioma inválido", () => {
-  const emailResult = Email.crear("test@test.com");
+  const emailResult = Email.crear("anon@example.com");
   assert(emailResult.ok);
   const result = crearUser(emailResult.value, "Test", "agent", TEST_TENANT, "fr" as never);
   assert(!result.ok);
@@ -29,7 +29,7 @@ Deno.test("crearUser — debe fallar con idioma inválido", () => {
 });
 
 Deno.test("crearUser — debe fallar con rol inválido", () => {
-  const emailResult = Email.crear("test@test.com");
+  const emailResult = Email.crear("anon@example.com");
   assert(emailResult.ok);
   const result = crearUser(emailResult.value, "Test", "ceo" as never, TEST_TENANT);
   assert(!result.ok);
@@ -37,7 +37,7 @@ Deno.test("crearUser — debe fallar con rol inválido", () => {
 });
 
 Deno.test("crearUser — debe aceptar role owner", () => {
-  const emailResult = Email.crear("owner@negocio.com");
+  const emailResult = Email.crear("owner@example.com");
   assert(emailResult.ok);
   const result = crearUser(emailResult.value, "Dueño", "owner", TEST_TENANT);
   assert(result.ok);

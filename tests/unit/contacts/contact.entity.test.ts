@@ -4,9 +4,9 @@ import { crearContacto } from "../../../src/contacts/domain/contact.entity.ts";
 const TID = crypto.randomUUID() as never;
 
 Deno.test("crearContacto — debe crear contacto valido", () => {
-  const result = crearContacto(TID, "Juan Perez", "juan@example.com", "+17875550100");
+  const result = crearContacto(TID, "Test User", "anon@example.com", "+17875550100");
   assert(result.ok);
-  assertEquals(result.value.displayName, "Juan Perez");
+  assertEquals(result.value.displayName, "Test User");
   assertEquals(result.value.segment, "new_lead");
   assertEquals(result.value.language, "es");
   assertEquals(result.value.ltvUsd, 0);
