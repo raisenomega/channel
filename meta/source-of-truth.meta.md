@@ -3,57 +3,57 @@
 > **Documento vivo**: refleja el estado real del proyecto HUB by Raisen.
 > Última auditoría: comprensiva contra Plan Maestro de Construcción (2026-09-09).
 
-## ✅ FASE 0 — Fundación (completada y auditada)
-- Plan Maestro de Construcción ✅ (12 fases, reglas innegociables, checklist, scaffolding)
-- Repo git + remote `github.com/raisenomega/channel.git` ✅
-- Scaffolding DDD (11 BCs, 4 capas: domain/application/infrastructure/presentation) ✅
-- Shared kernel (Result, Email, Phone, Money, IDs, Types, Locale, TranslationProvider) ✅
-- Gates CI endurecidos (C4, A2, C1, C2 — META-GATE check-all.sh) ✅
-- `.gitignore` protege docs estratégicos ✅
+## [OK] FASE 0 — Fundación (completada y auditada)
+- Plan Maestro de Construcción [OK] (12 fases, reglas innegociables, checklist, scaffolding)
+- Repo git + remote `github.com/raisenomega/channel.git` [OK]
+- Scaffolding DDD (11 BCs, 4 capas: domain/application/infrastructure/presentation) [OK]
+- Shared kernel (Result, Email, Phone, Money, IDs, Types, Locale, TranslationProvider) [OK]
+- Gates CI endurecidos (C4, A2, C1, C2 — META-GATE check-all.sh) [OK]
+- `.gitignore` protege docs estratégicos [OK]
 
-## ✅ FASE 1 — BC identity + Supabase Schema (completada y auditada)
-- Migraciones 001-003: extensiones, helpers globales, tenants, users + RLS ✅
-- Tenant entity (crearTenant con language, validaciones, slug) ✅
-- User entity (crearUser con Email VO + Role + Language) ✅
-- Identity repository (interfaces TenantRepository + UserRepository) ✅
-- CreateTenant + CreateUser handlers (1 caso de uso c/u) ✅
-- Repositorios Supabase con mapeo snake_case↔camelCase ✅
-- Tests: tenant.entity (5), user.entity (5), create-tenant.handler (2) ✅
-- **Gates: 0 violaciones** ✅
+## [OK] FASE 1 — BC identity + Supabase Schema (completada y auditada)
+- Migraciones 001-003: extensiones, helpers globales, tenants, users + RLS [OK]
+- Tenant entity (crearTenant con language, validaciones, slug) [OK]
+- User entity (crearUser con Email VO + Role + Language) [OK]
+- Identity repository (interfaces TenantRepository + UserRepository) [OK]
+- CreateTenant + CreateUser handlers (1 caso de uso c/u) [OK]
+- Repositorios Supabase con mapeo snake_case↔camelCase [OK]
+- Tests: tenant.entity (5), user.entity (5), create-tenant.handler (2) [OK]
+- **Gates: 0 violaciones** [OK]
 
-## ✅ FASE 2 — BC channels (completada y auditada)
-- ChannelAdapter interface (sendMessage, sendTemplate, parseInboundWebhook, verifyWebhook, ping) ✅
-- ZernioAdapter: 7 canales (WhatsApp, IG, FB, Telegram, SMS, X, LinkedIn) ✅
-- ResendAdapter: 1 canal (email) ✅
-- NativeWebchatAdapter: 1 canal (webchat) ✅
-- Inbox entity (crearInbox, activarInbox, desactivarInbox, ProviderType) ✅
-- ChannelRouter (resolver adapter, enrutar mensaje por canal) ✅
-- ConnectChannel + ProcessWebhook handlers (1 caso de uso c/u) ✅
-- Tests: inbox.entity (5), channel.router (4), connect-channel.handler (2) ✅
-- **Gates: 0 violaciones** ✅
+## [OK] FASE 2 — BC channels (completada y auditada)
+- ChannelAdapter interface (sendMessage, sendTemplate, parseInboundWebhook, verifyWebhook, ping) [OK]
+- ZernioAdapter: 7 canales (WhatsApp, IG, FB, Telegram, SMS, X, LinkedIn) [OK]
+- ResendAdapter: 1 canal (email) [OK]
+- NativeWebchatAdapter: 1 canal (webchat) [OK]
+- Inbox entity (crearInbox, activarInbox, desactivarInbox, ProviderType) [OK]
+- ChannelRouter (resolver adapter, enrutar mensaje por canal) [OK]
+- ConnectChannel + ProcessWebhook handlers (1 caso de uso c/u) [OK]
+- Tests: inbox.entity (5), channel.router (4), connect-channel.handler (2) [OK]
+- **Gates: 0 violaciones** [OK]
 
-## ✅ i18n — Internacionalización ES/EN (completada y auditada)
-- Language type ("es" | "en"), Locale VO + validación ✅
-- TranslationProvider + TranslationMap + factory con parámetros ({agent}, {n}) ✅
-- 3 pares de archivos de traducciones (6 archivos, 97 keys por idioma) ✅
-- Tenant y User entities con campo language + validación ✅
-- Handlers y repositorios con persistencia de language ✅
-- Tests de traducciones (5 tests: ES, EN, key inexistente, parámetros, mismas keys) ✅
-- **Gates: 0 violaciones** ✅
+## [OK] i18n — Internacionalización ES/EN (completada y auditada)
+- Language type ("es" | "en"), Locale VO + validación [OK]
+- TranslationProvider + TranslationMap + factory con parámetros ({agent}, {n}) [OK]
+- 3 pares de archivos de traducciones (6 archivos, 97 keys por idioma) [OK]
+- Tenant y User entities con campo language + validación [OK]
+- Handlers y repositorios con persistencia de language [OK]
+- Tests de traducciones (5 tests: ES, EN, key inexistente, parámetros, mismas keys) [OK]
+- **Gates: 0 violaciones** [OK]
 
-## ✅ FASE 3 — BC inbox (completada y auditada)
-- Migraciones 004-005: conversations (30+ columnas), messages (particionada), conversation_tags, conversation_participants + RLS ✅
-- Conversation entity (crearConversacion + máquina de estados con 5 status + transiciones) ✅
-- Message entity (crearMensaje + AiMeta + 11 content types + senderType + status) ✅
-- Eventos snake_case (conversation.created, message.received, conversation.assigned...) ✅
-- ConversationRepository + MessageRepository interfaces ✅
-- ReceiveMessage handler (busca o crea conversación por contacto+canal) ✅
-- SendMessage handler (valida estado, registra IA traceability) ✅
-- AssignConversation + ResolveConversation handlers ✅
-- ListInbox query (filtra por estado, activas primero, con límite) ✅
-- Repositorios Supabase con mappers separados ✅
-- Tests: conversation.entity (5), message.entity (4), resolve-conversation.handler (2) ✅
-- **Gates: 0 violaciones** ✅
+## [OK] FASE 3 — BC inbox (completada y auditada)
+- Migraciones 004-005: conversations (30+ columnas), messages (particionada), conversation_tags, conversation_participants + RLS [OK]
+- Conversation entity (crearConversacion + máquina de estados con 5 status + transiciones) [OK]
+- Message entity (crearMensaje + AiMeta + 11 content types + senderType + status) [OK]
+- Eventos snake_case (conversation.created, message.received, conversation.assigned...) [OK]
+- ConversationRepository + MessageRepository interfaces [OK]
+- ReceiveMessage handler (busca o crea conversación por contacto+canal) [OK]
+- SendMessage handler (valida estado, registra IA traceability) [OK]
+- AssignConversation + ResolveConversation handlers [OK]
+- ListInbox query (filtra por estado, activas primero, con límite) [OK]
+- Repositorios Supabase con mappers separados [OK]
+- Tests: conversation.entity (5), message.entity (4), resolve-conversation.handler (2) [OK]
+- **Gates: 0 violaciones** [OK]
 
 ## 📊 Resumen de métricas
 | Métrica | Valor |
@@ -72,7 +72,7 @@
 | Regla A8 (mappers en infra) | 0 violaciones |
 | RLS activo en migraciones | 4 tablas |
 
-## ❌ FASE 4+ — Pendientes
+## [--] FASE 4+ — Pendientes
 - BC contacts (CRM Lite)
 - BC commerce (quotes/orders/payments)
 - BC automation (rules/SLA/business-hours)

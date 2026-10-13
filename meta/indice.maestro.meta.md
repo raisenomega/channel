@@ -6,20 +6,20 @@
 ## Fase 0 — Documentos cubiertos en este árbol
 | Documento canónico | Fragmentado en | Estado |
 |---|---|---|
-| master_hub.md | `README.md` + `product/` + `architecture/` + `meta/` | ✅ corregido |
-| HUB_DOCUMENTATION_MASTER_INDEX.md | este archivo | ✅ |
-| AGENTE-IA-HUB.md | `domain/agente-ia/` + `application/agente-ia/` | ✅ corregido |
-| 01_HUB_Data_Schema.md | `data-schema/` | ✅ corregido |
-| 06_HUB_Adapter_Pattern.md | `infrastructure/adapters/` | ✅ corregido |
-| PRD_hub.md | `product/` | ✅ corregido |
-| Arquitectura Técnica | `architecture/` | ✅ corregido |
-| DDD-CERO-TOLERANCIA-HUB.md | `shared-kernel/` | ✅ corregido |
-| metodo-hub.md | `meta/metodo.meta.md` | ✅ |
-| SOURCE_OF_TRUTH_HUB.md | `meta/source-of-truth.meta.md` | ✅ |
-| Design System | `architecture/design-system.system.md` | ✅ corregido |
-| Código de Conducta | `meta/conducta-agentes.meta.md` | ✅ corregido |
-| Manifiesto HUB | `meta/manifiesto.meta.md` | ✅ corregido |
-| Changelog Maestro | `meta/changelog.meta.md` | ✅ |
+| master_hub.md | `README.md` + `product/` + `architecture/` + `meta/` | [OK] corregido |
+| HUB_DOCUMENTATION_MASTER_INDEX.md | este archivo | [OK] |
+| AGENTE-IA-HUB.md | `domain/agente-ia/` + `application/agente-ia/` | [OK] corregido |
+| 01_HUB_Data_Schema.md | `data-schema/` | [OK] corregido |
+| 06_HUB_Adapter_Pattern.md | `infrastructure/adapters/` | [OK] corregido |
+| PRD_hub.md | `product/` | [OK] corregido |
+| Arquitectura Técnica | `architecture/` | [OK] corregido |
+| DDD-CERO-TOLERANCIA-HUB.md | `shared-kernel/` | [OK] corregido |
+| metodo-hub.md | `meta/metodo.meta.md` | [OK] |
+| SOURCE_OF_TRUTH_HUB.md | `meta/source-of-truth.meta.md` | [OK] |
+| Design System | `architecture/design-system.system.md` | [OK] corregido |
+| Código de Conducta | `meta/conducta-agentes.meta.md` | [OK] corregido |
+| Manifiesto HUB | `meta/manifiesto.meta.md` | [OK] corregido |
+| Changelog Maestro | `meta/changelog.meta.md` | [OK] |
 
 ## Bounded Contexts (22)
 `inbox` · `channels` · `contacts` · `conversations` · `messages` · `quotes` ·
