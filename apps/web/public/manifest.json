@@ -1,0 +1,28 @@
+{
+  "name": "HUB by Raisen",
+  "short_name": "HUB",
+  "description": "Plataforma omnicanal con agente IA — Inbox, CRM, ventas y autonomía en un solo lugar",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls", "minimal-ui"],
+  "orientation": "any",
+  "theme_color": "#0FB5A6",
+  "background_color": "#E7ECF1",
+  "background_color_dark": "#0E1B2A",
+  "categories": ["business", "communication", "productivity"],
+  "lang": "es",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "/",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/maskable-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "screenshots": [{ "src": "/screenshots/inbox.png", "sizes": "412x880", "type": "image/png", "label": "Vista del inbox unificado" }],
+  "shortcuts": [
+    { "name": "Inbox", "short_name": "Inbox", "description": "Ver bandeja de entrada", "url": "/?tab=inbox", "icons": [{ "src": "/icons/inbox.png", "sizes": "96x96" }] },
+    { "name": "IA Agent", "short_name": "IA", "description": "Panel del agente IA", "url": "/?tab=agent", "icons": [{ "src": "/icons/agent.png", "sizes": "96x96" }] }
+  ]
+}
