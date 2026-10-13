@@ -36,7 +36,16 @@ export function renderLogin(cb: LoginCallbacks): string {
 
       <label class="login-field">
         <span class="login-label">Contrasena</span>
-        <input class="login-input" name="password" type="password" required autocomplete="current-password" placeholder="••••••••" />
+        <div class="password-wrap">
+          <input class="login-input password-input" name="password" type="password" required autocomplete="current-password" placeholder="••••••••" data-password-input />
+          <button type="button" class="password-toggle" data-password-toggle aria-label="Mostrar contrasena" title="Mostrar contrasena">
+            <svg viewBox="0 0 24 12" width="18" height="9" fill="currentColor">
+              <circle cx="6" cy="6" r="3.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+              <circle cx="18" cy="6" r="3.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="7" y1="5" x2="17" y2="5" stroke="currentColor" stroke-width="1"/>
+            </svg>
+          </button>
+        </div>
       </label>
 
       <p class="login-error text-danger" data-login-error role="alert"></p>
@@ -57,6 +66,16 @@ export function montarLogin(container: HTMLElement, cb: LoginCallbacks): void {
   if (!form || !errEl || !submit) return;
 
   let modo: "in" | "up" = "in";
+
+  const passInput = container.querySelector<HTMLInputElement>("[data-password-input]");
+  const passToggle = container.querySelector<HTMLButtonElement>("[data-password-toggle]");
+  passToggle?.addEventListener("click", () => {
+    if (!passInput) return;
+    const esVisible = passInput.type === "text";
+    passInput.type = esVisible ? "password" : "text";
+    passToggle.title = esVisible ? "Mostrar contrasena" : "Ocultar contrasena";
+    passInput.focus();
+  });
 
   container.querySelectorAll<HTMLButtonElement>("[data-login-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {

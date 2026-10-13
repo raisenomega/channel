@@ -528,6 +528,33 @@
   color: hsl(var(--critical));
   border-color: hsl(var(--critical) / 0.6);
 }
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-wrap .login-input {
+  width: 100%;
+  padding-right: 40px;
+}
+.password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: hsl(var(--text-muted));
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+.password-toggle:hover {
+  color: hsl(var(--primary));
+}
 .login-hint {
   margin: 0;
   text-align: center;
