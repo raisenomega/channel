@@ -9,6 +9,13 @@ import { AgentRoute } from "@/routes/agent";
 import { SettingsRoute } from "@/routes/settings";
 import { LegalRoute } from "@/routes/settings.legal";
 import { IntegrationsRoute } from "@/routes/settings.integrations";
+import { ContactsRoute } from "@/routes/contacts";
+import { QuotesRoute } from "@/routes/quotes";
+import { OrdersRoute } from "@/routes/orders";
+import { PaymentsRoute } from "@/routes/payments";
+import { AutomationRoute } from "@/routes/automation";
+import { ReportsRoute } from "@/routes/reports";
+import { SlaRoute } from "@/routes/settings.sla";
 
 const routeTree = rootRoute.addChildren([
   IndexRoute,
@@ -17,9 +24,16 @@ const routeTree = rootRoute.addChildren([
   ConversationRoute,
   ChannelsRoute,
   AgentRoute,
+  ContactsRoute,
+  QuotesRoute,
+  OrdersRoute,
+  PaymentsRoute,
+  AutomationRoute,
+  ReportsRoute,
   SettingsRoute,
   LegalRoute,
   IntegrationsRoute,
+  SlaRoute,
 ]);
 
 const router = createRouter({ routeTree, defaultNotFoundComponent: NotFoundPage });
@@ -33,5 +47,5 @@ declare module "@tanstack/react-router" {
 }
 
 function NotFoundPage() {
-  return <div className="flex h-full items-center justify-center text-muted-foreground">404 — Página no encontrada</div>;
+  return <div className="flex h-full items-center justify-center text-muted-foreground">404 — Pagina no encontrada</div>;
 }

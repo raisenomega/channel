@@ -89,26 +89,60 @@ export interface RowContact {
 
 export interface RowQuote {
   id: string;
+  contact_id: string | null;
   status: string;
   total_amount: number;
   currency: string;
   created_at: string;
+  expires_at: string | null;
 }
 
 export interface RowOrder {
   id: string;
+  quote_id: string | null;
+  contact_id: string | null;
   status: string;
   total_amount: number;
   currency: string;
   created_at: string;
+  paid_at: string | null;
 }
 
 export interface RowPayment {
   id: string;
+  order_id: string | null;
+  quote_id: string | null;
   status: string;
   amount: number;
   currency: string;
+  provider: string | null;
   created_at: string;
+}
+
+export interface RowAutomationRule {
+  id: string;
+  name: string;
+  trigger_event: string;
+  action_type: string;
+  action_config: Record<string, unknown> | null;
+  enabled: boolean;
+  created_at: string;
+}
+
+export interface RowSlaPolicy {
+  id: string;
+  channel: string;
+  max_response_minutes: number;
+  enabled: boolean;
+  created_at: string;
+}
+
+export interface RowBusinessHours {
+  id: string;
+  day_of_week: number;
+  open_time: string;
+  close_time: string;
+  enabled: boolean;
 }
 
 // ── IA Agent ────────────────────────────────────────────────

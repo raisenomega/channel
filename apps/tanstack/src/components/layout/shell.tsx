@@ -5,6 +5,12 @@ import { BottomNav, type NavItem } from "./bottom-nav";
 
 const LINKS: NavItem[] = [
   { to: "/inbox", label: "nav.inbox" },
+  { to: "/contacts", label: "nav.contacts" },
+  { to: "/quotes", label: "nav.quotes" },
+  { to: "/orders", label: "nav.orders" },
+  { to: "/payments", label: "nav.payments" },
+  { to: "/automation", label: "nav.automation" },
+  { to: "/reports", label: "nav.reports" },
   { to: "/agent", label: "nav.agent" },
   { to: "/channels", label: "nav.channels" },
   { to: "/settings", label: "nav.settings" },
