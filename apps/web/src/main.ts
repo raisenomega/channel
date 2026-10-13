@@ -37,7 +37,7 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
     // Sin tenant: el registro completo -> onboarding para crearlo.
     montarOnboarding(root, async (datos) => {
       const res = await crearTenant(sesion, datos);
-      if (!res.ok) return mensajeOnboarding(res.error.kind);
+      if (!res.ok) return mensajeOnboarding(res.error.kind, res.error.kind === "validacion" ? res.error.cause : undefined);
       auth.guardar({ ...sesion, tenant: { tenantId: res.value, name: datos.tenantName, plan: datos.plan, slug: datos.slug } });
       await montarShellAutenticado(root, sessionConTenant(sesion, res.value, datos));
       return null;
@@ -71,10 +71,10 @@ function sessionConTenant(
   });
 }
 
-function mensajeOnboarding(kind: string): string | null {
+function mensajeOnboarding(kind: string, cause?: string): string | null {
   if (kind === "no_autorizado") return "Sesion invalida. Vuelve a iniciar sesion.";
-  if (kind === "validacion") return "No se pudo crear el espacio. Verifica el identificador.";
-  if (kind === "red") return "Error de conexion. Intenta de nuevo.";
+  if (kind === "validacion") return cause ?? "No se pudo crear el espacio. Verifica el identificador.";
+  if (kind === "red") return cause ?? "Error de conexion. Intenta de nuevo.";
   return null;
 }
 
