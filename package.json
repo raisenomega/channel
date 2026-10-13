@@ -2,7 +2,7 @@
   "name": "hub-by-raisen",
   "version": "0.1.0",
   "private": true,
-  "description": "HUB by Raisen — Plataforma 12: comunicación omnicanal con opción de autonomía IA",
+  "description": "HUB by Raisen — Plataforma 12: comunicacion omnicanal con opcion de autonomia IA",
   "type": "module",
   "scripts": {
     "dev": "echo 'FASE 0: estructura scaffolding lista para desarrollo'",
@@ -10,10 +10,18 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",
-    "test": "echo 'FASE 0: sin tests aún'",
-    "check:lines": "scripts/check-lines.sh",
-    "check:layers": "scripts/check-layers.sh",
-    "check:all": "pnpm typecheck && pnpm lint && pnpm check:lines && pnpm check:layers",
+    "test": "echo 'FASE 0: sin tests aun'",
+    "test:unit": "deno test tests/unit/",
+    "test:integration": "deno test tests/integration/",
+    "check:lines": "bash scripts/check-lines.sh",
+    "check:layers": "bash scripts/check-layers.sh",
+    "check:emojis": "bash scripts/check-emojis.sh",
+    "check:all": "pnpm typecheck && pnpm lint && pnpm check:lines && pnpm check:layers && pnpm check:emojis",
+    "db:push": "supabase db push",
+    "db:seed": "supabase db execute --file supabase/seed.sql",
+    "db:reset": "bash scripts/reset-dev-db.sh",
+    "db:migrate": "supabase migration up",
+    "db:rollback": "supabase migration down",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -25,9 +33,6 @@
     "typescript": "^5"
   },
   "lint-staged": {
-    "*.ts": [
-      "pnpm lint:fix",
-      "pnpm format"
-    ]
+    "*.ts": ["pnpm lint:fix", "pnpm format"]
   }
 }

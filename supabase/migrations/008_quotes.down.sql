@@ -1,0 +1,3 @@
+-- ROLLBACK 008: Eliminar tabla quotes
+DROP TABLE IF EXISTS public.quote_line_items CASCADE;
+DROP TABLE IF EXISTS public.quotes CASCADE;

@@ -1,0 +1,24 @@
+[api]
+host = "auto"
+port = 5432
+schemas = ["public", "extensions"]
+
+[db]
+major_version = 15
+
+[auth]
+enabled = true
+enable_email_autoconfirm = true
+
+[edge_functions]
+enabled = false
+
+[analytics]
+enabled = false
+
+[experimental]
+orioledb_version = ""
+
+# Entorno: development / staging / production
+[env]
+APP_ENV = "development"
