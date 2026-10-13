@@ -159,7 +159,16 @@ function renderVista(root: HTMLElement, app: HUBApp): void {
   });
   // Handlers globales para acciones renderizadas en #app (no lanzan error).
   (globalThis as Record<string, unknown>).toggleFilter = (_tipo: string, valor: string) => {
-    app.toggleFiltroCanal(valor);
+    if (_tipo === "status") app.toggleFiltroEstado(valor);
+    else if (_tipo === "sla") app.toggleFiltroSLA();
+    else app.toggleFiltroCanal(valor);
+    appActual = app;
+    raizActual = root;
+    root.innerHTML = app.renderCurrentTab();
+    cablearNavegacion(root, app);
+  };
+  (globalThis as Record<string, unknown>).toggleFilterClean = () => {
+    app.toggleFiltroClean();
     appActual = app;
     raizActual = root;
     root.innerHTML = app.renderCurrentTab();
@@ -209,7 +218,7 @@ function renderVista(root: HTMLElement, app: HUBApp): void {
     void cargarMensajes(conversationId).then((res) => {
       const idioma = leerIdiomaActual();
       if (!res.ok) {
-        panelChat.innerHTML = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(idioma, "dash.conversaciones")}</div><div class="p-md text-sm text-muted">${tPlano(idioma, "chat.empty")}</div>`;
+        panelChat.innerHTML = `<div class="p-md text-sm text-muted">${tPlano(idioma, "chat.empty")}</div>`;
         return;
       }
       const uid = sesion?.uid ?? "";

@@ -14,6 +14,8 @@ export class HUBApp {
   private inbox: InboxItem[] = [];
   private safeSnapshot: SafeSnapshot | null = null;
   private filtroCanal: string | null = null;
+  private filtroEstado: string | null = null;
+  private filtroSLA: boolean | null = null;
 
   constructor(
     private readonly context: AppContext,
@@ -47,12 +49,43 @@ export class HUBApp {
     this.filtroCanal = this.filtroCanal === canal ? null : canal;
   }
 
+  toggleFiltroEstado(estado: string): void {
+    this.filtroEstado = this.filtroEstado === estado ? null : estado;
+  }
+
+  toggleFiltroSLA(): void {
+    this.filtroSLA = this.filtroSLA === true ? null : true;
+  }
+
+  /** Limpia todos los filtros del inbox (canal, estado y SLA). */
+  toggleFiltroClean(): void {
+    this.filtroCanal = null;
+    this.filtroEstado = null;
+    this.filtroSLA = null;
+  }
+
   filtroActual(): string | null {
     return this.filtroCanal;
   }
 
+  filtroEstadoActual(): string | null {
+    return this.filtroEstado;
+  }
+
+  filtroSLAActual(): boolean | null {
+    return this.filtroSLA;
+  }
+
   renderCurrentTab(): string {
-    return renderTab(this.state.currentTab, this.context, this.inbox, this.safeSnapshot, this.filtroCanal);
+    return renderTab(
+      this.state.currentTab,
+      this.context,
+      this.inbox,
+      this.safeSnapshot,
+      this.filtroCanal,
+      this.filtroEstado,
+      this.filtroSLA,
+    );
   }
 
   handleAction(action: string, params?: Record<string, unknown>): void {

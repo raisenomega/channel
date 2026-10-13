@@ -13,14 +13,24 @@ import { verMetricas } from "./agent-metrics-client.ts";
 import { estadoActual } from "./channel-handlers.ts";
 import { modeloDe } from "./channel-model.ts";
 
-export function renderTab(tab: TabId, ctx: AppContext, inbox: readonly InboxItem[], safe: SafeSnapshot | null, filtroCanal: string | null): string {
+export function renderTab(
+  tab: TabId,
+  ctx: AppContext,
+  inbox: readonly InboxItem[],
+  safe: SafeSnapshot | null,
+  filtroCanal: string | null,
+  filtroEstado: string | null,
+  filtroSLA: boolean | null,
+): string {
   const lang: Idioma = getIdioma();
   switch (tab) {
     case "inbox": {
-      const filtrados = filtroCanal
-        ? inbox.filter((i) => i.channel === filtroCanal)
-        : inbox;
-      return renderDashboard(filtrados, ctx, lang, filtroCanal);
+      const filtrados = inbox.filter((i) =>
+        (filtroCanal === null || i.channel === filtroCanal) &&
+        (filtroEstado === null || i.status === filtroEstado) &&
+        (filtroSLA === null || i.slaViolated),
+      );
+      return renderDashboard(filtrados, ctx, lang, filtroCanal, filtroEstado, filtroSLA);
     }
     case "agent": {
       const prov = estadoActual().proveedor;

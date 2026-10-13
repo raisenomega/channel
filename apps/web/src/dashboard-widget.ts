@@ -50,6 +50,40 @@ function chipCanal(canal: string, lang: Idioma, activo: boolean): string {
   </div>`;
 }
 
+/** Estado por omisión en colores OMEGA: open=verde, pending=ambar, snoozed=gris, resolved=azul. */
+const COLOR_ESTADO: Readonly<Record<string, string>> = {
+  open: "sev-success",
+  pending: "sev-medium",
+  snoozed: "sev-low",
+  resolved: "sev-process",
+};
+
+const ESTADOS: readonly string[] = ["open", "pending", "snoozed", "resolved"];
+
+function chipEstado(estado: string, lang: Idioma, activo: boolean): string {
+  const cls = activo ? "chip flex items-center gap-sm active" : "chip flex items-center gap-sm";
+  const color = COLOR_ESTADO[estado] ?? "sev-low";
+  return `<div class="${cls}" onclick="toggleFilter('status','${estado}')">
+    <span class="chip-name text-sm ${color}">${t(lang, `filtro.estado.${estado}`)}</span>
+  </div>`;
+}
+
+function chipSLA(lang: Idioma, activo: boolean): string {
+  const cls = activo ? "chip flex items-center gap-sm active" : "chip flex items-center gap-sm";
+  const etiqueta = activo ? t(lang, "filtro.sla.violated") : t(lang, "filtro.sla");
+  return `<div class="${cls}" onclick="toggleFilter('sla','violated')">
+    ${lucide("warning-triangle", { size: 16 })}
+    <span class="chip-name text-sm sev-critical">${etiqueta}</span>
+  </div>`;
+}
+
+function chipClean(lang: Idioma): string {
+  return `<div class="chip flex items-center gap-sm" onclick="toggleFilterClean()">
+    ${lucide("cross", { size: 16 })}
+    <span class="chip-name text-sm text-muted">${t(lang, "filtro.clean")}</span>
+  </div>`;
+}
+
 function kpis(estadisticas: DashboardStats, ctx: AppContext, lang: Idioma): string {
   const activas = t(lang, "dash.activas");
   const noAsig = t(lang, "dash.sinAsignar");
@@ -80,15 +114,15 @@ function cuerpoLista(items: readonly InboxItem[], ctx: AppContext, lang: Idioma)
   const lista = items.length
     ? renderInboxList(items, [], lang)
     : `<p class="text-sm text-muted p-md">${t(lang, "inbox.empty")}</p>`;
-  return `<div class="grid grid-cols-3 gap" style="margin-top:14px">
+  return `<div class="grid dash-grid gap" style="margin-top:14px">
     <div class="card" style="padding:0;overflow:hidden">
       <div class="section text-sm font-bold text-muted px-sm">${t(lang, "dash.conversaciones")}</div>
       <div class="list">${lista}</div>
     </div>
-    <div class="card" style="padding:0" data-chat-thread>
+    <div class="card" style="padding:0" data-chat-thread data-empty360>
       <div class="section text-sm font-bold text-muted px-sm">${t(lang, "dash.conversaciones")}</div>
       <div class="p-md">
-        <p class="text-sm text-muted">${t(lang, "dash.fichaEmpty")}</p>
+        <p class="text-sm text-muted">${t(lang, "chat.empty")}</p>
       </div>
     </div>
     <div class="card" style="padding:0" data-contact360 data-empty360>
@@ -100,11 +134,22 @@ function cuerpoLista(items: readonly InboxItem[], ctx: AppContext, lang: Idioma)
   </div>`;
 }
 
-export function renderDashboard(items: readonly InboxItem[], ctx: AppContext, lang: Idioma, filtroCanal: string | null = null): string {
+export function renderDashboard(
+  items: readonly InboxItem[],
+  ctx: AppContext,
+  lang: Idioma,
+  filtroCanal: string | null = null,
+  filtroEstado: string | null = null,
+  filtroSLA: boolean | null = null,
+): string {
   const estadisticas = calcularStats(items);
   const canalesActivos = CANALES.filter((c) => estadisticas.porCanal[c] !== undefined);
   const chips = (canalesActivos.length ? canalesActivos : ["whatsapp", "email", "instagram"])
     .map((c) => chipCanal(c, lang, c === filtroCanal)).join("");
+
+  const chipsEstado = ESTADOS
+    .map((e) => chipEstado(e, lang, e === filtroEstado)).join("");
+  const chipsSLA = chipSLA(lang, filtroSLA === true);
 
   const seccion = items.length === 0
     ? panelVacio(ctx, lang)
@@ -114,6 +159,8 @@ export function renderDashboard(items: readonly InboxItem[], ctx: AppContext, la
     ${kpis(estadisticas, ctx, lang)}
     <div class="section text-sm font-bold text-muted">${t(lang, "inbox.channels")} <span class="more text-xs text-hub">${t(lang, "inbox.seeAll")}</span></div>
     <div class="chips">${chips}</div>
+    <div class="section text-sm font-bold text-muted">${t(lang, "inbox.filtros")}</div>
+    <div class="chips">${chipsEstado}${chipsSLA}${chipClean(lang)}</div>
     <div class="section text-sm font-bold text-muted">${t(lang, "dash.conversaciones")}</div>
     ${seccion}
   </div>`;
