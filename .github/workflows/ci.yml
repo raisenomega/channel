@@ -1,0 +1,42 @@
+# CI Pipeline — HUB by Raisen
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install
+
+      - name: TypeScript strict check
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Gate: archivos ≤ 75 líneas
+        run: pnpm check:lines
+
+      - name: Gate: capas DDD + zero any
+        run: pnpm check:layers
+
+      - name: Tests unitarios
+        run: pnpm test
+
+      - name: Tests de integración
+        run: pnpm test -- --integration
+        continue-on-error: true

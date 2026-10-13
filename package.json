@@ -1,0 +1,33 @@
+{
+  "name": "hub-by-raisen",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HUB by Raisen — Plataforma 12: comunicación omnicanal con opción de autonomía IA",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'FASE 0: estructura scaffolding lista para desarrollo'",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write src/",
+    "test": "echo 'FASE 0: sin tests aún'",
+    "check:lines": "scripts/check-lines.sh",
+    "check:layers": "scripts/check-layers.sh",
+    "check:all": "pnpm typecheck && pnpm lint && pnpm check:lines && pnpm check:layers",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "eslint": "^9",
+    "husky": "^9",
+    "lint-staged": "^15",
+    "prettier": "^3",
+    "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "pnpm lint:fix",
+      "pnpm format"
+    ]
+  }
+}

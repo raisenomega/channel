@@ -1,0 +1,10 @@
+export type TenantId = string & { readonly __brand: "TenantId" };
+export type UserId = string & { readonly __brand: "UserId" };
+export type ConversationId = string & { readonly __brand: "ConversationId" };
+export type MessageId = string & { readonly __brand: "MessageId" };
+export type ContactId = string & { readonly __brand: "ContactId" };
+export type InboxId = string & { readonly __brand: "InboxId" };
+export type QuoteId = string & { readonly __brand: "QuoteId" };
+export type OrderId = string & { readonly __brand: "OrderId" };
+export type AgentId = string & { readonly __brand: "AgentId" };
+export type TeamId = string & { readonly __brand: "TeamId" };

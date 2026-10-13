@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+
+# Documentación estratégica (NUNCA se commitea)
+docs-hub/
+master_hub.md
+SOURCE_OF_TRUTH_HUB.md
+metodo-hub.md
+PRD*.md
+AGENTE-IA-HUB.md
+DDD-CERO-TOLERANCIA-HUB.md
+ARQUITECTURA-*.md
+AUDITORIA-*.md
+PLAN_MAESTRO_CONSTRUCCION.md
+*.hub.md
+CLAUDE.md
+.claude/
+PLANTILLA_AUDITORIA_*/
+_AUDIT_OMEGA_*/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
