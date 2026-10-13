@@ -75,7 +75,24 @@ Estado de despliegue y avance hacia produccion. Documento de control de fases.
   exports faltantes (PaymentId, Language), acceso seguro a causa en RepoError,
   adapters de canal con ParseError, eliminados los anti-patrones `as never`.
 - Instalada dependencia real @supabase/supabase-js + declaracion minima de Deno.
-- Pendiente: crear eslint.config.js para el gate de lint (ESLint 9 flat config).
+- `pnpm lint` verde (eslint.config.js con parser TypeScript via typescript-eslint).
+  `no-unused-vars` como warning: deuda acumulada de imports a limpiar (51 warnings, no bloquean).
+
+## FASE I — Crons de mantenimiento (estructura inicial)
+
+- `src/maintenance/domain/scheduler.entity.ts`: entidad pura SchedulerJobState +
+  crearSchedulerJob + calcularProximaEjecucion (patron Result, sin efectos).
+- `src/maintenance/infrastructure/cron.registry.infrastructure.ts`: registro de jobs
+  (agrega/lista/resuelve) sin ejecutar timers (efectos fuera).
+- Aprobado por auditoria de workflow (patron Result, sin any, C4, DDD layering).
+
+## Cobertura de tests ampliada
+
+- Tests de 3 handlers que no tenian cobertura:
+  tests/unit/commerce/accept-quote.handler.test.ts,
+  tests/unit/automation/check-sla.handler.test.ts,
+  tests/unit/contacts/find-contact.query.test.ts.
+- Sin PII (datos anonimos), Deno.test + @std/assert.
 
 ## Recordatorios operativos
 
