@@ -1,0 +1,49 @@
+/**
+ * HUB by Raisen — Paleta OMEGA (tema oscuro, por defecto).
+ * Tripletas HSL crudas para componer opacidad: hsl(var(--primary) / .5).
+ */
+:root {
+  --background: 225 15% 5%;      /* negro-navy, el fondo */
+  --foreground: 40 6% 90%;       /* texto hueso */
+  --card: 225 15% 8%;            /* tarjetas */
+  --card-soft: 225 14% 10%;
+  --primary: 38 85% 55%;         /* DORADO Raisen (identidad) */
+  --primary-hover: 38 90% 62%;
+  --primary-soft: 38 85% 55%;
+  --ring: 38 85% 55%;            /* foco dorado */
+  --border: 225 12% 42%;         /* borde L42% por WCAG 3:1 */
+
+  --text-muted: 40 8% 66%;
+  --text-dim: 40 8% 56%;
+
+  --surface: 225 15% 8%;
+  --line: 225 12% 42%;
+
+  --critical: 0 72% 64%;
+  --high: 25 88% 55%;
+  --medium: 45 90% 55%;
+  --low: 225 8% 55%;
+  --success: 145 60% 45%;
+  --process: 205 85% 58%;        /* azul = proceso, no riesgo */
+
+  --tool-glob: 190 90% 55%;
+  --tool-read: 38 90% 60%;
+  --tool-grep: 160 80% 45%;
+  --tool-bash: 265 70% 68%;
+  --tool-write: 12 90% 62%;
+  --tool-task: 45 95% 55%;
+  --tool-web: 220 85% 58%;
+  --tool-other: 225 8% 60%;
+
+  --hub: var(--primary);
+  --hub-deep: 38 62% 40%;
+  --good: var(--success);
+  --danger: var(--critical);
+  --agent: var(--primary);
+  --nucleo: 225 15% 5%;
+
+  /* Alias OMEGA (contrato con tailwind.config.ts) */
+  --gold: #B8963D;
+  --navy: #1B2A4A;
+  --dark: #0E1420;
+}

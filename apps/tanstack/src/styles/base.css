@@ -1,0 +1,57 @@
+/**
+ * HUB by Raisen — Base.
+ * Reset, alturas, scrollbars ocultas y escala de headings.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* app: sin scroll de documento */
+}
+
+body {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1rem; }
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border) / 0.45);
+}
+
+/* Sin scrollbars visibles */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

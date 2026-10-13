@@ -1,0 +1,22 @@
+/**
+ * HUB by Raisen — Tipografia.
+ * Display (h1-h4): Syne (700-800, geometrica)
+ * Body: DM Sans (400-700, humanista)
+ * Bundleadas con @fontsource — SIN CDN.
+ */
+:root {
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+}
+
+h1, h2, h3, h4, .display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+body, button, input, textarea, select {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
