@@ -22,7 +22,10 @@ export interface SessionUsuario {
 
 export type AuthError =
   | { readonly kind: "config_incompleta" }
+  | { readonly kind: "no_autorizado" }
+  | { readonly kind: "correo_no_confirmado"; readonly presentado?: boolean }
   | { readonly kind: "credenciales_invalidas" }
+  | { readonly kind: "email_existe" }
   | { readonly kind: "red"; readonly cause: string }
   | { readonly kind: "desconocido"; readonly cause: string };
 
@@ -61,6 +64,15 @@ export const auth = {
         body: JSON.stringify({ email, password }),
       });
       const body = (await res.json()) as Record<string, unknown>;
+      if (!res.ok) {
+        const code = body.error_code as string | undefined;
+        if (code === "email_exists" || code === "user_already_exists") return err({ kind: "email_existe" });
+        return err({ kind: "no_autorizado" });
+      }
+      // Con confirmacion de email activa, Supabase crea el user sin access_token.
+      const user = body.user as Record<string, unknown> | undefined;
+      const hasToken = typeof body.access_token === "string" && typeof body.refresh_token === "string";
+      if (user?.id && !hasToken) return err({ kind: "correo_no_confirmado" });
       return sessionDe(body, email);
     } catch (e) {
       return err({ kind: "red", cause: String(e) });
