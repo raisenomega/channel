@@ -1,7 +1,7 @@
 -- FASE 10 — Compliance: consent tracking, auditoria, privacy config
 
 CREATE TABLE public.consent_log (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id              uuid NOT NULL DEFAULT gen_random_uuid(),
   tenant_id       uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
   contact_id      uuid REFERENCES public.contacts(id) ON DELETE CASCADE,
   channel         text NOT NULL CHECK (channel IN ('whatsapp','email','sms','phone','web')),
@@ -11,7 +11,8 @@ CREATE TABLE public.consent_log (
   user_agent      text,
   consented_at    timestamptz NOT NULL DEFAULT now(),
   expires_at      timestamptz,
-  metadata        jsonb DEFAULT '{}'
+  metadata        jsonb DEFAULT '{}',
+  PRIMARY KEY (consented_at, id)
 ) PARTITION BY RANGE (consented_at);
 CREATE INDEX idx_consent_contact ON consent_log(tenant_id, contact_id, channel);
 ALTER TABLE public.consent_log ENABLE ROW LEVEL SECURITY;

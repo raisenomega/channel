@@ -18,14 +18,15 @@ ALTER TABLE public.automation_rules ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "tenant_isolation_automation" ON automation_rules FOR ALL USING (tenant_id = current_tenant()) WITH CHECK (tenant_id = current_tenant());
 
 CREATE TABLE public.automation_rule_executions (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id              uuid NOT NULL DEFAULT gen_random_uuid(),
   tenant_id       uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
   rule_id         uuid NOT NULL REFERENCES public.automation_rules(id),
   conversation_id uuid REFERENCES public.conversations(id),
   event_type      text NOT NULL,
   result          text NOT NULL CHECK (result IN ('success','failed','skipped')),
   details         jsonb DEFAULT '{}',
-  executed_at     timestamptz NOT NULL DEFAULT now()
+  executed_at     timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (executed_at, id)
 ) PARTITION BY RANGE (executed_at);
 ALTER TABLE public.automation_rule_executions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "tenant_isolation_auto_exec" ON automation_rule_executions FOR ALL USING (tenant_id = current_tenant()) WITH CHECK (tenant_id = current_tenant());
