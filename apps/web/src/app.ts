@@ -1,21 +1,24 @@
 /**
  * HUB by Raisen — App shell (punto de entrada a la SPA).
- * Gestiona estado, inbox, filtro de canal y delega render en tab-router.
+ * Gestiona estado, inbox, filtro de canal, SAFE governance y delega render en tab-router.
  */
-import type { PageState, TabId, InboxItem, AppContext } from "./types.ts";
+import type { PageState, TabId, InboxItem, AppContext, SafeSnapshot } from "./types.ts";
 import { createInitialState, cycleMode, navigate, popSubPage } from "./navigation.ts";
 import { renderTab } from "./tab-router.ts";
 
 export type CargarInbox = () => Promise<InboxItem[]>;
+export type CargarSafe = () => Promise<SafeSnapshot | null>;
 
 export class HUBApp {
   private state: PageState = createInitialState();
   private inbox: InboxItem[] = [];
+  private safeSnapshot: SafeSnapshot | null = null;
   private filtroCanal: string | null = null;
 
   constructor(
     private readonly context: AppContext,
     private readonly cargarInbox: CargarInbox,
+    private readonly cargarSafe: CargarSafe,
   ) {}
 
   async iniciar(): Promise<void> {
@@ -23,6 +26,11 @@ export class HUBApp {
       this.inbox = await this.cargarInbox();
     } catch {
       this.inbox = [];
+    }
+    try {
+      this.safeSnapshot = await this.cargarSafe();
+    } catch {
+      this.safeSnapshot = null;
     }
   }
 
@@ -44,7 +52,7 @@ export class HUBApp {
   }
 
   renderCurrentTab(): string {
-    return renderTab(this.state.currentTab, this.context, this.inbox, this.filtroCanal);
+    return renderTab(this.state.currentTab, this.context, this.inbox, this.safeSnapshot, this.filtroCanal);
   }
 
   handleAction(action: string, params?: Record<string, unknown>): void {

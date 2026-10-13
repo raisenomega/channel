@@ -6,7 +6,7 @@ import "./styles/index.css";
 import { HUBApp } from "./app.ts";
 import { logger } from "@shared/infrastructure/logger.infrastructure.ts";
 import { iniciarVigia } from "./vigia.ts";
-import { iniciarControlesShell, suscribirAlCambio, toggleTema, getIdioma } from "./interfaz.ts";
+import { iniciarControlesShell, suscribirAlCambio, toggleTema, toggleWhiteLabel, getWhiteLabel, getIdioma } from "./interfaz.ts";
 import { auth, SessionUsuario } from "./auth-client.ts";
 import { resolverTenant } from "./tenant-client.ts";
 import { cargarInbox } from "./inbox-client.ts";
@@ -19,7 +19,10 @@ import { cargarMensajes, enviarMensaje } from "./message-client.ts";
 import { renderChatThread, renderChatCargando } from "./chat-thread.ts";
 import { t } from "./i18n.ts";
 import { conectarHandlersCanales } from "./channel-handlers.ts";
+import { conectarHandlersIntegraciones } from "./integrations-view.ts";
 import type { AppContext, TabId } from "./types.ts";
+import { cargarSafe } from "./safe-client.ts";
+import { cargarMetricasAgente } from "./agent-metrics-client.ts";
 
 interface HubConfigGlobal {
   __HUB_CONFIG__?: { supabaseUrl: string; anonKey: string };
@@ -54,7 +57,7 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
     return;
   }
   const tenResult = await resolverTenant(sesion);
-  logger.info("tenant_resuelto", { fase: FASE, uid: sesion.uid, tenantId: tenResult.ok ? tenResult.value.tenantId : undefined });
+  logger.info("tenant_resuelto", { fase: FASE, uid: sesion.uid, ...(tenResult.ok ? { tenantId: tenResult.value.tenantId } : {}) });
   if (!tenResult.ok) {
     logger.warn("tenant_no_encontrado", { fase: FASE, uid: sesion.uid, causa: tenResult.error.kind });
     // Token invalido (caducado o usuario borrado): cerrar sesion y volver al login.
@@ -67,7 +70,8 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
     montarOnboarding(root, async (datos) => {
       const res = await crearTenant(sesion, datos);
       if (!res.ok) {
-        logger.error("onboarding_fallo", { fase: FASE, uid: sesion.uid, causa: causaDe(res.error) });
+        const causa = causaDe(res.error);
+        logger.error("onboarding_fallo", { fase: FASE, uid: sesion.uid, ...(causa ? { causa } : {}) });
         return mensajeOnboarding(res.error.kind, res.error.kind === "validacion" ? causaDe(res.error) : undefined);
       }
       logger.info("tenant_creado", { fase: FASE, uid: sesion.uid, tenantId: res.value });
@@ -91,6 +95,9 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
   const app = new HUBApp(contexto, async () => {
     const res = await cargarInbox(sesion);
     return res.ok ? res.value : [];
+  }, async () => {
+    const r = await cargarSafe(sesion);
+    return r.ok ? r.value : null;
   });
   await app.iniciar();
   appActual = app;
@@ -125,6 +132,7 @@ function causaDe(e: { readonly kind: string; readonly cause?: string }): string 
 function renderVista(root: HTMLElement, app: HUBApp): void {
   root.innerHTML = app.renderCurrentTab();
   cablearNavegacion(root, app);
+  dispararCargaMetricasAgente(app);
   // Dispatcher global para botones renderizados dentro de #app.
   (globalThis as Record<string, unknown>).handleAction = (
     action: string,
@@ -141,6 +149,14 @@ function renderVista(root: HTMLElement, app: HUBApp): void {
   themeSwitch?.addEventListener("click", () => {
     toggleTema();
   });
+  const wlSwitch = document.querySelector<HTMLButtonElement>("[data-settings-white-label]");
+  wlSwitch?.addEventListener("click", () => {
+    toggleWhiteLabel();
+    // Refresca el switch visualmente (cambia clase on/off).
+    if (wlSwitch) {
+      wlSwitch.className = wlSwitch.className.replace(/\b(?:on|off)\b/g, getWhiteLabel() ? "on" : "off");
+    }
+  });
   // Handlers globales para acciones renderizadas en #app (no lanzan error).
   (globalThis as Record<string, unknown>).toggleFilter = (_tipo: string, valor: string) => {
     app.toggleFiltroCanal(valor);
@@ -152,6 +168,14 @@ function renderVista(root: HTMLElement, app: HUBApp): void {
   // Canales (FASE 9.5-9.7): acciones de conectar/desconectar, autonomia y BYOK.
   // Se vincula siempre para que `actuarCanal` siga activo en cualquier navegacion.
   conectarHandlersCanales(() => {
+    if (raizActual && appActual) {
+      raizActual.innerHTML = appActual.renderCurrentTab();
+      cablearNavegacion(raizActual, appActual);
+    }
+  });
+  // Integraciones (FASE 8): lista de integraciones ecosistema + toggles.
+  // Se vincula siempre para que `actuarIntegracion` siga activo en cualquier navegacion.
+  conectarHandlersIntegraciones(() => {
     if (raizActual && appActual) {
       raizActual.innerHTML = appActual.renderCurrentTab();
       cablearNavegacion(raizActual, appActual);
@@ -208,6 +232,19 @@ function cargarCargando(idioma: "es" | "en"): string {
   return renderCargando360(idioma);
 }
 
+// Carga las metricas reales del agente desde la DB y repinta la vista activa.
+function dispararCargaMetricasAgente(app: HUBApp): void {
+  if (app.currentTab() !== "agent") return;
+  const sesion = auth.leer();
+  if (!sesion) return;
+  void cargarMetricasAgente(sesion).then(() => {
+    if (raizActual && appActual) {
+      raizActual.innerHTML = appActual.renderCurrentTab();
+      cablearNavegacion(raizActual, appActual);
+    }
+  });
+}
+
 function sincronizarNav(app: HUBApp): void {
   const tabButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-tab]"));
   const actual = app.currentTab();
@@ -224,6 +261,7 @@ function cablearNavegacion(root: HTMLElement, app: HUBApp): void {
       app.handleAction("navigate", { tab });
       tabButtons.forEach((b) => b.setAttribute("aria-selected", b === btn ? "true" : "false"));
       root.innerHTML = app.renderCurrentTab();
+      dispararCargaMetricasAgente(app);
     };
   });
 }

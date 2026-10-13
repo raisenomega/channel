@@ -1,20 +1,22 @@
 import { lucide } from "@shared/domain/lucide-icons.ts";
-import type { OperationMode } from "./types.ts";
+import type { OperationMode, SafeSnapshot } from "./types.ts";
 import { t, type Idioma } from "./i18n.ts";
+import { renderSafeWidget } from "./safe-widget.ts";
+import type { AgentMetricsView } from "./agent-metrics-client.ts";
+import { renderMetricasAgente } from "./agent-dashboard-metrics.ts";
 
 export function renderAgentDashboard(
-  wasCorrect: number,
-  indistinguishability: number,
-  autoRate: number,
-  latency: string,
+  metricas: AgentMetricsView,
   providerName: string,
   modelName: string,
   byokConfigured: boolean,
   fallbackProvider: string | null,
   mode: OperationMode,
+  safe: SafeSnapshot | null,
   lang: Idioma,
 ): string {
   const modeName = t(lang, `common.${mode}`);
+  const panelSafe = renderSafeWidget(safe, lang);
   return `<div class="view">
     <div class="brain">
       <div class="row1 flex items-center gap-sm">
@@ -23,18 +25,7 @@ export function renderAgentDashboard(
           <span class="block text-xs" style="color:#9FB4C4">${t(lang, "agent.providerLine")}: ${providerName} · ${t(lang, "agent.model")}: ${modelName}</span>
         </h3>
       </div>
-      <div class="agmetrics grid grid-cols-3 gap-sm" style="margin-top:14px">
-        <div class="am"><b>${wasCorrect}%</b><small>${t(lang, "agent.wasCorrect")}</small></div>
-        <div class="am"><b>${indistinguishability}%</b><small>${t(lang, "agent.indistinguishability")}</small></div>
-        <div class="am"><b>${autoRate}%</b><small>${t(lang, "agent.autoResolve")}</small></div>
-      </div>
-    </div>
-    <div class="section text-sm font-bold text-muted" style="margin-top:16px">${t(lang, "agent.qualityMetrics")}</div>
-    <div class="kpis grid grid-cols-2 gap">
-      <div class="kpi"><div class="kpi-label">${t(lang, "agent.wasCorrect")}</div><div class="kpi-value" style="color:var(--good)">${wasCorrect}<small>%</small></div></div>
-      <div class="kpi"><div class="kpi-label">${t(lang, "agent.indistinguishability")}</div><div class="kpi-value" style="color:var(--hub)">${indistinguishability}<small>%</small></div></div>
-      <div class="kpi"><div class="kpi-label">${t(lang, "agent.autoResolve")}</div><div class="kpi-value">${autoRate}<small>%</small></div></div>
-      <div class="kpi"><div class="kpi-label">${t(lang, "agent.latency")}</div><div class="kpi-value">${latency}</div></div>
+      ${renderMetricasAgente(metricas, lang)}
     </div>
     <div class="section text-sm font-bold text-muted">${t(lang, "agent.providerConfig")}</div>
     <div class="card" style="background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px">
@@ -74,5 +65,6 @@ export function renderAgentDashboard(
       <div class="row flex items-center gap px-lg py-sm"><span class="text-sm">${t(lang, "agent.legal")}</span></div>
       <div class="row flex items-center gap px-lg py-sm"><span class="text-sm">${t(lang, "agent.askHuman")}</span></div>
     </div>
+    ${panelSafe}
   </div>`;
 }

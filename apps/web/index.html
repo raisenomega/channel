@@ -21,10 +21,14 @@
       (function () {
         var TEMA = "hub.tema";
         var IDIOMA = "hub.idioma";
+        var WL = "hub.whiteLabel";
         function leer(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }
         function aplicar() {
           var t = leer(TEMA, "dark");
           document.documentElement.setAttribute("data-theme", t);
+          if (leer(WL, "false") === "true") {
+            document.documentElement.setAttribute("data-white-label", "");
+          }
         }
         aplicar();
         document.addEventListener("click", function (ev) {
@@ -80,6 +84,13 @@
         </div>
       </nav>
       <main id="app" class="app slide-up" aria-live="polite"></main>
+      <!-- Bottom-nav fijo para mobile (< 640px) -->
+      <nav class="bottom-nav" role="tablist" aria-label="Navegacion movil">
+        <button class="nav-item tap" data-tab="inbox" role="tab" aria-selected="true">Inbox</button>
+        <button class="nav-item tap" data-tab="agent" role="tab">IA</button>
+        <button class="nav-item tap" data-tab="channels" role="tab">Canales</button>
+        <button class="nav-item tap" data-tab="settings" role="tab">Ajustes</button>
+      </nav>
     </div>
     <noscript>
       <p style="padding:1rem;color:inherit">HUB by Raisen requiere JavaScript.</p>

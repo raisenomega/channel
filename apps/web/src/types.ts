@@ -48,3 +48,23 @@ export interface AppContext {
   readonly tenantName: string;
   readonly tenantPlan: string;
 }
+
+export type AutonomyPhase = 0 | 1 | 2 | 3 | 4;
+
+export interface SafeProgresion {
+  readonly currentPhase: AutonomyPhase;
+  readonly isKillSwitched: boolean;
+  readonly killSwitchReason: string | null;
+}
+
+/** Snapshot real de gobernanza SAFE (safe_evaluations + autonomy_progression). */
+export interface SafeSnapshot {
+  readonly totalEvaluaciones: number;
+  readonly disagreementPromedioPct: number | null;
+  readonly decisiones: {
+    readonly approved: number;
+    readonly blocked: number;
+    readonly abstained: number;
+  };
+  readonly progresion: SafeProgresion | null;
+}

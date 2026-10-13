@@ -31,7 +31,7 @@ function push(nivel: EventoVigia["nivel"], msg: string, ctx: LogContext = {}): v
   buffer.push({ ts: new Date().toISOString(), msg, nivel, uid, fase: ctx.fase ?? "", causa: ctx.causa ?? "" });
   if (buffer.length > MAX) buffer.shift();
   if (visible) renderVentana();
-  void publicar({ nivel, mensaje: msg, fase: ctx.fase, causa: ctx.causa });
+  void publicar({ nivel, mensaje: msg, ...(ctx.fase ? { fase: ctx.fase } : {}), ...(ctx.causa ? { causa: ctx.causa } : {}) });
 }
 
 function alcanzarUid(): string | undefined {

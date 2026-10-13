@@ -13,6 +13,7 @@
     "test": "echo 'FASE 0: sin tests aun'",
     "test:unit": "deno test tests/unit/",
     "test:integration": "deno test tests/integration/",
+    "test:e2e": "playwright test --config=tests/e2e/playwright.config.ts",
     "check:lines": "bash scripts/check-lines.sh",
     "check:layers": "bash scripts/check-layers.sh",
     "check:emojis": "bash scripts/check-emojis.sh",

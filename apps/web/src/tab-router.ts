@@ -3,14 +3,17 @@
  */
 import { t, type Idioma } from "./i18n.ts";
 import { getIdioma } from "./interfaz.ts";
-import type { AppContext, TabId, InboxItem } from "./types.ts";
+import type { AppContext, TabId, InboxItem, SafeSnapshot } from "./types.ts";
 import { renderDashboard } from "./dashboard-widget.ts";
 import { renderAgentDashboard } from "./agent-dashboard.ts";
 import { renderChannelSettings } from "./channel-settings.ts";
 import { renderAccountPrefs } from "./settings-account.ts";
 import { renderCompliance } from "./compliance-view.ts";
+import { verMetricas } from "./agent-metrics-client.ts";
+import { estadoActual } from "./channel-handlers.ts";
+import { modeloDe } from "./channel-model.ts";
 
-export function renderTab(tab: TabId, ctx: AppContext, inbox: readonly InboxItem[], filtroCanal: string | null): string {
+export function renderTab(tab: TabId, ctx: AppContext, inbox: readonly InboxItem[], safe: SafeSnapshot | null, filtroCanal: string | null): string {
   const lang: Idioma = getIdioma();
   switch (tab) {
     case "inbox": {
@@ -19,8 +22,10 @@ export function renderTab(tab: TabId, ctx: AppContext, inbox: readonly InboxItem
         : inbox;
       return renderDashboard(filtrados, ctx, lang, filtroCanal);
     }
-    case "agent":
-      return renderAgentDashboard(94, 92, 87, "1.45s", "Anthropic Claude", "claude-sonnet-4-6", true, "DeepSeek", "ecosystem", lang);
+    case "agent": {
+      const prov = estadoActual().proveedor;
+      return renderAgentDashboard(verMetricas(), prov.provider, modeloDe(prov.provider), prov.keyConfigured, null, "ecosystem", safe, lang);
+    }
     case "channels":
       return renderChannelSettings(lang);
     case "settings":

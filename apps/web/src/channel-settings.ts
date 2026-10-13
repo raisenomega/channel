@@ -6,6 +6,7 @@
 import { t, type Idioma } from "./i18n.ts";
 import { estadoActual } from "./channel-handlers.ts";
 import { renderAutonomia, renderChips, renderProveedor } from "./channel-ui.ts";
+import { renderIntegraciones } from "./integrations-view.ts";
 
 export function renderChannelSettings(lang: Idioma): string {
   const estado = estadoActual();
@@ -17,5 +18,6 @@ export function renderChannelSettings(lang: Idioma): string {
     ${renderChips(estado.canales, lang)}
     ${renderAutonomia(estado.canales, lang)}
     ${renderProveedor(estado.proveedor, lang)}
+    ${renderIntegraciones(lang)}
   </div>`;
 }

@@ -1,6 +1,6 @@
 /**
- * HUB by Raisen — Preferencias de interfaz (tema claro/oscuro + idioma ES/EN).
- * El acceso a la prefencia se lee del DOM (data-theme) y de localStorage,
+ * HUB by Raisen — Preferencias de interfaz (tema, idioma + white-label).
+ * El acceso a la preferencia se lee del DOM (data-theme) y de localStorage,
  * coherente con el script inline de index.html que delega los clicks.
  * Emite el CustomEvent "hub:ui-changed" para que la app re-renderice.
  */
@@ -10,6 +10,7 @@ export type Tema = "dark" | "light";
 
 const KEY_TEMA = "hub.tema";
 const KEY_IDIOMA = "hub.idioma";
+const KEY_WHITE_LABEL = "hub.whiteLabel";
 export const EVENTO_UI = "hub:ui-changed";
 
 function leer(key: string, def: string): string {
@@ -69,6 +70,33 @@ export function toggleIdioma(): Idioma {
 export function suscribirAlCambio(handler: () => void): () => void {
   window.addEventListener(EVENTO_UI, handler);
   return () => window.removeEventListener(EVENTO_UI, handler);
+}
+
+export function getWhiteLabel(): boolean {
+  return leer(KEY_WHITE_LABEL, "false") === "true";
+}
+
+export function setWhiteLabel(activo: boolean): void {
+  try {
+    localStorage.setItem(KEY_WHITE_LABEL, activo ? "true" : "false");
+  } catch {
+    // ignora
+  }
+  if (typeof document !== "undefined") {
+    const doc = document.documentElement;
+    if (activo) {
+      doc.setAttribute("data-white-label", "");
+    } else {
+      doc.removeAttribute("data-white-label");
+    }
+  }
+  notificar();
+}
+
+export function toggleWhiteLabel(): boolean {
+  const nuevo = !getWhiteLabel();
+  setWhiteLabel(nuevo);
+  return nuevo;
 }
 
 /** Aplica el tema guardado y sincroniza el label de idioma. */

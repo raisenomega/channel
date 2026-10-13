@@ -2,7 +2,7 @@
  * HUB by Raisen — Preferencias de cuenta (sub-vista de settings).
  */
 import { t, type Idioma } from "./i18n.ts";
-import { getTema } from "./interfaz.ts";
+import { getTema, getWhiteLabel } from "./interfaz.ts";
 import type { AppContext } from "./types.ts";
 
 export function renderAccountPrefs(ctx: AppContext, lang: Idioma): string {
@@ -19,6 +19,6 @@ export function renderAccountPrefs(ctx: AppContext, lang: Idioma): string {
     <span class="text-sm font-bold">${t(lang, "settings.theme")}</span>
     <button class="switch ${getTema() === 'dark' ? 'on' : 'off'} ml-auto" data-settings-theme aria-label="${t(lang, "settings.theme")}"><i></i></button>
   </div>
-  <div class="feat flex items-center gap-sm" style="margin-top:8px"><span class="text-sm font-bold">${t(lang, "settings.whiteLabel")}</span><div class="switch off ml-auto"><i></i></div></div>
+  <div class="feat flex items-center gap-sm" style="margin-top:8px"><span class="text-sm font-bold">${t(lang, "settings.whiteLabel")}</span><button class="switch ${getWhiteLabel() ? 'on' : 'off'} ml-auto" data-settings-white-label aria-label="${t(lang, "settings.whiteLabel")}"><i></i></button></div>
 </div>`;
 }
