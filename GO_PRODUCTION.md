@@ -68,6 +68,15 @@ Estado de despliegue y avance hacia produccion. Documento de control de fases.
 - Ejecutar con `deno test tests/integration/` (requiere Deno en la maquina).
 - Pendiente: cobertura de otros BCs (commerce, channels, cognition).
 
+## Calidad — Gate de typecheck restaurado
+
+- `pnpm typecheck` de 747 a 0 errores (mirador de calidad base corregido).
+- Cambios: tsconfig (allowImportingTsExtensions, sin verbatimModuleSyntax),
+  exports faltantes (PaymentId, Language), acceso seguro a causa en RepoError,
+  adapters de canal con ParseError, eliminados los anti-patrones `as never`.
+- Instalada dependencia real @supabase/supabase-js + declaracion minima de Deno.
+- Pendiente: crear eslint.config.js para el gate de lint (ESLint 9 flat config).
+
 ## Recordatorios operativos
 
 - Aplicar migraciones: `supabase db push` (con `SUPABASE_DB_PASSWORD`).
