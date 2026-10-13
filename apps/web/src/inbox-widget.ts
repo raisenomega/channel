@@ -1,7 +1,8 @@
 import { lucide } from "@shared/domain/lucide-icons.ts";
 import type { InboxItem, InboxFilter } from "./types.ts";
+import { t, type Idioma } from "./i18n.ts";
 
-export function renderInboxList(items: InboxItem[], filters: InboxFilter[]): string {
+export function renderInboxList(items: InboxItem[], filters: InboxFilter[], lang: Idioma): string {
   const filtrados = items.filter((item) => {
     return filters.length === 0 || filters.every((f) => {
       switch (f.type) {
@@ -13,7 +14,7 @@ export function renderInboxList(items: InboxItem[], filters: InboxFilter[]): str
       }
     });
   });
-  return filtrados.map(renderItem).join("");
+  return filtrados.map((i) => renderItem(i, lang)).join("");
 }
 
 export function renderFilterChips(filters: InboxFilter[], allChannels: string[]): string {
@@ -26,7 +27,7 @@ export function renderFilterChips(filters: InboxFilter[], allChannels: string[])
   return `<div class="chips">${channelChips}</div>`;
 }
 
-function renderItem(item: InboxItem): string {
+function renderItem(item: InboxItem, lang: Idioma): string {
   const modeIcon = item.mode === "autonomous" ? "agent" : item.mode === "human" ? "contacts" : "inbox";
   const slaBadge = item.slaViolated ? `<span class="badge badge-danger text-xs">SLA</span>` : "";
   return `<div class="list-item flex items-center gap p-sm px-lg" onclick="openConversation('${item.conversationId}')">
@@ -37,7 +38,7 @@ function renderItem(item: InboxItem): string {
       <div class="h flex items-center gap-sm">
         <span class="nm text-base font-bold truncate">${item.contactName}</span>
         ${slaBadge}
-        <span class="tm text-xs text-dim ml-auto">${formatTime(item.lastMessageAt)}</span>
+        <span class="tm text-xs text-dim ml-auto">${formatTime(item.lastMessageAt, lang)}</span>
       </div>
       <div class="msg text-sm text-muted line-clamp-2">${item.lastMessage}</div>
     </div>
@@ -45,11 +46,11 @@ function renderItem(item: InboxItem): string {
   </div>`;
 }
 
-function formatTime(d: Date): string {
+function formatTime(d: Date, lang: Idioma): string {
   const now = new Date();
   const diff = now.getTime() - d.getTime();
-  if (diff < 60_000) return "ahora";
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m`;
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h`;
+  if (diff < 60_000) return t(lang, "inbox.justNow");
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}${t(lang, "inbox.min")}`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}${t(lang, "inbox.hour")}`;
   return d.toLocaleDateString();
 }

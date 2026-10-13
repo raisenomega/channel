@@ -6,7 +6,7 @@ import "./styles/index.css";
 import { HUBApp } from "./app.ts";
 import { logger } from "@shared/infrastructure/logger.infrastructure.ts";
 import { iniciarVigia } from "./vigia.ts";
-import { iniciarControlesShell } from "./interfaz.ts";
+import { iniciarControlesShell, suscribirAlCambio, toggleTema } from "./interfaz.ts";
 import { auth, SessionUsuario } from "./auth-client.ts";
 import { resolverTenant } from "./tenant-client.ts";
 import { cargarInbox } from "./inbox-client.ts";
@@ -21,9 +21,16 @@ interface HubConfigGlobal {
 
 const FASE = "FASE_F";
 
+// Referencias al contexto para re-renderizar al cambiar idioma/tema.
+let raizActual: HTMLElement | null = null;
+let appActual: HUBApp | null = null;
+
 export async function inicializarHUB(root: HTMLElement): Promise<void> {
   iniciarVigia(FASE);
   iniciarControlesShell();
+  suscribirAlCambio(() => {
+    if (raizActual && appActual) renderVista(raizActual, appActual);
+  });
   const config = (globalThis as HubConfigGlobal).__HUB_CONFIG__;
   const sesion = config?.supabaseUrl ? auth.leer() : null;
   if (!sesion) {
@@ -80,6 +87,8 @@ async function montarShellAutenticado(root: HTMLElement, sesionPrevia?: SessionU
     return res.ok ? res.value : [];
   });
   await app.iniciar();
+  appActual = app;
+  raizActual = root;
   renderVista(root, app);
 }
 
@@ -110,6 +119,10 @@ function causaDe(e: { readonly kind: string; readonly cause?: string }): string 
 function renderVista(root: HTMLElement, app: HUBApp): void {
   root.innerHTML = app.renderCurrentTab();
   cablearNavegacion(root, app);
+  const themeSwitch = document.querySelector<HTMLButtonElement>("[data-settings-theme]");
+  themeSwitch?.addEventListener("click", () => {
+    toggleTema();
+  });
 }
 
 function cablearNavegacion(root: HTMLElement, app: HUBApp): void {
