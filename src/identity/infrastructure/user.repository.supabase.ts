@@ -3,6 +3,7 @@ import { UserId, TenantId } from "../../shared/domain/ids.ts";
 import { UserState } from "../../identity/domain/user.entity.ts";
 import { UserRepository, RepoError } from "../../identity/domain/identity.repository.ts";
 import { Email } from "../../shared/domain/email.vo.ts";
+import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 
 export class UserRepositorySupabase implements UserRepository {
   async guardar(user: UserState): Promise<Result<void, RepoError>> {
@@ -11,6 +12,7 @@ export class UserRepositorySupabase implements UserRepository {
         id: user.id, tenant_id: user.tenantId,
         email: user.email.valor, full_name: user.fullName,
         role: user.role, is_active: user.isActive,
+        language: user.language,
       });
       if (error) return err({ kind: "persistence_failure", cause: error.message });
       return ok(undefined);
@@ -60,10 +62,9 @@ export class UserRepositorySupabase implements UserRepository {
       email: emailResult.ok ? emailResult.value : (null as unknown as Email),
       fullName: row.full_name as string,
       role: row.role as UserState["role"],
+      language: (row.language ?? "es") as "es" | "en",
       isActive: row.is_active as boolean,
       createdAt: new Date(row.created_at as string),
     });
   }
 }
-
-import { supabase } from "../../shared/infrastructure/supabase.client.ts";

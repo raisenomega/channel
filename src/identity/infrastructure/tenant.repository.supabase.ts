@@ -2,6 +2,7 @@ import { Result, err, ok } from "../../shared/domain/result.ts";
 import { TenantId } from "../../shared/domain/ids.ts";
 import { TenantState } from "../../identity/domain/tenant.entity.ts";
 import { TenantRepository, RepoError } from "../../identity/domain/identity.repository.ts";
+import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 
 export class TenantRepositorySupabase implements TenantRepository {
   async guardar(tenant: TenantState): Promise<Result<void, RepoError>> {
@@ -48,12 +49,10 @@ export class TenantRepositorySupabase implements TenantRepository {
       plan: row.plan as TenantState["plan"],
       countryCode: row.country_code as string,
       timezone: row.timezone as string,
-      language: row.default_language as string,
+      language: (row.default_language ?? "es") as "es" | "en",
       featuresEnabled: Object.freeze(row.features_enabled as Record<string, unknown>),
       status: row.status as TenantState["status"],
       createdAt: new Date(row.created_at as string),
     });
   }
 }
-
-import { supabase } from "../../shared/infrastructure/supabase.client.ts";
