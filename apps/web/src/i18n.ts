@@ -127,6 +127,14 @@ const ES: Dict = {
   "channels.model": "Modelo",
   "channels.keyConfigured": "Key configurada",
   "channels.notConfigured": "No configurado",
+  "channels.autonomy": "Autonomia por canal",
+  "channels.autonomyHint": "La autonomia se activa por canal. Se aplica dentro del horario configurado del agente.",
+  "channels.apiKey": "API key (BYOK)",
+  "channels.apiKeyPh": "sk-...",
+  "channels.save": "Guardar",
+  "channels.savedCloud": "Guardado",
+  "channels.saveError": "Error al guardar. Solo local.",
+  "channels.savedLocal": "Guardado solo en este dispositivo.",
 
   // Settings
   "settings.account": "Tu cuenta",
@@ -138,6 +146,31 @@ const ES: Dict = {
   "settings.languageValue": "Espanol",
   "settings.theme": "Tema",
   "settings.whiteLabel": "White-label",
+
+  // Legal / Compliance
+  "legal.title": "Legal y cumplimiento",
+  "legal.privacyNotice": "Aviso de privacidad",
+  "legal.privacyDesc": "Consulta el aviso de privacidad de tu tenant para conocer como tratamos tus datos.",
+  "legal.privacyLink": "Abrir aviso de privacidad",
+  "legal.privacyPending": "Aviso de privacidad pendiente de configurar por el tenant.",
+  "legal.aiDisclosure": "Divulgacion de IA (SB-1001)",
+  "legal.aiDisclosureDesc": "Las conversaciones pueden ser procesadas total o parcialmente por sistemas de inteligencia artificial. Pide hablar con un humano en cualquier momento.",
+  "legal.aiOptIn": "Consentimiento IA por canal",
+  "legal.aiOptInWhatsapp": "WhatsApp",
+  "legal.aiOptInEmail": "Email",
+  "legal.aiOptInWebchat": "Webchat",
+  "legal.aiOptInPending": "Opt-in por canal pendiente de configuracion.",
+  "legal.termsOfService": "Terminos del servicio",
+  "legal.termsLink": "Ver terminos del servicio",
+  "legal.updatedAt": "Actualizado en",
+
+  // Chat thread (FASE 9.3)
+  "chat.empty": "No hay mensajes en esta conversacion.",
+  "chat.loading": "Cargando mensajes...",
+  "chat.placeholder": "Escribe un mensaje...",
+  "chat.send": "Enviar",
+  "chat.sent": "Enviado",
+  "chat.fail": "Error al enviar",
 
   // Common
   "common.selectTab": "Selecciona una pestana",
@@ -260,6 +293,14 @@ const EN: Dict = {
   "channels.model": "Model",
   "channels.keyConfigured": "Key configured",
   "channels.notConfigured": "Not configured",
+  "channels.autonomy": "Autonomy by channel",
+  "channels.autonomyHint": "Autonomy is enabled per channel. It applies within the agent's configured schedule.",
+  "channels.apiKey": "API key (BYOK)",
+  "channels.apiKeyPh": "sk-...",
+  "channels.save": "Save",
+  "channels.savedCloud": "Saved",
+  "channels.saveError": "Save error. Local only.",
+  "channels.savedLocal": "Saved on this device only.",
 
   "settings.account": "Your account",
   "settings.email": "Email",
@@ -270,6 +311,31 @@ const EN: Dict = {
   "settings.languageValue": "English",
   "settings.theme": "Theme",
   "settings.whiteLabel": "White-label",
+
+  // Legal / Compliance
+  "legal.title": "Legal & compliance",
+  "legal.privacyNotice": "Privacy notice",
+  "legal.privacyDesc": "Review your tenant's privacy notice to learn how we process your data.",
+  "legal.privacyLink": "Open privacy notice",
+  "legal.privacyPending": "Privacy notice pending tenant configuration.",
+  "legal.aiDisclosure": "AI disclosure (SB-1001)",
+  "legal.aiDisclosureDesc": "Conversations may be processed in whole or in part by artificial intelligence systems. Ask to speak to a human at any time.",
+  "legal.aiOptIn": "AI opt-in by channel",
+  "legal.aiOptInWhatsapp": "WhatsApp",
+  "legal.aiOptInEmail": "Email",
+  "legal.aiOptInWebchat": "Webchat",
+  "legal.aiOptInPending": "Channel opt-in pending configuration.",
+  "legal.termsOfService": "Terms of service",
+  "legal.termsLink": "View terms of service",
+  "legal.updatedAt": "Updated on",
+
+  // Chat thread (FASE 9.3)
+  "chat.empty": "No messages in this conversation.",
+  "chat.loading": "Loading messages...",
+  "chat.placeholder": "Type a message...",
+  "chat.send": "Send",
+  "chat.sent": "Sent",
+  "chat.fail": "Failed to send",
 
   "common.selectTab": "Select a tab",
   "common.lite": "lite",

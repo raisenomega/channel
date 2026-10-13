@@ -15,7 +15,10 @@ import { montarLogin } from "./login-view.ts";
 import { montarOnboarding } from "./onboarding-view.ts";
 import { cargarContacto } from "./contact-client.ts";
 import { renderContact360, renderCargando360 } from "./contact-360.ts";
+import { cargarMensajes, enviarMensaje } from "./message-client.ts";
+import { renderChatThread, renderChatCargando } from "./chat-thread.ts";
 import { t } from "./i18n.ts";
+import { conectarHandlersCanales } from "./channel-handlers.ts";
 import type { AppContext, TabId } from "./types.ts";
 
 interface HubConfigGlobal {
@@ -146,26 +149,51 @@ function renderVista(root: HTMLElement, app: HUBApp): void {
     root.innerHTML = app.renderCurrentTab();
     cablearNavegacion(root, app);
   };
-  (globalThis as Record<string, unknown>).openConversation = (conversationId: string) => {
-    const panel = document.querySelector<HTMLElement>("[data-contact360]");
-    if (!panel) return;
-    const lang = leerIdiomaActual();
-    panel.innerHTML = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(lang, "dash.ficha")}</div>` + cargarCargando(lang);
-    const contactId = app.contactIdDeConversacion(conversationId);
-    if (!contactId) {
-      panel.innerHTML = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(lang, "dash.ficha")}</div><div class="p-md text-sm text-muted">${tPlano(lang, "dash.fichaSinDatos")}</div>`;
-      return;
+  // Canales (FASE 9.5-9.7): acciones de conectar/desconectar, autonomia y BYOK.
+  // Se vincula siempre para que `actuarCanal` siga activo en cualquier navegacion.
+  conectarHandlersCanales(() => {
+    if (raizActual && appActual) {
+      raizActual.innerHTML = appActual.renderCurrentTab();
+      cablearNavegacion(raizActual, appActual);
     }
-    void cargarContacto(contactId).then((res) => {
+  });
+  const sesion = auth.leer();
+  (globalThis as Record<string, unknown>).openConversation = (conversationId: string) => {
+    const panel360 = document.querySelector<HTMLElement>("[data-contact360]");
+    const panelChat = document.querySelector<HTMLElement>("[data-chat-thread]");
+    if (!panel360 || !panelChat) return;
+    const lang = leerIdiomaActual();
+    // Cargar ficha 360 (existente).
+    panel360.innerHTML = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(lang, "dash.ficha")}</div>` + cargarCargando(lang);
+    // Cargar hilo de chat (nuevo).
+    panelChat.innerHTML = renderChatCargando(lang);
+    const contactId = app.contactIdDeConversacion(conversationId);
+    if (contactId) {
+      void cargarContacto(contactId).then((res) => {
+        const idioma = leerIdiomaActual();
+        const cabecera = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(idioma, "dash.ficha")}</div>`;
+        if (!res.ok) {
+          panel360.innerHTML = cabecera + `<div class="p-md text-sm text-muted">${tPlano(idioma, "dash.fichaSinDatos")}</div>`;
+          return;
+        }
+        panel360.innerHTML = cabecera + renderContact360(res.value, idioma);
+      });
+    } else {
+      panel360.innerHTML = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(lang, "dash.ficha")}</div><div class="p-md text-sm text-muted">${tPlano(lang, "dash.fichaSinDatos")}</div>`;
+    }
+    // Cargar mensajes reales.
+    void cargarMensajes(conversationId).then((res) => {
       const idioma = leerIdiomaActual();
-      const cabecera = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(idioma, "dash.ficha")}</div>`;
       if (!res.ok) {
-        panel.innerHTML = cabecera + `<div class="p-md text-sm text-muted">${tPlano(idioma, "dash.fichaSinDatos")}</div>`;
+        panelChat.innerHTML = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(idioma, "dash.conversaciones")}</div><div class="p-md text-sm text-muted">${tPlano(idioma, "chat.empty")}</div>`;
         return;
       }
-      panel.innerHTML = cabecera + renderContact360(res.value, idioma);
+      const uid = sesion?.uid ?? "";
+      panelChat.innerHTML = renderChatThread(res.value, idioma, conversationId, uid);
+      cablearComposer(conversationId, sesion?.uid ?? "", panelChat);
     });
   };
+  (globalThis as Record<string, unknown>).openConversationOld = undefined;
 }
 
 function leerIdiomaActual(): "es" | "en" {
@@ -197,6 +225,37 @@ function cablearNavegacion(root: HTMLElement, app: HUBApp): void {
       tabButtons.forEach((b) => b.setAttribute("aria-selected", b === btn ? "true" : "false"));
       root.innerHTML = app.renderCurrentTab();
     };
+  });
+}
+
+/** Cablea el boton de enviar del composer y el textarea (auto-grow). */
+function cablearComposer(
+  conversationId: string,
+  uid: string,
+  container: HTMLElement,
+): void {
+  const input = container.querySelector<HTMLTextAreaElement>("[data-chat-input]");
+  const sendBtn = container.querySelector<HTMLButtonElement>("[data-chat-send]");
+  if (!input || !sendBtn) return;
+
+  const autoGrow = (): void => {
+    input.style.height = "auto";
+    input.style.height = `${input.scrollHeight}px`;
+  };
+  input.addEventListener("input", autoGrow);
+  input.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendBtn.click();
+    }
+  });
+
+  sendBtn.addEventListener("click", () => {
+    const texto = input.value.trim();
+    if (!texto) return;
+    input.value = "";
+    autoGrow();
+    void enviarMensaje(conversationId, texto, uid);
   });
 }
 

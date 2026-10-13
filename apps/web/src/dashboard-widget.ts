@@ -75,15 +75,21 @@ function panelVacio(ctx: AppContext, lang: Idioma): string {
   </div>`;
 }
 
-/** Renderiza conversaciones en 2 columnas (lista + ficha 360) cuando hay datos. */
+/** Renderiza conversaciones en 3 columnas (lista + hilo + ficha 360). */
 function cuerpoLista(items: readonly InboxItem[], ctx: AppContext, lang: Idioma): string {
   const lista = items.length
     ? renderInboxList(items, [], lang)
     : `<p class="text-sm text-muted p-md">${t(lang, "inbox.empty")}</p>`;
-  return `<div class="grid grid-cols-2 gap" style="margin-top:14px">
+  return `<div class="grid grid-cols-3 gap" style="margin-top:14px">
     <div class="card" style="padding:0;overflow:hidden">
       <div class="section text-sm font-bold text-muted px-sm">${t(lang, "dash.conversaciones")}</div>
       <div class="list">${lista}</div>
+    </div>
+    <div class="card" style="padding:0" data-chat-thread>
+      <div class="section text-sm font-bold text-muted px-sm">${t(lang, "dash.conversaciones")}</div>
+      <div class="p-md">
+        <p class="text-sm text-muted">${t(lang, "dash.fichaEmpty")}</p>
+      </div>
     </div>
     <div class="card" style="padding:0" data-contact360 data-empty360>
       <div class="section text-sm font-bold text-muted px-sm">${t(lang, "dash.ficha")}</div>

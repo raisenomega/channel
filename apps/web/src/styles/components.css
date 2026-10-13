@@ -587,3 +587,102 @@
   font-size: 11px;
   color: hsl(var(--text-dim));
 }
+
+/* --- Chat thread (FASE 9.3) --- */
+.chat-thread {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.chat-messages {
+  flex: 1 1 0%;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-row {
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.chat-row.mr-auto {
+  align-self: flex-start;
+}
+.chat-row.ml-auto {
+  align-self: flex-end;
+}
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.chat-bubble.contact {
+  background-color: hsl(var(--primary) / 0.15);
+  color: hsl(var(--foreground));
+  border-bottom-left-radius: 4px;
+}
+.chat-bubble.agent {
+  background-color: hsl(var(--card-soft));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border) / 0.4);
+  border-bottom-right-radius: 4px;
+}
+.chat-time {
+  font-size: 11px;
+  color: hsl(var(--text-dim));
+  padding: 0 4px;
+}
+.chat-empty {
+  color: hsl(var(--text-muted));
+}
+.chat-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  background-color: hsl(var(--card));
+}
+.chat-input {
+  flex: 1;
+  appearance: none;
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--card-soft));
+  color: hsl(var(--foreground));
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.45;
+  resize: none;
+  max-height: 120px;
+  min-height: 40px;
+  transition: border-color 0.15s ease;
+}
+.chat-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+}
+.chat-send {
+  appearance: none;
+  border: none;
+  background: hsl(var(--primary));
+  color: hsl(var(--background));
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+.chat-send:hover {
+  background: hsl(var(--primary) / 0.85);
+}
