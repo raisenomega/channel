@@ -47,7 +47,11 @@ function transpile(code, filename) {
       jsx: ts.JsxEmit.Preserve,
     },
   });
-  return out.outputText;
+  // El CSS se carga ya via <link> en index.html; quitar los import de CSS
+  // para que el navegador no intente importar .css como modulo (rompe el boot).
+  return out.outputText
+    .replace(/import\s+["'][^"']+\.css["'];\s*/g, "")
+    .replace(/import\s+["'][^"']+\.css["']\s*;/g, "");
 }
 
 function cssVoid() {
