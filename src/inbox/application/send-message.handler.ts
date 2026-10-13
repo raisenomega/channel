@@ -2,7 +2,7 @@ import { Result, err, ok } from "../../shared/domain/result.ts";
 import { ConversationId, ContactId, TenantId } from "../../shared/domain/ids.ts";
 import { ChannelType } from "../../shared/domain/types.ts";
 import { crearMensaje, MessageContent, AiMode } from "../domain/message.entity.ts";
-import { ConversationRepository } from "../domain/inbox.repository.ts";
+import { ConversationRepository, MessageRepository } from "../domain/inbox.repository.ts";
 import { transicionarStatus } from "../domain/conversation.entity.ts";
 
 export interface SendMessageCommand {
@@ -25,7 +25,10 @@ export type SendMessageError =
   | { readonly kind: "persistence_failure"; readonly cause: string };
 
 export class SendMessageHandler {
-  constructor(private readonly convRepo: ConversationRepository) {}
+  constructor(
+    private readonly convRepo: ConversationRepository,
+    private readonly msgRepo: MessageRepository,
+  ) {}
 
   async ejecutar(cmd: SendMessageCommand): Promise<Result<void, SendMessageError>> {
     const convResult = await this.convRepo.buscar(cmd.conversationId);
@@ -48,6 +51,12 @@ export class SendMessageHandler {
       cmd.content, aiMeta,
     );
     if (!msgResult.ok) return err({ kind: "contenido_vacio" });
+
+    const persistir = await this.msgRepo.guardar(msgResult.value);
+    if (!persistir.ok) {
+      const cause = "cause" in persistir.error ? persistir.error.cause : "fallo_persistencia";
+      return err({ kind: "persistence_failure", cause });
+    }
 
     return ok(undefined);
   }

@@ -1,5 +1,5 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { ConversationId, ContactId, TenantId } from "../../shared/domain/ids.ts";
+import { ConversationId, ContactId, TenantId, InboxId } from "../../shared/domain/ids.ts";
 import { ChannelType } from "../../shared/domain/types.ts";
 import { crearConversacion, ConversationState } from "../domain/conversation.entity.ts";
 import { crearMensaje, MessageContent, MessageState } from "../domain/message.entity.ts";
@@ -29,7 +29,7 @@ export class ReceiveMessageHandler {
 
     const existente = activas.value.find(c => c.contactId === cmd.contactId && c.primaryChannel === cmd.channel);
     const conv = existente ?? ((r: Result<ConversationState, ConversationError>) =>
-      r.ok ? r.value : null)(crearConversacion(cmd.tenantId, cmd.contactId, cmd.channel, cmd.inboxId as never));
+      r.ok ? r.value : null)(crearConversacion(cmd.tenantId, cmd.contactId, cmd.channel, cmd.inboxId ? cmd.inboxId as InboxId : null));
 
     if (!conv) return err({ kind: "contacto_requerido" });
 

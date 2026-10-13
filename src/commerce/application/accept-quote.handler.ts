@@ -23,12 +23,14 @@ export class AcceptQuoteHandler {
     if (!quote) return err({ kind: "cotizacion_no_encontrada" });
 
     const quoteAceptada = aceptarQuote(quote);
-    await this.quoteRepo.guardar(quoteAceptada);
+    const guardarQuote = await this.quoteRepo.guardar(quoteAceptada);
+    if (!guardarQuote.ok) return err(guardarQuote.error);
 
     const orderResult = crearOrder(quote.contactId, quote.tenantId, quote.totalAmount, quote.id);
     if (!orderResult.ok) return err(orderResult.error);
 
-    await this.orderRepo.guardar(orderResult.value);
+    const guardarOrder = await this.orderRepo.guardar(orderResult.value);
+    if (!guardarOrder.ok) return err(guardarOrder.error);
     return ok(orderResult.value.id);
   }
 }

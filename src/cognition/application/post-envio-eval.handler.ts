@@ -1,14 +1,9 @@
 import { Result, ok } from "../../shared/domain/result.ts";
 import { AgentService } from "../domain/agent-executor.ts";
+import type { AgentKnowledgeState } from "../domain/agent.service.ts";
 
 export interface PostEnvioEvalCommand {
-  readonly knowledgeState: {
-    readonly timesApplied: number;
-    readonly timesConfirmed: number;
-    readonly timesCorrected: number;
-    readonly confidence: number;
-    readonly status: string;
-  };
+  readonly knowledgeState: AgentKnowledgeState;
   readonly wasCorrect: boolean;
 }
 
@@ -17,7 +12,7 @@ export class PostEnvioEvalHandler {
 
   async ejecutar(cmd: PostEnvioEvalCommand): Promise<Result<PostEnvioResult, never>> {
     const actualizado = this.agentService.aplicarFeedback(
-      cmd.knowledgeState as never,
+      cmd.knowledgeState,
       cmd.wasCorrect,
     );
     return ok(Object.freeze({

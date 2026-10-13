@@ -1,4 +1,5 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
+import { TenantId } from "../../shared/domain/ids.ts";
 import { AutomationRuleState, Action, Condition } from "../domain/automation.entity.ts";
 import { AutomationRuleRepository, RepoError } from "../domain/automation.repository.ts";
 
@@ -14,7 +15,7 @@ export class EvaluateRulesHandler {
   constructor(private readonly ruleRepo: AutomationRuleRepository) {}
 
   async ejecutar(cmd: EvaluateRulesCommand): Promise<Result<Action[][], EvaluateRulesError>> {
-    const rulesResult = await this.ruleRepo.buscarActivas(cmd.tenantId as never, cmd.eventType);
+    const rulesResult = await this.ruleRepo.buscarActivas(cmd.tenantId as TenantId, cmd.eventType);
     if (!rulesResult.ok) return err(rulesResult.error);
 
     const ejecutadas: Action[][] = [];

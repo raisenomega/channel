@@ -1,6 +1,7 @@
 import { Result } from "../../shared/domain/result.ts";
-import { ConversationId, TenantId, ContactId, AgentId } from "../../shared/domain/ids.ts";
+import { ConversationId, TenantId, ContactId, AgentId, MessageId } from "../../shared/domain/ids.ts";
 import { ConversationState } from "./conversation.entity.ts";
+import type { MessageState } from "./message.entity.ts";
 
 export type ConversationEvent =
   | { readonly type: "conversation.created"; readonly conversationId: ConversationId; readonly occurredAt: Date }
@@ -15,6 +16,12 @@ export interface ConversationRepository {
   buscar(id: ConversationId): Promise<Result<ConversationState | null, RepoError>>;
   buscarPorContacto(tenantId: TenantId, contactId: ContactId): Promise<Result<ConversationState[], RepoError>>;
   buscarActivos(tenantId: TenantId): Promise<Result<ConversationState[], RepoError>>;
+}
+
+export interface MessageRepository {
+  guardar(msg: MessageState): Promise<Result<void, RepoError>>;
+  buscar(id: MessageId): Promise<Result<MessageState | null, RepoError>>;
+  buscarPorConversacion(convId: ConversationId, limit?: number): Promise<Result<MessageState[], RepoError>>;
 }
 
 export type RepoError =
