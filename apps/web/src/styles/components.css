@@ -311,3 +311,84 @@
 .tool-task { color: hsl(var(--tool-task)); }
 .tool-web { color: hsl(var(--tool-web)); }
 .tool-other { color: hsl(var(--tool-other)); }
+
+/* --- Shell: navegacion glass + area de vistas --- */
+#shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background-color: hsl(var(--card) / 0.6);
+}
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+.nav-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: hsl(var(--primary));
+  color: hsl(var(--background));
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+.nav-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.nav-name small {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 11px;
+  color: hsl(var(--primary));
+}
+.nav-links {
+  display: flex;
+  gap: 4px;
+}
+.nav-item {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: hsl(var(--text-muted));
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.nav-item:hover {
+  color: hsl(var(--foreground));
+}
+.nav-item[aria-selected="true"] {
+  color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.12);
+}
+.app {
+  flex: 1 1 0%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+}
