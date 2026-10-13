@@ -1,5 +1,3 @@
-import { Result, err, ok } from "../../shared/domain/result.ts";
-
 export interface PageState {
   readonly currentTab: TabId;
   readonly subStack: readonly SubPage[];

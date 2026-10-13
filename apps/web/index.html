@@ -7,6 +7,13 @@
     <meta name="color-scheme" content="dark light" />
     <meta name="description" content="HUB by Raisen — Plataforma omnicanal con agente IA, CRM y autonomia" />
     <meta name="application-name" content="HUB by Raisen" />
+    <!-- Config de runtime (publica, segura de exponer): Supabase URL + anon key -->
+    <script>
+      window.__HUB_CONFIG__ = {
+        supabaseUrl: "https://qbpzdoopruqbnerdcyfq.supabase.co",
+        anonKey: "sb_publishable_2L3-FfRoCdSyqyIwjVqbJQ_8uix05Ti"
+      };
+    </script>
     <link rel="manifest" href="/manifest.json" />
     <!-- Sistema de estilos OMEGA: entrada unica que compone tailwind -> fonts -> tokens -> theme -> animations -> base -> components -->
     <link rel="stylesheet" href="/src/styles/index.css" />
@@ -36,8 +43,8 @@
     </noscript>
     <!-- Bootstrap de la app (vanilla ESM). La app monta su estado en #app. -->
     <script type="module">
-      import { mountHUB } from "/src/main.ts";
-      mountHUB(document.getElementById("app"));
+      import { inicializarHUB } from "/src/main.ts";
+      inicializarHUB(document.getElementById("app"));
     </script>
   </body>
 </html>

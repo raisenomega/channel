@@ -1,4 +1,4 @@
-import { lucide } from "../../../shared/domain/lucide-icons.ts";
+import { lucide } from "../../../src/shared/domain/lucide-icons.ts";
 
 export function renderChannelSettings(
   channels: readonly { id: string; name: string; active: boolean; autonomous: boolean; status: string }[],

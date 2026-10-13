@@ -1,4 +1,4 @@
-import type { PageState, TabId, OperationMode } from "./types.ts";
+import type { PageState, TabId, OperationMode, SubPage } from "./types.ts";
 
 export function createInitialState(): PageState {
   return {

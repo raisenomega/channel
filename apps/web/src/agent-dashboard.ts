@@ -1,4 +1,4 @@
-import { lucide } from "../../../shared/domain/lucide-icons.ts";
+import { lucide } from "../../../src/shared/domain/lucide-icons.ts";
 import type { OperationMode } from "./types.ts";
 
 export function renderAgentDashboard(
