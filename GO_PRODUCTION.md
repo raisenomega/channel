@@ -20,6 +20,7 @@ Estado de despliegue y avance hacia produccion. Documento de control de fases.
 | FASE D | Login y autenticacion (Supabase Auth) | PARCIAL | registro con bloqueo pendiente |
 | FASE E | Tenant onboarding (RPC crear_tenant) | PARCIAL | crea tenant; bloqueado por registro |
 | FASE F | Monitoring + logging estructurado | COMPLETO | logger + captura de errores en front |
+| FASE G | Integration tests (identity) | PARCIAL | stores en memoria + flujos multi-tenant |
 | FASE G | Integration tests | PENDIENTE | |
 | FASE H | Stripe Billing + feature flags | PENDIENTE | |
 | FASE I | Maintenance crons | PENDIENTE | |
@@ -57,6 +58,15 @@ Estado de despliegue y avance hacia produccion. Documento de control de fases.
 - Integrado en el flujo de login/onboarding para capturar el error real del registro
   (lock objetivo: diagnosticar el bloqueo de Fase E con datos reales).
 - `SENTRY_DSN` declarado en `.env.example` (pendiente de DSN real para Sentry).
+
+## FASE G — En progreso
+
+- Stores en memoria (`tests/integration/fixtures/memory-store.infrastructure.ts`)
+  que respetan los invariantes de la DB real (slug unico, email unico).
+- Integration tests de Identity (`tests/integration/identity/nucleo-integration.test.ts`):
+  crear tenant -> crear owner -> listar por tenant; rechazo de slug/email duplicados.
+- Ejecutar con `deno test tests/integration/` (requiere Deno en la maquina).
+- Pendiente: cobertura de otros BCs (commerce, channels, cognition).
 
 ## Recordatorios operativos
 
