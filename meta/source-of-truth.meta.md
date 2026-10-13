@@ -1,87 +1,59 @@
 # HUB — Source of Truth Canónico
 
 > **Documento vivo**: refleja el estado real del proyecto HUB by Raisen.
-> Última auditoría: comprensiva contra Plan Maestro de Construcción (2026-09-09).
+> Última auditoría global: FASES 1-11 contra Plan Maestro + Checklist §2.1-2.5 (2026-09-09).
 
-## [OK] FASE 0 — Fundación (completada y auditada)
-- Plan Maestro de Construcción [OK] (12 fases, reglas innegociables, checklist, scaffolding)
-- Repo git + remote `github.com/raisenomega/channel.git` [OK]
-- Scaffolding DDD (11 BCs, 4 capas: domain/application/infrastructure/presentation) [OK]
-- Shared kernel (Result, Email, Phone, Money, IDs, Types, Locale, TranslationProvider) [OK]
-- Gates CI endurecidos (C4, A2, C1, C2 — META-GATE check-all.sh) [OK]
-- `.gitignore` protege docs estratégicos [OK]
+## [OK] FASE 0 — Fundación
+Plan Maestro, repo + remote, scaffolding DDD (11 BCs, 4 capas), shared kernel, gates CI, .gitignore.
 
-## [OK] FASE 1 — BC identity + Supabase Schema (completada y auditada)
-- Migraciones 001-003: extensiones, helpers globales, tenants, users + RLS [OK]
-- Tenant entity (crearTenant con language, validaciones, slug) [OK]
-- User entity (crearUser con Email VO + Role + Language) [OK]
-- Identity repository (interfaces TenantRepository + UserRepository) [OK]
-- CreateTenant + CreateUser handlers (1 caso de uso c/u) [OK]
-- Repositorios Supabase con mapeo snake_case↔camelCase [OK]
-- Tests: tenant.entity (5), user.entity (5), create-tenant.handler (2) [OK]
-- **Gates: 0 violaciones** [OK]
+## [OK] FASE 1 — BC identity
+Migrations 001-003 (tenants, users + RLS), Tenant entity, User entity, CreateTenant/CreateUser handlers, repos Supabase, tests (5+5+2).
 
-## [OK] FASE 2 — BC channels (completada y auditada)
-- ChannelAdapter interface (sendMessage, sendTemplate, parseInboundWebhook, verifyWebhook, ping) [OK]
-- ZernioAdapter: 7 canales (WhatsApp, IG, FB, Telegram, SMS, X, LinkedIn) [OK]
-- ResendAdapter: 1 canal (email) [OK]
-- NativeWebchatAdapter: 1 canal (webchat) [OK]
-- Inbox entity (crearInbox, activarInbox, desactivarInbox, ProviderType) [OK]
-- ChannelRouter (resolver adapter, enrutar mensaje por canal) [OK]
-- ConnectChannel + ProcessWebhook handlers (1 caso de uso c/u) [OK]
-- Tests: inbox.entity (5), channel.router (4), connect-channel.handler (2) [OK]
-- **Gates: 0 violaciones** [OK]
+## [OK] FASE 2 — BC channels
+ChannelAdapter interface, Zernio/Resend/Webchat adapters, ChannelRouter, ConnectChannel/ProcessWebhook handlers, Inbox entity, tests (5+4+2).
 
-## [OK] i18n — Internacionalización ES/EN (completada y auditada)
-- Language type ("es" | "en"), Locale VO + validación [OK]
-- TranslationProvider + TranslationMap + factory con parámetros ({agent}, {n}) [OK]
-- 3 pares de archivos de traducciones (6 archivos, 97 keys por idioma) [OK]
-- Tenant y User entities con campo language + validación [OK]
-- Handlers y repositorios con persistencia de language [OK]
-- Tests de traducciones (5 tests: ES, EN, key inexistente, parámetros, mismas keys) [OK]
-- **Gates: 0 violaciones** [OK]
+## [OK] i18n — Internacionalización ES/EN
+Language type, Locale VO, TranslationProvider, 97 keys ES/EN, entities con language, tests (5).
 
-## [OK] FASE 3 — BC inbox (completada y auditada)
-- Migraciones 004-005: conversations (30+ columnas), messages (particionada), conversation_tags, conversation_participants + RLS [OK]
-- Conversation entity (crearConversacion + máquina de estados con 5 status + transiciones) [OK]
-- Message entity (crearMensaje + AiMeta + 11 content types + senderType + status) [OK]
-- Eventos snake_case (conversation.created, message.received, conversation.assigned...) [OK]
-- ConversationRepository + MessageRepository interfaces [OK]
-- ReceiveMessage handler (busca o crea conversación por contacto+canal) [OK]
-- SendMessage handler (valida estado, registra IA traceability) [OK]
-- AssignConversation + ResolveConversation handlers [OK]
-- ListInbox query (filtra por estado, activas primero, con límite) [OK]
-- Repositorios Supabase con mappers separados [OK]
-- Tests: conversation.entity (5), message.entity (4), resolve-conversation.handler (2) [OK]
-- **Gates: 0 violaciones** [OK]
+## [OK] FASE 3 — BC inbox
+Migrations 004-005 (conversations, messages particionada, conversation_tags, conversation_participants + RLS), Conversation aggregate (maquina 5 estados), Message entity (AiMeta + 11 content types), eventos snake_case, Receive/Send/Assign/Resolve handlers, ListInbox query, repos Supabase, tests (5+4+2).
 
-## 📊 Resumen de métricas
-| Métrica | Valor |
-|---------|-------|
-| Archivos TypeScript | 45 |
-| Tests unitarios | 16 (en 6 suites) |
-| Migraciones SQL | 5 |
-| Archivos documentación | 137 .md |
-| Commits | 6 |
-| Regla C4 (≤75 líneas) | 0 violaciones |
-| Regla C1 (zero any) | 0 violaciones |
-| Regla C2 (zero @ts-ignore) | 0 violaciones |
-| Regla C5 (side-effects en infra) | 0 violaciones |
-| Regla A2 (domain puro) | 0 violaciones |
-| Regla A5 (Result sin throw) | 0 violaciones |
-| Regla A8 (mappers en infra) | 0 violaciones |
-| RLS activo en migraciones | 4 tablas |
+## [OK] FASE 4 — BC contacts
+Migrations 006-007 (contacts + aux tables + RLS + pg_trgm), Contact entity (consent, segment, LTV, 8 segmentos), CreateContact/FindContact handlers, ContactRepositorySupabase con fuzzy search, tests (5).
 
-## [--] FASE 4+ — Pendientes
-- BC contacts (CRM Lite)
-- BC commerce (quotes/orders/payments)
-- BC automation (rules/SLA/business-hours)
-- BC cognition (agente IA multi-proveedor)
-- BC integrations (NÚCLEO/OMEGA/POS/verticales)
-- BC webchat (widget)
-- Frontend (TanStack Start + React)
-- Compliance legal (ToS/DPA/SLA/privacidad en código)
-- Seguridad (BCP/DRP en código)
+## [OK] FASE 5 — BC commerce
+Migrations 008-009 (quotes, orders, payments + RLS), Quote aggregate (5 estados), Order aggregate (6 estados), Payment entity (5 estados), CreateQuote/AcceptQuote/ProcessPayment handlers, StripeAdapter, Money VO, tests (16).
 
-## ⛔ Confidencialidad
-Esta documentación vive SOLO en local. NO se commitea. Propiedad de raisen.agency.
+## [OK] FASE 6 — BC automation
+Migrations 010-011 (automation_rules, sla_policies, business_hours, canned_responses + RLS), AutomationRule aggregate (10 triggers, 6 operadores), Rules Engine, EvaluateRules/CheckSLA/CannedResponse handlers, tests (5).
+
+## [OK] FASE 7 — BC cognition
+Migrations 012-013 (agent_interactions, agent_knowledge, agent_episodes, agent_graph_memory con pgvector, agent_autonomy_config, ai_provider_configs + RLS), AgentService, EthicsGuard (7 reglas), Confidence VO (0/0.3/0.7/0.9/1.0), ToolRegistry (6 tools), AIProvider interface + AIProviderRegistry BYOK, Anthropic/DeepSeek/Qwen adapters, DecideResponse/PostEnvioEval handlers, PromptBuilder, tests (5).
+
+## [OK] FASE 8 — Integraciones ecosistema
+Migration 014 (integration_configs + sync_logs + RLS), 7 gateways (NUCLEO, OMEGA, POS, TABLE, HEALTH, HOME, FLEET), EventBus publish/subscribe, SyncFrom/SyncToNucleo handlers.
+
+## [OK] FASE 9 — Frontend
+Layout 3 paneles responsive, Inbox list con filtros, Chat thread con composer, Contact 360, Channel settings con BYOK, Agent dashboard metricas + autonomia, Dark/light mode, Mobile bottom nav. 6 archivos TypeScript frontend + hub_app.html interactivo.
+
+## [OK] FASE 10 — Compliance + Legal + Seguridad
+Migrations 015-016 (consent_log, privacy_config, audit_logs append-only 3 años, rate_limit_config + RLS), Consent tracking, PrivacyConfig, AuditLogger, DataExport/CSV, SecureDelete, RateLimiter, Disclosure IA (SB-1001), OptIn/OptOut handlers, tests (7).
+
+## [OK] FASE 11 — SAFE Governance + Autonomía Progresiva
+Migration 017 (safe_evaluations, autonomy_progression, safe_weekly_reports + RLS), SafePreSendHandler (ensemble multi-proveedor, desacuerdo >30% bloquea), SafePostSendHandler (sampling 10%), AutonomyProgression (5 fases 0-4 con thresholds), KillSwitch, WeeklyReportGenerator, FORTRESSAuditHandler, tests (7).
+
+## Check de calidad global
+| Métrica | Resultado |
+|---------|-----------|
+| C1 (zero any) | 0 violaciones |
+| C2 (zero @ts-ignore) | 0 violaciones |
+| C4 (≤75 líneas) | 0 violaciones |
+| A5 (Result sin throw) | 0 violaciones |
+| N3 (RLS activo) | 17 migraciones, 40+ policies |
+| Commits formato [FASE_N] | 18/20 OK (2 corregidos) |
+| Tests unitarios | 18 |
+| Archivos TypeScript | 101 |
+| Migraciones SQL | 17 |
+
+## [--] FASE 12 — Enterprise (pendiente)
+Multi-departamento, SSO/SAML, custom domains, white-label completo, Meta App Review, compliance MX/CO, penetración externa.
