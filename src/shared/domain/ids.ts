@@ -9,3 +9,4 @@ export type OrderId = string & { readonly __brand: "OrderId" };
 export type AgentId = string & { readonly __brand: "AgentId" };
 export type TeamId = string & { readonly __brand: "TeamId" };
 export type PaymentId = string & { readonly __brand: "PaymentId" };
+export type AuditLogId = string & { readonly __brand: "AuditLogId" };
