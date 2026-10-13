@@ -18,7 +18,6 @@
     "check:emojis": "bash scripts/check-emojis.sh",
     "check:all": "pnpm typecheck && pnpm lint && pnpm check:lines && pnpm check:layers && pnpm check:emojis",
     "db:push": "supabase db push",
-    "db:seed": "supabase db execute --file supabase/seed.sql",
     "db:reset": "bash scripts/reset-dev-db.sh",
     "db:migrate": "supabase migration up",
     "db:rollback": "supabase migration down",

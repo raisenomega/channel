@@ -84,23 +84,22 @@ supabase link --project-ref xxxxxxxxx
 
 ```bash
 pnpm db:push
-# Aplica 001 → 017 en orden
+# Aplica las migraciones en orden de dependencia (001 → 020)
 ```
 
-### 5.4 Cargar seed data
+### 5.4 Reset / reconstrucción
 
 ```bash
-pnpm db:seed
-# Carga datos de prueba: tenant, contactos, conversaciones...
+pnpm db:reset
+# Borra el esquema remoto y re-aplica todas las migraciones desde cero.
+# No hay seed data (ley N5: datos simulados prohibidos).
 ```
 
 ### 5.5 Rollback (si algo falla)
 
 ```bash
-# Rollback de la ultima migration
-supabase migration down
-
-# Reset completo (rollback todas + push + seed)
+# Los archivos de rollback (*.down.sql) viven en supabase/rollback/
+# y se aplican en orden inverso al esquema.
 pnpm db:reset
 ```
 
@@ -122,7 +121,8 @@ channel/
 │   ├── integrations/      # BC integrations (NUCLEO, OMEGA, POS, verticals)
 │   └── compliance/        # BC compliance (consent, audit, rate limit)
 ├── apps/web/src/          # Frontend TanStack Start + React
-├── supabase/migrations/   # 17 migrations + 17 down + seed
+├── supabase/migrations/   # Migraciones UP en orden de dependencia (001-020)
+├── supabase/rollback/     # Migraciones DOWN (*.down.sql) para rollback
 ├── tests/                 # 18 tests unitarios
 ├── scripts/               # Gates CI + reset DB
 ├── ui/                    # Prototipo HTML interactivo
