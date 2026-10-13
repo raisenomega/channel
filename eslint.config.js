@@ -67,10 +67,10 @@ export default [
     },
     rules: {
       "@typescript-eslint/no-unused-vars": [
-        "error",
+        "warn",
         {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
+          argsIgnorePattern: "^_[a-zA-Z0-9]+$",
+          varsIgnorePattern: "^_[a-zA-Z0-9]+$",
           caughtErrorsIgnorePattern: "^_",
         },
       ],
