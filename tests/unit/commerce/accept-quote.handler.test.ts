@@ -1,0 +1,134 @@
+import { assertEquals, assert } from "jsr:@std/assert";
+import { ok, err } from "../../../src/shared/domain/result.ts";
+import { AcceptQuoteHandler, AcceptQuoteCommand } from "../../../src/commerce/application/accept-quote.handler.ts";
+import { QuoteRepository, OrderRepository, RepoError } from "../../../src/commerce/domain/commerce.repository.ts";
+import { QuoteState } from "../../../src/commerce/domain/quote.entity.ts";
+import { OrderState } from "../../../src/commerce/domain/order.entity.ts";
+
+const TID = crypto.randomUUID() as never;
+const CID = crypto.randomUUID() as never;
+const QID = crypto.randomUUID() as never;
+
+const quoteFixture: QuoteState = Object.freeze({
+  id: QID,
+  tenantId: TID,
+  contactId: CID,
+  mode: "lite",
+  status: "draft",
+  totalAmount: 100,
+  currency: "USD",
+  items: Object.freeze([{ description: "Item de prueba", quantity: 1, unitPrice: 100, total: 100 }]),
+  createdByType: "human",
+  createdAt: new Date(),
+});
+
+Deno.test("AcceptQuoteHandler — debe aceptar quote y crear order exitosamente", async () => {
+  let quoteGuardada: QuoteState | undefined;
+  let orderGuardada: OrderState | undefined;
+
+  const mockQuoteRepo: QuoteRepository = {
+    buscar: async (_id) => ok(quoteFixture),
+    guardar: async (q) => {
+      quoteGuardada = q;
+      return ok(undefined);
+    },
+  };
+
+  const mockOrderRepo: OrderRepository = {
+    guardar: async (o) => {
+      orderGuardada = o;
+      return ok(undefined);
+    },
+    buscar: async (_id) => ok(null),
+    buscarPorContacto: async (_cid) => ok([]),
+  };
+
+  const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
+  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const result = await handler.ejecutar(cmd);
+
+  assert(result.ok);
+  assertEquals(typeof result.value, "string");
+  // La quote debe quedar como "accepted"
+  assert(quoteGuardada !== undefined);
+  assertEquals(quoteGuardada!.status, "accepted");
+  // La order debe tener el quoteId vinculado
+  assert(orderGuardada !== undefined);
+  assertEquals(orderGuardada!.quoteId, QID);
+});
+
+Deno.test("AcceptQuoteHandler — debe fallar si quoteRepo.buscar devuelve error", async () => {
+  const mockQuoteRepo: QuoteRepository = {
+    buscar: async (_id) => err({ kind: "persistence_failure", cause: "db_down" }),
+    guardar: async (_q) => ok(undefined),
+  };
+  const mockOrderRepo: OrderRepository = {
+    guardar: async (_o) => ok(undefined),
+    buscar: async (_id) => ok(null),
+    buscarPorContacto: async (_cid) => ok([]),
+  };
+
+  const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
+  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const result = await handler.ejecutar(cmd);
+
+  assert(!result.ok);
+  assertEquals(result.error.kind, "persistence_failure");
+});
+
+Deno.test("AcceptQuoteHandler — debe fallar si la quote no existe (null)", async () => {
+  const mockQuoteRepo: QuoteRepository = {
+    buscar: async (_id) => ok(null),
+    guardar: async (_q) => ok(undefined),
+  };
+  const mockOrderRepo: OrderRepository = {
+    guardar: async (_o) => ok(undefined),
+    buscar: async (_id) => ok(null),
+    buscarPorContacto: async (_cid) => ok([]),
+  };
+
+  const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
+  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const result = await handler.ejecutar(cmd);
+
+  assert(!result.ok);
+  assertEquals(result.error.kind, "cotizacion_no_encontrada");
+});
+
+Deno.test("AcceptQuoteHandler — debe fallar si quoteRepo.guardar falla", async () => {
+  const mockQuoteRepo: QuoteRepository = {
+    buscar: async (_id) => ok(quoteFixture),
+    guardar: async (_q) => err({ kind: "persistence_failure", cause: "disk_full" }),
+  };
+  const mockOrderRepo: OrderRepository = {
+    guardar: async (_o) => ok(undefined),
+    buscar: async (_id) => ok(null),
+    buscarPorContacto: async (_cid) => ok([]),
+  };
+
+  const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
+  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const result = await handler.ejecutar(cmd);
+
+  assert(!result.ok);
+  assertEquals(result.error.kind, "persistence_failure");
+});
+
+Deno.test("AcceptQuoteHandler — debe fallar si orderRepo.guardar falla", async () => {
+  const mockQuoteRepo: QuoteRepository = {
+    buscar: async (_id) => ok(quoteFixture),
+    guardar: async (_q) => ok(undefined),
+  };
+  const mockOrderRepo: OrderRepository = {
+    guardar: async (_o) => err({ kind: "persistence_failure", cause: "disk_full" }),
+    buscar: async (_id) => ok(null),
+    buscarPorContacto: async (_cid) => ok([]),
+  };
+
+  const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
+  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const result = await handler.ejecutar(cmd);
+
+  assert(!result.ok);
+  assertEquals(result.error.kind, "persistence_failure");
+});

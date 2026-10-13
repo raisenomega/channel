@@ -24,12 +24,16 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/parser": "^8.71.2",
     "eslint": "^9",
     "husky": "^9",
     "lint-staged": "^15",
     "prettier": "^3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.71.2"
   },
   "lint-staged": {
     "*.ts": [
