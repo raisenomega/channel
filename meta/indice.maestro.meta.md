@@ -20,6 +20,7 @@
 | Código de Conducta | `meta/conducta-agentes.meta.md` | [OK] corregido |
 | Manifiesto HUB | `meta/manifiesto.meta.md` | [OK] corregido |
 | Changelog Maestro | `meta/changelog.meta.md` | [OK] |
+| Protocolo Auditoría Grado Bancario | `meta/auditoria.grado-bancario.meta.md` + `scripts/gate-grado-bancario.sh` | [OK] nuevo |
 
 ## Bounded Contexts (22)
 `inbox` · `channels` · `contacts` · `conversations` · `messages` · `quotes` ·
