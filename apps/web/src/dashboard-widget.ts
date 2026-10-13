@@ -113,7 +113,7 @@ function panelVacio(ctx: AppContext, lang: Idioma): string {
 function cuerpoLista(items: readonly InboxItem[], ctx: AppContext, lang: Idioma): string {
   const lista = items.length
     ? renderInboxList(items, [], lang)
-    : `<p class="text-sm text-muted p-md">${t(lang, "inbox.empty")}</p>`;
+    : panelVacio(ctx, lang);
   return `<div class="grid dash-grid gap" style="margin-top:14px">
     <div class="card" style="padding:0;overflow:hidden">
       <div class="section text-sm font-bold text-muted px-sm">${t(lang, "dash.conversaciones")}</div>
@@ -151,6 +151,8 @@ export function renderDashboard(
     .map((e) => chipEstado(e, lang, e === filtroEstado)).join("");
   const chipsSLA = chipSLA(lang, filtroSLA === true);
 
+  // panelVacio se usa tanto cuando el tenant no tiene canales como
+  // cuando aun no hay conversaciones (estado vacio claro y accionable).
   const seccion = items.length === 0
     ? panelVacio(ctx, lang)
     : cuerpoLista(items, ctx, lang);

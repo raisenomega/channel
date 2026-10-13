@@ -37,21 +37,22 @@ export function renderAutonomia(canales: readonly CanalState[], lang: Idioma): s
 }
 
 export function renderProveedor(p: ProveedorState, lang: Idioma): string {
+  const pendiente = p.sync === "pending";
   return `<div class="section text-sm font-bold text-muted">${t(lang, "channels.configureAI")}</div>
     <div class="card" style="padding:14px">
       <div class="feat flex items-center gap-sm">
         <span class="text-sm font-bold">${t(lang, "channels.provider")}</span>
-        <select data-ai-select class="ml-auto" aria-label="${t(lang, "channels.provider")}">
+        <select data-ai-select class="ml-auto" aria-label="${t(lang, "channels.provider")}" ${pendiente ? "disabled" : ""}>
           ${PROVEEDORES.map(({ key }) =>
             `<option value="${key}" ${p.provider === key ? "selected" : ""}>${key}</option>`).join("")}
         </select>
       </div>
       <div class="feat flex flex-col gap-sm" style="margin-top:8px">
         <label class="text-sm font-bold">${t(lang, "channels.apiKey")}</label>
-        <input data-ai-key type="password" style="width:100%" placeholder="${t(lang, "channels.apiKeyPh")}" aria-label="${t(lang, "channels.apiKey")}">
+        <input data-ai-key type="password" style="width:100%" placeholder="${t(lang, "channels.apiKeyPh")}" aria-label="${t(lang, "channels.apiKey")}" ${pendiente ? "disabled" : ""}>
       </div>
       <div class="feat flex items-center gap-sm" style="margin-top:8px">
-        <button class="badge badge-hub cursor-pointer" onclick="actuarCanal('guardarProveedor')">${t(lang, "channels.save")}</button>
+        <button class="badge badge-hub cursor-pointer ${pendiente ? "loading" : ""}" onclick="actuarCanal('guardarProveedor')" ${pendiente ? "disabled" : ""}>${t(lang, "channels.save")}</button>
         <span class="text-xs text-dim ml-auto">${marca(p.sync, lang)}</span>
       </div>
     </div>`;

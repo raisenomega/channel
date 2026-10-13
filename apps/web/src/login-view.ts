@@ -54,6 +54,7 @@ export function renderLogin(): string {
 
       <p class="login-hint">Con el correo y la contrasena del tenant. Sin emojis, solo SVG.</p>
     </form>
+    <footer class="login-footer">FORTRESS. by Raisen</footer>
   </div>`;
 }
 
