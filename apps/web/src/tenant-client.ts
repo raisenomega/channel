@@ -1,7 +1,7 @@
 /**
  * HUB by Raisen — Resolucion del tenant del usuario autenticado
- * Consulta `users` y `tenants` con el JWT del usuario (RLS por auth.uid()).
- * Sin dependencias externas; respeta la CSP.
+ * Usa el RPC seguro `mi_tenant()` (SECURITY DEFINER) para evitar la recursion
+ * de `current_tenant()` en el RLS de `users` al resolver post-login.
  */
 import { Result, err, ok } from "@shared/domain/result.ts";
 import { auth, SessionUsuario } from "./auth-client.ts";
@@ -34,41 +34,26 @@ export async function resolverTenant(s: SessionUsuario): Promise<Result<TenantCo
   const { supabaseUrl, anonKey } = config();
   if (!supabaseUrl || !anonKey) return err({ kind: "config_incompleta" });
   try {
-    // 1. Perfil del usuario: el RLS `users_read_own_tenant` permite leer la
-    //    fila del usuario (id = auth.uid()).
-    const perfil = await fetch(`${supabaseUrl}/rest/v1/users?select=tenant_id,email`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/mi_tenant`, {
+      method: "POST",
       headers: {
         apikey: anonKey,
         authorization: `Bearer ${s.accessToken}`,
-        accept: "application/json",
+        "content-type": "application/json",
       },
+      body: "{}",
     });
-    if (perfil.status === 401 || perfil.status === 403) return err({ kind: "no_autorizado" });
-    const perfiles = (await perfil.json()) as Array<Record<string, unknown>>;
-    const tenantId = perfiles[0]?.tenant_id as string | undefined;
-    if (!tenantId) return err({ kind: "sin_tenant" });
-
-    // 2. Datos del tenant: el RLS `tenants_read_own` permite leer el propio.
-    const ten = await fetch(
-      `${supabaseUrl}/rest/v1/tenants?select=id,name,slug,plan&id=eq.${encodeURIComponent(tenantId)}`,
-      {
-        headers: {
-          apikey: anonKey,
-          authorization: `Bearer ${s.accessToken}`,
-          accept: "application/json",
-        },
-      },
-    );
-    if (ten.status === 401 || ten.status === 403) return err({ kind: "no_autorizado" });
-    const tens = (await ten.json()) as Array<Record<string, unknown>>;
-    const row = tens[0];
-    if (!row) return err({ kind: "sin_tenant" });
+    if (res.status === 401 || res.status === 403) return err({ kind: "no_autorizado" });
+    if (!res.ok) return err({ kind: "sin_tenant" });
+    const filas = (await res.json()) as Array<Record<string, unknown>>;
+    const fila = filas[0];
+    if (!fila?.tenant_id) return err({ kind: "sin_tenant" });
 
     const context: TenantContext = Object.freeze({
-      tenantId,
-      name: (row.name as string) ?? "Mi empresa",
-      plan: (row.plan as string) ?? "lite_starter",
-      slug: (row.slug as string) ?? tenantId,
+      tenantId: String(fila.tenant_id),
+      name: (fila.name as string) ?? "Mi empresa",
+      plan: (fila.plan as string) ?? "lite_starter",
+      slug: (fila.slug as string) ?? String(fila.tenant_id),
     });
     auth.guardar({ ...s, tenant: context });
     return ok(context);
