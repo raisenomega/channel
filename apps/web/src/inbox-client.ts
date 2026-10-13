@@ -41,6 +41,7 @@ export async function cargarInbox(s: SessionUsuario): Promise<Result<InboxItem[]
     const items: InboxItem[] = filas.map((r) =>
       Object.freeze({
         conversationId: String(r.id),
+        contactId: r.contact_id ? String(r.contact_id) : null,
         contactName: nombreContacto(r.contact_id),
         channel: String(r.primary_channel ?? "whatsapp"),
         lastMessage: String(r.subject ?? "Conversacion"),

@@ -29,6 +29,11 @@ export class HUBApp {
     return this.state.currentTab;
   }
 
+  contactIdDeConversacion(conversationId: string): string | null {
+    const c = this.inbox.find((i) => i.conversationId === conversationId);
+    return c?.contactId ?? null;
+  }
+
   renderCurrentTab(): string {
     const lang: Idioma = getIdioma();
     switch (this.state.currentTab) {

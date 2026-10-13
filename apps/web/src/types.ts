@@ -29,6 +29,7 @@ export interface InboxFilter {
 
 export interface InboxItem {
   readonly conversationId: string;
+  readonly contactId: string | null;
   readonly contactName: string;
   readonly channel: string;
   readonly lastMessage: string;

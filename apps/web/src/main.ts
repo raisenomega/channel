@@ -6,13 +6,16 @@ import "./styles/index.css";
 import { HUBApp } from "./app.ts";
 import { logger } from "@shared/infrastructure/logger.infrastructure.ts";
 import { iniciarVigia } from "./vigia.ts";
-import { iniciarControlesShell, suscribirAlCambio, toggleTema } from "./interfaz.ts";
+import { iniciarControlesShell, suscribirAlCambio, toggleTema, getIdioma } from "./interfaz.ts";
 import { auth, SessionUsuario } from "./auth-client.ts";
 import { resolverTenant } from "./tenant-client.ts";
 import { cargarInbox } from "./inbox-client.ts";
 import { crearTenant } from "./onboarding-client.ts";
 import { montarLogin } from "./login-view.ts";
 import { montarOnboarding } from "./onboarding-view.ts";
+import { cargarContacto } from "./contact-client.ts";
+import { renderContact360, renderCargando360 } from "./contact-360.ts";
+import { t } from "./i18n.ts";
 import type { AppContext, TabId } from "./types.ts";
 
 interface HubConfigGlobal {
@@ -137,9 +140,38 @@ function renderVista(root: HTMLElement, app: HUBApp): void {
   });
   // Handlers globales para acciones renderizadas en #app (no lanzan error).
   (globalThis as Record<string, unknown>).toggleFilter = () => {};
-  (globalThis as Record<string, unknown>).openConversation = (id: string) => {
-    if (id) renderVista(root, app);
+  (globalThis as Record<string, unknown>).openConversation = (conversationId: string) => {
+    const panel = document.querySelector<HTMLElement>("[data-contact360]");
+    if (!panel) return;
+    const lang = leerIdiomaActual();
+    panel.innerHTML = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(lang, "dash.ficha")}</div>` + cargarCargando(lang);
+    const contactId = app.contactIdDeConversacion(conversationId);
+    if (!contactId) {
+      panel.innerHTML = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(lang, "dash.ficha")}</div><div class="p-md text-sm text-muted">${tPlano(lang, "dash.fichaSinDatos")}</div>`;
+      return;
+    }
+    void cargarContacto(contactId).then((res) => {
+      const idioma = leerIdiomaActual();
+      const cabecera = `<div class="section text-sm font-bold text-muted px-sm">${tPlano(idioma, "dash.ficha")}</div>`;
+      if (!res.ok) {
+        panel.innerHTML = cabecera + `<div class="p-md text-sm text-muted">${tPlano(idioma, "dash.fichaSinDatos")}</div>`;
+        return;
+      }
+      panel.innerHTML = cabecera + renderContact360(res.value, idioma);
+    });
   };
+}
+
+function leerIdiomaActual(): "es" | "en" {
+  return getIdioma();
+}
+
+function tPlano(idioma: "es" | "en", key: string): string {
+  return t(idioma, key);
+}
+
+function cargarCargando(idioma: "es" | "en"): string {
+  return renderCargando360(idioma);
 }
 
 function sincronizarNav(app: HUBApp): void {
