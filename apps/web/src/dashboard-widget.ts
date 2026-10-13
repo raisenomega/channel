@@ -41,9 +41,10 @@ function canalNombre(canal: string, lang: Idioma): string {
   return traducido === clave ? canal : traducido;
 }
 
-function chipCanal(canal: string, lang: Idioma): string {
+function chipCanal(canal: string, lang: Idioma, activo: boolean): string {
   const icono = canal === "whatsapp" ? "phone" : canal === "email" ? "mail" : canal === "webchat" ? "chat" : "message-square";
-  return `<div class="chip flex items-center gap-sm" onclick="toggleFilter('channel','${canal}')">
+  const cls = activo ? "chip flex items-center gap-sm active" : "chip flex items-center gap-sm";
+  return `<div class="${cls}" onclick="toggleFilter('channel','${canal}')">
     ${lucide(icono, { size: 16 })}
     <span class="chip-name text-sm">${canalNombre(canal, lang)}</span>
   </div>`;
@@ -93,11 +94,11 @@ function cuerpoLista(items: readonly InboxItem[], ctx: AppContext, lang: Idioma)
   </div>`;
 }
 
-export function renderDashboard(items: readonly InboxItem[], ctx: AppContext, lang: Idioma): string {
+export function renderDashboard(items: readonly InboxItem[], ctx: AppContext, lang: Idioma, filtroCanal: string | null = null): string {
   const estadisticas = calcularStats(items);
   const canalesActivos = CANALES.filter((c) => estadisticas.porCanal[c] !== undefined);
   const chips = (canalesActivos.length ? canalesActivos : ["whatsapp", "email", "instagram"])
-    .map((c) => chipCanal(c, lang)).join("");
+    .map((c) => chipCanal(c, lang, c === filtroCanal)).join("");
 
   const seccion = items.length === 0
     ? panelVacio(ctx, lang)

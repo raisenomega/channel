@@ -139,7 +139,13 @@ function renderVista(root: HTMLElement, app: HUBApp): void {
     toggleTema();
   });
   // Handlers globales para acciones renderizadas en #app (no lanzan error).
-  (globalThis as Record<string, unknown>).toggleFilter = () => {};
+  (globalThis as Record<string, unknown>).toggleFilter = (_tipo: string, valor: string) => {
+    app.toggleFiltroCanal(valor);
+    appActual = app;
+    raizActual = root;
+    root.innerHTML = app.renderCurrentTab();
+    cablearNavegacion(root, app);
+  };
   (globalThis as Record<string, unknown>).openConversation = (conversationId: string) => {
     const panel = document.querySelector<HTMLElement>("[data-contact360]");
     if (!panel) return;

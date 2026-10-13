@@ -11,6 +11,7 @@ export type CargarInbox = () => Promise<InboxItem[]>;
 export class HUBApp {
   private state: PageState = createInitialState();
   private inbox: InboxItem[] = [];
+  private filtroCanal: string | null = null;
 
   constructor(
     private readonly context: AppContext,
@@ -34,11 +35,23 @@ export class HUBApp {
     return c?.contactId ?? null;
   }
 
+  toggleFiltroCanal(canal: string): void {
+    this.filtroCanal = this.filtroCanal === canal ? null : canal;
+  }
+
+  filtroActual(): string | null {
+    return this.filtroCanal;
+  }
+
   renderCurrentTab(): string {
     const lang: Idioma = getIdioma();
     switch (this.state.currentTab) {
-      case "inbox":
-        return renderDashboard(this.inbox, this.context, lang);
+      case "inbox": {
+        const filtrados = this.filtroCanal
+          ? this.inbox.filter((i) => i.channel === this.filtroCanal)
+          : this.inbox;
+        return renderDashboard(filtrados, this.context, lang, this.filtroCanal);
+      }
 
       case "agent":
         return renderAgentDashboard(94, 92, 87, "1.45s", "Anthropic Claude", "claude-sonnet-4-6", true, "DeepSeek", this.state.mode, lang);
