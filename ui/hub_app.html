@@ -7,19 +7,10 @@
 <meta name="theme-color" content="#0E1B2A" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta name="application-name" content="HUB by Raisen">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script>addEventListener("load",()=>{navigator.serviceWorker?.register("/sw.js")})</script>
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   HUB by Raisen — UI System (Tailwind philosophy, utility-first)
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ── DESIGN TOKENS (CSS Custom Properties) ── */
 :root{
   --hub:#0FB5A6;--hub-deep:#0A8F84;--hub-light:#D1F7F2;
   --agent:#F5A623;--agent-deep:#C97C0C;--agent-light:#FFF3DC;
@@ -34,128 +25,56 @@
   --space-xs:4px;--space-sm:8px;--space:12px;--space-lg:16px;--space-xl:24px;
   --font:'Sora',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   --safe-bottom:env(safe-area-inset-bottom,0px);
-  --nav-height:56px;
 }
-/* ── DARK MODE (prefers-color-scheme) ── */
 @media(prefers-color-scheme:dark){
   :root{--ink:#E8EDF2;--ink2:#9AAFC4;--ink3:#5B7186;--bg:#0E1B2A;--surface:#1A2D42;--panel:#14232F;--line:#2E4460;
-    --shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow:0 4px 12px rgba(0,0,0,.4);--shadow-lg:0 18px 50px rgba(0,0,0,.5);
-    --hub-light:#0A8F84;--agent-light:#C97C0C;--good-light:#1F9D55;--danger-light:#E5484D;--info-light:#2D6FE0;}
-  .mode{background:rgba(245,166,35,.12);border-color:#F3D89B}
+    --shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow:0 4px 12px rgba(0,0,0,.4);--shadow-lg:0 18px 50px rgba(0,0,0,.5);}
 }
-
-/* ── RESET + UTILITY CLASSES ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{font-size:16px;-webkit-text-size-adjust:100%}
-body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#F2F5F8,var(--bg));min-height:100vh;color:var(--ink);font-family:var(--font);font-size:var(--fs-base);line-height:1.5;overflow-x:hidden}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
-
-/* ── LAYOUT: Mobile-first (1 panel), luego Desktop (3 paneles) ── */
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#F2F5F8,var(--bg));min-height:100vh;color:var(--ink);font-family:var(--font);font-size:var(--fs-base);overflow-x:hidden}
 .app{display:flex;flex-direction:column;max-width:100%;min-height:100vh}
-.app-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.app-main{flex:1;display:flex;flex-direction:column}
 @media(min-width:768px){
-  .app{flex-direction:row;height:100vh}
-  .app-main{flex-direction:row;height:100vh}
+  .app{flex-direction:row;height:100vh}.app-main{flex-direction:row;height:100vh}
   .panel-left{width:320px;max-width:35%;flex:0 0 auto;border-right:1px solid var(--line);overflow-y:auto}
-  .panel-center{flex:1;overflow-y:auto}
-  .panel-right{width:300px;max-width:30%;flex:0 0 auto;border-left:1px solid var(--line);overflow-y:auto}
+  .panel-center{flex:1;overflow-y:auto}.panel-right{width:300px;max-width:30%;flex:0 0 auto;border-left:1px solid var(--line);overflow-y:auto}
   nav{display:none}
 }
-@media(max-width:767px){
-  .panel-left,.panel-right{display:none}
-  .panel-center{flex:1}
-  .panel-left.mobile-show{display:flex;flex:1;width:100%}.panel-right.mobile-show{display:flex;flex:1;width:100%}
-}
-
-/* ── COMPONENTES REUTILIZABLES (Tailwind philosophy) ── */
-.flex{display:flex}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.items-start{align-items:flex-start}.justify-between{justify-content:space-between}.gap-xs{gap:4px}.gap-sm{gap:8px}.gap{gap:12px}.gap-lg{gap:16px}.gap-xl{gap:24px}
-.p-sm{padding:8px}.p{padding:12px}.p-lg{padding:16px}.p-xl{padding:24px}
-.px-sm{padding:0 8px}.px{padding:0 12px}.px-lg{padding:0 16px}
-.py-sm{padding:8px 0}.py{padding:12px 0}.py-lg{padding:16px 0}
-.m-sm{margin:8px}.m{margin:12px}.ml-auto{margin-left:auto}
-.text-sm{font-size:var(--fs-sm)}.text-base{font-size:var(--fs-base)}.text-lg{font-size:var(--fs-lg)}.text-xl{font-size:var(--fs-xl)}
-.text-muted{color:var(--ink2)}.text-dim{color:var(--ink3)}.text-hub{color:var(--hub)}.text-agent{color:var(--agent)}
-.font-bold{font-weight:600}.font-semibold{font-weight:500}
-.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:767px){.panel-left,.panel-right{display:none}.panel-center{flex:1}}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-sm{gap:8px}.gap{gap:12px}.ml-auto{margin-left:auto}
+.text-sm{font-size:var(--fs-sm)}.text-xs{font-size:var(--fs-xs)}.text-base{font-size:var(--fs-base)}.font-bold{font-weight:600}.text-muted{color:var(--ink2)}.text-dim{color:var(--ink3)}.text-hub{color:var(--hub)}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
-
-/* ── SURFACE COMPONENTS ── */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--space-lg);box-shadow:var(--shadow-sm)}
-.card-sm{padding:var(--space)}.card-lg{padding:var(--space-xl)}
-.card-header{display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space)}
-.card-title{font-size:var(--fs-lg);font-weight:600;margin:0}
-.card-body{color:var(--ink2);font-size:var(--fs-sm)}
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--radius-full);font-size:var(--fs-xs);font-weight:600}
-.badge-agent{background:var(--agent-light);color:var(--agent-deep)}
-.badge-human{background:var(--info-light);color:var(--info)}
-.badge-danger{background:var(--danger-light);color:var(--danger)}
-.badge-good{background:var(--good-light);color:var(--good)}
-.badge-hub{background:var(--hub-light);color:var(--hub-deep)}
-.badge-wa{background:var(--wa);color:#fff}.badge-ig{background:var(--ig);color:#fff}.badge-ms{background:var(--ms);color:#fff}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-xs);padding:10px 16px;border:none;border-radius:var(--radius);font-family:inherit;font-size:var(--fs-base);font-weight:600;cursor:pointer;transition:background .15s,transform .1s}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:var(--hub);color:#fff}.btn-primary:hover{background:var(--hub-deep)}
-.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
-.btn-danger{background:var(--danger);color:#fff}
-.btn-sm{padding:6px 12px;font-size:var(--fs-sm)}
-.btn-icon{width:36px;height:36px;padding:0;border-radius:50%;display:grid;place-items:center}
-
-/* ── AVATARS ── */
-.avatar{width:40px;height:40px;border-radius:var(--radius-sm);flex:0 0 auto;display:grid;place-items:center;font-weight:700;font-size:var(--fs-base);color:#fff;position:relative}
-.avatar-sm{width:32px;height:32px;font-size:var(--fs-xs)}
-.avatar .channel-badge{position:absolute;right:-4px;bottom:-4px;width:16px;height:16px;border-radius:3px;border:2px solid var(--surface);display:grid;place-items:center;font-size:7px;color:#fff;font-weight:700}
-
-/* ── LIST ITEMS (inbox, contacts) ── */
+.badge-agent{background:var(--agent-light);color:var(--agent-deep)}.badge-good{background:var(--good-light);color:var(--good)}.badge-danger{background:var(--danger-light);color:var(--danger)}.badge-hub{background:var(--hub-light);color:var(--hub-deep)}
+.btn{display:inline-flex;align-items:center;padding:10px 16px;border:none;border-radius:var(--radius);font-family:inherit;font-size:var(--fs-base);font-weight:600;cursor:pointer}
+.btn-primary{background:var(--hub);color:#fff}
 .list{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden}
-.list-item{display:flex;gap:var(--space);padding:var(--space) var(--space-lg);border-bottom:1px solid var(--line);cursor:pointer;align-items:center;transition:background .1s}
-.list-item:hover{background:var(--panel)}.list-item:last-child{border-bottom:none}
-.list-item.esc{background:var(--danger-light)}
-.list-item .body{flex:1;min-width:0}
+.list-item{display:flex;gap:var(--space);padding:var(--space) var(--space-lg);border-bottom:1px solid var(--line);cursor:pointer;align-items:center}
+.list-item:last-child{border-bottom:none}.list-item .body{flex:1;min-width:0}
 .list-item .h{display:flex;align-items:center;gap:var(--space-sm)}
 .list-item .h .nm{font-size:var(--fs-base);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .list-item .h .tm{margin-left:auto;font-size:var(--fs-xs);color:var(--ink3)}
 .list-item .msg{font-size:var(--fs-sm);color:var(--ink2);margin-top:2px;line-clamp:2}
-
-/* ── CHIPS / SCROLLABLE HORIZONTAL ── */
 .chips{display:flex;gap:var(--space-sm);overflow-x:auto;padding:2px;scrollbar-width:none;margin-bottom:var(--space)}
-.chips::-webkit-scrollbar{display:none}
 .chip{flex:0 0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px;min-width:85px;cursor:pointer;white-space:nowrap}
-.chip-icon{width:18px;height:18px;border-radius:4px;color:#fff;display:grid;place-items:center;font-size:9px;font-weight:700}
-.chip-name{font-size:var(--fs-sm);font-weight:600}
-.chip-status{font-size:10px;display:flex;align-items:center;gap:4px;color:var(--ink2);margin-top:5px}
-.dot{width:6px;height:6px;border-radius:50%}.dot-on{background:var(--good)}.dot-deg{background:var(--warn)}.dot-off{background:var(--danger)}
-
-/* ── KPIs GRID ── */
+.chip-name{font-size:var(--fs-sm);font-weight:600}.chip-status{font-size:10px;display:flex;align-items:center;gap:4px;color:var(--ink2);margin-top:5px}
+.dot{width:6px;height:6px;border-radius:50%}.dot-on{background:var(--good)}.dot-off{background:var(--danger)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--space)}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--space) var(--space-lg)}
-.kpi-label{font-size:var(--fs-xs);color:var(--ink2)}
-.kpi-value{font-size:var(--fs-2xl);font-weight:700;margin-top:4px;display:flex;align-items:baseline;gap:3px;color:var(--ink);letter-spacing:-.3px}
+.kpi-label{font-size:var(--fs-xs);color:var(--ink2)}.kpi-value{font-size:var(--fs-2xl);font-weight:700;margin-top:4px;display:flex;align-items:baseline;gap:3px;color:var(--ink);letter-spacing:-.3px}
 .kpi-value small{font-size:var(--fs-sm);color:var(--ink3);font-weight:500}
-.kpi-trend{font-size:var(--fs-xs);font-weight:600;margin-top:5px}.trend-up{color:var(--good)}.trend-down{color:var(--danger)}.trend-flat{color:var(--ink3)}
-
-/* ── CHAT (THREAD + COMPOSER) ── */
-.thread{display:flex;flex-direction:column;gap:var(--space-sm);padding:var(--space-lg) var(--space)}
-.bubble{max-width:80%;padding:10px 14px;border-radius:var(--radius);font-size:var(--fs-base);line-height:1.4}
-.bubble-in{background:var(--surface);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
-.bubble-out{background:var(--hub);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.bubble .who{font-size:9px;opacity:.7;margin-bottom:2px;display:flex;gap:4px;align-items:center}
-.composer{display:flex;gap:var(--space-sm);align-items:center;padding:var(--space);border-top:1px solid var(--line);background:var(--surface)}
-.composer input{flex:1;border:1px solid var(--line);border-radius:var(--radius-full);padding:10px 14px;font-family:inherit;font-size:var(--fs-base);outline:none;background:var(--panel);color:var(--ink)}
-.composer input:focus{border-color:var(--hub);box-shadow:0 0 0 2px rgba(15,181,166,.2)}
-
-/* ── ALERTS ── */
-.alert{display:flex;gap:var(--space);align-items:center;border-radius:var(--radius);padding:var(--space) var(--space-lg)}
-.alert-danger{background:var(--danger-light);border:1px solid #F6C9C9;color:#9B1C1F}
-.alert-warn{background:var(--agent-light);border:1px solid #F3D89B;color:var(--agent-deep)}
-.alert-title{font-weight:600;font-size:var(--fs-base)}.alert-desc{font-size:var(--fs-sm);margin-top:1px;opacity:.85}
-
-/* ── BOTTOM NAV ── */
-nav{bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:8px 4px calc(8px + var(--safe-bottom));z-index:100}
-nav button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink3);font-family:inherit;font-size:10px;font-weight:500;cursor:pointer;padding:6px 0}
-nav button svg{width:20px;height:20px}nav button.active{color:var(--hub)}
-
-/* ── TOP BAR ── */
+.section{font-size:var(--fs-sm);font-weight:600;color:var(--ink2);margin:var(--space-lg) 0 var(--space-sm);display:flex;align-items:center}
+.section .more{margin-left:auto;font-size:var(--fs-xs);color:var(--hub-deep);cursor:pointer}
+.avatar{width:36px;height:36px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-weight:700;font-size:var(--fs-sm);color:#fff;position:relative}
+.avatar .channel-badge{position:absolute;right:-4px;bottom:-4px;width:14px;height:14px;border-radius:3px;border:2px solid var(--surface);display:grid;place-items:center;font-size:6px;color:#fff;font-weight:700}
+.switch{width:36px;height:20px;border-radius:999px;background:#C9D3DD;position:relative;cursor:pointer;flex:0 0 auto}.switch.on{background:var(--hub)}.switch i{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}.switch.on i{left:auto;right:2px}
+.kv{display:flex;justify-content:space-between;font-size:var(--fs-sm);padding:8px 0}.feat{display:flex;gap:var(--space-sm);padding:8px 0;font-size:var(--fs-sm);align-items:flex-start}
+.brain{background:linear-gradient(150deg,#14232F,#0E1B2A 60%);border-radius:var(--radius-xl);padding:18px 17px;color:#fff;position:relative;overflow:hidden}
+.agmetrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-sm);margin-top:14px}
+.am{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:10px 8px;text-align:center}
+.am b{font-size:var(--fs-lg);font-weight:700}.am small{font-size:9.5px;color:#9FB4C4;display:block;margin-top:3px}
 .topbar{display:flex;align-items:center;gap:var(--space);padding:8px 16px}
 .topbar .logo{width:36px;height:36px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--hub),var(--hub-deep));color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px;letter-spacing:.3px}
 .topbar h1{font-size:var(--fs-base);font-weight:600;margin:0;line-height:1.2}
@@ -163,96 +82,63 @@ nav button svg{width:20px;height:20px}nav button.active{color:var(--hub)}
 .mode-pill{display:flex;align-items:center;gap:6px;background:var(--agent-light);border:1px solid #F3D89B;color:var(--agent-deep);padding:5px 10px;border-radius:var(--radius-full);font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;margin-left:auto}
 .mode-pill .pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--agent);animation:pulse 2s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,166,35,.55)}70%{box-shadow:0 0 0 6px rgba(245,166,35,0)}100%{box-shadow:0 0 0 0 rgba(245,166,35,0)}}
-
-/* ── SUBSECTION NAV ── */
-.subbar{display:flex;align-items:center;gap:var(--space-sm);padding:var(--space)}
-.subbar .back{width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--surface);font-size:20px;line-height:1;color:var(--ink);cursor:pointer;display:grid;place-items:center}
-.subbar .title{font-size:var(--fs-lg);font-weight:600}
-.subbar .right{margin-left:auto;font-size:var(--fs-sm);color:var(--hub-deep);font-weight:600}
-
-/* ── SECCIÓN / DIVIDER ── */
-.section{font-size:var(--fs-sm);font-weight:600;color:var(--ink2);margin:var(--space-lg) 0 var(--space-sm);display:flex;align-items:center}
-.section .more{margin-left:auto;font-size:var(--fs-xs);color:var(--hub-deep);cursor:pointer}
-
-/* ── TAGS ── */
-.tags{display:flex;gap:var(--space-xs);margin-top:6px;flex-wrap:wrap}
-.tag{font-size:9px;font-weight:600;padding:2px 7px;border-radius:var(--radius-full)}
-
-/* ── FILTERS ── */
-.filters{display:flex;gap:var(--space-sm);overflow-x:auto;padding-bottom:4px;margin-bottom:var(--space);scrollbar-width:none}
-.filter-btn{flex:0 0 auto;font-size:var(--fs-sm);font-weight:600;padding:6px 12px;border-radius:var(--radius-full);border:1px solid var(--line);background:var(--surface);color:var(--ink2);cursor:pointer}
-.filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-
-/* ── RESPONSIVE ADJUSTMENTS ── */
-@media(max-width:440px){
-  .topbar{padding:6px 12px}
-  .topbar h1{font-size:var(--fs-sm)}
-  .kpis{grid-template-columns:1fr 1fr;gap:var(--space-sm)}
-  .list-item{padding:var(--space)}
-  .section{margin:var(--space) 0 var(--space-xs)}
-}
-@media(min-width:768px){
-  body{padding:0}
-  .topbar{padding:12px 24px}
-  .kpis{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
-}
-
-/* ── KEYFRAMES ── */
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + var(--safe-bottom));z-index:100}
+nav button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink3);font-family:inherit;font-size:9px;font-weight:500;cursor:pointer;padding:4px 0}
+nav button svg{width:18px;height:18px}nav button.active{color:var(--hub)}
 .view{animation:fadeIn .2s ease}
-@media(prefers-reduced-motion:reduce){.view,.mode-pill .pulse-dot{animation:none}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="topbar" id="topbar">
-    <div class="logo">SC</div>
-    <div><h1>Restaurante Sabor Criollo</h1><p>San Juan, PR · HUB by Raisen</p></div>
-    <button class="mode-pill" onclick="cycleMode(event)" aria-label="Cambiar modo de operación">
-      <span class="pulse-dot"></span><span id="modeLabel">Autónomo</span>
+    <div class="logo">H</div>
+    <div><h1 id="bizName">Restaurante Sabor Criollo</h1><p>San Juan, PR · HUB by Raisen</p></div>
+    <button class="mode-pill" id="modeBtn" aria-label="Cambiar modo de operacion">
+      <span class="pulse-dot"></span><span id="modeLabel">Ecosistema</span>
     </button>
   </header>
   <div class="app-main">
-    <div class="panel-left" id="panelLeft" role="complementary" aria-label="Lista de conversaciones"></div>
-    <div class="panel-center" id="panelCenter" role="main" aria-label="Inbox principal"></div>
-    <div class="panel-right" id="panelRight" role="complementary" aria-label="Detalle del contacto"></div>
+    <div class="panel-left" id="panelLeft"></div>
+    <div class="panel-center" id="panelCenter"></div>
+    <div class="panel-right" id="panelRight"></div>
   </div>
-  <nav id="bottomNav" role="navigation" aria-label="Navegación principal">
-    <button data-tab="inbox" onclick="goTab('inbox')" class="active">
-      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 9l8 4v6h-8v-6H3zM5 8l6 4v6h-6v-6H5zM7 11l10 2v6h-10v-6H7z" fill="currentColor"/></svg>Inbox
-    </button>
-    <button data-tab="channels" onclick="goTab('channels')">
-      <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 6l12 0v12h-12v-12z" fill="currentColor"/><circle cx="8" cy="10" r="2" fill="currentColor"/></svg>Canales
-    </button>
-    <button data-tab="agent" onclick="goTab('agent')">
-      <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 6l4 4v6h-4v-4H10zM8 10l8 2v6h-8v-6H8z" fill="currentColor"/></svg>IA
-    </button>
-    <button data-tab="sales" onclick="goTab('sales')">
-      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 16l6-6v-2h6v8H4zM14 10l6 2v6h-6v-2H14z" fill="currentColor"/><path d="M6 10l12 2v4h-12v-4H6z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Ventas
-    </button>
-    <button data-tab="contacts" onclick="goTab('contacts')">
-      <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2.5" fill="currentColor"/><circle cx="15" cy="10" r="2.5" fill="currentColor"/><circle cx="12" cy="7" r="2" fill="currentColor"/></svg>Clientes
-    </button>
-  </nav>
 </div>
+<nav id="bottomNav">
+  <button data-tab="inbox" class="active"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 9l8 4v6h-8v-6H3zM5 8l6 4v6h-6v-6H5zM7 11l10 2v6h-10v-6H7z" fill="currentColor"/></svg>Inbox</button>
+  <button data-tab="channels"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 6l12 0v12h-12v-12z" fill="currentColor"/><circle cx="8" cy="10" r="2" fill="currentColor"/></svg>Canales</button>
+  <button data-tab="agent"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 6l4 4v6h-4v-4H10zM8 10l8 2v6h-8v-6H8z" fill="currentColor"/></svg>IA</button>
+  <button data-tab="sales"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 16l6-6v-2h6v8H4zM14 10l6 2v6h-6v-2H14z" fill="currentColor"/><path d="M6 10l12 2v4h-12v-4H6z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Ventas</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="3" y1="3" x2="3" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="21" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="1.5"/></svg>Ajustes</button>
+</nav>
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   HUB — UI Controller (routing, data, render)
-   ═══════════════════════════════════════════════════════════════ */
-const CHAN={wa:{c:"--wa",i:"W",nm:"WhatsApp"},ig:{c:"--ig",i:"IG",nm:"Instagram"},ms:{c:"--ms",i:"M",nm:"Messenger"},web:{c:"--web",i:"◈",nm:"Webchat"},em:{c:"--em",i:"@",nm:"Email"},sms:{c:"--sms",i:"S",nm:"SMS"},tg:{c:"--tg",i:"T",nm:"Telegram"},tw:{c:"--tw",i:"X",nm:"X / Twitter"},li:{c:"--li",i:"in",nm:"LinkedIn"}};
-const D=JSON.parse(`{"modes":["Lite","Ecosistema","Autónomo"],"kpis":[{"l":"Sin leer","v":"17","u":"conv","t":"up","d":"↑ +5"},{"l":"Resolución autónoma","v":"87","u":"%","t":"up","d":"↑ +3"},{"l":"Ventas hoy","v":"$943","u":"","t":"up","d":"↑ +12%"},{"l":"Escalados","v":"3","u":"conv","t":"up","d":"↑ +3"}],"channels":[{"id":"wa","st":"on","un":4,"acct":"+1 787-555-0100 · WhatsApp Business"},{"id":"ig","st":"on","un":2,"acct":"@saborcriollo"},{"id":"ms","st":"on","un":1,"acct":"Sabor Criollo · Página FB"},{"id":"web","st":"on","un":3,"acct":"widget en saborcriollo.com"},{"id":"em","st":"on","un":5,"acct":"2 cuentas · vía Resend"},{"id":"sms","st":"on","un":0,"acct":"+1 787-555-0100"},{"id":"tg","st":"on","un":0,"acct":"@SaborCriolloBot"},{"id":"tw","st":"deg","un":1,"acct":"@saborcriollopr"},{"id":"li","st":"off","un":0,"acct":"sin conectar"}],"convos":[{"ch":"web","nm":"Visitante web #A19","tm":"ahora","msg":"¿A qué hora cierran hoy?","by":"agent","co":98,"es":false},{"ch":"ig","nm":"Génesis Fontánez","tm":"3:05","msg":"¿Tienen opciones sin gluten?","by":"human","co":41,"es":true},{"ch":"wa","nm":"Luis Rodríguez","tm":"3:18","msg":"¡Perfecto! Orden confirmada. Total $24.","by":"agent","co":94,"es":false},{"ch":"em","nm":"Caribe Foods","tm":"1:22","msg":"Adjunto cotización actualizada.","by":"human","co":null,"es":false},{"ch":"tw","nm":"@josuecomer","tm":"12:47","msg":"¿Hacen delivery a Bayamón?","by":"human","co":null,"es":true}]}`);
-let modeIdx=2,curTab="inbox";
-const $=(s,o)=>document.getElementById(s),ini=s=>{if(!s)return"?";const t=s.replace(/[@#]/g,"");return t[0]?.toUpperCase()||"?"};
-function cycleMode(e){modeIdx=(modeIdx+1)%D.modes.length;$("modeLabel").textContent=D.modes[modeIdx];e.stopPropagation()}
-function goTab(t){curTab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));render()}
+const MODES=["Lite","Ecosistema","Autonomo"];let modeIdx=1,curTab="inbox";
+const $id=s=>document.getElementById(s);
+const icons={whatsapp:"<path d='M6 6l12 0v12h-12v-12z'/>",email:"<rect x='4' y='4' rx='3' width='16' height='12'/><path d='M6 6h12v-2h-12z'/>",instagram:"<circle cx='12' cy='10' r='8'/><path d='M8 18l8 0v-4h-8v4z'/>",webchat:"<rect x='4' y='4' rx='6' width='16' height='10'/><path d='M6 16l12 0v4h-12v-4z'/>",telegram:"<circle cx='12' cy='12' r='9'/><path d='M6 6l12 0v12h-12v-12z'/>",sms:"<rect x='6' y='4' rx='4' width='12' height='16'/>",x:"<circle cx='12' cy='12' r='9'/><line x1='3' y1='3' x2='21' y2='21' stroke='currentColor' stroke-width='1.5'/>",linkedin:"<rect x='4' y='4' rx='4' width='16' height='16'/><path d='M6 6h12z'/>"};
+const lucide=(n,s=16)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="currentColor">${icons[n]||icons.whatsapp}</svg>`;
+function goTab(t){curTab=t;document.querySelectorAll("#bottomNav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));render()}
+function cycleMode(){modeIdx=(modeIdx+1)%MODES.length;$id("modeLabel").textContent=MODES[modeIdx];render()}
 function render(){
-  const ch=D.channels,co=D.convos,chips=ch.map(c=>`<div class="chip"><div class="flex items-center gap-sm"><div class="chip-icon" style="background:var(${CHAN[c.id].c})">${CHAN[c.id].i}</div><span class="chip-name">${CHAN[c.id].nm}</span>${c.un?`<span class="badge badge-hub">${c.un}</span>`:""}</div><div class="chip-status"><span class="dot dot-${c.st}"></span>${c.st==="on"?"Activo":c.st==="deg"?"Degradado":"Inactivo"}</div></div>`).join("");
-  const list=co.map(c=>`<div class="list-item${c.es?" esc":""}"><div class="avatar" style="background:var(${CHAN[c.ch].c})">${ini(c.nm)}<span class="channel-badge" style="background:var(${CHAN[c.ch].c})">${CHAN[c.ch].i}</span></div><div class="body"><div class="h"><span class="nm">${c.nm}</span><span class="tm">${c.tm}</span></div><div class="msg line-clamp-2">${c.msg}</div><div class="tags">${c.by==="agent"?`<span class="tag badge-agent">IA</span>`:c.by==="human"?`<span class="tag badge-human">Humano</span>`:""}${c.co!==null&&c.co<70?`<span class="tag badge-danger">${c.co}%</span>`:""}${c.es?`<span class="tag badge-danger">Escalado</span>`:""}</div></div></div>`).join("");
-  const kpis=D.kpis.map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}<small>${k.u}</small></div><div class="kpi-trend trend-${k.t}">${k.d}</div></div>`).join("");
-  const S=(n,p)=>`<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">${p}</svg>`;
-  const pages={inbox:`<div class="view"><div class="kpis">${kpis}</div><div class="section">Canales<div class="more">${S("arrow-right","<path d='M3 12l8 0v-4h-8v4H3z'/>")}</div></div><div class="chips">${chips}</div><div class="section">Conversaciones activas<div class="more">${S("arrow-right","<path d='M3 12l8 0v-4h-8v4H3z'/>")}</div></div><div class="list">${list}</div></div>`,channels:`<div class="view"><div class="section">Estado de canales<div class="more">9 canales</div></div><div class="chips">${chips}</div><div class="section">Detalle</div><div class="list">${ch.map(c=>`<div class="list-item"><div class="avatar-sm" style="background:var(${CHAN[c.id].c})">${CHAN[c.id].i}</div><div class="body"><div class="h"><span class="nm">${c.acct}</span></div></div><span class="badge ${c.st==="on"?"badge-good":c.st==="deg"?"badge-agent":"badge-danger"}">${c.st==="on"?"Activo":c.st==="deg"?"Degradado":"Inactivo"}</span></div>`).join("")}</div></div>`};
-  $("panelCenter").innerHTML=pages[curTab]||pages.inbox;
+  const ch=["whatsapp","email","instagram","facebook","telegram","sms","x","linkedin","webchat"];
+  const convos=[
+    {ch:"web",nm:"Visitante web #A19",tm:"ahora",msg:"A que hora cierran hoy?",by:"agent",co:98,sl:false},
+    {ch:"ig",nm:"Genesis Fontanez",tm:"3:05",msg:"Tienen opciones sin gluten?",by:"human",co:41,sl:false},
+    {ch:"wa",nm:"Luis Rodriguez",tm:"3:18",msg:"Perfecto! Orden confirmada. Total $24.",by:"agent",co:94,sl:false},
+    {ch:"em",nm:"Caribe Foods",tm:"1:22",msg:"Adjunto cotizacion actualizada.",by:"human",co:null,sl:true},
+    {ch:"tw",nm:"@josuecomer",tm:"12:47",msg:"Hacen delivery a Bayamon?",by:"human",co:null,sl:false}
+  ];
+  const chips=ch.map(c=>`<div class="chip flex items-center gap-sm">${lucide(c,14)}<span class="chip-name">${c}</span></div>`).join("");
+  const list=convos.map(c=>`<div class="list-item flex items-center gap px-lg py-sm"><div class="avatar" style="background:var(--hub-deep)">${c.nm[0]}<span class="channel-badge" style="background:var(--hub)">${lucide(c.ch,10)}</span></div><div class="body"><div class="h"><span class="nm truncate">${c.nm}</span>${c.sl?`<span class="badge badge-danger text-xs">SLA</span>`:""}<span class="tm text-xs text-dim ml-auto">${c.tm}</span></div><div class="msg line-clamp-2">${c.msg}</div></div></div>`).join("");
+  const pages={
+    inbox:`<div class="view"><div class="kpis"><div class="kpi"><div class="kpi-label">Conversaciones</div><div class="kpi-value">23<small>hoy</small></div></div><div class="kpi"><div class="kpi-label">IA Was Correct</div><div class="kpi-value" style="color:var(--good)">94<small>%</small></div></div><div class="kpi"><div class="kpi-label">Ventas desde chat</div><div class="kpi-value" style="color:var(--hub)">$589<small>hoy</small></div></div><div class="kpi"><div class="kpi-label">Autonomia</div><div class="kpi-value">87<small>%</small></div></div></div><div class="section">Canales <span class="more text-xs text-hub">Ver todos</span></div><div class="chips">${chips}</div><div class="section">Conversaciones activas <span class="more text-xs text-hub">Ver todas</span></div><div class="list">${list}</div></div>`,
+    channels:`<div class="view"><div class="section">Canales conectados <span class="more text-xs text-hub">9 canales</span></div><div class="chips">${chips}</div><div class="list">${ch.map(c=>`<div class="list-item flex items-center gap px-lg py-sm"><div class="avatar-sm">${lucide(c,14)}</div><div class="body"><div class="h"><span class="nm truncate">${c}</span></div></div><div class="switch on"><i></i></div></div>`).join("")}</div><div class="section">Configurar proveedor IA</div><div class="card" style="padding:14px"><div class="kv"><span class="text-muted">Proveedor</span><span class="text-hub font-bold">Anthropic Claude</span></div><div class="kv"><span class="text-muted">Modelo</span><span class="text-hub" style="font-family:monospace">claude-sonnet-4-6</span></div><div class="kv"><span class="text-muted">DeepSeek (BYOK)</span><span class="text-hub text-sm" style="color:var(--hub-deep)">Key configurada</span></div><div class="kv"><span class="text-muted">Qwen (BYOK)</span><span class="text-hub text-sm" style="color:var(--hub-deep)">No configurado</span></div></div></div>`,
+    agent:`<div class="view"><div class="brain"><div class="flex items-center gap-sm"><div style="width:32px;height:32px;border-radius:10px;background:rgba(245,166,35,.16);border:1px solid rgba(245,166,35,.4);display:grid;place-items:center;color:var(--agent);font-size:16px">${lucide("email",22)}</div><h3 style="margin:0;font-size:14px;font-weight:600">Agente IA ${MODES[modeIdx]}<span style="display:block;font-size:11px;color:#9FB4C4;font-weight:400;margin-top:2px">Proveedor: Anthropic Claude · Modelo: claude-sonnet-4-6</span></h3></div><div class="agmetrics"><div class="am"><b>94%</b><small>Was Correct</small></div><div class="am"><b>92%</b><small>Indistinguibilidad</small></div><div class="am"><b>87%</b><small>Resol. autonomia</small></div></div></div><div class="section">Metricas de calidad IA</div><div class="kpis"><div class="kpi"><div class="kpi-label">Was Correct</div><div class="kpi-value" style="color:var(--good)">94<small>%</small></div></div><div class="kpi"><div class="kpi-label">Indistinguibilidad</div><div class="kpi-value" style="color:var(--hub)">92<small>%</small></div></div><div class="kpi"><div class="kpi-label">Resol. autonoma</div><div class="kpi-value">87<small>%</small></div></div><div class="kpi"><div class="kpi-label">Latencia media</div><div class="kpi-value">1.45s</div></div></div><div class="section">Configuracion del proveedor IA</div><div class="card" style="padding:14px"><div class="kv"><span class="text-muted">Proveedor activo</span><span class="text-hub font-bold">Anthropic Claude</span></div><div class="kv"><span class="text-muted">BYOK</span><span class="text-hub" style="color:var(--hub-deep)">Usando key del tenant</span></div><div class="kv"><span class="text-muted">Fallback</span><span class="text-hub" style="color:var(--hub-deep)">DeepSeek</span></div></div><div class="section">Autonomia</div><div class="card" style="padding:12px"><div class="feat"><div class="switch on"><i></i></div><span>Fuera de horario laboral</span></div><div class="feat"><div class="switch on"><i></i></div><span>Consultas frecuentes en horario</span></div><div class="feat"><div class="switch off"><i></i></div><span>Cotizaciones y ordenes</span></div></div><div class="section">Siempre escala a humano</div><div class="list"><div class="row px-lg py-sm flex items-center gap"><span class="text-sm">Queja detectada</span></div><div class="row px-lg py-sm flex items-center gap"><span class="text-sm">Cliente VIP</span></div><div class="row px-lg py-sm flex items-center gap"><span class="text-sm">Monto mayor a umbral</span></div><div class="row px-lg py-sm flex items-center gap"><span class="text-sm">Solicitud legal</span></div><div class="row px-lg py-sm flex items-center gap"><span class="text-sm">El cliente pide hablar con una persona</span></div></div></div>`,
+    settings:`<div class="view"><div class="section">Integraciones del ecosistema</div><div class="list"><div class="row px-lg py-sm flex items-center gap"><span class="font-bold">NUCLEO</span><span class="text-xs text-muted ml-auto">ERP · CRM · facturacion</span><span class="badge badge-good">Activo</span></div><div class="row px-lg py-sm flex items-center gap"><span class="font-bold">OMEGA</span><span class="text-xs text-muted ml-auto">Brand Voice</span><span class="badge badge-good">Activo</span></div><div class="row px-lg py-sm flex items-center gap"><span class="font-bold">POS</span><span class="text-xs text-muted ml-auto">Recibos digitales</span><span class="badge badge-good">Activo</span></div><div class="row px-lg py-sm flex items-center gap"><span class="font-bold">TABLE</span><span class="text-xs text-muted ml-auto">Reservas</span><span class="badge badge-good">Activo</span></div><div class="row px-lg py-sm flex items-center gap"><span class="font-bold">SAFE</span><span class="text-xs text-muted ml-auto">Auditoria continua</span><span class="badge badge-good">Activo</span></div></div><div class="section">Preferencias</div><div class="card" style="padding:14px"><div class="feat"><span class="font-bold">Idioma</span><span class="text-hub ml-auto">Espanol</span></div><div class="feat" style="margin-top:8px"><span class="font-bold">Tema</span><div class="switch off ml-auto"><i></i></div></div></div></div>`
+  };
+  $id("panelCenter").innerHTML=pages[curTab]||pages.inbox;
 }
+$id("modeBtn").onclick=cycleMode;
 render();
 </script>
 </body>
