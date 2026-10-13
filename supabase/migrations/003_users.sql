@@ -32,6 +32,30 @@ CREATE INDEX idx_users_online ON users(tenant_id, is_online) WHERE is_online = t
 CREATE TRIGGER trg_users_updated_at BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION _set_updated_at();
 
+-- 4b. HELPERS GLOBALES (reemplazan las stubs de 001_initial.sql ahora que users existe)
+CREATE OR REPLACE FUNCTION current_tenant() RETURNS uuid
+  LANGUAGE sql STABLE SECURITY INVOKER AS $$
+  SELECT COALESCE(
+    current_setting('app.tenant_id', true)::uuid,
+    (SELECT tenant_id FROM users WHERE id = auth.uid())
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION is_hub_admin() RETURNS boolean
+  LANGUAGE sql STABLE SECURITY INVOKER AS $$
+  SELECT EXISTS(SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('owner','admin','superadmin'));
+$$;
+
+CREATE OR REPLACE FUNCTION is_hub_owner() RETURNS boolean
+  LANGUAGE sql STABLE SECURITY INVOKER AS $$
+  SELECT EXISTS(SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('owner','superadmin'));
+$$;
+
+CREATE OR REPLACE FUNCTION is_superadmin() RETURNS boolean
+  LANGUAGE sql STABLE SECURITY INVOKER AS $$
+  SELECT EXISTS(SELECT 1 FROM users WHERE id = auth.uid() AND role = 'superadmin');
+$$;
+
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "users_read_own_tenant" ON users FOR SELECT
   USING (tenant_id = current_tenant() OR is_superadmin() OR id = auth.uid());

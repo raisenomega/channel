@@ -33,3 +33,6 @@ desktop.ini
 *placeholder*.sql
 *sample*.sql
 *dummy*.sql
+
+# Supabase CLI state (local, no versionar)
+supabase/.temp/

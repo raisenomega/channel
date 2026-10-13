@@ -13,27 +13,28 @@ CREATE EXTENSION IF NOT EXISTS pg_cron SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS http SCHEMA extensions;
 
 -- 2. HELPERS GLOBALES
+-- OJO: estas 4 funciones dependen de la tabla users, que aún no existe en esta
+-- migración (se crea en 003_users.sql). Por eso aquí solo se define una versión
+-- independiente de users; la versión completa (con fallback a users) se
+-- reemplaza con CREATE OR REPLACE dentro de 003_users.sql.
 CREATE OR REPLACE FUNCTION current_tenant() RETURNS uuid
   LANGUAGE sql STABLE SECURITY INVOKER AS $$
-  SELECT COALESCE(
-    current_setting('app.tenant_id', true)::uuid,
-    (SELECT tenant_id FROM users WHERE id = auth.uid())
-  );
+  SELECT current_setting('app.tenant_id', true)::uuid;
 $$;
 
 CREATE OR REPLACE FUNCTION is_hub_admin() RETURNS boolean
   LANGUAGE sql STABLE SECURITY INVOKER AS $$
-  SELECT EXISTS(SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('owner','admin','superadmin'));
+  SELECT false;
 $$;
 
 CREATE OR REPLACE FUNCTION is_hub_owner() RETURNS boolean
   LANGUAGE sql STABLE SECURITY INVOKER AS $$
-  SELECT EXISTS(SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('owner','superadmin'));
+  SELECT false;
 $$;
 
 CREATE OR REPLACE FUNCTION is_superadmin() RETURNS boolean
   LANGUAGE sql STABLE SECURITY INVOKER AS $$
-  SELECT EXISTS(SELECT 1 FROM users WHERE id = auth.uid() AND role = 'superadmin');
+  SELECT false;
 $$;
 
 CREATE OR REPLACE FUNCTION _set_updated_at() RETURNS trigger
