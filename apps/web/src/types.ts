@@ -39,3 +39,11 @@ export interface InboxItem {
   readonly slaViolated: boolean;
   readonly mode: "human" | "assistant" | "copilot" | "autonomous" | "escalated";
 }
+
+export interface AppContext {
+  readonly uid: string;
+  readonly email: string;
+  readonly tenantId: string;
+  readonly tenantName: string;
+  readonly tenantPlan: string;
+}

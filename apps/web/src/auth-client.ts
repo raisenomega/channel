@@ -6,9 +6,10 @@
 import { Result, err, ok } from "../../../src/shared/domain/result.ts";
 
 export interface TenantKey {
-  readonly id: string;
+  readonly tenantId: string;
   readonly name: string;
   readonly plan: string;
+  readonly slug: string;
 }
 
 export interface SessionUsuario {
