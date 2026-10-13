@@ -24,7 +24,7 @@ export type AdapterError =
   | { readonly kind: "unknown"; readonly cause: string };
 
 export interface ChannelAdapter {
-  readonly provider: "zernio" | "meta_direct" | "resend" | "360dialog" | "twilio";
+  readonly provider: "zernio" | "meta_direct" | "resend" | "360dialog" | "twilio" | "dev";
   readonly supportedChannels: readonly ChannelType[];
 
   sendMessage(msg: OutboundMessage): Promise<Result<void, AdapterError>>;

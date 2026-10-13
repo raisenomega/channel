@@ -54,9 +54,12 @@ export async function enviarMensaje(
   senderId: string,
 ): Promise<Result<Mensaje, MensajeError>> {
   const sesion = auth.leer();
-  const { supabaseUrl, anonKey } = cfg();
+  const { supabaseUrl, anonKey, devChannelEnabled } = cfg();
   if (!sesion) return err({ kind: "sin_sesion" });
   if (!supabaseUrl || !anonKey) return err({ kind: "red", cause: "config_incompleta" });
+
+  // Conectado al dev-channel: persiste en la misma tabla `messages` que DevChannelAdapter.
+  const provider = devChannelEnabled ? "dev" : "";
 
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/messages`, {
@@ -69,6 +72,7 @@ export async function enviarMensaje(
       body: JSON.stringify({
         conversation_id: conversationId, sender_type: "agent",
         sender_id: senderId, content, message_type: "text",
+        ...(provider ? { provider } : {}),
       }),
     });
     if (res.status === 401 || res.status === 403) return err({ kind: "no_autorizado" });

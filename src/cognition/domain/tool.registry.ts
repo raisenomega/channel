@@ -1,58 +1,29 @@
-export type ContentType =
-  | "text" | "template" | "image" | "video" | "audio" | "document"
-  | "location" | "contact_card" | "sticker" | "reaction" | "system_event";
+/**
+ * HUB by Raisen — Tool Registry (BC Cognition).
+ * Agrega los registros parciales (comms, commerce, ops) en un unico
+ * TOOL_REGISTRY inmutable. Separacion por archivos para cumplir C4.
+ *
+ * Total: 16 tools. Sin any.
+ */
+import type { ToolDef } from "./tool.types.ts";
+import { COMMS_TOOLS } from "./tool.registry.comms.ts";
+import { COMMERCE_TOOLS } from "./tool.registry.commerce.ts";
+import { OPS_TOOLS } from "./tool.registry.ops.ts";
 
-export interface ToolDef {
-  readonly name: string;
-  readonly description: string;
-  readonly parameters: Readonly<Record<string, unknown>>;
-  readonly minConfidence: number;
-  readonly requiresSafeEvaluation: boolean;
-  readonly preconditions: readonly string[];
-  readonly escalationTriggers: readonly string[];
-}
+export type { ContentType, ToolDef } from "./tool.types.ts";
 
-export const TOOL_REGISTRY: Readonly<Record<string, ToolDef>> = Object.freeze({
-  send_message: Object.freeze({
-    name: "send_message", description: "Enviar mensaje al contacto",
-    parameters: Object.freeze({ channel: "string", contactId: "string", text: "string" }),
-    minConfidence: 0.7, requiresSafeEvaluation: false,
-    preconditions: Object.freeze([]),
-    escalationTriggers: Object.freeze([]),
-  }),
-  create_quote: Object.freeze({
-    name: "create_quote", description: "Crear cotizacion para el contacto",
-    parameters: Object.freeze({ contactId: "string", items: "array", total: "number" }),
-    minConfidence: 0.9, requiresSafeEvaluation: true,
-    preconditions: Object.freeze(["contacto_existe", "items_no_vacio"]),
-    escalationTriggers: Object.freeze(["monto_supera_umbral"]),
-  }),
-  send_payment_link: Object.freeze({
-    name: "send_payment_link", description: "Enviar enlace de pago",
-    parameters: Object.freeze({ orderId: "string", channel: "string" }),
-    minConfidence: 0.9, requiresSafeEvaluation: true,
-    preconditions: Object.freeze(["order_existe", "monto_valido", "conversacion_no_bloqueada", "confianza_supera_07"]),
-    escalationTriggers: Object.freeze([]),
-  }),
+const LEYENDAS: Readonly<Record<string, ToolDef>> = Object.freeze({
   escalate_to_human: Object.freeze({
-    name: "escalate_to_human", description: "Escalar a un agente humano",
+    name: "escalate_to_human", description: "Escalar a un agente humano (alias)",
     parameters: Object.freeze({ conversationId: "string", reason: "string", context: "object" }),
     minConfidence: 0.0, requiresSafeEvaluation: false,
-    preconditions: Object.freeze([]),
-    escalationTriggers: Object.freeze([]),
+    preconditions: Object.freeze([]), escalationTriggers: Object.freeze([]),
   }),
-  check_table_availability: Object.freeze({
-    name: "check_table_availability", description: "Verificar mesas disponibles (TABLE)",
-    parameters: Object.freeze({ datetime: "string", partySize: "number" }),
-    minConfidence: 0.7, requiresSafeEvaluation: false,
-    preconditions: Object.freeze([]),
-    escalationTriggers: Object.freeze([]),
-  }),
-  get_fleet_delivery_status: Object.freeze({
-    name: "get_fleet_delivery_status", description: "Consultar estado de entrega (FLEET)",
-    parameters: Object.freeze({ orderId: "string" }),
-    minConfidence: 0.7, requiresSafeEvaluation: false,
-    preconditions: Object.freeze([]),
-    escalationTriggers: Object.freeze([]),
-  }),
+});
+
+export const TOOL_REGISTRY: Readonly<Record<string, ToolDef>> = Object.freeze({
+  ...COMMS_TOOLS,
+  ...COMMERCE_TOOLS,
+  ...OPS_TOOLS,
+  ...LEYENDAS,
 });

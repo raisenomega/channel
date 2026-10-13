@@ -10,12 +10,18 @@ export interface MensajeError {
 interface HubCfg {
   readonly supabaseUrl: string;
   readonly anonKey: string;
+  /** Canal simulado de desarrollo: enruta la escritura via dev-channel. */
+  readonly devChannelEnabled: boolean;
 }
 
 export function cfg(): HubCfg {
   const g = globalThis as Record<string, unknown>;
-  const c = g.__HUB_CONFIG__ as HubCfg | undefined;
-  return { supabaseUrl: c?.supabaseUrl ?? "", anonKey: c?.anonKey ?? "" };
+  const c = g.__HUB_CONFIG__ as Partial<HubCfg> | undefined;
+  return {
+    supabaseUrl: c?.supabaseUrl ?? "",
+    anonKey: c?.anonKey ?? "",
+    devChannelEnabled: c?.devChannelEnabled === true,
+  };
 }
 
 export const enc = (s: string): string => encodeURIComponent(s);

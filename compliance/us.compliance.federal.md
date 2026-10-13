@@ -9,7 +9,7 @@
 
 ## Disclosure de IA (SB-1001)
 HUB añade disclaimer configurable si el contacto está en California o pregunta
-"¿eres un bot?". Ver `product/prd.product.principios.md` (excepción legal de HP6).
+"¿eres un bot?". Ver `docs-hub/product/prd.product.principios.md` (excepción legal de HP6).
 
 ## Consentimiento
 - SMS: opt-in expreso antes de enviar (TCPA).

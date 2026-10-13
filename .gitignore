@@ -8,6 +8,9 @@ dist/
 
 # Documentación estratégica (NUNCA se commitea)
 docs-hub/
+product/
+shared-kernel/
+meta/
 master_hub.md
 SOURCE_OF_TRUTH_HUB.md
 metodo-hub.md

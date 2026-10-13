@@ -197,6 +197,40 @@ vercel --prod
 
 ---
 
+## Canales (P1): simulacion vs reales
+
+### Canal simulado (dev-channel) — funcionamiento en local
+
+Para que **al menos un canal envíe un mensaje real** sin depender de proveedores
+externos, existe el **canal simulado** (`src/channels/infrastructure/dev-channel.adapter.ts`).
+
+- Su `sendMessage` **no hace fetch a una URL**: escribe el mensaje directamente en la
+  tabla `messages` via Supabase (como si recibiera un mensaje de prueba local).
+- Requiere configurar los ids de la conversacion/contacto/tenant de prueba en
+  `.env.development` (se crean con `scripts/setup-canales.sh`):
+  `DEV_CONVERSATION_ID`, `DEV_CONTACT_ID`, `DEV_TENANT_ID`.
+- El composer del chat thread (`apps/web`) escribe en la misma tabla `messages`
+  cuando `devChannelEnabled` esta activo en la config del frontend.
+
+```bash
+# Setup/credenciales del canal simulado
+bash scripts/setup-canales.sh
+```
+
+### Canales reales (Zernio / Resend) — P1 pendiente de API keys reales
+
+| Canal | Proveedor | Requerido para envio real |
+|-------|-----------|---------------------------|
+| WhatsApp / IG / FB / Telegram / SMS / X / LinkedIn | Zernio | `ZERNIO_API_KEY` real |
+| Email | Resend | `RESEND_API_KEY` real |
+
+> **P1:** Los adapters `zernio.adapter.ts` y `resend.adapter.ts` apuntan a URLs
+> operativas de cada proveedor, pero **sin API keys reales no pueden enviar mensajes
+> reales**. El `dev-channel` cubre ese hueco en desarrollo; el paso a producción
+> requiere configurar las keys reales (nunca en el codigo, siempre en entorno).
+
+---
+
 ## Variables de entorno requeridas (.env)
 
 ```bash

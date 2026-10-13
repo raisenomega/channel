@@ -5,7 +5,8 @@
   "description": "HUB by Raisen — Plataforma 12: comunicacion omnicanal con opcion de autonomia IA",
   "type": "module",
   "scripts": {
-    "dev": "echo 'FASE 0: estructura scaffolding lista para desarrollo'",
+    "dev": "bash scripts/start-server.sh",
+    "start": "bash scripts/start-server.sh",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",

@@ -25,7 +25,7 @@ import { cargarSafe } from "./safe-client.ts";
 import { cargarMetricasAgente } from "./agent-metrics-client.ts";
 
 interface HubConfigGlobal {
-  __HUB_CONFIG__?: { supabaseUrl: string; anonKey: string };
+  __HUB_CONFIG__?: { supabaseUrl: string; anonKey: string; devChannelEnabled?: boolean };
 }
 
 const FASE = "FASE_F";

@@ -10,9 +10,9 @@ El repo remoto (`github.com/raisenomega/hub`) contiene solo código.
 
 ## Estándar de gobierno
 - **Cero Tolerancia**: DDD 4 capas, archivos ≤75 líneas, responsabilidad única.
-- Reglas: `shared-kernel/estandar.shared-kernel.reglas.md`
-- Capas: `shared-kernel/estandar.shared-kernel.capas.md`
-- Nombres: `shared-kernel/estandar.shared-kernel.nombres.md`
+- Reglas: `docs-hub/shared-kernel/estandar.shared-kernel.reglas.md`
+- Capas: `docs-hub/shared-kernel/estandar.shared-kernel.capas.md`
+- Nombres: `docs-hub/shared-kernel/estandar.shared-kernel.nombres.md`
 
 ## Bounded Contexts (22)
 `inbox` · `channels` · `contacts` · `conversations` · `messages` · `quotes` ·
@@ -23,11 +23,11 @@ El repo remoto (`github.com/raisenomega/hub`) contiene solo código.
 ## Estructura (capas DDD)
 | Carpeta | Responsabilidad |
 |---|---|
-| `shared-kernel/` | Estándar Cero-Tolerancia |
-| `product/` | PRD: visión, canales, modos, precios |
+| `docs-hub/shared-kernel/` | Estándar Cero-Tolerancia |
+| `docs-hub/product/` | PRD: visión, canales, modos, precios |
 | `architecture/` | Stack, diagrama, gobernanza, design system |
 | `data-schema/` | Tablas por BC (RLS, índices) |
 | `domain/` · `application/` · `infrastructure/` | Capas DDD por contexto |
 
 ## Índice maestro
-→ `meta/indice.maestro.meta.md` · Estado real → `meta/source-of-truth.meta.md`
+→ `docs-hub/meta/indice.maestro.meta.md` · Estado real → `docs-hub/meta/source-of-truth.meta.md`
