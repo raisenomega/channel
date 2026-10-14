@@ -1,0 +1,188 @@
+/* ===== HUB Ultra-Dashboard — BentoBox Glass ===== */
+
+/* Contenedor bento: grid 12 columnas responsivo */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+}
+
+/* Celdas por tamaño (desktop) */
+.bento-col-3 { grid-column: span 3; }
+.bento-col-4 { grid-column: span 4; }
+.bento-col-5 { grid-column: span 5; }
+.bento-col-6 { grid-column: span 6; }
+.bento-col-7 { grid-column: span 7; }
+.bento-col-8 { grid-column: span 8; }
+.bento-col-9 { grid-column: span 9; }
+.bento-col-12 { grid-column: span 12; }
+
+/* Tarjeta glass con glow */
+.bento-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 16px;
+  background: linear-gradient(160deg, hsl(var(--card) / 0.92), hsl(var(--card-soft) / 0.55));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid hsl(var(--border) / 0.35);
+  box-shadow:
+    0 10px 40px -18px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 0 hsl(var(--primary) / 0.08);
+  transition: transform 0.2s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.bento-card:hover {
+  border-color: hsl(var(--primary) / 0.55);
+  box-shadow:
+    0 14px 48px -16px rgba(0, 0, 0, 0.7),
+    0 0 0 1px hsl(var(--primary) / 0.16),
+    0 0 26px -8px hsl(var(--primary) / 0.35);
+  transform: translateY(-2px);
+}
+
+/* Resplandor superior (ambient glow) */
+.bento-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.55), transparent);
+  opacity: 0.6;
+}
+
+/* Orbe de luz de fondo (3D futuristico) */
+.bento-card::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -60px;
+  top: -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.18), transparent 65%);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Encabezado de tarjeta */
+.bento-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: hsl(var(--text-muted));
+  margin-bottom: 12px;
+}
+.bento-title .ico {
+  display: inline-flex;
+  color: hsl(var(--primary));
+}
+
+/* KPI vitals (numero grande sobre glass) */
+.bento-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bento-stat .num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
+  line-height: 1;
+  text-shadow: 0 0 22px hsl(var(--primary) / 0.35);
+}
+.bento-stat .num small {
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(var(--text-dim));
+  margin-left: 4px;
+}
+.bento-stat .trend {
+  font-size: 12px;
+  color: hsl(var(--success));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.bento-stat .trend.down { color: hsl(var(--critical)); }
+
+/* Chip de estado live */
+.bento-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: hsl(var(--success));
+  border: 1px solid hsl(var(--success) / 0.4);
+  background: hsl(var(--success) / 0.1);
+}
+.bento-live::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: hsl(var(--success));
+  box-shadow: 0 0 8px hsl(var(--success));
+  animation: pulse-glow 1.8s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* Pendientes: lista de acciones */
+.bento-pending {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bento-pending li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid hsl(var(--border) / 0.22);
+}
+.bento-pending li:last-child { border-bottom: none; }
+.bento-pending .dotx {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.bento-pending .dotx.from-zernio { background: hsl(var(--process)); box-shadow: 0 0 8px hsl(var(--process)); }
+.bento-pending .dotx.to-send { background: hsl(var(--primary)); box-shadow: 0 0 8px hsl(var(--primary)); }
+.bento-pending .dotx.sla-risk { background: hsl(var(--medium)); box-shadow: 0 0 8px hsl(var(--medium)); }
+.bento-pending .dotx.vip { background: hsl(var(--success)); box-shadow: 0 0 8px hsl(var(--success)); }
+.bento-pending .tx { flex: 1; min-width: 0; }
+.bento-pending .tx b { display: block; font-size: 13.5px; color: hsl(var(--foreground)); }
+.bento-pending .tx span { display: block; font-size: 12px; color: hsl(var(--text-muted)); }
+
+/* Ajustes de recharts dentro de las tarjetas (borde latente) */
+.chart-hint {
+  font-size: 11px;
+  color: hsl(var(--text-dim));
+  margin-top: 6px;
+}
+
+/* Responsive: colapsa a 1 o 2 columnas */
+@media (max-width: 900px) {
+  .bento-col-3, .bento-col-4, .bento-col-5,
+  .bento-col-6, .bento-col-7, .bento-col-8,
+  .bento-col-9, .bento-col-12 { grid-column: span 6; }
+}
+@media (max-width: 600px) {
+  .bento-col-3, .bento-col-4, .bento-col-5,
+  .bento-col-6, .bento-col-7, .bento-col-8,
+  .bento-col-9, .bento-col-12 { grid-column: span 12; }
+  .bento-stat .num { font-size: 28px; }
+}
