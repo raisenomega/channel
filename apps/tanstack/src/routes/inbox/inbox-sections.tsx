@@ -1,0 +1,41 @@
+/**
+ * HUB by Raisen — Barra de filtros del dashboard /inbox.
+ */
+import type { Idioma } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { ESTADOS } from "./inbox-mappers";
+
+export function FiltersBar({ language, canalesActivos, filtroEstado, filtroSLA, onEstado, onSLA, onClean, onCanalNav }: {
+  language: Idioma;
+  canalesActivos: readonly string[];
+  filtroEstado: string | null;
+  filtroSLA: boolean | null;
+  onEstado: (e: string) => void;
+  onSLA: () => void;
+  onClean: () => void;
+  onCanalNav: (c: string) => void;
+}) {
+  return (
+    <div className="bento-card bento-col-12 mt-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t(language, "inbox.channels")}:</span>
+        {(canalesActivos.length ? canalesActivos : ["whatsapp", "email", "instagram"]).map((c) => (
+          <button key={c} type="button" className="chip" onClick={() => onCanalNav(c)}>
+            <span className="chip-name">{t(language, "canal." + c)}</span>
+          </button>
+        ))}
+        {ESTADOS.map((e) => (
+          <button key={e} type="button" className={"chip" + (e === filtroEstado ? " active" : "")} onClick={() => onEstado(e)}>
+            <span className="chip-name">{t(language, "filtro.estado." + e)}</span>
+          </button>
+        ))}
+        <button type="button" className={"chip" + (filtroSLA === true ? " active" : "")} onClick={onSLA}>
+          <span className="chip-name">{filtroSLA === true ? t(language, "filtro.sla.violated") : t(language, "inbox.filtros.sla")}</span>
+        </button>
+        <button type="button" className="chip" onClick={onClean}>
+          <span className="chip-name text-muted-foreground">{t(language, "filtro.clean")}</span>
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,1 @@
+export const DIAS = ["sla.day.0", "sla.day.1", "sla.day.2", "sla.day.3", "sla.day.4", "sla.day.5", "sla.day.6"];

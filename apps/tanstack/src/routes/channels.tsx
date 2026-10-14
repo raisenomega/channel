@@ -1,22 +1,15 @@
 /**
- * HUB by Raisen — Canales (/channels).
- * Catálogo de canales disponibles con su estado real desde `inboxes`.
- * Cada tarjeta expande configuración (API key, proveedor, autonomía).
- * Sin datos mock: si no hay canales en la base, se muestra vacío honesto (N5).
+ * HUB by Raisen — Canales (/channels). Sin datos mock (N5).
  */
 import { useState } from "react";
-import { createRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
-import { listarCanales, toggleCanal, type Channel } from "@/lib/channels-client";
-import type { ChannelKind } from "@/components/ui/channel-icon";
-import { ChannelIcon } from "@/components/ui/channel-icon";
-import { Card, CardHeader, CardBody, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { CATALOGO } from "./channels-ui/channels-data";
+import { useCanales } from "./channels-ui/channels-fetchers";
+import { ChannelCard } from "./channels-ui/channel-card";
 
 export const ChannelsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -24,49 +17,15 @@ export const ChannelsRoute = createRoute({
   component: ChannelsPage,
 });
 
-const CATALOGO: readonly ChannelKind[] = [
-  "whatsapp", "email", "instagram", "facebook", "telegram",
-  "sms", "x", "linkedin", "webchat",
-];
-
-const TONE: Readonly<Record<Channel["state"], "success" | "warn" | "process">> = {
-  conectado: "success",
-  desconectado: "warn",
-  autonomo: "process",
-};
-
 function ChannelsPage() {
   const { language } = usePreferences();
-  const navigate = useNavigate();
   const [abierto, setAbierto] = useState<string | null>(null);
-  const [err, setErr] = useState(false);
-
-  const { data, isPending, refetch } = useQuery({
-    queryKey: ["channels"],
-    queryFn: async () => {
-      const r = await listarCanales();
-      if (!r.ok) {
-        if (r.error.kind === "config_incompleta") {
-          // Sin sesion valida -> redirigir a login.
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
-          }
-        }
-        setErr(true);
-        return [];
-      }
-      setErr(false);
-      return r.value;
-    },
-    staleTime: 30_000,
-  });
+  const { data, isPending, err, refetch } = useCanales();
 
   if (isPending) {
     return (
       <div className="view">
-        <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-          {t(language, "channels.loading")}
-        </div>
+        <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t(language, "channels.loading")}</div>
       </div>
     );
   }
@@ -76,9 +35,7 @@ function ChannelsPage() {
       <div className="view">
         <div className="flex flex-col items-center gap-3 rounded-2xl glass-card p-6 text-center">
           <p className="text-sm text-muted-foreground">{t(language, "channels.error")}</p>
-          <Button variant="outline" size="sm" onClick={() => void refetch()}>
-            {t(language, "channels.retry")}
-          </Button>
+          <Button variant="outline" size="sm" onClick={() => void refetch()}>{t(language, "channels.retry")}</Button>
         </div>
       </div>
     );
@@ -100,108 +57,17 @@ function ChannelsPage() {
       ) : null}
 
       <div className="grid gap-3 md:grid-cols-2">
-        {CATALOGO.map((kind) => {
-          const canal = porKind.get(kind);
-          const state = canal?.state ?? "desconectado";
-          const esAbierto = abierto === kind;
-          return (
-            <Card
-              key={kind}
-              className={canal ? "cursor-pointer" : "cursor-pointer opacity-80"}
-              role="button"
-              tabIndex={0}
-              onClick={() => void navigate({ to: "/channels/$channelId", params: { channelId: kind } })}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  void navigate({ to: "/channels/$channelId", params: { channelId: kind } });
-                }
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-primary">
-                  <ChannelIcon kind={kind} className="size-6" />
-                </span>
-                <div className="flex-1">
-                  <CardTitle className="text-sm">{t(language, "canal." + kind)}</CardTitle>
-                </div>
-                <Badge tone={TONE[state]} dot>
-                  {t(language, "channels.state." + state)}
-                </Badge>
-              </div>
-
-              <CardHeader className="mb-2 mt-3 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {t(language, "channels.active")}
-                </span>
-                <span
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
-                >
-                  <Switch
-                    checked={canal?.active ?? false}
-                    disabled={!canal}
-                    onChange={(v) => onToggle(canal, v)}
-                  />
-                </span>
-              </CardHeader>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setAbierto(esAbierto ? null : kind);
-                }}
-              >
-                {t(language, "channels.config")}
-              </Button>
-
-              {esAbierto ? (
-                <CardBody className="mt-2 border-t border-border/40 pt-3">
-                  <ConfigRows language={language} canal={canal} kind={kind} />
-                </CardBody>
-              ) : null}
-            </Card>
-          );
-        })}
+        {CATALOGO.map((kind) => (
+          <ChannelCard
+            key={kind}
+            language={language}
+            kind={kind}
+            canal={porKind.get(kind)}
+            esAbierto={abierto === kind}
+            onToggleExpand={() => setAbierto(abierto === kind ? null : kind)}
+          />
+        ))}
       </div>
     </div>
   );
-}
-
-function ConfigRows({
-  language, canal, kind,
-}: {
-  language: Parameters<typeof t>[0];
-  canal: Channel | undefined;
-  kind: ChannelKind;
-}) {
-  return (
-    <>
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">{t(language, "channels.provider")}</span>
-        <span className="text-foreground">
-          {canal?.provider ?? t(language, "channels.providerNone")}
-        </span>
-      </div>
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">{t(language, "channels.syncStatus")}</span>
-        <span className="text-foreground">
-          {canal?.syncStatus ?? t(language, "channels.providerNone")}
-        </span>
-      </div>
-      {!canal ? (
-        <p className="text-xs text-muted-foreground">
-          {t(language, "channels.emptyBody")} ({t(language, "canal." + kind)})
-        </p>
-      ) : null}
-    </>
-  );
-}
-
-function onToggle(canal: Channel | undefined, v: boolean) {
-  if (!canal) return;
-  void toggleCanal(canal.id, v);
 }
