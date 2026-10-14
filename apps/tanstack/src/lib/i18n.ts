@@ -200,6 +200,7 @@ const ES: Dict = {
   "cf.documentos": "Documentos",
   "cf.tabsLabel": "Pestañas de negocio",
   "cf.convTitle": "Conversación",
+  "cf.convSelect": "Selecciona una conversación",
   "cf.convSub": "Selecciona una conversación en el celular o una pestaña para empezar.",
 
   "agent.providerConfig": "Configuración del proveedor",
@@ -584,6 +585,7 @@ const EN: Dict = {
   "cf.documentos": "Documents",
   "cf.tabsLabel": "Business tabs",
   "cf.convTitle": "Conversation",
+  "cf.convSelect": "Select a conversation",
   "cf.convSub": "Select a conversation on the phone or a tab to get started.",
 
   "agent.providerConfig": "Provider config",
