@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { AcceptQuoteHandler, AcceptQuoteCommand } from "../../../src/commerce/application/accept-quote.handler.ts";
 import { QuoteRepository, OrderRepository, RepoError } from "../../../src/commerce/domain/commerce.repository.ts";
@@ -22,7 +22,7 @@ const quoteFixture: QuoteState = Object.freeze({
   createdAt: new Date(),
 });
 
-Deno.test("AcceptQuoteHandler — debe aceptar quote y crear order exitosamente", async () => {
+test("AcceptQuoteHandler â€” debe aceptar quote y crear order exitosamente", async () => {
   let quoteGuardada: QuoteState | undefined;
   let orderGuardada: OrderState | undefined;
 
@@ -47,17 +47,17 @@ Deno.test("AcceptQuoteHandler — debe aceptar quote y crear order exitosamente"
   const cmd: AcceptQuoteCommand = { quoteId: QID };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(typeof result.value, "string");
+  expect(result.ok).toBe(true);
+  expect(typeof result.value).toBe("string");
   // La quote debe quedar como "accepted"
-  assert(quoteGuardada !== undefined);
-  assertEquals(quoteGuardada!.status, "accepted");
+  expect(quoteGuardada !== undefined).toBe(true);
+  expect(quoteGuardada!.status).toBe("accepted");
   // La order debe tener el quoteId vinculado
-  assert(orderGuardada !== undefined);
-  assertEquals(orderGuardada!.quoteId, QID);
+  expect(orderGuardada !== undefined).toBe(true);
+  expect(orderGuardada!.quoteId).toBe(QID);
 });
 
-Deno.test("AcceptQuoteHandler — debe fallar si quoteRepo.buscar devuelve error", async () => {
+test("AcceptQuoteHandler â€” debe fallar si quoteRepo.buscar devuelve error", async () => {
   const mockQuoteRepo: QuoteRepository = {
     buscar: async (_id) => err({ kind: "persistence_failure", cause: "db_down" }),
     guardar: async (_q) => ok(undefined),
@@ -72,11 +72,11 @@ Deno.test("AcceptQuoteHandler — debe fallar si quoteRepo.buscar devuelve error
   const cmd: AcceptQuoteCommand = { quoteId: QID };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
 });
 
-Deno.test("AcceptQuoteHandler — debe fallar si la quote no existe (null)", async () => {
+test("AcceptQuoteHandler â€” debe fallar si la quote no existe (null)", async () => {
   const mockQuoteRepo: QuoteRepository = {
     buscar: async (_id) => ok(null),
     guardar: async (_q) => ok(undefined),
@@ -91,11 +91,11 @@ Deno.test("AcceptQuoteHandler — debe fallar si la quote no existe (null)", asy
   const cmd: AcceptQuoteCommand = { quoteId: QID };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "cotizacion_no_encontrada");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("cotizacion_no_encontrada");
 });
 
-Deno.test("AcceptQuoteHandler — debe fallar si quoteRepo.guardar falla", async () => {
+test("AcceptQuoteHandler â€” debe fallar si quoteRepo.guardar falla", async () => {
   const mockQuoteRepo: QuoteRepository = {
     buscar: async (_id) => ok(quoteFixture),
     guardar: async (_q) => err({ kind: "persistence_failure", cause: "disk_full" }),
@@ -110,11 +110,11 @@ Deno.test("AcceptQuoteHandler — debe fallar si quoteRepo.guardar falla", async
   const cmd: AcceptQuoteCommand = { quoteId: QID };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
 });
 
-Deno.test("AcceptQuoteHandler — debe fallar si orderRepo.guardar falla", async () => {
+test("AcceptQuoteHandler â€” debe fallar si orderRepo.guardar falla", async () => {
   const mockQuoteRepo: QuoteRepository = {
     buscar: async (_id) => ok(quoteFixture),
     guardar: async (_q) => ok(undefined),
@@ -129,6 +129,6 @@ Deno.test("AcceptQuoteHandler — debe fallar si orderRepo.guardar falla", async
   const cmd: AcceptQuoteCommand = { quoteId: QID };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
 });

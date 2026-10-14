@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { CheckSLAHandler, CheckSLACommand } from "../../../src/automation/application/check-sla.handler.ts";
 import { SLAPolicyRepository, RepoError } from "../../../src/automation/domain/automation.repository.ts";
@@ -29,7 +29,7 @@ const politicaNormal: SLAPolicyState = Object.freeze({
 
 const ALL_POLICIES: SLAPolicyState[] = [politicaUrgente, politicaNormal];
 
-Deno.test("CheckSLAHandler — debe retornar politica si elapsed excede firstResponseSeconds", async () => {
+test("CheckSLAHandler â€” debe retornar politica si elapsed excede firstResponseSeconds", async () => {
   const mockSlaRepo: SLAPolicyRepository = {
     buscarActivas: async (_tid) => ok(ALL_POLICIES),
     guardar: async (_p) => ok(undefined),
@@ -43,12 +43,12 @@ Deno.test("CheckSLAHandler — debe retornar politica si elapsed excede firstRes
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assert(result.value !== null);
-  assertEquals(result.value!.id, "pol-1");
+  expect(result.ok).toBe(true);
+  expect(result.value !== null).toBe(true);
+  expect(result.value!.id).toBe("pol-1");
 });
 
-Deno.test("CheckSLAHandler — debe retornar null si ningun elapsed supera politicas", async () => {
+test("CheckSLAHandler â€” debe retornar null si ningun elapsed supera politicas", async () => {
   const mockSlaRepo: SLAPolicyRepository = {
     buscarActivas: async (_tid) => ok(ALL_POLICIES),
     guardar: async (_p) => ok(undefined),
@@ -62,11 +62,11 @@ Deno.test("CheckSLAHandler — debe retornar null si ningun elapsed supera polit
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value, null);
+  expect(result.ok).toBe(true);
+  expect(result.value).toBe(null);
 });
 
-Deno.test("CheckSLAHandler — debe retornar la primera politica que se cumple (por orden)", async () => {
+test("CheckSLAHandler â€” debe retornar la primera politica que se cumple (por orden)", async () => {
   const policiesOrdenadas = [politicaNormal, politicaUrgente]; // normal first
   const mockSlaRepo: SLAPolicyRepository = {
     buscarActivas: async (_tid) => ok(policiesOrdenadas),
@@ -81,12 +81,12 @@ Deno.test("CheckSLAHandler — debe retornar la primera politica que se cumple (
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
   // Normal tiene 600s, 500 no lo supera, Urgente 60s si -> debe devolver Urgente
-  assertEquals(result.value!.id, "pol-1");
+  expect(result.value!.id).toBe("pol-1");
 });
 
-Deno.test("CheckSLAHandler — debe fallar con persistence_failure si repo falla", async () => {
+test("CheckSLAHandler â€” debe fallar con persistence_failure si repo falla", async () => {
   const mockSlaRepo: SLAPolicyRepository = {
     buscarActivas: async (_tid) => err({ kind: "persistence_failure", cause: "timeout" }),
     guardar: async (_p) => ok(undefined),
@@ -100,12 +100,12 @@ Deno.test("CheckSLAHandler — debe fallar con persistence_failure si repo falla
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
-  assertEquals(result.error.cause, "timeout");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
+  expect(result.error.cause).toBe("timeout");
 });
 
-Deno.test("CheckSLAHandler — debe fallar con causa por defecto si repo no da cause", async () => {
+test("CheckSLAHandler â€” debe fallar con causa por defecto si repo no da cause", async () => {
   const mockSlaRepo: SLAPolicyRepository = {
     buscarActivas: async (_tid) => err({ kind: "not_found" }),
     guardar: async (_p) => ok(undefined),
@@ -119,7 +119,7 @@ Deno.test("CheckSLAHandler — debe fallar con causa por defecto si repo no da c
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
-  assertEquals(result.error.cause, "fallo_persistencia");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
+  expect(result.error.cause).toBe("fallo_persistencia");
 });

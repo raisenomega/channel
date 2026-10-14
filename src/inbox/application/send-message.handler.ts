@@ -3,7 +3,6 @@ import { ConversationId, ContactId, TenantId } from "../../shared/domain/ids.ts"
 import { ChannelType } from "../../shared/domain/types.ts";
 import { crearMensaje, MessageContent, AiMode } from "../domain/message.entity.ts";
 import { ConversationRepository, MessageRepository } from "../domain/inbox.repository.ts";
-import { transicionarStatus } from "../domain/conversation.entity.ts";
 
 export interface SendMessageCommand {
   readonly tenantId: TenantId;
@@ -36,8 +35,8 @@ export class SendMessageHandler {
     const conv = convResult.value;
     if (!conv) return err({ kind: "conversacion_no_encontrada" });
 
-    const transResult = transicionarStatus(conv.status, "open");
-    if (!transResult.ok && conv.status === "resolved") {
+    // Regla de negocio: no se envían mensajes a conversación resuelta
+    if (conv.status === "resolved") {
       return err({ kind: "conversacion_resuelta" });
     }
 

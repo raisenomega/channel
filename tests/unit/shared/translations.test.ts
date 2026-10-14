@@ -1,37 +1,37 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { TRANSLATIONS } from "../../../src/shared/domain/translations.ts";
 import { crearTranslationProvider } from "../../../src/shared/domain/translation-provider.ts";
 
-Deno.test("translations — debe traducir key existente en español", () => {
+test("translations â€” debe traducir key existente en espaÃ±ol", () => {
   const tp = crearTranslationProvider("es", TRANSLATIONS);
-  assertEquals(tp.translate("inbox.title"), "Bandeja de entrada");
-  assertEquals(tp.translate("channel.whatsapp"), "WhatsApp");
-  assertEquals(tp.translate("common.save"), "Guardar");
+  expect(tp.translate("inbox.title")).toBe("Bandeja de entrada");
+  expect(tp.translate("channel.whatsapp")).toBe("WhatsApp");
+  expect(tp.translate("common.save")).toBe("Guardar");
 });
 
-Deno.test("translations — debe traducir key existente en inglés", () => {
+test("translations â€” debe traducir key existente en inglÃ©s", () => {
   const tp = crearTranslationProvider("en", TRANSLATIONS);
-  assertEquals(tp.translate("inbox.title"), "Inbox");
-  assertEquals(tp.translate("common.save"), "Save");
-  assertEquals(tp.translate("auth.login"), "Log in");
+  expect(tp.translate("inbox.title")).toBe("Inbox");
+  expect(tp.translate("common.save")).toBe("Save");
+  expect(tp.translate("auth.login")).toBe("Log in");
 });
 
-Deno.test("translations — debe devolver la key si no existe traducción", () => {
+test("translations â€” debe devolver la key si no existe traducciÃ³n", () => {
   const tp = crearTranslationProvider("es", TRANSLATIONS);
-  assertEquals(tp.translate("key.inexistente"), "key.inexistente");
+  expect(tp.translate("key.inexistente")).toBe("key.inexistente");
 });
 
-Deno.test("translations — debe reemplazar parámetros en la traducción", () => {
+test("translations â€” debe reemplazar parÃ¡metros en la traducciÃ³n", () => {
   const tp = crearTranslationProvider("es", TRANSLATIONS);
   const result = tp.translate("conversation.assigned", { agent: "Ana" });
-  assertEquals(result, "Asignada a Ana");
+  expect(result).toBe("Asignada a Ana");
 });
 
-Deno.test("translations — debe tener todas las keys en ES y EN", () => {
+test("translations â€” debe tener todas las keys en ES y EN", () => {
   const esKeys = Object.keys(TRANSLATIONS.es).sort();
   const enKeys = Object.keys(TRANSLATIONS.en).sort();
-  assertEquals(esKeys.length, enKeys.length, "ES y EN deben tener la misma cantidad de keys");
+  expect(esKeys.length).toBe(enKeys.length) // "ES y EN deben tener la misma cantidad de keys";
   for (let i = 0; i < esKeys.length; i++) {
-    assertEquals(esKeys[i], enKeys[i], `Key '${esKeys[i]}' debe existir en ambos idiomas`);
+    expect(esKeys[i]).toBe(enKeys[i]) // `Key '${esKeys[i]}' debe existir en ambos idiomas`;
   }
 });

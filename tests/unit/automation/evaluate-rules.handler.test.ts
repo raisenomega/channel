@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { EvaluateRulesHandler, EvaluateRulesCommand } from "../../../src/automation/application/evaluate-rules.handler.ts";
 import { AutomationRuleRepository, RepoError } from "../../../src/automation/domain/automation.repository.ts";
@@ -32,7 +32,7 @@ const reglaConCondicion: AutomationRuleState = Object.freeze({
   priority: 2,
 });
 
-Deno.test("EvaluateRulesHandler — debe ejecutar reglas sin condiciones", async () => {
+test("EvaluateRulesHandler â€” debe ejecutar reglas sin condiciones", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => ok([reglaSinCondiciones]),
     guardar: async (_r) => ok(undefined),
@@ -46,12 +46,12 @@ Deno.test("EvaluateRulesHandler — debe ejecutar reglas sin condiciones", async
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 1);
-  assertEquals(result.value[0], reglaSinCondiciones.actions);
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(1);
+  expect(result.value[0]).toStrictEqual(reglaSinCondiciones.actions);
 });
 
-Deno.test("EvaluateRulesHandler — debe ejecutar regla cuando condicion eq se cumple", async () => {
+test("EvaluateRulesHandler â€” debe ejecutar regla cuando condicion eq se cumple", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => ok([reglaConCondicion]),
     guardar: async (_r) => ok(undefined),
@@ -65,11 +65,11 @@ Deno.test("EvaluateRulesHandler — debe ejecutar regla cuando condicion eq se c
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(1);
 });
 
-Deno.test("EvaluateRulesHandler — NO debe ejecutar regla cuando condicion eq no se cumple", async () => {
+test("EvaluateRulesHandler â€” NO debe ejecutar regla cuando condicion eq no se cumple", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => ok([reglaConCondicion]),
     guardar: async (_r) => ok(undefined),
@@ -83,11 +83,11 @@ Deno.test("EvaluateRulesHandler — NO debe ejecutar regla cuando condicion eq n
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 0);
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(0);
 });
 
-Deno.test("EvaluateRulesHandler — debe evaluar condicion neq", async () => {
+test("EvaluateRulesHandler â€” debe evaluar condicion neq", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => ok([{
       ...reglaSinCondiciones,
@@ -104,11 +104,11 @@ Deno.test("EvaluateRulesHandler — debe evaluar condicion neq", async () => {
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(1);
 });
 
-Deno.test("EvaluateRulesHandler — debe evaluar condicion contains", async () => {
+test("EvaluateRulesHandler â€” debe evaluar condicion contains", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => ok([{
       ...reglaSinCondiciones,
@@ -125,11 +125,11 @@ Deno.test("EvaluateRulesHandler — debe evaluar condicion contains", async () =
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(1);
 });
 
-Deno.test("EvaluateRulesHandler — debe evaluar condicion gt", async () => {
+test("EvaluateRulesHandler â€” debe evaluar condicion gt", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => ok([{
       ...reglaSinCondiciones,
@@ -146,11 +146,11 @@ Deno.test("EvaluateRulesHandler — debe evaluar condicion gt", async () => {
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(1);
 });
 
-Deno.test("EvaluateRulesHandler — debe evaluar condicion lt", async () => {
+test("EvaluateRulesHandler â€” debe evaluar condicion lt", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => ok([{
       ...reglaSinCondiciones,
@@ -167,11 +167,11 @@ Deno.test("EvaluateRulesHandler — debe evaluar condicion lt", async () => {
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(1);
 });
 
-Deno.test("EvaluateRulesHandler — debe evaluar condicion in", async () => {
+test("EvaluateRulesHandler â€” debe evaluar condicion in", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => ok([{
       ...reglaSinCondiciones,
@@ -188,11 +188,11 @@ Deno.test("EvaluateRulesHandler — debe evaluar condicion in", async () => {
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(1);
 });
 
-Deno.test("EvaluateRulesHandler — debe fallar con error del repo cuando buscarActivas falla", async () => {
+test("EvaluateRulesHandler â€” debe fallar con error del repo cuando buscarActivas falla", async () => {
   const mockRepo: AutomationRuleRepository = {
     buscarActivas: async (_tid, _trigger) => err({ kind: "persistence_failure", cause: "timeout" }),
     guardar: async (_r) => ok(undefined),
@@ -206,6 +206,6 @@ Deno.test("EvaluateRulesHandler — debe fallar con error del repo cuando buscar
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
 });

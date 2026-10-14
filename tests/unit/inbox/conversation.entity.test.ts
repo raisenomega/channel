@@ -1,37 +1,37 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { crearConversacion, transicionarStatus } from "../../../src/inbox/domain/conversation.entity.ts";
 
 const TID = crypto.randomUUID() as never;
 const CID = crypto.randomUUID() as never;
 
-Deno.test("crearConversacion — debe crear conversación open", () => {
+test("crearConversacion â€” debe crear conversaciÃ³n open", () => {
   const result = crearConversacion(TID, CID, "whatsapp");
-  assert(result.ok);
-  assertEquals(result.value.status, "open");
-  assertEquals(result.value.primaryChannel, "whatsapp");
-  assertEquals(result.value.operationMode, "human");
-  assertEquals(result.value.totalMessages, 0);
+  expect(result.ok).toBe(true);
+  expect(result.value.status).toBe("open");
+  expect(result.value.primaryChannel).toBe("whatsapp");
+  expect(result.value.operationMode).toBe("human");
+  expect(result.value.totalMessages).toBe(0);
 });
 
-Deno.test("crearConversacion — debe fallar sin contacto", () => {
+test("crearConversacion â€” debe fallar sin contacto", () => {
   const result = crearConversacion(TID, "" as never, "email");
-  assert(!result.ok);
-  assertEquals(result.error.kind, "contacto_requerido");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("contacto_requerido");
 });
 
-Deno.test("transicionarStatus — open → resolved permitido", () => {
+test("transicionarStatus â€” open â†’ resolved permitido", () => {
   const result = transicionarStatus("open", "resolved");
-  assert(result.ok);
+  expect(result.ok).toBe(true);
 });
 
-Deno.test("transicionarStatus — resolved → snoozed prohibido", () => {
+test("transicionarStatus â€” resolved â†’ snoozed prohibido", () => {
   const result = transicionarStatus("resolved", "snoozed");
-  assert(!result.ok);
-  assertEquals(result.error.kind, "transicion_invalida");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("transicion_invalida");
 });
 
-Deno.test("transicionarStatus — archived no puede ir a ningún lado", () => {
-  assert(!transicionarStatus("archived", "open").ok);
-  assert(!transicionarStatus("archived", "resolved").ok);
-  assert(!transicionarStatus("archived", "snoozed").ok);
+test("transicionarStatus â€” archived no puede ir a ningÃºn lado", () => {
+  expect(!transicionarStatus("archived", "open").ok).toBe(true);
+  expect(!transicionarStatus("archived", "resolved").ok).toBe(true);
+  expect(!transicionarStatus("archived", "snoozed").ok).toBe(true);
 });

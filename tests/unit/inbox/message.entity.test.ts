@@ -1,40 +1,41 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { crearMensaje } from "../../../src/inbox/domain/message.entity.ts";
 
 const CID = crypto.randomUUID() as never;
 const CNID = crypto.randomUUID() as never;
 const TID = crypto.randomUUID() as never;
 
-Deno.test("crearMensaje — debe crear mensaje de texto", () => {
+test("crearMensaje â€” debe crear mensaje de texto", () => {
   const result = crearMensaje(CID, CNID, TID, "inbound", "contact", "whatsapp", "zernio",
     { type: "text", body: "Hola, ¿cuánto cuesta?" });
-  assert(result.ok);
-  assertEquals(result.value.direction, "inbound");
-  assertEquals(result.value.content.body, "Hola, ¿cuánto cuesta?");
-  assertEquals(result.value.status, "sent");
-  assertEquals(result.value.aiMeta.editedByHuman, false);
+  expect(result.ok).toBe(true);
+  expect(result.value.direction).toBe("inbound");
+    expect(result.value.content.body).toBe("Hola, ¿cuánto cuesta?");
+  expect(result.value.status).toBe("sent");
+  expect(result.value.aiMeta.editedByHuman).toBe(false);
 });
 
-Deno.test("crearMensaje — debe fallar con contenido vacío", () => {
+test("crearMensaje â€” debe fallar con contenido vacÃ­o", () => {
   const result = crearMensaje(CID, CNID, TID, "outbound", "human_agent", "email", "resend",
     { type: "text", body: "   " });
-  assert(!result.ok);
-  assertEquals(result.error.kind, "contenido_vacio");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("contenido_vacio");
 });
 
-Deno.test("crearMensaje — mensaje de IA debe incluir AiMeta", () => {
+test("crearMensaje â€” mensaje de IA debe incluir AiMeta", () => {
   const result = crearMensaje(CID, CNID, TID, "outbound", "ai_agent", "webchat", "hub",
     { type: "text", body: "Claro, con gusto." },
     { interactionId: "int-001", confidence: 0.94, mode: "autonomous", editedByHuman: false });
-  assert(result.ok);
-  assertEquals(result.value.senderType, "ai_agent");
-  assertEquals(result.value.aiMeta.confidence, 0.94);
-  assertEquals(result.value.aiMeta.mode, "autonomous");
+  expect(result.ok).toBe(true);
+  expect(result.value.senderType).toBe("ai_agent");
+  expect(result.value.aiMeta.confidence).toBe(0.94);
+  expect(result.value.aiMeta.mode).toBe("autonomous");
 });
 
-Deno.test("crearMensaje — direction debe ser inbound/outbound/internal", () => {
+test("crearMensaje â€” direction debe ser inbound/outbound/internal", () => {
   const r = crearMensaje(CID, CNID, TID, "internal", "system", "webchat", "hub",
-    { type: "text", body: "Sistema: conversación creada" });
-  assert(r.ok);
-  assertEquals(r.value.direction, "internal");
+    { type: "text", body: "Sistema: conversaciÃ³n creada" });
+  expect(r.ok).toBe(true);
+  expect(r.value.direction).toBe("internal");
 });
+

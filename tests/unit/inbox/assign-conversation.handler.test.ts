@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { AssignConversationHandler, AssignConversationCommand } from "../../../src/inbox/application/assign-conversation.handler.ts";
 import { ConversationRepository, RepoError } from "../../../src/inbox/domain/inbox.repository.ts";
@@ -31,7 +31,7 @@ const convActiva: ConversationState = Object.freeze({
 
 const convResuelta: ConversationState = Object.freeze({ ...convActiva, status: "resolved" as const });
 
-Deno.test("AssignConversationHandler — debe asignar conversacion activa exitosamente", async () => {
+test("AssignConversationHandler â€” debe asignar conversacion activa exitosamente", async () => {
   const mockRepo: ConversationRepository = {
     buscar: async (_id) => ok(convActiva),
     guardar: async (_c) => ok(undefined),
@@ -43,10 +43,10 @@ Deno.test("AssignConversationHandler — debe asignar conversacion activa exitos
   const cmd: AssignConversationCommand = { conversationId: CID, agentId: AID };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
 });
 
-Deno.test("AssignConversationHandler — debe fallar si conversacion no se encuentra (error repo)", async () => {
+test("AssignConversationHandler â€” debe fallar si conversacion no se encuentra (error repo)", async () => {
   const mockRepo: ConversationRepository = {
     buscar: async (_id) => err({ kind: "not_found" }),
     guardar: async (_c) => ok(undefined),
@@ -58,11 +58,11 @@ Deno.test("AssignConversationHandler — debe fallar si conversacion no se encue
   const cmd: AssignConversationCommand = { conversationId: CID, agentId: AID };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "conversacion_no_encontrada");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("conversacion_no_encontrada");
 });
 
-Deno.test("AssignConversationHandler — debe fallar si conversacion no existe (null)", async () => {
+test("AssignConversationHandler â€” debe fallar si conversacion no existe (null)", async () => {
   const mockRepo: ConversationRepository = {
     buscar: async (_id) => ok(null),
     guardar: async (_c) => ok(undefined),
@@ -74,11 +74,11 @@ Deno.test("AssignConversationHandler — debe fallar si conversacion no existe (
   const cmd: AssignConversationCommand = { conversationId: CID, agentId: AID };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "conversacion_no_encontrada");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("conversacion_no_encontrada");
 });
 
-Deno.test("AssignConversationHandler — debe fallar si conversacion ya esta resuelta", async () => {
+test("AssignConversationHandler â€” debe fallar si conversacion ya esta resuelta", async () => {
   const mockRepo: ConversationRepository = {
     buscar: async (_id) => ok(convResuelta),
     guardar: async (_c) => ok(undefined),
@@ -90,6 +90,6 @@ Deno.test("AssignConversationHandler — debe fallar si conversacion ya esta res
   const cmd: AssignConversationCommand = { conversationId: CID, agentId: AID };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "conversacion_resuelta");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("conversacion_resuelta");
 });

@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { CreateQuoteHandler, CreateQuoteCommand } from "../../../src/commerce/application/create-quote.handler.ts";
 import { QuoteRepository, RepoError } from "../../../src/commerce/domain/commerce.repository.ts";
@@ -7,7 +7,7 @@ import { QuoteState } from "../../../src/commerce/domain/quote.entity.ts";
 const TID = crypto.randomUUID() as never;
 const CID = crypto.randomUUID() as never;
 
-Deno.test("CreateQuoteHandler — debe crear y guardar quote exitosamente", async () => {
+test("CreateQuoteHandler â€” debe crear y guardar quote exitosamente", async () => {
   let savedQuote: QuoteState | undefined;
 
   const mockRepo: QuoteRepository = {
@@ -28,14 +28,14 @@ Deno.test("CreateQuoteHandler — debe crear y guardar quote exitosamente", asyn
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(typeof result.value, "string");
-  assert(savedQuote !== undefined);
-  assertEquals(savedQuote!.totalAmount, 500);
-  assertEquals(savedQuote!.status, "draft");
+  expect(result.ok).toBe(true);
+  expect(typeof result.value).toBe("string");
+  expect(savedQuote !== undefined).toBe(true);
+  expect(savedQuote!.totalAmount).toBe(500);
+  expect(savedQuote!.status).toBe("draft");
 });
 
-Deno.test("CreateQuoteHandler — debe fallar con items_vacios si no hay items", async () => {
+test("CreateQuoteHandler â€” debe fallar con items_vacios si no hay items", async () => {
   const mockRepo: QuoteRepository = {
     guardar: async (_q) => ok(undefined),
     buscar: async (_id) => ok(null),
@@ -49,11 +49,11 @@ Deno.test("CreateQuoteHandler — debe fallar con items_vacios si no hay items",
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "items_vacios");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("items_vacios");
 });
 
-Deno.test("CreateQuoteHandler — debe fallar con item_sin_descripcion si item vacio", async () => {
+test("CreateQuoteHandler â€” debe fallar con item_sin_descripcion si item vacio", async () => {
   const mockRepo: QuoteRepository = {
     guardar: async (_q) => ok(undefined),
     buscar: async (_id) => ok(null),
@@ -69,11 +69,11 @@ Deno.test("CreateQuoteHandler — debe fallar con item_sin_descripcion si item v
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "item_sin_descripcion");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("item_sin_descripcion");
 });
 
-Deno.test("CreateQuoteHandler — debe fallar con cantidad_invalida si quantity < 1", async () => {
+test("CreateQuoteHandler â€” debe fallar con cantidad_invalida si quantity < 1", async () => {
   const mockRepo: QuoteRepository = {
     guardar: async (_q) => ok(undefined),
     buscar: async (_id) => ok(null),
@@ -89,11 +89,11 @@ Deno.test("CreateQuoteHandler — debe fallar con cantidad_invalida si quantity 
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "cantidad_invalida");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("cantidad_invalida");
 });
 
-Deno.test("CreateQuoteHandler — debe fallar con precio_invalido si unitPrice negativo", async () => {
+test("CreateQuoteHandler â€” debe fallar con precio_invalido si unitPrice negativo", async () => {
   const mockRepo: QuoteRepository = {
     guardar: async (_q) => ok(undefined),
     buscar: async (_id) => ok(null),
@@ -109,11 +109,11 @@ Deno.test("CreateQuoteHandler — debe fallar con precio_invalido si unitPrice n
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "precio_invalido");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("precio_invalido");
 });
 
-Deno.test("CreateQuoteHandler — debe fallar si repo.guardar falla", async () => {
+test("CreateQuoteHandler â€” debe fallar si repo.guardar falla", async () => {
   const mockRepo: QuoteRepository = {
     guardar: async (_q) => err({ kind: "persistence_failure", cause: "disk_full" }),
     buscar: async (_id) => ok(null),
@@ -129,6 +129,6 @@ Deno.test("CreateQuoteHandler — debe fallar si repo.guardar falla", async () =
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
 });
