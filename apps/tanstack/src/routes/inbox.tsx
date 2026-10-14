@@ -14,10 +14,26 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { BentoKpi, DistribucionCanales, AnilloSLA, Pendientes, BentoTitle } from "@/components/dashboard/bentobox-dashboard";
 
-const ICONO_BARS = '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/><line x1="3" y1="5" x2="17" y2="5"/></svg>';
-const ICONO_DONA = '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3" fill="currentColor" stroke="none"/></svg>';
-const ICONO_FLAG = '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 17V3h9l-1.5 3L14 9H5"/></svg>';
-const ICONO_LIST = '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="14" x2="17" y2="14"/></svg>';
+const IconBars = () => (
+  <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <line x1="3" y1="10" x2="17" y2="10" /><line x1="3" y1="15" x2="17" y2="15" /><line x1="3" y1="5" x2="17" y2="5" />
+  </svg>
+);
+const IconDona = () => (
+  <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <circle cx="10" cy="10" r="7" /><circle cx="10" cy="10" r="3" fill="currentColor" stroke="none" />
+  </svg>
+);
+const IconFlag = () => (
+  <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <path d="M5 17V3h9l-1.5 3L14 9H5" />
+  </svg>
+);
+const IconList = () => (
+  <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <line x1="3" y1="6" x2="17" y2="6" /><line x1="3" y1="10" x2="17" y2="10" /><line x1="3" y1="14" x2="17" y2="14" />
+  </svg>
+);
 
 const InboxRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -147,21 +163,21 @@ function InboxPage() {
       {/* FILA 2 — Dashboard: distribucion canales + anillo SLA + pendientes */}
       <div className="bento mt-4">
         <div className="bento-card bento-col-4">
-          <BentoTitle icon={ICONO_BARS} label={t(language, "dash.distribucion")} />
+          <BentoTitle icon={<IconBars />} label={t(language, "dash.distribucion")} />
           {sinDatos
             ? <p className="text-sm text-muted-foreground">{t(language, "dash.emptyBody")}</p>
             : <DistribucionCanales stats={stats} lang={language} />}
         </div>
 
         <div className="bento-card bento-col-4">
-          <BentoTitle icon={ICONO_DONA} label={t(language, "dash.slaTitulo")} />
+          <BentoTitle icon={<IconDona />} label={t(language, "dash.slaTitulo")} />
           {sinDatos
             ? <p className="text-sm text-muted-foreground">{t(language, "dash.emptyBody")}</p>
             : <AnilloSLA items={itemsFiltrados} lang={language} />}
         </div>
 
         <div className="bento-card bento-col-4">
-          <BentoTitle icon={ICONO_FLAG} label={t(language, "dash.pendientes")} />
+          <BentoTitle icon={<IconFlag />} label={t(language, "dash.pendientes")} />
           {sinDatos
             ? <p className="text-sm text-muted-foreground">{t(language, "dash.emptyBody")}</p>
             : <Pendientes items={itemsFiltrados} lang={language} />}
@@ -198,7 +214,7 @@ function InboxPage() {
       {/* CONVERSACIONES */}
       <div className="bento mt-4">
         <div className="bento-card bento-col-12">
-          <BentoTitle icon={ICONO_LIST} label={t(language, "dash.conversaciones")}
+          <BentoTitle icon={<IconList />} label={t(language, "dash.conversaciones")}
             right={<Badge tone="hub">{String(itemsFiltrados.length)}</Badge>} />
           {sinDatos ? (
             <div className="flex flex-col items-center justify-center gap-3 py-6 text-center">

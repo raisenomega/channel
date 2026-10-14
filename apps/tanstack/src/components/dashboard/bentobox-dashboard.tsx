@@ -26,7 +26,7 @@ export function BentoKpi({
 /* ===== Título de sección / encabezado ===== */
 
 export function BentoTitle({ icon, label, right }: {
-  icon: string; label: string; right?: React.ReactNode;
+  icon: React.ReactNode; label: string; right?: React.ReactNode;
 }) {
   return (
     <div className="bento-title">
