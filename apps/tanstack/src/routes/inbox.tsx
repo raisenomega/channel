@@ -133,7 +133,6 @@ function InboxPage() {
   const stats = calcularStats(itemsFiltrados);
   const canalesActivos = CANALES.filter((c) => stats.porCanal[c] !== undefined);
 
-  function toggleCanal(c: string) { setFiltroCanal(filtroCanal === c ? null : c); }
   function toggleEstado(e: string) { setFiltroEstado(filtroEstado === e ? null : e); }
   function toggleSLA() { setFiltroSLA(filtroSLA === true ? null : true); }
   function cleanFilters() { setFiltroCanal(null); setFiltroEstado(null); setFiltroSLA(null); }
@@ -190,8 +189,8 @@ function InboxPage() {
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t(language, "inbox.channels")}:</span>
           {(canalesActivos.length ? canalesActivos : ["whatsapp", "email", "instagram"]).map((c) => (
             <button key={c} type="button"
-              className={"chip" + (c === filtroCanal ? " active" : "")}
-              onClick={() => toggleCanal(c)}>
+              className="chip"
+              onClick={() => void navigate({ to: "/channels/$channelId", params: { channelId: c } })}>
               <span className="chip-name">{t(language, "canal." + c)}</span>
             </button>
           ))}

@@ -46,6 +46,12 @@ function ChannelsPage() {
     queryFn: async () => {
       const r = await listarCanales();
       if (!r.ok) {
+        if (r.error.kind === "config_incompleta") {
+          // Sin sesion valida -> redirigir a login.
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+        }
         setErr(true);
         return [];
       }
