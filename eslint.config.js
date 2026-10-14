@@ -74,6 +74,12 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/ban-ts-comment": ["error", {
+        "ts-ignore": true,
+        "ts-expect-error": true,
+        "ts-nocheck": true,
+      }],
     },
   },
 ];
