@@ -45,3 +45,6 @@ supabase/.temp/
 .vercel
 
 /docs-hub/
+
+# Reportes del sentinela (locales)
+.sentinel-reports/

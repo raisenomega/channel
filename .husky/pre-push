@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Git pre-push hook — invoca el sentinela.
+# Si falla, el push se aborta.
+# Para saltar en emergencia: `git push --no-verify` (CI atrapa de todas formas).
+
+set -euo pipefail
+
+bash scripts/sentinel.sh
