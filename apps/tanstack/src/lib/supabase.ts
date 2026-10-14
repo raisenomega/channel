@@ -1,9 +1,26 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { readLocalSession } from "./auth";
 
-/** Config inyectada en runtime (VITE_*). Nunca commitear secrets. */
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+interface HubConfig {
+  supabaseUrl: string;
+  anonKey: string;
+}
+
+/** Lee config inyectada en runtime (window.__HUB_CONFIG__) con fallback a VITE_*.
+ *  La publishable anon key es publica y segura de exponer en el bundle. */
+function readHubConfig(): HubConfig {
+  const g = globalThis as Record<string, unknown>;
+  const cfg = g.__HUB_CONFIG__ as HubConfig | undefined;
+  return {
+    supabaseUrl: cfg?.supabaseUrl ?? (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "",
+    anonKey: cfg?.anonKey ?? (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? "",
+  };
+}
+
+const { url, anonKey } = (() => {
+  const c = readHubConfig();
+  return { url: c.supabaseUrl, anonKey: c.anonKey };
+})();
 
 let client: SupabaseClient | null = null;
 
