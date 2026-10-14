@@ -68,7 +68,7 @@ test("Identity: email duplicado es rechazado entre tenants distintos", async () 
   const t2 = await crearTenant.ejecutar({ name: "Two", slug: "two", plan: "lite_starter", ownerEmail: "x@example.com" });
   expect(t1.ok && t2.ok).toBe(true);
 
-  const u1 = await crearUser.ejecutar({ email: "dupe@example.com", fullName: "A", role: "agent", tenantId: t1.value });
+  const u1 = await crearUser.ejecutar({ email: "dupe@example.com").toBe(fullName: "A", role: "agent", tenantId: t1.value });
   expect(u1.ok, "primer usuario se crea").toBe(true);
 
   const u2 = await crearUser.ejecutar({ email: "dupe@example.com", fullName: "B", role: "agent", tenantId: t2.value });

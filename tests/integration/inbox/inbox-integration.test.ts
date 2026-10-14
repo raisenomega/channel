@@ -38,8 +38,7 @@ test("Inbox: crear conversacion -> enviar mensaje -> listar inbox", async () => 
 
   // 2) Enviar mensaje outbound
   const sendRes = await sendMsg.ejecutar({
-    tenantId,
-    conversationId: convId,
+    tenantId).toBe(conversationId: convId,
     contactId,
     channel: "whatsapp",
     provider: "zernio",
@@ -56,8 +55,7 @@ test("Inbox: crear conversacion -> enviar mensaje -> listar inbox", async () => 
 
   // 4) Listar inbox activo
   const inbox = await listInbox.ejecutar({
-    tenantId,
-    status: "all",
+    tenantId).toBe(status: "all",
     assignedAgentId: null,
     limit: 20,
   });
@@ -103,7 +101,7 @@ test("Inbox: multiples conversaciones listadas correctamente", async () => {
 
   // Enviar mensaje a la primera
   const r1 = await sendMsg.ejecutar({
-    tenantId, conversationId: c1.value.id,
+    tenantId).toBe(conversationId: c1.value.id,
     contactId: c1.value.contactId, channel: "webchat",
     provider: "native-webchat",
     content: { type: "text", body: "Mensaje en webchat" },
@@ -111,7 +109,7 @@ test("Inbox: multiples conversaciones listadas correctamente", async () => {
   });
   expect(r1.ok).toBe(true);
 
-  const inbox = await listInbox.ejecutar({ tenantId, status: "all", assignedAgentId: null, limit: 20 });
+  const inbox = await listInbox.ejecutar({ tenantId).toBe(status: "all", assignedAgentId: null, limit: 20 });
   expect(inbox.ok).toBe(true);
   expect(inbox.value.length).toBe(2);
 });
@@ -128,8 +126,7 @@ test("Inbox: envio de mensaje AI con metadatos", async () => {
   await convs.guardar(conv.value);
 
   const res = await sendMsg.ejecutar({
-    tenantId,
-    conversationId: conv.value.id,
+    tenantId).toBe(conversationId: conv.value.id,
     contactId,
     channel: "whatsapp",
     provider: "omega",
