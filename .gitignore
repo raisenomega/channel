@@ -43,3 +43,5 @@ supabase/.temp/
 .vercel
 
 .vercel
+
+/docs-hub/
