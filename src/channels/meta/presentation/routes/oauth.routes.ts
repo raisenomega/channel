@@ -1,7 +1,7 @@
 /**
  * HUB by Raisen — Rutas HTTP para flujo Embedded Signup Meta.
  * /auth/meta/init — inicia OAuth (persiste state + signup)
- * /auth/meta/callback — recibe callback (verifica state + firma webhook)
+ * /auth/meta/callback — recibe callback (firma MANDATORIA, state MANDATORIO, single-use)
  * C4 ≤75 lineas.
  */
 import type { RouteDefinition } from "../../../../server/server-types.ts";
@@ -10,10 +10,11 @@ import { obj } from "../../../../server/server-helpers.ts";
 import { InitSignupHandler } from "../../application/init-signup.handler.ts";
 import { HandleCallbackHandler } from "../../application/handle-callback.handler.ts";
 import { verificarFirmaWebhook } from "../../infrastructure/webhook-verifier.ts";
-import { SupabaseEmbeddedSignupRepo } from "../supabase-embedded-signup.repo.ts";
+import { SupabaseMetaSignupFacade } from "../../infrastructure/meta-signup-facade.ts";
 
-const initHandler = new InitSignupHandler(new SupabaseEmbeddedSignupRepo());
-const callbackHandler = new HandleCallbackHandler(new SupabaseEmbeddedSignupRepo(), new SupabaseEmbeddedSignupRepo());
+const repo = new SupabaseMetaSignupFacade();
+const initHandler = new InitSignupHandler(repo);
+const callbackHandler = new HandleCallbackHandler(repo, repo);
 
 export function rutaInitSignup(): RouteDefinition {
   return {
@@ -32,18 +33,19 @@ export function rutaCallbackMeta(): RouteDefinition {
   return {
     method: "POST", path: "/auth/meta/callback",
     handler: async (ctx) => {
-      // CRIT-3: Verificar firma del webhook
+      // CRIT-B: Firma MANDATORIA
       const sig = (ctx.headers?.["x-hub-signature-256"] ?? "") as string;
-      if (sig) {
-        const bodyStr = typeof ctx.body === "string" ? ctx.body : JSON.stringify(ctx.body);
-        const firmado = await verificarFirmaWebhook(sig, bodyStr);
-        if (!firmado.ok || !firmado.value) return { ok: false, error: { kind: "firma_invalida" } };
-      }
-      // CRIT-2: Extraer state del body y verificar
+      if (!sig) return { ok: false, error: { kind: "firma_requerida" } };
+      const bodyStr = typeof ctx.body === "string" ? ctx.body : JSON.stringify(ctx.body);
+      const firmado = await verificarFirmaWebhook(sig, bodyStr);
+      if (!firmado.ok || !firmado.value) return { ok: false, error: { kind: "firma_invalida" } };
+
+      // CRIT-C: State MANDATORIO del body (solo state, tenant_id se deriva)
       const body = obj(ctx.body);
       const state = (body as Record<string, unknown>)["state"] as string | undefined;
-      const tenantId = (body as Record<string, unknown>)["tenant_id"] as string | undefined;
-      const result = await callbackHandler.ejecutar(ctx.body, state, tenantId);
+      if (!state) return { ok: false, error: { kind: "state_requerido" } };
+
+      const result = await callbackHandler.ejecutar(ctx.body, state);
       return result.ok ? { ok: true, data: result.value } : { ok: false, error: result.error };
     },
   };

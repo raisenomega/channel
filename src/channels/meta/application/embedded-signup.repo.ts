@@ -1,6 +1,6 @@
 /**
- * HUB by Raisen — Tipos e interfaz del repositorio de Embedded Signup Meta.
- * Separado de handle-callback.handler.ts para cumplir C4.
+ * HUB by Raisen — Tipos e interfaz del repositorio de Embedded Signup.
+ * Separado para C4 y claridad de dependencias.
  */
 import type { EmbeddedSignupStatus } from "../domain/embedded-signup.entity.ts";
 import type { Result } from "../../../shared/domain/result.ts";
@@ -18,7 +18,11 @@ export interface CallbackResult {
 }
 
 export interface EmbeddedSignupRepository {
-  buscarPorMetaId(metaId: string): Promise<Result<{ id: string; tenantId: string; status: EmbeddedSignupStatus } | null, string>>;
+  buscarPorId(signupId: string): Promise<Result<{ id: string; tenantId: string; status: EmbeddedSignupStatus } | null, string>>;
   actualizar(signupId: string, data: Record<string, unknown>): Promise<Result<void, string>>;
   guardarToken(signupId: string, tenantId: string, accessToken: string, expiresAt: string): Promise<Result<void, string>>;
+}
+
+export interface StateResolver {
+  verificarYConsumirState(state: string): Promise<Result<{ signupId: string; tenantId: string } | null, string>>;
 }

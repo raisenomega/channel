@@ -15,14 +15,13 @@ test("firma con hash correcto retorna true", async () => {
   vi.stubEnv("META_APP_SECRET", TEST_SECRET);
   const body = "test_body";
   const expectedSig = await calcularHash(TEST_SECRET, body);
-
   const result = await verificarFirmaWebhook(expectedSig, body);
   expect(result.ok).toBe(true);
   if (result.ok) expect(result.value).toBe(true);
   vi.unstubAllEnvs();
 });
 
-test("firma incorrecta retorna false (no error)", async () => {
+test("firma incorrecta retorna false", async () => {
   vi.stubEnv("META_APP_SECRET", TEST_SECRET);
   const body = JSON.stringify({ id: "test", status: "CREATED" });
   const result = await verificarFirmaWebhook("sha256=hash_incorrecto", body);
@@ -43,5 +42,13 @@ test("body vacio con firma correcta retorna true", async () => {
   const result = await verificarFirmaWebhook(expectedSig, body);
   expect(result.ok).toBe(true);
   if (result.ok) expect(result.value).toBe(true);
+  vi.unstubAllEnvs();
+});
+
+test("NEW-CRIT-B adversarial: header vacio retorna error (no procesa)", async () => {
+  vi.stubEnv("META_APP_SECRET", TEST_SECRET);
+  const result = await verificarFirmaWebhook("", "test_body");
+  expect(result.ok).toBe(true);
+  if (result.ok) expect(result.value).toBe(false); // HMAC vacio no coincide
   vi.unstubAllEnvs();
 });

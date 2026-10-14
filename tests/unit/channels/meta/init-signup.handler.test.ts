@@ -4,21 +4,21 @@ import { ok } from "../../../../src/shared/domain/result.ts";
 import type { Result } from "../../../../src/shared/domain/result.ts";
 
 class MockInitRepo implements InitSignupRepository {
-  states: Array<{ tenantId: string; state: string; appId: string; callbackUrl: string; expiresAt: string }> = [];
-  signups: Array<{ tenantId: string; signupId: string; state: string }> = [];
+  states: Array<{ tenantId: string; state: string; signupId: string; expiresAt: string }> = [];
+  signups: Array<{ tenantId: string; signupId: string; metaWebhookId: string }> = [];
   failNext = "none";
 
   setFail(mode: "none" | "state" | "signup") { this.failNext = mode; }
 
-  async guardarState(tenantId: string, state: string, appId: string, callbackUrl: string, expiresAt: string): Promise<Result<void, string>> {
+  async guardarState(tenantId: string, state: string, signupId: string, expiresAt: string): Promise<Result<void, string>> {
     if (this.failNext === "state") return { ok: false as const, error: "db_error" };
-    this.states.push({ tenantId, state, appId, callbackUrl, expiresAt });
+    this.states.push({ tenantId, state, signupId, expiresAt });
     return ok(undefined);
   }
 
-  async crearSignup(tenantId: string, signupId: string, state: string): Promise<Result<void, string>> {
+  async crearSignup(tenantId: string, signupId: string, metaWebhookId: string): Promise<Result<void, string>> {
     if (this.failNext === "signup") return { ok: false as const, error: "db_error" };
-    this.signups.push({ tenantId, signupId, state });
+    this.signups.push({ tenantId, signupId, metaWebhookId });
     return ok(undefined);
   }
 }

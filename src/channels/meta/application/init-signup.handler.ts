@@ -1,6 +1,7 @@
 /**
  * HUB by Raisen — InitSignupHandler: inicia flujo OAuth Embedded Signup Meta.
- * Persiste state CSRF con TTL 10min y crea fila embedded_signups status CREATED.
+ * Persiste state CSRF con TTL 10min + signup_id enlace.
+ * Crea fila embedded_signups con status CREATED y meta_webhook_id.
  * C4 ≤75 lineas.
  */
 import { Result, err, ok } from "../../../shared/domain/result.ts";
@@ -24,8 +25,8 @@ export interface MetaOAuthUrl {
 }
 
 export interface InitSignupRepository {
-  guardarState(tenantId: string, state: string, appId: string, callbackUrl: string, expiresAt: string): Promise<Result<void, string>>;
-  crearSignup(tenantId: string, signupId: string, state: string): Promise<Result<void, string>>;
+  guardarState(tenantId: string, state: string, signupId: string, expiresAt: string): Promise<Result<void, string>>;
+  crearSignup(tenantId: string, signupId: string, metaWebhookId: string): Promise<Result<void, string>>;
 }
 
 const META_AUTH_BASE = "https://www.facebook.com/v22.0/dialog/embedded_signup";
@@ -41,12 +42,13 @@ export class InitSignupHandler {
 
     const state = crypto.randomUUID();
     const signupId = crypto.randomUUID();
+    const metaWebhookId = signupId; // El id que Meta enviara en el webhook
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-    const stateRes = await this.repo.guardarState(cmd.tenantId, state, cmd.appId.trim(), cmd.callbackUrl, expiresAt);
+    const stateRes = await this.repo.guardarState(cmd.tenantId, state, signupId, expiresAt);
     if (!stateRes.ok) return err({ kind: "persistence_failure", cause: `state:${stateRes.error}` });
 
-    const signupRes = await this.repo.crearSignup(cmd.tenantId, signupId, state);
+    const signupRes = await this.repo.crearSignup(cmd.tenantId, signupId, metaWebhookId);
     if (!signupRes.ok) return err({ kind: "persistence_failure", cause: `signup:${signupRes.error}` });
 
     const params = new URLSearchParams({
