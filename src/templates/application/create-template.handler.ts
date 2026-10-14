@@ -1,7 +1,6 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import { TenantId } from "../../shared/domain/ids.ts";
 import {
-  WhatsAppTemplateState,
   WhatsAppButton,
   crearWhatsAppTemplate,
   TemplateError,
