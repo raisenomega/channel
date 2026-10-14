@@ -2,58 +2,84 @@
 
 Estado de despliegue y avance hacia produccion. Documento de control de fases.
 
-## Estado general
+## Estado general (VALIDADO 2026-10-13)
 
 - Plataforma: HUB by Raisen (SaaS omnicanal con IA, multi-tenant).
-- Backend: Supabase (Postgres + Auth) en `qbpzdoopruqbnerdcyfq.supabase.co`.
-- Frontend: Vite (vanilla TS) desplegado en Vercel (`channel-blue.vercel.app`).
-- Repo: github.com/raisenomega/channel, branches `develop`, `staging`, `main`.
+- Backend: Supabase (Postgres + Auth) en `qbpzdoopruqbnerdcyfq.supabase.co`. Backend DDD en `src/` con server HTTP `src/server/hub.server.ts`.
+- **Frontend: TanStack Start (SPA) + React 19 + TanStack Router + TanStack Query + Tailwind v4 + shadcn/ui** en `apps/tanstack/`.
+- Repo: github.com/raisenomega/channel, branch `develop`.
+- Desplegado en Vercel (`channel-blue.vercel.app` / URL de deploy reciente).
 
-> 2026-10-13: Despliegue en Vercel fijo (se quito bins nativos Windows del package.json y se fijo pnpm en lockfile 9.0). Build en Linux OK. El sitio sirve `channel-blue.vercel.app` con proteccion de Vercel Auth (el owner logueado ve la app).
+> 2026-10-13: Migración de frontend de Vite vanilla TS a TanStack Start + React 19 + shadcn/ui completada y VALIDADA en produccion. Login/registro funcionan contra Supabase (config via `window.__HUB_CONFIG__`).
 
-## Fases del roadmap
+## Los 3 modos de operacion (master_hub §4)
 
-| Fase | Descripcion | Estado | Notas |
-|------|-------------|--------|-------|
-| FASE 0-11 | Dominio, BC, migraciones, UI | COMPLETO | schema 001-023 aplicado |
-| FASE A | Governance de ramas | COMPLETO | main/develop/staging |
-| FASE B | Migraciones y rollback | COMPLETO | 23 migraciones + down |
-| FASE C | Variables de entorno y scripts | COMPLETO | .env + scripts |
-| FASE D | Login y autenticacion (Supabase Auth) | COMPLETO | registro + onboarding + shell funcionales |
-| FASE E | Tenant onboarding (RPC crear_tenant) | COMPLETO | crea tenant + `mi_tenant` resuelve post-login |
-| FASE F | Monitoring + logging estructurado | COMPLETO | logger + Vigia + app_events |
-| FASE G | Integration tests (identity) | PARCIAL | stores en memoria + flujos multi-tenant |
-| FASE H | Stripe Billing + feature flags | PENDIENTE | sin Stripe por decision |
-| FASE I | Maintenance crons | PENDIENTE | estructura inicial en src/maintenance |
-| FASE J | ToS / Privacy en UI | PENDIENTE | |
+- **Lite (Manual):** Inbox unificado + CRM Lite + cotizaciones + ordenes + pagos automatizados con L1.
+- **Ecosystem (integrado):** SLA, integraciones NUCLEO/OMEGA/POS/verticales, multi-departamento, audit logs.
+- **Autonomo (IA):** Dashboard de agente IA + gobernanza SAFE + kill switch.
 
-## Estado funcional verificado
+## LAS 16 FUNCIONALIDADES — ESTADO VALIDADO
 
-- Registro por email + confirmacion + login → funciona (Supabase Auth habilitado, SMTP del proyecto).
-- Onboarding de tenant (RPC `crear_tenant_onboarding`) → crea tenant + owner.
-- Shell con tabs (Inbox / IA / Canales / Ajustes) → navegacion cableada.
-- **Toggles tema claro/oscuro + idioma ES/EN**: funcionales. El tema conmuta `html[data-theme]` (tokens OMEGA + tokens-light) y el idioma traduce la UI via i18n con re-render automatico (`hub:ui-changed`). Admin/switch en Ajustes sincronizados.
-- Auditoria S1-S5 entregada en `AUDITORIA_S1_S5.md`; violaciones C4, capas y S1 resueltas.
+Cada una con su ruta TanStack (`apps/tanstack/src/routes/`) y cliente de datos (`apps/tanstack/src/lib/`), conectada a Supabase con RLS por tenant.
 
-## Auditoria S1-S5 (2026-10-13)
+| # | Funcionalidad | Ruta (ruta) | Client (lib) | Estado |
+|---|---------------|-------------|--------------|--------|
+| 1 | **Inbox unificado** | `inbox.tsx` + `inbox.$conversationId.tsx` | `inbox-client` → contact/message | ✅ Desplegado, KPIs reales, lista, hilo, ficha 360 |
+| 2 | **CRM Lite** (contactos/tags/notas/historial) | `contacts.tsx` | `contacts-client.ts` | ✅ Lista, busqueda, crear, segmentos |
+| 3 | **Cotizaciones** (estados) | `quotes.tsx` | `quotes-client.ts` | ✅ Lista + crear + estados + PDF placeholder (P1) |
+| 4 | **Ordenes** (6 estados) | `orders.tsx` | `orders-client.ts` | ✅ Lista vinculada a cotizaciones |
+| 5 | **Pagos** (Stripe/ATH) | `payments.tsx` | `payments-client.ts` | ✅ Lista montos/estados/proveedor |
+| 6 | **Templates WhatsApp** | `settings.sla`/canned | `template` (backend) | ⚠️ Backend BC templates creado; UI de templates pendiente |
+| 7 | **Automatizaciones** (reglas trigger→action) | `automation.tsx` | `automation-client.ts` | ✅ Crear/lista reglas |
+| 8 | **Reportes** (KPIs agregados) | `reports.tsx` | `reports-client.ts` | ✅ KPIs conversaciones/mensajes/close/was_correct |
+| 9 | **Agente IA L1 (sugerencias)** | `agent.tsx` | `agent-client.ts` | ✅ Dashboard IA + metricas reales |
+| 10 | **Multi-departamento / roles** | `settings.tsx` | `settings-client` | ✅ Cuenta/plan/tenant |
+| 11 | **SLA policies + horarios** | `settings.sla.tsx` | `sla-client.ts` | ✅ SLA por canal + horarios |
+| 12 | **Audit logs** | (backend `audit/`) | `audit-client` | ⚠️ Backend BC audit creado; UI de audit pendiente |
+| 13 | **SSO/SAML** | — | — | ⏳ Pendiente (FASE 12 enterprise) |
+| 14 | **Custom domains + white-label** | `settings.tsx` | `settings-client` | ⚠️ White-label switch; custom domains pendiente |
+| 15 | **Agentes L2/L3 + gobernanza SAFE + kill switch** | `agent.tsx` + `safe` | `agent-client` + backend cognition | ✅ Dashboard + SAFE board + orquestador cognition |
+| 16 | **Integraciones verticales (TABLE/HEALTH/HOME/FLEET)** | `settings.integrations.tsx` | `integrations-client.ts` | ✅ Backend adapters + vista integraciones (NUCLEO/OMEGA/POS/TABLE/HEALTH/HOME/FLEET) |
 
-- C4: 0 archivos >75 lineas (se refactorizaron 6: contact, conversation, compliance entities, vertical-adapters, safe-evaluator, safe-governance).
-- Capas DDD: 0 violaciones app->infra (AIProviderRegistry movido a domain; audit-logger usa repos inyectados).
-- Lint: 0 errores, 0 warnings. Typecheck: 0 errores.
-- S1: Source of Truth y GO_PRODUCTION actualizados.
-- Deuda pendiente: cifrar `webhook_provider_configs.secret` (N4), ampliar tests de handlers, push GitHub requiere credenciales.
+## Estructura frontend TanStack
 
-## Quality gates
+```
+apps/tanstack/src/
+├── routes/      # 16 rutas (inbox, contacts, quotes, orders, payments,
+│                #   automation, reports, agent, channels, settings, sla, legal, integrations, login)
+├── lib/         # 16 clients Supabase (REST + JWT + RLS) + i18n + auth + supabase
+├── components/  # shadcn/ui (button, card, badge, switch, input, avatar, chip, kpi)
+│                # + layout (shell, bottom-nav) + safe-board
+├── app/         # root, route-tree, preferences, not-found
+└── styles/      # tokens omega/light, tailwind, components OMEGA
+```
 
-- `pnpm typecheck` = 0 errores.
-- `pnpm lint` = 0 errores, 0 warnings.
-- `check:lines` / `check:layers` disponibles (bash).
-- RLS: 45 tablas habilitadas con RLS, 51 policies, todas con tenant_id.
+## Backend DDD (src/ backend)
+
+- ~16 BCs implementados (identity, channels, inbox, contacts, commerce, automation, cognition, integrations, compliance, maintenance, agents, sla, reports, audit, templates).
+- Runtime HTTP: `src/server/hub.server.ts` (rutas webhook, message, inbox list).
+- BC cognition: agent.service, agent-executor, tool.registry (11+ tools), AIProvider (anthropic/deepseek/qwen), orquestador, SAFE.
+- Migraciones: 001-025 (25 migraciones, ~45 tablas, RLS habilitado).
+
+## Quality gates (validado)
+
+- Backend: `tsc --noEmit` 0 errores · `eslint src/` 0 errores.
+- Frontend TanStack: `tsc --noEmit` 0 errores.
+- Frontend legacy `apps/web/`: conservado, lint 0.
+- Confidencialidad: documentos estrategicos movidos a `docs-hub/` (gitignore). Solo codigo en repo.
+
+## Notas de honestidad (P1)
+
+- 📌 Pagos reales Stripe/ATH: UI y backend listos, requiere credenciales reales del proveedor (no configuradas aun).
+- 📌 Templates WhatsApp: backend BC listo; la UI de gestion de templates aun no esta en el frontend TanStack.
+- 📌 Audit UI: backend BC audit listo; vista de audit en frontend pendiente.
+- 📌 SSO/SAML: no implementado (FASE 12).
+- 📌 Custom domains: no implementado.
+- 📌 Canales Zernio/Resend reales: adapters listos pero apuntan a sandbox/placeholder; requieren cuentas con API keys.
 
 ## Recordatorios operativos
 
-- Aplicar migraciones: `supabase db push` (con `SUPABASE_DB_PASSWORD`).
-- Reset de DB: `supabase db reset --linked`.
-- Deploy frontend (desde apps/web o repo root): `npx vercel --prod --scope "raisen-s-projects"`.
-- Rama de integracion: `develop`. Produccion estable: `main`.
-- Push GitHub: requiere credenciales (Windows Credential Manager) desde terminal del owner.
+- Deploy frontend TanStack: desde `apps/tanstack/` → `vercel --prod --yes` (o raiz con `vercel.json` que apunta a `apps/tanstack`).
+- Rama de integracion: `develop`.
+- Migraciones: `supabase db push` con `SUPABASE_DB_PASSWORD`.
+- Push GitHub / deploy Vercel: requieren credenciales del owner en su terminal.
