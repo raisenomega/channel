@@ -21,7 +21,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           aria-invalid={error ? true : undefined}
           className={cn(
-            "h-10 w-full rounded-xl border border-border/55 bg-card-soft px-3 text-sm text-foreground",
+            "h-10 w-full rounded-xl border border-border/45 bg-card-soft/60 px-3 text-sm text-foreground backdrop-blur-sm",
             "transition-colors placeholder:text-dim focus:border-primary focus:outline-none",
             "focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
             error && "border-critical focus:border-critical",

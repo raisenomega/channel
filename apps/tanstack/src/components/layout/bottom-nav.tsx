@@ -25,7 +25,7 @@ export function BottomNav({ items }: BottomNavProps) {
             className={cn(
               "flex-1 rounded-lg px-1 py-1.5 text-center text-xs",
               active
-                ? "bg-primary/10 text-primary"
+                ? "bg-primary/15 text-primary"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >

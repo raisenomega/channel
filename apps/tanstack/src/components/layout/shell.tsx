@@ -23,6 +23,7 @@ export function Shell() {
 
   return (
     <div id="shell">
+      <div className="bg-orb" aria-hidden="true" />
       <header className="nav">
         <div className="nav-brand">
           <span className="nav-mark">HB</span>

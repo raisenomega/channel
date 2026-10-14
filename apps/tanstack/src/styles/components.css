@@ -104,13 +104,67 @@
 
 /* --- Shell: navegacion glass + area de vistas --- */
 #shell {
+  position: relative;
   display: flex; flex-direction: column; height: 100dvh;
-  background-color: hsl(var(--card) / 0.6);
+  overflow: hidden;
+  background-color: hsl(var(--background));
+  isolation: isolate; /* el fondo de orbes queda confinado al shell */
 }
+#shell > .nav,
+#shell > .app {
+  position: relative;
+  z-index: 1;
+  background-color: hsl(var(--card) / 0.5);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+#shell > .bottom-nav { z-index: 100; }
+
 .nav {
   display: flex; align-items: center; gap: 16px;
   padding: 10px 16px;
   border-bottom: 1px solid hsl(var(--border) / 0.4);
+}
+.app {
+  flex: 1 1 0%; overflow-y: auto; overflow-x: hidden; padding: 16px;
+}
+
+/* --- Orbes de luz 3D de fondo (residen dentro del shell, sobre el fondo y bajo el glass) --- */
+#shell .bg-orb {
+  position: absolute; inset: 0;
+  z-index: 0; pointer-events: none;
+  overflow: hidden;
+}
+#shell .bg-orb::before,
+#shell .bg-orb::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  animation: orb-drift 18s ease-in-out infinite alternate;
+}
+#shell .bg-orb::before {
+  width: 46vmax; height: 46vmax;
+  left: -12vmax; top: -14vmax;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.45), hsl(var(--primary) / 0.12) 45%, transparent 70%);
+}
+#shell .bg-orb::after {
+  width: 40vmax; height: 40vmax;
+  right: -10vmax; bottom: -12vmax;
+  background: radial-gradient(circle, hsl(var(--process) / 0.38), hsl(var(--process) / 0.1) 45%, transparent 70%);
+  animation-delay: -9s;
+  animation-duration: 22s;
+}
+
+@keyframes orb-drift {
+  from { transform: translate3d(-2.5vmax, -1.5vmax, 0) scale(1); }
+  to   { transform: translate3d(2.5vmax, 1.5vmax, 0) scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #shell .bg-orb::before, #shell .bg-orb::after { animation: none; }
 }
 .nav-brand {
   display: flex; align-items: center; gap: 10px; margin-right: auto;
@@ -155,9 +209,6 @@
 .nav-item:hover { color: hsl(var(--foreground)); }
 .nav-item[aria-selected="true"] {
   color: hsl(var(--primary)); background-color: hsl(var(--primary) / 0.12);
-}
-.app {
-  flex: 1 1 0%; overflow-y: auto; overflow-x: hidden; padding: 16px;
 }
 
 /* --- Login --- */
@@ -225,9 +276,10 @@
     display: flex; justify-content: space-around; align-items: center; gap: 2px;
     padding: 6px 8px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    background-color: hsl(var(--card) / 0.88);
-    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-    border-top: 1px solid hsl(var(--border) / 0.35);
+    background: linear-gradient(160deg, hsl(var(--card) / 0.82), hsl(var(--card-soft) / 0.45));
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border-top: 1px solid hsl(var(--border) / 0.25);
+    box-shadow: 0 -4px 20px -10px rgba(0, 0, 0, 0.25);
   }
   .bottom-nav .nav-item { flex: 1; text-align: center; padding: 6px 4px; font-size: 12px; border-radius: 8px; }
   .app { padding-bottom: 72px; }
