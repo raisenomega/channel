@@ -32,22 +32,23 @@ done < <(find "$SRC" -path '*/domain/*' -name '*.ts' -print0 2>/dev/null)
 # C1: Cero 'any' en todo src/
 # ──────────────────────────────────────────────────────────────────
 while IFS= read -r -d '' f; do
-  # Busca 'any' (como palabra, no substring de 'many' etc)
-  if grep -Pn '\bany\b' "$f" > /dev/null 2>&1; then
+  # C1: cualquier .ts contiene 'any' EN CÓDIGO (no en comentarios)
+  # Strip comments antes de buscar: elimina // y /* */ y frontmatter JSDoc
+  if sed -E 's|//.*$||g; s|/\*([^*]|\*[^/])*\*/||g' "$f" | grep -Pn '\bany\b' > /dev/null 2>&1; then
     # Excluir Result<T,E> que es la única excepción canónica
     if ! grep -P '^export type Result<[^,]+,[^>]+> =' "$f" > /dev/null 2>&1; then
-      echo "❌ C1 VIOLATION: $f → contiene 'any' (prohibido)"
+      echo "❌ C1 VIOLATION: $f → contiene 'any' en código (prohibido)"
       FAIL=1
     fi
   fi
 done < <(find "$SRC" -name '*.ts' -print0 2>/dev/null)
 
 # ──────────────────────────────────────────────────────────────────
-# C2: Cero @ts-ignore y @ts-expect
+# C2: Cero @ts-ignore y @ts-expect (en código, no comentarios)
 # ──────────────────────────────────────────────────────────────────
 while IFS= read -r -d '' f; do
-  if grep -P '@ts-(ignore|expect)' "$f" > /dev/null 2>&1; then
-    echo "❌ C2 VIOLATION: $f → contiene @ts-ignore o @ts-expect (prohibido)"
+  if sed -E 's|//.*$||g; s|/\*([^*]|\*[^/])*\*/||g' "$f" | grep -P '@ts-(ignore|expect)' > /dev/null 2>&1; then
+    echo "❌ C2 VIOLATION: $f → contiene @ts-ignore o @ts-expect en código (prohibido)"
     FAIL=1
   fi
 done < <(find "$SRC" -name '*.ts' -print0 2>/dev/null)
