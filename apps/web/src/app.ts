@@ -1,10 +1,11 @@
 /**
  * HUB by Raisen — App shell (punto de entrada a la SPA).
- * Gestiona estado, inbox, filtro de canal, SAFE governance y delega render en tab-router.
+ * Estado de filtros en app-filters.ts (C4 ≤75).
  */
 import type { PageState, TabId, InboxItem, AppContext, SafeSnapshot } from "./types.ts";
 import { createInitialState, cycleMode, navigate, popSubPage } from "./navigation.ts";
 import { renderTab } from "./tab-router.ts";
+import { FiltrosInbox } from "./app-filters.ts";
 
 export type CargarInbox = () => Promise<InboxItem[]>;
 export type CargarSafe = () => Promise<SafeSnapshot | null>;
@@ -13,9 +14,7 @@ export class HUBApp {
   private state: PageState = createInitialState();
   private inbox: InboxItem[] = [];
   private safeSnapshot: SafeSnapshot | null = null;
-  private filtroCanal: string | null = null;
-  private filtroEstado: string | null = null;
-  private filtroSLA: boolean | null = null;
+  private filtros = new FiltrosInbox();
 
   constructor(
     private readonly context: AppContext,
@@ -46,34 +45,31 @@ export class HUBApp {
   }
 
   toggleFiltroCanal(canal: string): void {
-    this.filtroCanal = this.filtroCanal === canal ? null : canal;
+    this.filtros.toggleCanal(canal);
   }
 
   toggleFiltroEstado(estado: string): void {
-    this.filtroEstado = this.filtroEstado === estado ? null : estado;
+    this.filtros.toggleEstado(estado);
   }
 
   toggleFiltroSLA(): void {
-    this.filtroSLA = this.filtroSLA === true ? null : true;
+    this.filtros.toggleSLA();
   }
 
-  /** Limpia todos los filtros del inbox (canal, estado y SLA). */
   toggleFiltroClean(): void {
-    this.filtroCanal = null;
-    this.filtroEstado = null;
-    this.filtroSLA = null;
+    this.filtros.clean();
   }
 
   filtroActual(): string | null {
-    return this.filtroCanal;
+    return this.filtros.canalActual;
   }
 
   filtroEstadoActual(): string | null {
-    return this.filtroEstado;
+    return this.filtros.estadoActual;
   }
 
   filtroSLAActual(): boolean | null {
-    return this.filtroSLA;
+    return this.filtros.slaActual;
   }
 
   renderCurrentTab(): string {
@@ -82,9 +78,9 @@ export class HUBApp {
       this.context,
       this.inbox,
       this.safeSnapshot,
-      this.filtroCanal,
-      this.filtroEstado,
-      this.filtroSLA,
+      this.filtros.canalActual,
+      this.filtros.estadoActual,
+      this.filtros.slaActual,
     );
   }
 
