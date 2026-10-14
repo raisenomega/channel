@@ -474,3 +474,65 @@
 @media (max-width: 1080px) and (min-width: 901px) {
   .cf-root { grid-template-columns: minmax(200px, 24%) 1fr; }
 }
+
+/* ============================================================
+ * HUB by Raisen — ChannelOverlay
+ * Overlay de la página flotante de canal + franja de canales.
+ * NO altera .cf-* ni .wa-* (la página flotante queda igual).
+ * ============================================================ */
+.cao { position: relative; }
+
+/* FRANJA de canales: se ubica en la franja ENTRE el header principal del
+   shell (.nav ~56px) y el header del panel flotante. Fina y compacta para
+   caber entre ambos headers. */
+.cao-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 36px;                       /* fino, para caber entre ambos headers */
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  background: rgba(8, 10, 16, 0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid hsl(var(--border) / 0.3);
+}
+
+.cao-chip {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--card-soft));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cao-chip.on {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.12);
+}
+
+.cao-x {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: hsl(var(--text-dim));
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Overlay de la página flotante: cubre el inbox, dejando el hueco para la
+   franja debajo. */
+.cao-body {
+  position: relative;
+  margin-top: 44px;   /* deja el hueco para la franja */
+}

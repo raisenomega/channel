@@ -13,6 +13,9 @@ import type { InboxItem, DashboardStats, RowConv } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { BentoKpi, DistribucionCanales, AnilloSLA, Pendientes, BentoTitle } from "@/components/dashboard/bentobox-dashboard";
+import { ChannelOverlay } from "@/components/dashboard/channel-overlay";
+import { ChannelFrame } from "@/components/dashboard/channel-frame";
+import { BrandPhone, type BrandKind } from "@/components/dashboard/brand-phone";
 
 const IconBars = () => (
   <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -114,12 +117,110 @@ function formatTime(iso: string, lang: Idioma): string {
   return d.toLocaleDateString(lang === "es" ? "es" : "en", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
+/* ────────────────────────────────────────────
+   Página flotante del canal dentro del overlay
+   (ChannelFrame + BrandPhone, simplificada).
+   Muestra el canal activo sin salir del inbox.
+   ──────────────────────────────────────────── */
+
+/** Acento (triplete HSL) y marca de celular por canal activo. */
+const OVERLAY_META: Record<string, { accent: string; brand: BrandKind }> = {
+  whatsapp: { accent: "142 70% 28%", brand: "whatsapp" },
+  email:    { accent: "4 82% 56%",  brand: "gmail" },
+  instagram:{ accent: "332 72% 50%",brand: "instagram" },
+  facebook: { accent: "221 88% 53%",brand: "facebook" },
+  telegram: { accent: "201 78% 52%",brand: "telegram" },
+  sms:      { accent: "122 39% 49%",brand: "sms" },
+  x:        { accent: "210 60% 55%",brand: "x" },
+  linkedin: { accent: "203 89% 40%",brand: "linkedin" },
+  webchat:  { accent: "240 100% 69%",brand: "webchat" },
+};
+
+function FloatingChannel({ channel, items, lang }: {
+  channel: string;
+  items: readonly InboxItem[];
+  lang: Idioma;
+}) {
+  const meta: { accent: string; brand: BrandKind } =
+    OVERLAY_META[channel] ?? { accent: "142 70% 28%", brand: "whatsapp" };
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const convos = items.filter((i) => i.channel === channel);
+  const active = convos.find((c) => c.conversationId === activeId) ?? null;
+
+  return (
+    <ChannelFrame lang={lang} accent={meta.accent}>
+      <BrandPhone kind={meta.brand}>
+        <div className="wa-root" style={{ height: "100%" }}>
+          {activeId && active ? (
+            <ConversacionMini item={active} onBack={() => setActiveId(null)} lang={lang} />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+              <p style={{ margin: "6px 12px 2px", fontSize: 12, fontWeight: 700, opacity: 0.85 }}>
+                {t(lang, "canal." + channel)}
+              </p>
+              {convos.length === 0 ? (
+                <p style={{ textAlign: "center", fontSize: 12, opacity: 0.7, padding: 18 }}>
+                  {t(lang, "dash.emptyBody")}
+                </p>
+              ) : (
+                convos.map((c) => (
+                  <div
+                    key={c.conversationId}
+                    onClick={() => setActiveId(c.conversationId)}
+                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderBottom: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}
+                  >
+                    <Avatar name={c.contactName} size="sm" />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                        <span style={{ fontSize: 13.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.contactName}</span>
+                        <span style={{ fontSize: 10.5, opacity: 0.7, flexShrink: 0 }}>{formatTime(c.lastMessageAt, lang)}</span>
+                      </div>
+                      <div style={{ fontSize: 12, opacity: 0.75, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.lastMessage}</div>
+                    </div>
+                    {c.slaViolated ? <Badge tone="danger">SLA</Badge> : null}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </BrandPhone>
+    </ChannelFrame>
+  );
+}
+
+/** Chat simplificado de la conversación activa dentro del celular. */
+function ConversacionMini({ item, onBack, lang }: {
+  item: InboxItem;
+  onBack: () => void;
+  lang: Idioma;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", background: "#075e54", color: "#fff", flexShrink: 0 }}>
+        <span onClick={onBack} style={{ cursor: "pointer", fontSize: 18, lineHeight: 1 }}>‹</span>
+        <span style={{ fontWeight: 700, fontSize: 13, flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.contactName}</span>
+        <span style={{ fontSize: 11, opacity: 0.9 }}>{t(lang, "canal.enLinea")}</span>
+      </div>
+      <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ maxWidth: "80%", alignSelf: "flex-start", background: "#ffffff", color: "#1f2926", padding: "7px 10px", borderRadius: 10, fontSize: 13, lineHeight: 1.35, boxShadow: "0 1px 1px rgba(0,0,0,0.08)" }}>
+          {item.lastMessage}
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 6, padding: 8, flexShrink: 0 }}>
+        <input readOnly={true} defaultValue="" placeholder={t(lang, "chat.placeholder")} style={{ flex: 1, borderRadius: 999, border: "1px solid rgba(0,0,0,0.1)", background: "#fff", padding: "7px 12px", fontSize: 13, outline: "none" }} />
+      </div>
+    </div>
+  );
+}
+
 function InboxPage() {
   const { language } = usePreferences();
   const navigate = useNavigate();
   const [filtroCanal, setFiltroCanal] = useState<string | null>(null);
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [filtroSLA, setFiltroSLA] = useState<boolean | null>(null);
+  const [openChannel, setOpenChannel] = useState<string | null>(null); // canal abierto en overlay (null = cerrado)
 
   const { data: items, isPending } = useQuery({ queryKey: ["inbox"], queryFn: fetchInbox, staleTime: 30_000 });
 
@@ -190,7 +291,7 @@ function InboxPage() {
           {(canalesActivos.length ? canalesActivos : ["whatsapp", "email", "instagram"]).map((c) => (
             <button key={c} type="button"
               className="chip"
-              onClick={() => void navigate({ to: "/channels/$channelId", params: { channelId: c } })}>
+              onClick={() => setOpenChannel(c)}>
               <span className="chip-name">{t(language, "canal." + c)}</span>
             </button>
           ))}
@@ -246,6 +347,18 @@ function InboxPage() {
           )}
         </div>
       </div>
+
+      {/* Overlay flotante de canal: se abre al pulsar un chip de canal, sin navegar fuera */}
+      <ChannelOverlay
+        open={openChannel !== null}
+        selected={openChannel ?? "whatsapp"}
+        onSelect={(k) => { setOpenChannel(k); }}
+        onClose={() => { setOpenChannel(null); }}
+      >
+        {openChannel ? (
+          <FloatingChannel channel={openChannel} items={itemsFiltrados} lang={language} />
+        ) : null}
+      </ChannelOverlay>
     </div>
   );
 }
