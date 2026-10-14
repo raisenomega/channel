@@ -322,26 +322,29 @@
  * ============================================================ */
 .cf-root {
   display: grid;
-  grid-template-columns: minmax(320px, 40%) 1fr;
+  grid-template-columns: 340px 1fr;
   gap: 16px;
   align-items: stretch;
   height: 100%;
   min-height: 0;
-  padding: 18px;
-  /* Una UNICA tarjeta flotante glass (estilo OMEGA/inbox), sin tocar el CSS global. */
+  padding: 16px;
+  /* Una UNICA tarjeta flotante glass (estilo OMEGA/inbox), sin tocar el CSS global.
+     El borde/gradiente por canal se aplica via la variable --wa-accent (hsl) */
   border: 1px solid hsl(var(--border) / 0.35);
   border-radius: 22px;
   background: linear-gradient(160deg, hsl(var(--card) / 0.85), hsl(var(--card-soft) / 0.50));
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   box-shadow: 0 14px 48px -18px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 hsl(var(--primary) / 0.08);
+  outline: 1px solid hsl(var(--wa-accent, var(--primary)) / 0.5);
 }
 
-/* Columna izquierda (dentro de la tarjeta): el celular, auto-ajustado y centrado */
+/* Columna izquierda (dentro de la tarjeta): el celular, con su medida
+   original (340px), pegado al borde IZQUIERDO (inicio de la pagina flotante). */
 .cf-left {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
   min-height: 0;
 }
@@ -356,13 +359,14 @@
   min-height: 0;
 }
 
-/* Barra de pestañas (palabras de negocio, NO pills) */
+/* Barra de pestañas (palabras de negocio, NO pills)
+   Compacta y pegada al celular: menos gap/padding y borde inferior fino. */
 .cf-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 18px;
-  padding: 6px 0 8px;
-  border-bottom: 1px solid hsl(var(--border) / 0.3);
+  gap: 2px 12px;
+  padding: 2px 6px 4px;
+  border-bottom: 1px solid hsl(var(--border) / 0.18);
   flex-shrink: 0;
 }
 
@@ -370,10 +374,10 @@
   appearance: none;
   background: transparent;
   border: none;
-  padding: 2px 2px;
+  padding: 2px 1px;
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: hsl(var(--text-muted));
   border-bottom: 2px solid transparent;
@@ -408,21 +412,21 @@
 }
 .cf-conv-sub { font-size: 13px; max-width: 360px; line-height: 1.4; }
 
-/* Composer (barra de input) — empujada al fondo */
+/* Composer (barra de input) — compacta y pegada al celular */
 .cf-composer {
   margin-top: auto;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding-top: 10px;
-  border-top: 1px solid hsl(var(--border) / 0.3);
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid hsl(var(--border) / 0.18);
 }
 
 .cf-input {
   flex: 1;
   min-width: 0;
-  padding: 9px 12px;
+  padding: 7px 10px;
   border-radius: 12px;
   border: 1px solid hsl(var(--border) / 0.4);
   background: transparent;
@@ -436,7 +440,7 @@
 
 .cf-send {
   flex-shrink: 0;
-  padding: 9px 16px;
+  padding: 7px 14px;
   border-radius: 12px;
   border: none;
   cursor: pointer;
@@ -453,4 +457,20 @@
 /* Colapso móvil: celular arriba, derecha debajo */
 @media (max-width: 900px) {
   .cf-root { grid-template-columns: minmax(0, 1fr); height: auto; }
+}
+
+/* Pantallas medianas: el celular sigue reduciendo para dar aún más espacio
+   a la conversación, y se compactan las barras. */
+@media (max-width: 1280px) and (min-width: 901px) {
+  .cf-root {
+    grid-template-columns: minmax(230px, 26%) 1fr;
+    padding: 10px;
+    gap: 8px;
+  }
+  .cf-tabs { gap: 2px 10px; padding: 2px 4px 3px; }
+  .cf-tab { font-size: 12.5px; }
+}
+
+@media (max-width: 1080px) and (min-width: 901px) {
+  .cf-root { grid-template-columns: minmax(200px, 24%) 1fr; }
 }

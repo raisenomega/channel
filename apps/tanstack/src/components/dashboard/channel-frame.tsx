@@ -7,7 +7,7 @@
  *
  * No renderiza título ni acciones antiguas: solo tabs + content + composer.
  */
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { t, type Idioma } from "@/lib/i18n";
 
 /** Pestañas de negocio disponibles en la columna derecha. */
@@ -78,7 +78,10 @@ export function ChannelFrame({
   const accentColor = accent ?? "var(--primary)";
 
   return (
-    <div className="cf-root">
+    <div
+      className="cf-root"
+      style={accent ? { "--wa-accent": accent } as CSSProperties : undefined}
+    >
       {/* Columna 1: celular */}
       <div className="cf-left">{children}</div>
 

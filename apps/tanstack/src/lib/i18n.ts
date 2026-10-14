@@ -59,6 +59,9 @@ const ES: Dict = {
   "canal.seleccionar": "Selecciona una conversación",
   "canal.contacto": "Información del contacto",
   "canal.conversacion": "Conversación",
+  "canal.sinHilo": "Selecciona una conversación para ver la ficha de su cliente.",
+  "canal.sinContacto": "No se encontró información del contacto de este hilo.",
+  "canal.dataContacto": "Datos del cliente del hilo",
 
   "dash.activas": "Conversaciones abiertas",
   "dash.sinAsignar": "Sin asignar",
@@ -444,6 +447,9 @@ const EN: Dict = {
   "canal.seleccionar": "Select a conversation",
   "canal.contacto": "Contact information",
   "canal.conversacion": "Conversation",
+  "canal.sinHilo": "Select a conversation to see its customer profile.",
+  "canal.sinContacto": "No contact data found for this thread.",
+  "canal.dataContacto": "Thread customer data",
 
   "dash.activas": "Open conversations",
   "dash.sinAsignar": "Unassigned",

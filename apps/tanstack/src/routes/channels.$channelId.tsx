@@ -20,7 +20,9 @@ import { t, type Idioma } from "@/lib/i18n";
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import { ChannelIcon, type ChannelKind } from "@/components/ui/channel-icon";
 import { Button } from "@/components/ui/button";
-import type { Mensaje, RowQuote, RowPayment } from "@/lib/types";
+import { Badge, type BadgeTone } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/card";
+import type { Mensaje, RowQuote, RowPayment, RowOrder } from "@/lib/types";
 import {
   WaContactBar,
   waChatFrom,
@@ -41,7 +43,10 @@ export const CanalRoute = createRoute({
 
 const MESSAGE_COLS = ["id", "conversation_id", "sender_type", "sender_id", "content", "message_type", "created_at"];
 const CONV_COLS = ["id", "contact_id", "primary_channel", "subject", "last_message_at"];
-const CONTACT_COLS = ["id", "display_name", "primary_phone", "primary_email"];
+const CONTACT_COLS = [
+  "id", "display_name", "primary_phone", "primary_email",
+  "segment", "ltv_usd", "total_orders", "preferred_channel",
+];
 const AGENT_COLS = ["id", "display_name", "role", "status"];
 const TEMPLATE_COLS = ["id", "name", "channel", "category", "body_preview"];
 const DOC_COLS = ["id", "conversation_id", "file_name", "file_type", "file_size", "created_at"];
@@ -95,7 +100,10 @@ async function fetchContact(id: string) {
   try {
     const res = await fetch(url, { headers });
     if (!res.ok) return null;
-    const rows = (await res.json()) as Array<{ id: string; display_name: string | null; primary_phone: string | null; primary_email: string | null }>;
+    const rows = (await res.json()) as unknown as Array<{
+      id: string; display_name: string | null; primary_phone: string | null; primary_email: string | null;
+      segment: string | null; ltv_usd: number | null; total_orders: number | null; preferred_channel: string | null;
+    }>;
     return rows[0] ?? null;
   } catch { return null; }
 }
@@ -114,18 +122,6 @@ async function fetchAgents() {
   } catch { return []; }
 }
 
-async function fetchContacts() {
-  const base = supabaseRestBase();
-  const headers = supabaseAuthHeaders();
-  if (!base || !headers) return [];
-  const url = `${base}/contacts?select=${enc(CONTACT_COLS.join(","))}&order=display_name.asc&limit=100`;
-  try {
-    const res = await fetch(url, { headers });
-    if (!res.ok) return [];
-    return (await res.json()) as Array<{ id: string; display_name: string | null; primary_phone: string | null; primary_email: string | null }>;
-  } catch { return []; }
-}
-
 async function fetchTemplates() {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
@@ -135,30 +131,6 @@ async function fetchTemplates() {
     const res = await fetch(url, { headers });
     if (!res.ok) return [];
     return (await res.json()) as Array<{ id: string; name: string | null; channel: string | null; category: string | null; body_preview: string | null }>;
-  } catch { return []; }
-}
-
-async function fetchQuotes() {
-  const base = supabaseRestBase();
-  const headers = supabaseAuthHeaders();
-  if (!base || !headers) return [];
-  const url = `${base}/quotes?select=${enc(["id","contact_id","status","total_amount","currency","created_at"].join(","))}&order=created_at.desc&limit=50`;
-  try {
-    const res = await fetch(url, { headers });
-    if (!res.ok) return [];
-    return (await res.json()) as RowQuote[];
-  } catch { return []; }
-}
-
-async function fetchPayments() {
-  const base = supabaseRestBase();
-  const headers = supabaseAuthHeaders();
-  if (!base || !headers) return [];
-  const url = `${base}/payments?select=${enc(["id","order_id","quote_id","status","amount","currency","created_at"].join(","))}&order=created_at.desc&limit=50`;
-  try {
-    const res = await fetch(url, { headers });
-    if (!res.ok) return [];
-    return (await res.json()) as RowPayment[];
   } catch { return []; }
 }
 
@@ -173,6 +145,61 @@ async function fetchDocuments() {
     return (await res.json()) as Array<{ id: string; conversation_id: string | null; file_name: string | null; file_type: string | null; file_size: number | null; created_at: string | null }>;
   } catch { return []; }
 }
+
+/* Fetchers scoped al cliente del hilo activo. */
+async function fetchQuotesForContact(contactId: string): Promise<RowQuote[]> {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  const cols = ["id", "contact_id", "status", "total_amount", "currency", "created_at", "expires_at"].join(",");
+  const url = `${base}/quotes?select=${enc(cols)}&contact_id=eq.${enc(contactId)}&order=created_at.desc&limit=50`;
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as RowQuote[];
+  } catch { return []; }
+}
+
+async function fetchOrdersForContact(contactId: string): Promise<RowOrder[]> {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  const cols = ["id", "quote_id", "contact_id", "status", "total_amount", "currency", "created_at", "paid_at"].join(",");
+  const url = `${base}/orders?select=${enc(cols)}&contact_id=eq.${enc(contactId)}&order=created_at.desc&limit=50`;
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as RowOrder[];
+  } catch { return []; }
+}
+
+async function fetchPaymentsForContact(contactId: string): Promise<RowPayment[]> {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  // Los pagos no exponen contact_id: se resuelven vía las órdenes y cotizaciones
+  // del contacto filtrando por order_id.in / quote_id.in.
+  try {
+    const [orders, quotes] = await Promise.all([
+      fetchOrdersForContact(contactId),
+      fetchQuotesForContact(contactId),
+    ]);
+    const orderIds = orders.map((o) => o.id);
+    const quoteIds = quotes.map((q) => q.id);
+    if (orderIds.length === 0 && quoteIds.length === 0) return [];
+    const clauses: string[] = [];
+    if (orderIds.length > 0) clauses.push(`order_id.in.(${orderIds.map((id) => encodeURIComponent(id)).join(",")})`);
+    if (quoteIds.length > 0) clauses.push(`quote_id.in.(${quoteIds.map((id) => encodeURIComponent(id)).join(",")})`);
+    const cols = ["id", "order_id", "quote_id", "status", "amount", "currency", "provider", "created_at"].join(",");
+    const url = `${base}/payments?select=${enc(cols)}&or=(${clauses.join(",")})&order=created_at.desc&limit=50`;
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as RowPayment[];
+  } catch { return []; }
+}
+
+/** Información cargada del contacto del hilo activo (ficha 360). */
+type ActiveContactInfo = NonNullable<Awaited<ReturnType<typeof fetchContact>>>;
 
 function toWaMsg(m: Mensaje): WaMsg {
   return {
@@ -331,35 +358,25 @@ function PhoneApp({
 /* ── Componentes de contenido para cada pestaña ──────────────── */
 
 function TabContent({
-  lang, activeTab, accent,
+  lang, activeTab, accent, contactId, contactInfo,
 }: {
   lang: Idioma;
   activeTab: ChannelTab | undefined;
   accent: string;
+  contactId: string | null;
+  contactInfo: ActiveContactInfo | null;
 }): ReactNode {
+  const hasHilo = !!contactId;
+
+  // Vistas auxiliares (no scoped al cliente).
   const { data: agents } = useQuery({
     queryKey: ["channel-agents"],
     queryFn: fetchAgents,
     staleTime: 30_000,
   });
-  const { data: contacts } = useQuery({
-    queryKey: ["channel-contacts"],
-    queryFn: fetchContacts,
-    staleTime: 30_000,
-  });
   const { data: templates } = useQuery({
     queryKey: ["channel-templates"],
     queryFn: fetchTemplates,
-    staleTime: 30_000,
-  });
-  const { data: quotes } = useQuery({
-    queryKey: ["channel-quotes"],
-    queryFn: fetchQuotes,
-    staleTime: 30_000,
-  });
-  const { data: payments } = useQuery({
-    queryKey: ["channel-payments"],
-    queryFn: fetchPayments,
     staleTime: 30_000,
   });
   const { data: documents } = useQuery({
@@ -368,10 +385,44 @@ function TabContent({
     staleTime: 30_000,
   });
 
+  // Vistas scoped al cliente del hilo activo.
+  const { data: quotes } = useQuery({
+    queryKey: ["channel-quotes-contact", contactId],
+    queryFn: () => fetchQuotesForContact(contactId as string),
+    enabled: !!contactId,
+    staleTime: 30_000,
+  });
+  const { data: orders } = useQuery({
+    queryKey: ["channel-orders-contact", contactId],
+    queryFn: () => fetchOrdersForContact(contactId as string),
+    enabled: !!contactId,
+    staleTime: 30_000,
+  });
+  const { data: payments } = useQuery({
+    queryKey: ["channel-payments-contact", contactId],
+    queryFn: () => fetchPaymentsForContact(contactId as string),
+    enabled: !!contactId,
+    staleTime: 30_000,
+  });
+
   if (!activeTab) {
     return <ChatAmplified lang={lang} />;
   }
 
+  const sinHilo = (
+    <Card>
+      <CardBody className="py-8 text-center">
+        <p className="text-sm text-muted-foreground">{t(lang, "canal.sinHilo")}</p>
+      </CardBody>
+    </Card>
+  );
+  const sinContacto = (
+    <Card>
+      <CardBody className="py-8 text-center">
+        <p className="text-sm text-muted-foreground">{t(lang, "canal.sinContacto")}</p>
+      </CardBody>
+    </Card>
+  );
   const accentStyle = { borderLeft: `3px solid hsl(${accent})`, paddingLeft: 10 };
 
   switch (activeTab) {
@@ -396,21 +447,13 @@ function TabContent({
       );
 
     case "contactos":
+      // Ficha del CONTACTO del hilo activo.
+      if (!hasHilo) return sinHilo;
+      if (!contactInfo) return sinContacto;
       return (
-        <div>
-          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.contactos")}</h4>
-          {!contacts || contacts.length === 0 ? (
-            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
-          ) : (
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
-              {contacts.map((c) => (
-                <li key={c.id} style={accentStyle}>
-                  <span style={{ fontWeight: 600, fontSize: 13 }}>{c.display_name ?? "—"}</span>
-                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{c.primary_phone ?? ""}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+        <div className="space-y-3">
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})` }}>{t(lang, "canal.dataContacto")}</h4>
+          <ContactFichaCard lang={lang} contact={contactInfo} />
         </div>
       );
 
@@ -434,62 +477,88 @@ function TabContent({
       );
 
     case "cotizacion":
+      // Cotizaciones del CONTACTO del hilo, formato /quotes.
+      if (!hasHilo) return sinHilo;
       return (
-        <div>
+        <div className="space-y-3">
           <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.cotizacion")}</h4>
           {!quotes || quotes.length === 0 ? (
-            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "quotes.empty")}</p>
           ) : (
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div className="grid gap-3">
               {quotes.map((q) => (
-                <li key={q.id} style={accentStyle}>
-                  <span style={{ fontWeight: 600, fontSize: 13 }}>{q.id.slice(0, 8)}</span>
-                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{q.status}</span>
-                  <span style={{ fontSize: 11, float: "right" }}>{q.currency} {q.total_amount}</span>
-                </li>
+                <Card key={q.id}>
+                  <CardHeader>
+                    <CardTitle className="text-sm">{t(lang, "quotes.total")}: {q.currency} {q.total_amount.toFixed(2)}</CardTitle>
+                    <Badge tone={QUOTE_STATUS_TONE[q.status] ?? "warn"}>
+                      {t(lang, "quotes.status." + q.status)}
+                    </Badge>
+                  </CardHeader>
+                  <CardBody>
+                    <Row label={t(lang, "quotes.date")} value={new Date(q.created_at).toLocaleDateString()} />
+                  </CardBody>
+                </Card>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       );
 
     case "factura":
-      // Facturas: filtramos quotes con estado "approved" o "sent" como facturas
+      // Facturas/órdenes del contacto del hilo, formato /orders.
+      if (!hasHilo) return sinHilo;
       return (
-        <div>
+        <div className="space-y-3">
           <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.factura")}</h4>
-          {!quotes || quotes.length === 0 ? (
-            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+          {!orders || orders.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "orders.empty")}</p>
           ) : (
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
-              {quotes.filter((q) => q.status === "approved" || q.status === "sent").map((q) => (
-                <li key={q.id} style={accentStyle}>
-                  <span style={{ fontWeight: 600, fontSize: 13 }}>#{q.id.slice(0, 8)}</span>
-                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{q.status}</span>
-                  <span style={{ fontSize: 11, float: "right" }}>{q.currency} {q.total_amount}</span>
-                </li>
+            <div className="grid gap-3">
+              {orders.map((o) => (
+                <Card key={o.id}>
+                  <CardHeader>
+                    <CardTitle className="text-sm">{t(lang, "orders.total")}: {o.currency} {o.total_amount.toFixed(2)}</CardTitle>
+                    <Badge tone={ORDER_STATUS_TONE[o.status] ?? "warn"}>
+                      {t(lang, "orders.status." + o.status)}
+                    </Badge>
+                  </CardHeader>
+                  <CardBody>
+                    <Row label={t(lang, "orders.quote")} value={o.quote_id ? o.quote_id.slice(0, 8) + "..." : "—"} />
+                    <Row label={t(lang, "orders.date")} value={new Date(o.created_at).toLocaleDateString()} />
+                  </CardBody>
+                </Card>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       );
 
     case "pagos":
+      // Pagos del contacto del hilo, formato /payments.
+      if (!hasHilo) return sinHilo;
       return (
-        <div>
+        <div className="space-y-3">
           <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.pagos")}</h4>
           {!payments || payments.length === 0 ? (
-            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "payments.empty")}</p>
           ) : (
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div className="grid gap-3">
               {payments.map((p) => (
-                <li key={p.id} style={accentStyle}>
-                  <span style={{ fontWeight: 600, fontSize: 13 }}>{p.id.slice(0, 8)}</span>
-                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{p.status}</span>
-                  <span style={{ fontSize: 11, float: "right" }}>{p.currency} {p.amount}</span>
-                </li>
+                <Card key={p.id}>
+                  <CardHeader>
+                    <CardTitle className="text-sm">{p.currency} {p.amount.toFixed(2)}</CardTitle>
+                    <Badge tone={PAYMENT_STATUS_TONE[p.status] ?? "warn"}>
+                      {t(lang, "payments.status." + p.status)}
+                    </Badge>
+                  </CardHeader>
+                  <CardBody>
+                    <Row label={t(lang, "payments.provider")} value={p.provider ?? "—"} />
+                    <Row label={t(lang, "payments.order")} value={p.order_id ? p.order_id.slice(0, 8) + "..." : "—"} />
+                    <Row label={t(lang, "payments.date")} value={new Date(p.created_at).toLocaleDateString()} />
+                  </CardBody>
+                </Card>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       );
@@ -522,6 +591,45 @@ function TabContent({
       return <ChatAmplified lang={lang} />;
   }
 }
+
+/* Ficha 360 del cliente del hilo activo. */
+function ContactFichaCard({ lang, contact }: { lang: Idioma; contact: ActiveContactInfo }) {
+  const segment = contact.segment ? t(lang, "contacts.segment." + contact.segment) : "—";
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">{contact.display_name ?? "—"}</CardTitle>
+        <Badge tone={contact.segment ? "hub" : "warn"} dot>{segment}</Badge>
+      </CardHeader>
+      <CardBody>
+        <Row label={t(lang, "contacts.phone")} value={contact.primary_phone ?? "—"} />
+        <Row label={t(lang, "contacts.email")} value={contact.primary_email ?? "—"} />
+        <Row label={t(lang, "contacts.segment")} value={segment} />
+        <Row label={t(lang, "contacts.ltv")} value={`$${(contact.ltv_usd ?? 0).toFixed(2)}`} />
+        <Row label={t(lang, "contacts.orders")} value={String(contact.total_orders ?? 0)} />
+      </CardBody>
+    </Card>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-0.5 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground">{value}</span>
+    </div>
+  );
+}
+
+const QUOTE_STATUS_TONE: Record<string, BadgeTone> = {
+  draft: "warn", sent: "hub", accepted: "success", rejected: "danger", expired: "process",
+};
+const ORDER_STATUS_TONE: Record<string, BadgeTone> = {
+  pending: "warn", confirmed: "hub", paid: "success", shipped: "process", delivered: "success", cancelled: "danger",
+};
+const PAYMENT_STATUS_TONE: Record<string, BadgeTone> = {
+  pending: "warn", completed: "success", failed: "danger", refunded: "process",
+};
 
 function CanalViewPage() {
   const { channelId } = useParams({ from: CanalRoute.id });
@@ -574,6 +682,11 @@ function CanalViewPage() {
   }, [conversations, channelId]);
 
   const activeChat = useMemo(() => chats.find((c) => c.id === activeId) ?? null, [chats, activeId]);
+  const threadContactId = useMemo(() => {
+    if (!activeId) return null;
+    const conv = (conversations ?? []).find((c) => c.id === activeId);
+    return conv?.contact_id ?? null;
+  }, [conversations, activeId]);
   const activeMsgs: WaMsg[] = useMemo(
     () => (activeId && msgMap?.[activeId] ? msgMap[activeId].map(toWaMsg) : []),
     [msgMap, activeId],
@@ -617,7 +730,7 @@ function CanalViewPage() {
         onSend={onSend}
         composerContent={
           activeTab
-            ? <TabContent lang={language} activeTab={activeTab} accent={meta.hsl} />
+            ? <TabContent lang={language} activeTab={activeTab} accent={meta.hsl} contactId={threadContactId} contactInfo={contactInfo ?? null} />
             : <AmplifiedChat lang={language} chat={activeChat} contact={activeContact} msgs={activeMsgs} meta={meta} onOpenContact={() => setContactBarOpen(true)} />
         }
       >
