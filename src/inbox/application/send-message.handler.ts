@@ -3,7 +3,6 @@ import { ConversationId, ContactId, TenantId } from "../../shared/domain/ids.ts"
 import { ChannelType } from "../../shared/domain/types.ts";
 import { crearMensaje, MessageContent, AiMode } from "../domain/message.entity.ts";
 import { ConversationRepository, MessageRepository } from "../domain/inbox.repository.ts";
-import { transicionarStatus } from "../domain/conversation.entity.ts";
 
 export interface SendMessageCommand {
   readonly tenantId: TenantId;
