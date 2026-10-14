@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "framework": "vite",
-  "buildCommand": "npx vinxi build",
-  "installCommand": "pnpm install",
+  "buildCommand": "npx vite build",
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "outputDirectory": "dist"
 }
