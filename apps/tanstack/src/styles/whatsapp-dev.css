@@ -14,10 +14,20 @@
 }
 
 /* -------- Carcasa Samsung S25 Ultra -------- */
+/* La altura se DERIVA del viewport (no fija vía aspect-ratio) para que
+ * el teléfono quepa siempre en la altura disponible sin scroll externo.
+ * aspect-ratio conserva la proporción real del dispositivo, y
+ * max-height/max-width la acotan a lo que cabe en pantalla. */
 .wa-phone {
   position: relative;
+  height: auto;
   width: 340px;
   aspect-ratio: 9 / 19.5;
+  max-height: calc(100vh - 70px);
+  max-width: calc((100vh - 70px) * 9 / 19.5);
+  /* centrado vertical si sobra espacio */
+  margin: auto 0;
+  flex-shrink: 0;
   border-radius: 44px;
   background: linear-gradient(160deg, #1a1a1f, #2a2a33 60%, #0e0e12);
   box-shadow:
@@ -26,7 +36,7 @@
     inset 0 0 0 6px #00000055;
   padding: 9px;
 }
-/* Pantalla interna del teléfono */
+/* Pantalla interna del teléfono: siempre ocupa el 100% de la carcasa */
 .wa-screen {
   position: relative;
   width: 100%;
@@ -36,6 +46,45 @@
   background: #e5ddd5;
   display: flex;
   flex-direction: column;
+  /* asegura que el contenido interno respete la altura y pueda scrollear */
+  min-height: 0;
+}
+
+/* -------- Scroll interno dentro del celular -------- */
+/* Contenedores con scroll propio: nunca generan scroll en el viewport. */
+.wa-app,
+.wa-chatview,
+.wa-chats,
+.wa-chatview-body {
+  min-height: 0;
+}
+.wa-app,
+.wa-chatview {
+  overflow: hidden;
+}
+.wa-chats,
+.wa-chatview-body {
+  overflow-y: auto;
+}
+
+/* -------- Pantallas bajas: sigue cabiendo sin scroll -------- */
+/* Reduce ligeramente el tamaño y los radios para que la carcasa no se
+ * deforme ni desborde en viewports de altura reducida. */
+@media (max-height: 700px) {
+  .wa-phone {
+    max-height: calc(100vh - 44px);
+    max-width: calc((100vh - 44px) * 9 / 19.5);
+    border-radius: 30px;
+    padding: 6px;
+  }
+  .wa-screen { border-radius: 25px; }
+  .wa-chat .wa-avatar { width: 34px; height: 34px; font-size: 14px; }
+  .wa-chat .wa-preview { font-size: 11.5px; }
+  .wa-header { padding: 6px 8px 6px; }
+  .wa-tab { padding: 6px 2px; font-size: 11px; }
+  .wa-chatview-head { padding: 5px 8px; }
+  .wa-inputbar { padding: 4px 6px; }
+  .wa-fab { right: 14px; bottom: 12px; width: 42px; height: 42px; }
 }
 /* Isotipo camera (punch hole) */
 .wa-punch {
@@ -265,4 +314,142 @@
 @media (max-width: 900px) {
   .wa-root { grid-template-columns: 1fr; }
   .wa-phone { margin: 0 auto; width: 320px; }
+}
+
+/* ============================================================
+ * HUB by Raisen — ChannelFrame (layout horizontal)
+ * Grid de 2 columnas: celular (izq.) + pestañas/composer (der.)
+ * ============================================================ */
+.cf-root {
+  display: grid;
+  grid-template-columns: minmax(320px, 40%) 1fr;
+  gap: 16px;
+  align-items: stretch;
+  height: 100%;
+  min-height: 0;
+  padding: 8px;
+}
+
+/* Columna izquierda: el celular, auto-ajustado */
+.cf-left {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Columna derecha: pestañas + contenido + composer */
+.cf-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 12px;
+  border: 1px solid hsl(var(--border) / 0.35);
+  border-radius: 18px;
+  background: linear-gradient(160deg, hsl(var(--card) / 0.75), hsl(var(--card-soft) / 0.40));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px -18px rgba(0, 0, 0, 0.55);
+}
+
+/* Barra de pestañas (palabras de negocio, NO pills) */
+.cf-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding: 6px 0 8px;
+  border-bottom: 1px solid hsl(var(--border) / 0.3);
+  flex-shrink: 0;
+}
+
+.cf-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 2px 2px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--text-muted));
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.cf-tab:hover { color: hsl(var(--foreground)); }
+.cf-tab.on { color: hsl(var(--primary)); border-bottom-color: currentColor; font-weight: 700; }
+
+/* Contenido de la pestaña / conversación ampliada */
+.cf-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.cf-conv-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 6px;
+  text-align: center;
+  color: hsl(var(--text-muted));
+}
+.cf-conv-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+}
+.cf-conv-sub { font-size: 13px; max-width: 360px; line-height: 1.4; }
+
+/* Composer (barra de input) — empujada al fondo */
+.cf-composer {
+  margin-top: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid hsl(var(--border) / 0.3);
+}
+
+.cf-input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid hsl(var(--border) / 0.4);
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.cf-input:focus { border-color: hsl(var(--primary) / 0.55); }
+
+.cf-send {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: hsl(var(--primary));
+  color: hsl(var(--background));
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.cf-send:hover:not(:disabled) { transform: translateY(-1px); }
+.cf-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Colapso móvil: celular arriba, derecha debajo */
+@media (max-width: 900px) {
+  .cf-root { grid-template-columns: minmax(0, 1fr); height: auto; }
 }

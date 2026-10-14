@@ -1,14 +1,17 @@
 /**
  * HUB by Raisen — Vista de canal individual.
  * CUALQUIER canal (no solo WhatsApp) usa:
- *   - ChannelFrame: panel flotante glass (header + acciones + input en el panel).
+ *   - ChannelFrame: layout horizontal con celular a la izquierda y
+ *     pestañas de negocio + composer a la derecha.
  *   - BrandPhone: celular de la marca con la lista de conversaciones del canal.
  *   - Click hilo -> se muestra el chat interno de esa conversación dentro del celular.
  *   - Sidebar de contacto al pulsar el avatar (WaContactBar).
+ *   - Las pestañas de negocio muestran datos reales (cotizaciones, pagos, contactos, etc)
+ *     o estado vacío honesto (N5).
  * Datos reales via Supabase REST (conversaciones/mensajes/contactos). Sin datos mock.
  * i18n completo.
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import { createRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { rootRoute } from "@/app/root";
@@ -17,13 +20,17 @@ import { t, type Idioma } from "@/lib/i18n";
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import { ChannelIcon, type ChannelKind } from "@/components/ui/channel-icon";
 import { Button } from "@/components/ui/button";
-import type { Mensaje } from "@/lib/types";
+import type { Mensaje, RowQuote, RowPayment } from "@/lib/types";
 import {
   WaContactBar,
   waChatFrom,
   type WaChat, type WaMsg, type WaContact,
 } from "@/components/dashboard/whatsapp-phone";
-import { ChannelFrame, type ChannelFrameActions } from "@/components/dashboard/channel-frame";
+import {
+  ChannelFrame,
+  ChannelTab,
+  ChatAmplified,
+} from "@/components/dashboard/channel-frame";
 import { BrandPhone, type BrandKind } from "@/components/dashboard/brand-phone";
 
 export const CanalRoute = createRoute({
@@ -35,6 +42,9 @@ export const CanalRoute = createRoute({
 const MESSAGE_COLS = ["id", "conversation_id", "sender_type", "sender_id", "content", "message_type", "created_at"];
 const CONV_COLS = ["id", "contact_id", "primary_channel", "subject", "last_message_at"];
 const CONTACT_COLS = ["id", "display_name", "primary_phone", "primary_email"];
+const AGENT_COLS = ["id", "display_name", "role", "status"];
+const TEMPLATE_COLS = ["id", "name", "channel", "category", "body_preview"];
+const DOC_COLS = ["id", "conversation_id", "file_name", "file_type", "file_size", "created_at"];
 
 function enc(v: string): string { return encodeURIComponent(v); }
 
@@ -88,6 +98,80 @@ async function fetchContact(id: string) {
     const rows = (await res.json()) as Array<{ id: string; display_name: string | null; primary_phone: string | null; primary_email: string | null }>;
     return rows[0] ?? null;
   } catch { return null; }
+}
+
+/* ── Fetchers para las pestañas de negocio ──────────────────── */
+
+async function fetchAgents() {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  const url = `${base}/agents?select=${enc(AGENT_COLS.join(","))}&order=display_name.asc`;
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as Array<{ id: string; display_name: string | null; role: string | null; status: string | null }>;
+  } catch { return []; }
+}
+
+async function fetchContacts() {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  const url = `${base}/contacts?select=${enc(CONTACT_COLS.join(","))}&order=display_name.asc&limit=100`;
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as Array<{ id: string; display_name: string | null; primary_phone: string | null; primary_email: string | null }>;
+  } catch { return []; }
+}
+
+async function fetchTemplates() {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  const url = `${base}/templates?select=${enc(TEMPLATE_COLS.join(","))}&order=name.asc`;
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as Array<{ id: string; name: string | null; channel: string | null; category: string | null; body_preview: string | null }>;
+  } catch { return []; }
+}
+
+async function fetchQuotes() {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  const url = `${base}/quotes?select=${enc(["id","contact_id","status","total_amount","currency","created_at"].join(","))}&order=created_at.desc&limit=50`;
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as RowQuote[];
+  } catch { return []; }
+}
+
+async function fetchPayments() {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  const url = `${base}/payments?select=${enc(["id","order_id","quote_id","status","amount","currency","created_at"].join(","))}&order=created_at.desc&limit=50`;
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as RowPayment[];
+  } catch { return []; }
+}
+
+async function fetchDocuments() {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return [];
+  const url = `${base}/attachments?select=${enc(DOC_COLS.join(","))}&order=created_at.desc&limit=50`;
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    return (await res.json()) as Array<{ id: string; conversation_id: string | null; file_name: string | null; file_type: string | null; file_size: number | null; created_at: string | null }>;
+  } catch { return []; }
 }
 
 function toWaMsg(m: Mensaje): WaMsg {
@@ -244,6 +328,201 @@ function PhoneApp({
   );
 }
 
+/* ── Componentes de contenido para cada pestaña ──────────────── */
+
+function TabContent({
+  lang, activeTab, accent,
+}: {
+  lang: Idioma;
+  activeTab: ChannelTab | undefined;
+  accent: string;
+}): ReactNode {
+  const { data: agents } = useQuery({
+    queryKey: ["channel-agents"],
+    queryFn: fetchAgents,
+    staleTime: 30_000,
+  });
+  const { data: contacts } = useQuery({
+    queryKey: ["channel-contacts"],
+    queryFn: fetchContacts,
+    staleTime: 30_000,
+  });
+  const { data: templates } = useQuery({
+    queryKey: ["channel-templates"],
+    queryFn: fetchTemplates,
+    staleTime: 30_000,
+  });
+  const { data: quotes } = useQuery({
+    queryKey: ["channel-quotes"],
+    queryFn: fetchQuotes,
+    staleTime: 30_000,
+  });
+  const { data: payments } = useQuery({
+    queryKey: ["channel-payments"],
+    queryFn: fetchPayments,
+    staleTime: 30_000,
+  });
+  const { data: documents } = useQuery({
+    queryKey: ["channel-documents"],
+    queryFn: fetchDocuments,
+    staleTime: 30_000,
+  });
+
+  if (!activeTab) {
+    return <ChatAmplified lang={lang} />;
+  }
+
+  const accentStyle = { borderLeft: `3px solid hsl(${accent})`, paddingLeft: 10 };
+
+  switch (activeTab) {
+    case "agentes":
+      return (
+        <div>
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.agentes")}</h4>
+          {!agents || agents.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              {agents.map((a) => (
+                <li key={a.id} style={accentStyle}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{a.display_name ?? "—"}</span>
+                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{a.role ?? ""}</span>
+                  <span style={{ fontSize: 11, color: a.status === "online" ? "#22c55e" : "var(--muted-foreground)", float: "right" }}>{a.status ?? ""}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+
+    case "contactos":
+      return (
+        <div>
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.contactos")}</h4>
+          {!contacts || contacts.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              {contacts.map((c) => (
+                <li key={c.id} style={accentStyle}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{c.display_name ?? "—"}</span>
+                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{c.primary_phone ?? ""}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+
+    case "plantillas":
+      return (
+        <div>
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.plantillas")}</h4>
+          {!templates || templates.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              {templates.map((tpl) => (
+                <li key={tpl.id} style={accentStyle}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{tpl.name ?? "—"}</span>
+                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{tpl.category ?? ""}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+
+    case "cotizacion":
+      return (
+        <div>
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.cotizacion")}</h4>
+          {!quotes || quotes.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              {quotes.map((q) => (
+                <li key={q.id} style={accentStyle}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{q.id.slice(0, 8)}</span>
+                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{q.status}</span>
+                  <span style={{ fontSize: 11, float: "right" }}>{q.currency} {q.total_amount}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+
+    case "factura":
+      // Facturas: filtramos quotes con estado "approved" o "sent" como facturas
+      return (
+        <div>
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.factura")}</h4>
+          {!quotes || quotes.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              {quotes.filter((q) => q.status === "approved" || q.status === "sent").map((q) => (
+                <li key={q.id} style={accentStyle}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>#{q.id.slice(0, 8)}</span>
+                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{q.status}</span>
+                  <span style={{ fontSize: 11, float: "right" }}>{q.currency} {q.total_amount}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+
+    case "pagos":
+      return (
+        <div>
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.pagos")}</h4>
+          {!payments || payments.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              {payments.map((p) => (
+                <li key={p.id} style={accentStyle}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{p.id.slice(0, 8)}</span>
+                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{p.status}</span>
+                  <span style={{ fontSize: 11, float: "right" }}>{p.currency} {p.amount}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+
+    case "documentos":
+      return (
+        <div>
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: `hsl(${accent})`, marginBottom: 10 }}>{t(lang, "cf.documentos")}</h4>
+          {!documents || documents.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{t(lang, "dash.sinRegistros")}</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              {documents.map((d) => (
+                <li key={d.id} style={accentStyle}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{d.file_name ?? "—"}</span>
+                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{d.file_type ?? ""}</span>
+                  {d.file_size != null ? (
+                    <span style={{ fontSize: 11, color: "var(--muted-foreground)", float: "right" }}>
+                      {(d.file_size / 1024).toFixed(0)} KB
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+
+    default:
+      return <ChatAmplified lang={lang} />;
+  }
+}
+
 function CanalViewPage() {
   const { channelId } = useParams({ from: CanalRoute.id });
   const { language } = usePreferences();
@@ -254,6 +533,7 @@ function CanalViewPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [contactBarOpen, setContactBarOpen] = useState(false);
   const [composer, setComposer] = useState("");
+  const [activeTab, setActiveTab] = useState<ChannelTab | undefined>(undefined);
 
   const { data: conversations } = useQuery({
     queryKey: ["channel-convs", channelId],
@@ -315,38 +595,29 @@ function CanalViewPage() {
     setComposer("");
   };
 
-  const actions: ChannelFrameActions = {
-    templates: true,
-    cotizacion: true,
-    pagos: true,
-    ordenes: true,
-  };
-
   return (
     <div className="view">
-      <div className="mb-3 flex items-center gap-2">
+      {/* Botón volver atrás */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <Button variant="ghost" size="sm" onClick={() => void navigate({ to: "/channels" })}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </Button>
-        <span className="text-primary"><ChannelIcon kind={kind} className="size-6" /></span>
-        <h2 className="text-lg font-bold text-foreground">{t(language, "canal." + kind)}</h2>
+        <span className="text-primary"><ChannelIcon kind={kind} className="size-5" /></span>
       </div>
 
       <ChannelFrame
         lang={language}
-        title={t(language, "canal." + kind)}
         accent={meta.hsl}
-        icon={
-          <span style={{ display: "inline-flex", alignItems: "center" }}>
-            <ChannelIcon kind={kind} className="size-5" />
-          </span>
-        }
-        actions={actions}
+        active={activeTab}
+        onTabChange={setActiveTab}
         composerValue={composer}
         onComposerChange={setComposer}
         onSend={onSend}
+        composerContent={
+          <TabContent lang={language} activeTab={activeTab} accent={meta.hsl} />
+        }
       >
         <BrandPhone kind={meta.brand}>
           <PhoneApp
