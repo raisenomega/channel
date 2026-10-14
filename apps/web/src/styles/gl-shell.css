@@ -1,0 +1,63 @@
+﻿/* ===== OMEGA Web — Shell y barra de navegacion ===== */
+
+#shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background-color: hsl(var(--card) / 0.6);
+}
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+.nav-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: hsl(var(--primary));
+  color: hsl(var(--background));
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+.nav-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.nav-name small {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 11px;
+  color: hsl(var(--primary));
+}
+[data-white-label] .nav-name small,
+[data-white-label] small.by-raise {
+  display: none;
+}
+.nav-links { display: flex; gap: 4px; }
+.nav-tools { display: flex; gap: 6px; align-items: center; }
+.app {
+  flex: 1 1 0%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+}

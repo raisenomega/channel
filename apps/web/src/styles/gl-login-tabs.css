@@ -1,0 +1,37 @@
+﻿/* ===== OMEGA Web — Login: tabs y campos ===== */
+
+.login-tabs {
+  display: flex;
+  background: hsl(var(--card-soft));
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+.login-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px 0;
+  border-radius: 9px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: hsl(var(--text-muted));
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.login-tab.is-active {
+  color: hsl(var(--background));
+  background-color: hsl(var(--primary));
+}
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.login-field[data-login-up-show] { display: none; }
+.login-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: hsl(var(--text-muted));
+}

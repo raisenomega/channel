@@ -1,0 +1,50 @@
+﻿/* ===== OMEGA Web — Login: layout y marca ===== */
+
+.login-wrap {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 28px 24px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.login-brand .nav-mark {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+  border-radius: 14px;
+}
+.login-title {
+  margin: 0;
+  font-size: 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.login-title small {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  color: hsl(var(--primary));
+}
+.login-sub {
+  margin: 2px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--text-dim));
+}

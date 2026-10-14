@@ -1,0 +1,43 @@
+﻿/* ===== OMEGA Web — Hilo de chat (FASE 9.3) ===== */
+
+.chat-thread {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.chat-messages {
+  flex: 1 1 0%;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-row {
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.chat-row.mr-auto { align-self: flex-start; }
+.chat-row.ml-auto { align-self: flex-end; }
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.chat-bubble.contact {
+  background-color: hsl(var(--primary) / 0.15);
+  color: hsl(var(--foreground));
+  border-bottom-left-radius: 4px;
+}
+.chat-bubble.agent {
+  background-color: hsl(var(--card-soft));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border) / 0.4);
+  border-bottom-right-radius: 4px;
+}
+.chat-time { font-size: 11px; color: hsl(var(--text-dim)); padding: 0 4px; }
+.chat-empty { color: hsl(var(--text-muted)); }

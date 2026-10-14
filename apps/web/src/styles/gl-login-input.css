@@ -1,0 +1,37 @@
+﻿/* ===== OMEGA Web — Login: inputs y selects ===== */
+
+.login-input {
+  appearance: none;
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--card-soft));
+  color: hsl(var(--foreground));
+  border-radius: 11px;
+  padding: 11px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: border-color 0.15s ease;
+}
+.login-input:disabled,
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+select {
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--card-soft));
+  color: hsl(var(--foreground));
+  border-radius: 11px;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+select:hover:not(:disabled) { border-color: hsl(var(--primary) / 0.6); }
+select:focus:not(:disabled) { outline: none; border-color: hsl(var(--primary)); }
+.login-input:focus { outline: none; border-color: hsl(var(--primary)); }
+.login-error {
+  min-height: 18px;
+  margin: 0;
+  font-size: 13px;
+}

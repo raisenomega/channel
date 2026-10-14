@@ -1,0 +1,42 @@
+﻿/* ===== OMEGA Web — Secciones, brain, severidad, tools ===== */
+
+.section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 0 8px;
+  color: hsl(var(--text-muted));
+}
+.section .more { color: hsl(var(--primary)); cursor: pointer; }
+.view { padding: 4px 0 24px; }
+
+.brain {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 16px;
+  padding: 16px;
+}
+.glyph { color: hsl(var(--agent)); display: inline-flex; }
+.brain h3 { margin: 0; }
+.agmetrics { display: grid; gap: 10px; }
+.am { background-color: hsl(var(--card-soft)); border-radius: 12px; padding: 10px 12px; }
+.am b { font-family: var(--font-display); font-weight: 800; font-size: 18px; display: block; }
+.am small { color: hsl(var(--text-muted)); font-size: 11px; }
+.kv { color: hsl(var(--foreground)); }
+.feat { padding: 6px 0; }
+
+.sev-critical { color: hsl(var(--critical)); }
+.sev-high { color: hsl(var(--high)); }
+.sev-medium { color: hsl(var(--medium)); }
+.sev-low { color: hsl(var(--low)); }
+.sev-success { color: hsl(var(--success)); }
+.sev-process { color: hsl(var(--process)); }
+
+.tool-glob { color: hsl(var(--tool-glob)); }
+.tool-read { color: hsl(var(--tool-read)); }
+.tool-grep { color: hsl(var(--tool-grep)); }
+.tool-bash { color: hsl(var(--tool-bash)); }
+.tool-write { color: hsl(var(--tool-write)); }
+.tool-task { color: hsl(var(--tool-task)); }
+.tool-web { color: hsl(var(--tool-web)); }
+.tool-other { color: hsl(var(--tool-other)); }

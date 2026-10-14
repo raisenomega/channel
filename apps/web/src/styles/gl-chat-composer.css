@@ -1,0 +1,44 @@
+﻿/* ===== OMEGA Web — Composer de chat ===== */
+
+.chat-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  background-color: hsl(var(--card));
+}
+.chat-input {
+  flex: 1;
+  appearance: none;
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--card-soft));
+  color: hsl(var(--foreground));
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.45;
+  resize: none;
+  max-height: 120px;
+  min-height: 40px;
+  transition: border-color 0.15s ease;
+}
+.chat-input:focus { outline: none; border-color: hsl(var(--primary)); }
+.chat-send {
+  appearance: none;
+  border: none;
+  background: hsl(var(--primary));
+  color: hsl(var(--background));
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, transform 0.12s ease;
+}
+.chat-send:hover { background: hsl(var(--primary) / 0.85); }
+.chat-send:active { transform: scale(0.92); }

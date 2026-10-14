@@ -1,18 +1,38 @@
 /**
  * HUB by Raisen — Sistema de estilos OMEGA
- * Punto de entrada unico. Los archivos se componen en este orden estricto:
+ * Punto de entrada unico. Los archivos se componen en orden estricto:
  *   tailwindcss -> fonts -> tokens-omega -> tokens-light -> theme
  *   -> animations -> base -> components
  *
  * Sin emojis. Sin CDN. Sin dependencias externas de runtime.
  */
 
-@import "./tailwindcss.css";
+@import "./tw-layout.css";
+@import "./tw-type.css";
 @import "./fonts.css";
 @import "./tokens-omega.css";
 @import "./tokens-light.css";
 @import "./theme.css";
 @import "./animations.css";
 @import "./base.css";
-@import "./components.css";
-@import "./responsive.css";
+
+/* --- Componentes (gl-*) --- */
+@import "./gl-glass.css";
+@import "./gl-badges.css";
+@import "./gl-chips.css";
+@import "./gl-lists.css";
+@import "./gl-switches.css";
+@import "./gl-misc.css";
+@import "./gl-shell.css";
+@import "./gl-navitems.css";
+@import "./gl-login.css";
+@import "./gl-login-tabs.css";
+@import "./gl-login-input.css";
+@import "./gl-login-action.css";
+@import "./gl-chat.css";
+@import "./gl-chat-composer.css";
+@import "./gl-safe.css";
+
+/* --- Responsive --- */
+@import "./resp-mobile.css";
+@import "./resp-dashgrid.css";

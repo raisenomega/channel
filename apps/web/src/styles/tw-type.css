@@ -1,0 +1,23 @@
+﻿/* ===== OMEGA — Utilidades de tipografia, color e interaccion ===== */
+
+.text-xs { font-size: 12px; line-height: 1.4; }
+.text-sm { font-size: 14px; line-height: 1.45; }
+.text-base { font-size: 16px; line-height: 1.5; }
+.text-lg { font-size: 18px; line-height: 1.5; }
+.text-xl { font-size: 20px; line-height: 1.4; }
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.text-muted { color: hsl(var(--text-muted)); }
+.text-dim { color: hsl(var(--text-dim)); }
+.text-hub { color: hsl(var(--primary)); }
+.text-primary { color: hsl(var(--primary)); }
+.text-foreground { color: hsl(var(--foreground)); }
+.text-ok { color: hsl(var(--success)); }
+.text-warn { color: hsl(var(--medium)); }
+.text-danger { color: hsl(var(--critical)); }
+
+.cursor-pointer { cursor: pointer; }
+.select-none { user-select: none; }

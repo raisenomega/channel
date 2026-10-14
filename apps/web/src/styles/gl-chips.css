@@ -1,0 +1,41 @@
+﻿/* ===== OMEGA Web — Chips y dots ===== */
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background-color: hsl(var(--card-soft));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.chip:hover { border-color: hsl(var(--primary)); }
+.chip.active {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.12);
+}
+.chip-name { font-weight: 500; }
+.chip-status { margin-left: 2px; }
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-on {
+  background-color: hsl(var(--success));
+  box-shadow: 0 0 6px hsl(var(--success) / 0.6);
+}
+.dot-off {
+  background-color: hsl(var(--low));
+}
