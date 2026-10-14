@@ -192,7 +192,12 @@ export class MemoryConsentStore implements ConsentRepository {
     const matches = this.items.filter(
       (r) => r.tenantId === tenantId && r.contactId === contactId && r.channel === channel,
     );
-    matches.sort((a, b) => b.consentedAt.getTime() - a.consentedAt.getTime());
+    matches.sort((a, b) => {
+      const timeDiff = b.consentedAt.getTime() - a.consentedAt.getTime();
+      if (timeDiff !== 0) return timeDiff;
+      // Tiebreak: insercion mas tarde gana (desambiguacion para timestamps iguales)
+      return this.items.indexOf(b) - this.items.indexOf(a);
+    });
     return ok(matches[0] ?? null);
   }
 

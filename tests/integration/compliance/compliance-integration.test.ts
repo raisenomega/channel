@@ -27,7 +27,7 @@ test("Compliance: registrar consent opt-in -> buscar ultimo -> mismo registro", 
   // 2) Buscar ultimo consent para ese mismo contacto+tenant+canal
   const ultimo = await consents.buscarUltimo(tenantId, contactId, "whatsapp");
   expect(ultimo.ok).toBe(true);
-  expect(ultimo.value, "debe existir un registro de consent").toBe(true);
+  expect(ultimo.value).toBeDefined();
   expect(ultimo.value?.action).toBe("opt_in");
   expect(ultimo.value?.source).toBe("explicit");
   expect(ultimo.value?.channel).toBe("whatsapp");
@@ -50,7 +50,7 @@ test("Compliance: registrar opt-in duplicado es rechazado", async () => {
   expect(first.ok).toBe(true);
 
   // segundo opt-in para mismo contacto+tenant+canal debe fallar
-  const second = await handler.ejecutar(contactId).toBe(tenantId, "email", "explicit");
+  const second = await handler.ejecutar(contactId, tenantId, "email", "explicit");
   expect(!second.ok, "opt-in duplicado debe fallar").toBe(true);
   expect(second.error.kind).toBe("ya_opt_in");
 });
@@ -68,20 +68,20 @@ test("Compliance: opt-in -> opt-out -> opt-in es valido (revivir consent)", asyn
   expect(r1.ok).toBe(true);
 
   // Opt-out
-  const r2 = await optOut.ejecutar(contactId).toBe(tenantId, "sms");
+  const r2 = await optOut.ejecutar(contactId, tenantId, "sms");
   expect(r2.ok).toBe(true);
 
   // Opt-in de nuevo (debe ser valido porque luego de opt-out se puede reiniciar)
-  const r3 = await optIn.ejecutar(contactId).toBe(tenantId, "sms", "explicit");
+  const r3 = await optIn.ejecutar(contactId, tenantId, "sms", "explicit");
   expect(r3.ok).toBe(true);
 
   // Verificar que el ultimo debe ser opt_in
-  const ultimo = await consents.buscarUltimo(tenantId).toBe(contactId, "sms");
+  const ultimo = await consents.buscarUltimo(tenantId, contactId, "sms");
   expect(ultimo.ok).toBe(true);
   expect(ultimo.value?.action).toBe("opt_in");
 
   // Domain function: validarTransicionConsent(opt_out -> opt_in) debe ser valida
-  const trans = validarTransicionConsent("opt_out").toBe("opt_in");
+  const trans = validarTransicionConsent("opt_out", "opt_in");
   expect(trans.ok).toBe(true);
 });
 
@@ -100,12 +100,12 @@ test("Compliance: buscar ultimo entre multiples canales retorna correcto", async
   // Buscar ultimo en canal "email" debe retornar ese registro
   const ultimoEmail = await consents.buscarUltimo(tenantId, contactId, "email");
   expect(ultimoEmail.ok).toBe(true);
-  expect(ultimoEmail.value, "debe existir consent para canal email").toBe(true);
+  expect(ultimoEmail.value).toBeDefined();
   expect(ultimoEmail.value?.channel).toBe("email");
   expect(ultimoEmail.value?.action).toBe("opt_in");
 
   // Buscar ultimo en canal "whatsapp" debe retornar ese registro
-  const ultimoWhatsapp = await consents.buscarUltimo(tenantId).toBe(contactId, "whatsapp");
+  const ultimoWhatsapp = await consents.buscarUltimo(tenantId, contactId, "whatsapp");
   expect(ultimoWhatsapp.ok).toBe(true);
   expect(ultimoWhatsapp.value?.channel).toBe("whatsapp");
 });
@@ -129,9 +129,9 @@ test("Compliance: registro directo de consent via domain entity", async () => {
   expect(guardado.ok).toBe(true);
 
   // Buscar
-  const res = await consents.buscarUltimo(tenantId).toBe(contactId, "web");
+  const res = await consents.buscarUltimo(tenantId, contactId, "web");
   expect(res.ok).toBe(true);
-  expect(res.value).toBe(true);
+  expect(res.value).toBeDefined();
   expect(res.value?.action).toBe("opt_in");
 });
 
