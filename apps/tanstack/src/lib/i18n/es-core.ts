@@ -1,0 +1,67 @@
+/**
+ * HUB by Raisen — Diccionario ES: núcleo (nav, kpi, inbox, filtro, canal).
+ */
+import type { Dict } from "./i18n-types";
+
+export const esCore: Dict = {
+  "nav.inbox": "Inbox",
+  "nav.agent": "IA",
+  "nav.channels": "Canales",
+  "nav.settings": "Ajustes",
+
+  "kpi.tenant": "Tenant",
+  "kpi.wasCorrect": "IA Was Correct",
+  "kpi.salesChat": "Ventas desde chat",
+  "kpi.autonomy": "Autonomía",
+
+  "inbox.channels": "Canales",
+  "inbox.seeAll": "Ver todos",
+  "inbox.filtros": "Filtros",
+  "inbox.filtros.estado": "Estado",
+  "inbox.filtros.sla": "SLA",
+  "inbox.active": "Conversaciones activas",
+  "inbox.total": "total",
+  "inbox.empty": "Aún no hay conversaciones para este tenant.",
+  "inbox.justNow": "ahora",
+  "inbox.min": "m",
+  "inbox.hour": "h",
+
+  "filtro.estado.open": "Abierta",
+  "filtro.estado.pending": "Pendiente",
+  "filtro.estado.snoozed": "Diferido",
+  "filtro.estado.resolved": "Resuelta",
+  "filtro.sla.violated": "SLA violado",
+  "filtro.clean": "Limpiar",
+
+  "canal.whatsapp": "WhatsApp",
+  "canal.email": "Email",
+  "canal.instagram": "Instagram",
+  "canal.facebook": "Facebook",
+  "canal.telegram": "Telegram",
+  "canal.sms": "SMS",
+  "canal.x": "X",
+  "canal.linkedin": "LinkedIn",
+  "canal.webchat": "Webchat",
+
+  "channelFrame.templates": "Templates WA",
+  "channelFrame.cotizacion": "Cotización",
+  "channelFrame.pagos": "Pagos",
+  "channelFrame.ordenes": "Órdenes",
+  "channelFrame.agentes": "Agentes",
+  "channelFrame.contactos": "Contactos",
+  "channelFrame.plantillas": "Plantillas",
+  "channelFrame.factura": "Factura",
+  "channelFrame.documentos": "Documentos",
+  "canal.vacio": "Sin conversaciones",
+  "canal.sinMsgs": "Sin mensajes aún",
+  "canal.enLinea": "en línea",
+  "canal.cerrar": "Cerrar y volver al inbox",
+  "canal.hoy": "Hoy",
+  "canal.ayer": "Ayer",
+  "canal.seleccionar": "Selecciona una conversación",
+  "canal.contacto": "Información del contacto",
+  "canal.conversacion": "Conversación",
+  "canal.sinHilo": "Selecciona una conversación para ver la ficha de su cliente.",
+  "canal.sinContacto": "No se encontró información del contacto de este hilo.",
+  "canal.dataContacto": "Datos del cliente del hilo",
+};
