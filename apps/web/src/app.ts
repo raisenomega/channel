@@ -1,6 +1,5 @@
 /**
- * HUB by Raisen — App shell (punto de entrada a la SPA).
- * Lógica de render/action en app-logic.ts, filtros en app-filters.ts (C4 ≤75).
+ * HUB by Raisen — App shell. Lógica y filtros en submódulos (C4 ≤75).
  */
 import type { PageState, TabId, InboxItem, AppContext, SafeSnapshot } from "./types.ts";
 import { createInitialState } from "./navigation.ts";
@@ -35,52 +34,22 @@ export class HUBApp {
     }
   }
 
-  currentTab(): TabId {
-    return this.state.currentTab;
-  }
+  currentTab(): TabId { return this.state.currentTab; }
 
   contactIdDeConversacion(conversationId: string): string | null {
     return this.inbox.find((i) => i.conversationId === conversationId)?.contactId ?? null;
   }
 
-  toggleFiltroCanal(canal: string): void {
-    this.filtros.toggleCanal(canal);
-  }
-
-  toggleFiltroEstado(estado: string): void {
-    this.filtros.toggleEstado(estado);
-  }
-
-  toggleFiltroSLA(): void {
-    this.filtros.toggleSLA();
-  }
-
-  toggleFiltroClean(): void {
-    this.filtros.clean();
-  }
-
-  filtroActual(): string | null {
-    return this.filtros.canalActual;
-  }
-
-  filtroEstadoActual(): string | null {
-    return this.filtros.estadoActual;
-  }
-
-  filtroSLAActual(): boolean | null {
-    return this.filtros.slaActual;
-  }
+  toggleFiltroCanal(canal: string): void { this.filtros.toggleCanal(canal); }
+  toggleFiltroEstado(estado: string): void { this.filtros.toggleEstado(estado); }
+  toggleFiltroSLA(): void { this.filtros.toggleSLA(); }
+  toggleFiltroClean(): void { this.filtros.clean(); }
+  filtroActual(): string | null { return this.filtros.canalActual; }
+  filtroEstadoActual(): string | null { return this.filtros.estadoActual; }
+  filtroSLAActual(): boolean | null { return this.filtros.slaActual; }
 
   renderCurrentTab(): string {
-    return renderCurrentTab(
-      this.state,
-      this.context,
-      this.inbox,
-      this.safeSnapshot,
-      this.filtros.canalActual,
-      this.filtros.estadoActual,
-      this.filtros.slaActual,
-    );
+    return renderCurrentTab(this.state, this.context, this.inbox, this.safeSnapshot, this.filtros.canalActual, this.filtros.estadoActual, this.filtros.slaActual);
   }
 
   handleAction(action: string, params?: Record<string, unknown>): void {
