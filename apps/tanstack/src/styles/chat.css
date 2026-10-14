@@ -69,7 +69,9 @@
 }
 .chat-row.in .chat-meta { color: hsl(var(--primary-hover)); }
 .chat-tick { display: inline-flex; align-items: center; }
-.chat-tick.delivered, .chat-tick.read { color: hsl(var(--process)); font-weight: 700; }
+.chat-tick--sent,
+.chat-tick--delivered { color: hsl(var(--text-dim)); }
+.chat-tick--read { color: hsl(var(--process)); }
 
 /* Fondo patrón sutil de mensajería */
 .chat-thread-view {

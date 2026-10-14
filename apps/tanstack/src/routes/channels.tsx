@@ -5,7 +5,7 @@
  * Sin datos mock: si no hay canales en la base, se muestra vacío honesto (N5).
  */
 import { useState } from "react";
-import { createRoute } from "@tanstack/react-router";
+import { createRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
@@ -37,6 +37,7 @@ const TONE: Readonly<Record<Channel["state"], "success" | "warn" | "process">> =
 
 function ChannelsPage() {
   const { language } = usePreferences();
+  const navigate = useNavigate();
   const [abierto, setAbierto] = useState<string | null>(null);
   const [err, setErr] = useState(false);
 
@@ -98,7 +99,19 @@ function ChannelsPage() {
           const state = canal?.state ?? "desconectado";
           const esAbierto = abierto === kind;
           return (
-            <Card key={kind} className={canal ? "" : "opacity-80"}>
+            <Card
+              key={kind}
+              className={canal ? "cursor-pointer" : "cursor-pointer opacity-80"}
+              role="button"
+              tabIndex={0}
+              onClick={() => void navigate({ to: "/channels/" + kind })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  void navigate({ to: "/channels/" + kind });
+                }
+              }}
+            >
               <div className="flex items-center gap-3">
                 <span className="text-primary">
                   <ChannelIcon kind={kind} className="size-6" />
@@ -115,18 +128,26 @@ function ChannelsPage() {
                 <span className="text-xs text-muted-foreground">
                   {t(language, "channels.active")}
                 </span>
-                <Switch
-                  checked={canal?.active ?? false}
-                  disabled={!canal}
-                  onChange={(v) => onToggle(canal, v)}
-                />
+                <span
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                >
+                  <Switch
+                    checked={canal?.active ?? false}
+                    disabled={!canal}
+                    onChange={(v) => onToggle(canal, v)}
+                  />
+                </span>
               </CardHeader>
 
               <Button
                 variant="ghost"
                 size="sm"
                 className="w-full"
-                onClick={() => setAbierto(esAbierto ? null : kind)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAbierto(esAbierto ? null : kind);
+                }}
               >
                 {t(language, "channels.config")}
               </Button>
@@ -172,7 +193,12 @@ function ConfigRows({
       </div>
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">{t(language, "channels.autonomia")}</span>
-        <Switch checked={autonomia} disabled={!canal} onChange={cambiaAut} />
+        <span
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <Switch checked={autonomia} disabled={!canal} onChange={cambiaAut} />
+        </span>
       </div>
       {!canal ? (
         <p className="text-xs text-muted-foreground">

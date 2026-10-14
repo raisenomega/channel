@@ -33,12 +33,13 @@ function timeLabel(iso: string, lang: Idioma): string {
 }
 
 function Ticks({ status }: { status: ChatMsg["status"] }) {
-  const read = status === "read";
+  const cls = `chat-tick chat-tick--${status ?? "sent"}`;
+  const two = status === "delivered" || status === "read";
   return (
-    <span className="chat-tick" title={String(status)}>
+    <span className={cls} title={String(status)}>
       <svg viewBox="0 0 16 10" width="14" height="9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M1 5l3.5 3.5L11 1.5" />
-        {!read ? null : <path d="M6 7l3 3L15 4" />}
+        {two ? <path d="M6 7l3 3L15 4" /> : null}
       </svg>
     </span>
   );
