@@ -1,6 +1,5 @@
 /**
- * HUB by Raisen — Vista de onboarding (crear tu tenant)
- * Formulario OMEGA para que el usuario cree su empresa.
+ * HUB by Raisen — Vista de onboarding (crear tu tenant).
  */
 import { OnboardingData } from "./onboarding-client.ts";
 
