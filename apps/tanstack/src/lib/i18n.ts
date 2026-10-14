@@ -169,6 +169,8 @@ const ES: Dict = {
   "chat.empty": "No hay mensajes en esta conversación.",
   "chat.placeholder": "Escribe un mensaje…",
   "chat.send": "Enviar",
+  "chat.hoy": "Hoy",
+  "chat.ayer": "Ayer",
 
   "agent.providerConfig": "Configuración del proveedor",
   "agent.activeProvider": "Proveedor activo",
@@ -519,6 +521,8 @@ const EN: Dict = {
   "chat.empty": "No messages in this conversation.",
   "chat.placeholder": "Type a message…",
   "chat.send": "Send",
+  "chat.hoy": "Today",
+  "chat.ayer": "Yesterday",
 
   "agent.providerConfig": "Provider config",
   "agent.activeProvider": "Active provider",

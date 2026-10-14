@@ -3,11 +3,12 @@ import { cn } from "@/lib/utils";
 export interface AvatarProps {
   name: string;
   url?: string | null;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   dot?: "on" | "off";
 }
 
 const SIZE: Record<string, string> = {
+  xs: "size-5 text-[10px]",
   sm: "size-7 text-xs",
   md: "size-10 text-sm",
   lg: "size-12 text-lg",

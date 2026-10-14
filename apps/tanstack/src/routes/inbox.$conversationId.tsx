@@ -13,6 +13,7 @@ import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import type { Mensaje, Contact360, RowContact, RowQuote, RowOrder, RowPayment } from "@/lib/types";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ChatThread, type ChatMsg } from "@/components/dashboard/chat-bubbles";
 
 const ConversationRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -137,18 +138,6 @@ async function fetchContact360(contactId: string): Promise<Contact360 | null> {
   } catch {
     return null;
   }
-}
-
-function formatTime(iso: string, lang: Idioma): string {
-  const d = new Date(iso);
-  const now = new Date();
-  const diff = now.getTime() - d.getTime();
-  if (diff < 60_000) return t(lang, "inbox.justNow");
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}${t(lang, "inbox.min")}`;
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}${t(lang, "inbox.hour")}`;
-  return d.toLocaleDateString(lang === "es" ? "es" : "en", {
-    day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
-  });
 }
 
 function currency(v: number, mon: string, lang: Idioma): string {
@@ -285,17 +274,13 @@ function ChatPanel({
           {t(language, "chat.empty")}
         </div>
       ) : (
-        <div className="chat-messages">
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              className={"chat-bubble" + (m.senderType === "contact" ? " contact" : "") + " ml-" + (m.senderType === "contact" ? "0" : "auto")}
-            >
-              <p className="text-sm">{m.content}</p>
-              <span className="text-xs text-dim">{formatTime(m.createdAt, language)}</span>
-            </div>
-          ))}
-        </div>
+        <ChatThread messages={messages.map<ChatMsg>((m) => ({
+          id: m.id,
+          senderType: m.senderType,
+          content: m.content,
+          createdAt: m.createdAt,
+          status: m.senderType === "contact" ? "read" : "delivered",
+        }))} lang={language} />
       )}
 
       {/* Composer */}

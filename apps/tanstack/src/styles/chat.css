@@ -1,0 +1,85 @@
+/* ===== Hilo de chat estilo mensajería (nativo, tipo app mobile) ===== */
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  max-height: 58vh;
+  overflow-y: auto;
+}
+
+/* Fecha de agrupación (como los "Hoy"/"Ayer" de WhatsApp) */
+.chat-day {
+  align-self: center;
+  margin: 8px 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: hsl(var(--text-muted));
+  background: hsl(var(--card) / 0.6);
+  border: 1px solid hsl(var(--border) / 0.3);
+}
+
+/* Contenedor de una fila de burbuja */
+.chat-row {
+  display: flex;
+  width: 100%;
+}
+.chat-row.in { justify-content: flex-end; }
+.chat-row.out { justify-content: flex-start; }
+
+/* Burbuja base */
+.chat-bubble {
+  position: relative;
+  max-width: 72%;
+  padding: 7px 10px 5px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.5);
+  word-break: break-word;
+}
+
+/* Burbuja contacto (gris, izquierda) — como el chat de entrada de WhatsApp */
+.chat-row.out .chat-bubble {
+  background: hsl(var(--card-soft));
+  border: 1px solid hsl(var(--border) / 0.3);
+  border-top-left-radius: 4px;
+  color: hsl(var(--foreground));
+}
+/* Burbuja propia / HUB (tono de acento, derecha) — como la burbuja verde de salida */
+.chat-row.in .chat-bubble {
+  background: linear-gradient(160deg, hsl(var(--primary) / 0.24), hsl(var(--primary) / 0.12));
+  border: 1px solid hsl(var(--primary) / 0.35);
+  border-top-right-radius: 4px;
+  color: hsl(var(--foreground));
+}
+
+/* Timestamp + checkmarks (estilo WhatsApp: ✓ enviado, ✓✓ entregado, ✓✓ azul leído) */
+.chat-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  float: right;
+  margin-top: 3px;
+  font-size: 10.5px;
+  color: hsl(var(--text-dim));
+}
+.chat-row.in .chat-meta { color: hsl(var(--primary-hover)); }
+.chat-tick { display: inline-flex; align-items: center; }
+.chat-tick.delivered, .chat-tick.read { color: hsl(var(--process)); font-weight: 700; }
+
+/* Fondo patrón sutil de mensajería */
+.chat-thread-view {
+  background:
+    radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.05), transparent 40%),
+    radial-gradient(circle at 85% 15%, hsl(var(--process) / 0.05), transparent 40%);
+}
+
+/* Avatar de la burbuja */
+.chat-row .chat-avatar {
+  align-self: flex-end;
+  margin-right: 6px;
+}
