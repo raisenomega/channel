@@ -1,0 +1,27 @@
+﻿/* ===== HUB — Shell: navegacion glass + area de vistas + orbes ===== */
+
+#shell {
+  position: relative;
+  display: flex; flex-direction: column; height: 100dvh;
+  overflow: hidden;
+  background-color: hsl(var(--background));
+  isolation: isolate;
+}
+#shell > .nav,
+#shell > .app {
+  position: relative;
+  z-index: 1;
+  background-color: hsl(var(--card) / 0.5);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+#shell > .bottom-nav { z-index: 100; }
+
+.nav {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+}
+.app {
+  flex: 1 1 0%; overflow-y: auto; overflow-x: hidden; padding: 16px;
+}

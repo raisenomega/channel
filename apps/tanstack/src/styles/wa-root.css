@@ -1,0 +1,51 @@
+/* ============================================================
+ * HUB by Raisen — Carcasa Samsung S25 Ultra (prefijo wa-).
+ * Base de .wa-root y .wa-phone/.wa-screen + responsive.
+ * ============================================================ */
+
+.wa-root {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 4px;
+}
+
+/* Carcasa: altura derivada del viewport para caber sin scroll */
+.wa-phone {
+  position: relative;
+  height: auto;
+  width: 340px;
+  aspect-ratio: 9 / 19.5;
+  max-height: calc(100vh - 70px);
+  max-width: calc((100vh - 70px) * 9 / 19.5);
+  margin: auto 0;
+  flex-shrink: 0;
+  border-radius: 44px;
+  background: linear-gradient(160deg, #1a1a1f, #2a2a33 60%, #0e0e12);
+  box-shadow:
+    0 30px 70px -20px rgba(0, 0, 0, 0.85),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+    inset 0 0 0 6px #00000055;
+  padding: 9px;
+}
+
+/* Pantalla interna: 100% de la carcasa */
+.wa-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 36px;
+  overflow: hidden;
+  background: #e5ddd5;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Responsive: telefono arriba en pantallas pequenas */
+@media (max-width: 900px) {
+  .wa-root { grid-template-columns: 1fr; }
+  .wa-phone { margin: 0 auto; width: 320px; }
+}

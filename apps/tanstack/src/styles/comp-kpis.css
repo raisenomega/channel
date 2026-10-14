@@ -1,0 +1,43 @@
+﻿/* ===== HUB — Componentes OMEGA: KPIs, severidad, SAFE ===== */
+
+/* --- KPIs --- */
+.kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.kpi {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: 14px; padding: 14px;
+}
+.kpi-label { font-size: 12px; color: hsl(var(--text-muted)); }
+.kpi-value {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 24px; letter-spacing: -0.01em; color: hsl(var(--foreground));
+}
+.kpi-value small { font-size: 12px; font-weight: 600; color: hsl(var(--text-dim)); }
+
+/* --- Severidad FORTRESS --- */
+.sev-critical { color: hsl(var(--critical)); }
+.sev-high { color: hsl(var(--high)); }
+.sev-medium { color: hsl(var(--medium)); }
+.sev-low { color: hsl(var(--low)); }
+.sev-success { color: hsl(var(--success)); }
+.sev-process { color: hsl(var(--process)); }
+
+/* --- SAFE --- */
+.safe {
+  border: 1px solid hsl(var(--border) / 0.45); border-radius: 16px;
+  background-color: hsl(var(--card));
+}
+.safe-row { padding: 4px 0; }
+.safe-phases { display: flex; gap: 4px; margin-top: 4px; }
+.safe-step {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  border: 2px solid hsl(var(--border) / 0.3); color: hsl(var(--text-dim));
+  background-color: transparent;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+.safe-step.on {
+  border-color: hsl(var(--primary)); color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.12);
+}

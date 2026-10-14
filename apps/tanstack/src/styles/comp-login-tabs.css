@@ -1,0 +1,26 @@
+﻿/* ===== HUB — Login: tabs, labels, footer ===== */
+
+.login-sub {
+  margin: 2px 0 0; font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: hsl(var(--text-dim));
+}
+.login-tabs {
+  display: flex; background: hsl(var(--card-soft)); border-radius: 12px;
+  padding: 4px; gap: 4px;
+}
+.login-tab {
+  flex: 1; border: none; background: transparent; padding: 9px 0;
+  border-radius: 9px; font-weight: 600; font-size: 14px;
+  color: hsl(var(--text-muted)); cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.login-tab.is-active {
+  color: hsl(var(--background)); background-color: hsl(var(--primary));
+}
+.login-label { font-size: 12px; font-weight: 600; color: hsl(var(--text-muted)); }
+.login-hint { margin: 0; text-align: center; font-size: 11px; color: hsl(var(--text-dim)); }
+.login-footer {
+  text-align: center; font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: hsl(var(--text-dim));
+  padding: 12px 0 0; margin-top: auto;
+}

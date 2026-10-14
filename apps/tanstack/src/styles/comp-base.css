@@ -1,0 +1,35 @@
+﻿/* ===== HUB by Raisen — Componentes visuales OMEGA: utilidades base ===== */
+
+/* --- Glass: card translucido + blur --- */
+.glass {
+  background-color: hsl(var(--card) / 0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border) / 0.35);
+}
+
+/* --- Tap: feedback tactil con glow dorado --- */
+.tap {
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.tap:active {
+  transform: scale(0.94);
+  filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.55));
+}
+
+/* --- Chip filtros (REGLA GLOBAL declarada) --- */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background-color: hsl(var(--card-soft)); color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.chip:hover { border-color: hsl(var(--primary)); }
+.chip-name { font-weight: 500; }
+.chip.active {
+  border-color: hsl(var(--primary)); color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.12);
+}

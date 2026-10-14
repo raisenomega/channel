@@ -1,0 +1,53 @@
+﻿/* ============================================================
+ * HUB by Raisen — Lista de chats del celular (prefijo wa-).
+ * Nube de chats, avatares, unread y FAB nuevo chat.
+ * ============================================================ */
+
+/* Nube de chats */
+.wa-chats {
+  flex: 1;
+  overflow-y: auto;
+  background: #fff;
+  scrollbar-width: none;
+}
+.wa-chats::-webkit-scrollbar { display: none; }
+.wa-chat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.wa-chat:active { background: #ececec; }
+.wa-chat .wa-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 17px; flex-shrink: 0;
+}
+.wa-chat .wa-body { flex: 1; min-width: 0; }
+.wa-chat .wa-row1 { display: flex; align-items: center; justify-content: space-between; }
+.wa-chat .wa-name { font-size: 14px; font-weight: 600; color: #111; }
+.wa-chat .wa-time { font-size: 11px; color: #999; }
+.wa-chat .wa-preview { font-size: 12.5px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wa-chat .wa-preview.me { color: #999; }
+.wa-unread {
+  background: #25d366; color: #fff; border-radius: 999px;
+  font-size: 11px; width: 19px; height: 19px; display: flex;
+  align-items: center; justify-content: center; font-weight: 700;
+  margin-left: auto;
+}
+
+/* FAB nuevo chat */
+.wa-fab {
+  position: absolute;
+  right: 18px; bottom: 18px;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  cursor: pointer; z-index: 6;
+  border: none;
+}

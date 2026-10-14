@@ -1,0 +1,46 @@
+﻿/* ===== HUB — Navegacion: brand, links, tools, items ===== */
+
+.nav-brand {
+  display: flex; align-items: center; gap: 10px; margin-right: auto;
+}
+.nav-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 10px;
+  background: hsl(var(--primary)); color: hsl(var(--background));
+  font-family: var(--font-display); font-weight: 800; font-size: 14px;
+}
+.nav-name {
+  font-family: var(--font-display); font-weight: 800; font-size: 15px;
+  letter-spacing: -0.01em; color: hsl(var(--foreground));
+  display: flex; align-items: baseline; gap: 5px;
+}
+.nav-name small {
+  font-family: var(--font-body); font-weight: 500; font-size: 11px;
+  color: hsl(var(--primary));
+}
+.nav-links { display: flex; gap: 4px; }
+.nav-tools { display: flex; gap: 6px; align-items: center; }
+
+.nav-tool {
+  appearance: none;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--card-soft)); color: hsl(var(--text-muted));
+  border-radius: 9px; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 12px; font-weight: 700;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+.nav-tool:hover {
+  color: hsl(var(--primary)); border-color: hsl(var(--primary) / 0.6);
+}
+.nav-item {
+  appearance: none; border: none; background: transparent;
+  padding: 8px 12px; border-radius: 10px;
+  font-weight: 600; font-size: 14px; color: hsl(var(--text-muted));
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.nav-item:hover { color: hsl(var(--foreground)); }
+.nav-item[aria-selected="true"] {
+  color: hsl(var(--primary)); background-color: hsl(var(--primary) / 0.12);
+}

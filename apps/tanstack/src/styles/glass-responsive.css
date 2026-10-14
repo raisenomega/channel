@@ -1,0 +1,52 @@
+﻿/* ===== OMEGA Glass System — Responsive collapso ===== */
+
+@media (max-width: 768px) {
+  .glass-card {
+    border-radius: 14px;
+    padding: 12px;
+  }
+  .glass-card::after {
+    width: 140px;
+    height: 140px;
+    right: -40px;
+    top: -40px;
+    opacity: 0.4;
+  }
+  .glass-surface {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .glass-kpi .num {
+    font-size: 28px;
+  }
+  .glass-kpi .num small {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .glass-card {
+    border-radius: 12px;
+    padding: 10px;
+  }
+  .glass-card::after {
+    width: 100px;
+    height: 100px;
+    right: -30px;
+    top: -30px;
+    opacity: 0.3;
+  }
+  .glass-kpi .num {
+    font-size: 24px;
+  }
+  .glass-surface {
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .glass-card.responsive-full {
+    width: 100%;
+  }
+}

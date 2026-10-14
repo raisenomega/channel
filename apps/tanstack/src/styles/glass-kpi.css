@@ -1,0 +1,43 @@
+﻿/* ===== OMEGA Glass System — .glass-kpi ===== */
+
+.glass-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.glass-kpi .num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
+  line-height: 1;
+  text-shadow: 0 0 22px hsl(var(--primary) / 0.35);
+}
+
+.glass-kpi .num small {
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(var(--text-dim));
+  margin-left: 4px;
+}
+
+.glass-kpi .label {
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: hsl(var(--text-muted));
+  margin-top: 2px;
+}
+
+.glass-kpi .trend {
+  font-size: 12px;
+  color: hsl(var(--success));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.glass-kpi .trend.down {
+  color: hsl(var(--critical));
+}

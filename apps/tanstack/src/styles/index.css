@@ -1,13 +1,9 @@
 @import "tailwindcss";
-
-/* --- Fuentes (bundleadas, sin CDN) --- */
 @import "./fonts.css";
-
-/* --- Tokens de tema (oscuro por defecto + claro via data-theme) --- */
 @import "./tokens-omega.css";
 @import "./tokens-light.css";
 
-/* --- Fuente de verdad de clases Tailwind v4 (mapeo a tokens HSL) --- */
+/* Tailwind v4 tokens mapeados a HSL OMEGA */
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -29,18 +25,51 @@
   --color-gold: var(--gold);
   --color-navy: var(--navy);
   --color-dark: var(--dark);
-
   --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
   --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* --- Reglas base del tema --- */
+/* Base + componentes */
 @import "./theme.css";
 @import "./base.css";
+@import "./comp-base.css";
+@import "./comp-lists.css";
+@import "./comp-kpis.css";
+@import "./comp-shell.css";
+@import "./comp-orbs.css";
+@import "./comp-nav.css";
+@import "./comp-login.css";
+@import "./comp-login-tabs.css";
+@import "./comp-chat-thread.css";
+@import "./comp-responsive.css";
 
-/* --- Componentes visuales --- */
-@import "./components.css";
-@import "./bentobox.css";
-@import "./glass-global.css";
-@import "./chat.css";
-@import "./whatsapp-dev.css";
+/* BentoBox + Glass */
+@import "./bento-grid.css";
+@import "./bento-card.css";
+@import "./bento-stat.css";
+@import "./bento-pending.css";
+@import "./glass-card.css";
+@import "./glass-surface.css";
+@import "./glass-kpi.css";
+@import "./glass-orb.css";
+@import "./glass-responsive.css";
+
+/* Hilo de chat */
+@import "./chat-bubbles.css";
+@import "./chat-meta.css";
+
+/* Mockup de celular (wa-) */
+@import "./wa-root.css";
+@import "./wa-phone-shell.css";
+@import "./wa-app.css";
+@import "./wa-chats.css";
+@import "./wa-chatview.css";
+@import "./wa-side.css";
+@import "./wa-contact.css";
+
+/* ChannelFrame (cf-) + Barra de canales */
+@import "./cf-root.css";
+@import "./cf-tabs.css";
+@import "./cf-content.css";
+@import "./cf-composer.css";
+@import "./chbar.css";

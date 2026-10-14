@@ -1,0 +1,35 @@
+﻿/* ===== HUB — Login ===== */
+
+.login-wrap {
+  min-height: 100dvh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 24px;
+}
+.login-card--premium {
+  width: 100%; max-width: 400px; padding: 32px 28px;
+  border-radius: 26px; display: flex; flex-direction: column; gap: 18px;
+  background: linear-gradient(165deg, hsl(var(--card) / 0.96), hsl(var(--card-soft) / 0.62));
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  border: 1px solid hsl(var(--primary) / 0.30);
+  box-shadow:
+    0 24px 70px -24px rgba(0, 0, 0, 0.75),
+    0 0 46px -12px hsl(var(--primary) / 0.35),
+    inset 0 1px 0 0 hsl(var(--primary) / 0.18);
+}
+.login-card--premium::after {
+  width: 260px; height: 260px; right: -70px; top: -70px;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.28), transparent 68%);
+}
+.login-intro {
+  margin: 0; font-size: 13px; line-height: 1.5;
+  color: hsl(var(--text-muted));
+}
+.login-submit {
+  height: 44px;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85));
+  box-shadow: 0 10px 26px -10px hsl(var(--primary) / 0.6), inset 0 1px 0 0 hsl(var(--primary) / 0.35);
+  color: hsl(var(--background));
+}
+.login-brand { display: flex; align-items: center; gap: 14px; }
+.login-brand .nav-mark { width: 44px; height: 44px; font-size: 18px; border-radius: 14px; }
+.login-title { margin: 0; font-size: 20px; display: flex; align-items: baseline; gap: 6px; }
+.login-title small { font-size: 12px; color: hsl(var(--primary)); }

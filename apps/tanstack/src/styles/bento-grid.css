@@ -1,0 +1,16 @@
+﻿/* ===== HUB Ultra-Dashboard — BentoBox: grid y celdas ===== */
+
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.bento-col-3 { grid-column: span 3; }
+.bento-col-4 { grid-column: span 4; }
+.bento-col-5 { grid-column: span 5; }
+.bento-col-6 { grid-column: span 6; }
+.bento-col-7 { grid-column: span 7; }
+.bento-col-8 { grid-column: span 8; }
+.bento-col-9 { grid-column: span 9; }
+.bento-col-12 { grid-column: span 12; }

@@ -1,0 +1,30 @@
+﻿/* ============================================================
+ * HUB by Raisen — Barra de pestañas del ChannelFrame (prefijo cf-).
+ * Tab compacto por debajo del celular.
+ * ============================================================ */
+
+.cf-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  padding: 2px 6px 4px;
+  border-bottom: 1px solid hsl(var(--border) / 0.18);
+  flex-shrink: 0;
+}
+
+.cf-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 2px 1px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(var(--text-muted));
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.cf-tab:hover { color: hsl(var(--foreground)); }
+.cf-tab.on { color: hsl(var(--primary)); border-bottom-color: currentColor; font-weight: 700; }

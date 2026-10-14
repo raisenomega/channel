@@ -1,0 +1,38 @@
+﻿/* ===== HUB — Orbes de luz 3D de fondo (residen en el shell) ===== */
+
+#shell .bg-orb {
+  position: absolute; inset: 0;
+  z-index: 0; pointer-events: none;
+  overflow: hidden;
+}
+#shell .bg-orb::before,
+#shell .bg-orb::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  animation: orb-drift 18s ease-in-out infinite alternate;
+}
+#shell .bg-orb::before {
+  width: 46vmax; height: 46vmax;
+  left: -12vmax; top: -14vmax;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.45), hsl(var(--primary) / 0.12) 45%, transparent 70%);
+}
+#shell .bg-orb::after {
+  width: 40vmax; height: 40vmax;
+  right: -10vmax; bottom: -12vmax;
+  background: radial-gradient(circle, hsl(var(--process) / 0.38), hsl(var(--process) / 0.1) 45%, transparent 70%);
+  animation-delay: -9s;
+  animation-duration: 22s;
+}
+
+@keyframes orb-drift {
+  from { transform: translate3d(-2.5vmax, -1.5vmax, 0) scale(1); }
+  to   { transform: translate3d(2.5vmax, 1.5vmax, 0) scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #shell .bg-orb::before, #shell .bg-orb::after { animation: none; }
+}

@@ -1,0 +1,45 @@
+﻿/* ============================================================
+ * HUB by Raisen — Composer del ChannelFrame (barra de input).
+ * Prefijo cf-. Aislado del CSS global.
+ * ============================================================ */
+
+.cf-composer {
+  margin-top: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid hsl(var(--border) / 0.18);
+}
+
+.cf-input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 12px;
+  border: 1px solid hsl(var(--border) / 0.4);
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.cf-input:focus { border-color: hsl(var(--primary) / 0.55); }
+
+.cf-send {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: hsl(var(--primary));
+  color: hsl(var(--background));
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.cf-send:hover:not(:disabled) { transform: translateY(-1px); }
+.cf-send:disabled { opacity: 0.4; cursor: not-allowed; }

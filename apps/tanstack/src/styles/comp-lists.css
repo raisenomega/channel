@@ -1,0 +1,26 @@
+﻿/* ===== HUB — Componentes OMEGA: listas, secciones, KPIs, severidad, SAFE ===== */
+
+/* --- Listas / filas --- */
+.list { overflow: hidden; }
+.list-item {
+  border-bottom: 1px solid hsl(var(--border) / 0.3);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+.list-item:last-child { border-bottom: none; }
+.list-item:hover { background-color: hsl(var(--card-soft)); }
+.nm { min-width: 0; }
+.tm { flex-shrink: 0; }
+
+/* --- Secciones / encabezados --- */
+.section {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 14px 0 8px; color: hsl(var(--text-muted));
+}
+.section .more { color: hsl(var(--primary)); cursor: pointer; }
+
+/* --- Vista principal scroll --- */
+.view { padding: 4px 0 24px; }
+.scroll-y { overflow-y: auto; overflow-x: hidden; }
+.kv { color: hsl(var(--foreground)); }
+.feat { padding: 6px 0; }
