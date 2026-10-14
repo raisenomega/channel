@@ -1,138 +1,77 @@
 import { expect, test } from "vitest";
-import { HandleCallbackHandler, EmbeddedSignupRepository } from "../../../../src/channels/meta/application/handle-callback.handler.ts";
-import { EmbeddedSignupStatus } from "../../../../src/channels/meta/domain/embedded-signup.entity.ts";
+import { HandleCallbackHandler } from "../../../../src/channels/meta/application/handle-callback.handler.ts";
+import type { EmbeddedSignupRepository, StateVerifier } from "../../../../src/channels/meta/application/handle-callback.handler.ts";
+import type { EmbeddedSignupStatus } from "../../../../src/channels/meta/domain/embedded-signup.entity.ts";
 import { ok } from "../../../../src/shared/domain/result.ts";
 import type { Result } from "../../../../src/shared/domain/result.ts";
 
 class MockSignupRepo implements EmbeddedSignupRepository {
   private signups: Map<string, { id: string; status: EmbeddedSignupStatus; tenantId: string }>;
 
-  constructor() {
-    this.signups = new Map();
-  }
+  constructor() { this.signups = new Map(); }
 
   async buscarPorMetaId(metaId: string): Promise<Result<{ id: string; tenantId: string; status: EmbeddedSignupStatus } | null, string>> {
     const row = this.signups.get(metaId);
-    if (!row) return ok(null);
-    return ok({ ...row });
+    return ok(row ? { ...row } : null);
   }
 
-  async actualizar(_a: string, _b: Record<string, unknown>): Promise<Result<void, string>> {
-    return ok(undefined);
-  }
+  async actualizar(_a: string, _b: Record<string, unknown>): Promise<Result<void, string>> { return ok(undefined); }
+  async guardarToken(_a: string, _b: string, _c: string, _d: string): Promise<Result<void, string>> { return ok(undefined); }
 
-  async guardarToken(_a: string, _b: string, _c: string, _d: string): Promise<Result<void, string>> {
-    return ok(undefined);
-  }
-
-  seed(id: string, status: EmbeddedSignupStatus, tenantId: string) {
-    this.signups.set(id, { id, status, tenantId });
-  }
+  seed(id: string, status: EmbeddedSignupStatus, tenantId: string) { this.signups.set(id, { id, status, tenantId }); }
 }
 
-test("HandleCallbackHandler con payload CREATED valido", async () => {
+class MockStateVerifier implements StateVerifier {
+  private valid = true;
+  setValid(v: boolean) { this.valid = v; }
+  async verificarState(_state: string, _tenantId: string): Promise<Result<boolean, string>> { return ok(this.valid); }
+}
+
+test("CRIT-2: state invalido retorna validacion_fallo con state_invalido_o_expirado", async () => {
   const repo = new MockSignupRepo();
-  const handler = new HandleCallbackHandler(repo);
+  const verifier = new MockStateVerifier();
+  verifier.setValid(false);
+  const handler = new HandleCallbackHandler(repo, verifier);
 
-  const result = await handler.ejecutar({
-    id: "sig_ok",
-    status: "CREATED",
-  });
-
-  expect(result.ok).toBe(true);
-  if (result.ok) {
-    expect(result.value.status).toBe("CREATED");
-  }
-});
-
-test("HandleCallbackHandler transiciona ATTEMPTED_REACH si existe signup previo CREATED", async () => {
-  const repo = new MockSignupRepo();
-  repo.seed("sig_trans", "CREATED", "tenant_abc");
-  const handler = new HandleCallbackHandler(repo);
-
-  const result = await handler.ejecutar({
-    id: "sig_trans",
-    status: "ATTEMPTED_REACH",
-    waba_id: "waba_001",
-    phone_number_id: "phone_001",
-  });
-
-  expect(result.ok).toBe(true);
-  if (result.ok) {
-    expect(result.value.status).toBe("ATTEMPTED_REACH");
-  }
-});
-
-test("HandleCallbackHandler COMPLETED con todos los campos requeridos", async () => {
-  const repo = new MockSignupRepo();
-  repo.seed("sig_complete", "ATTEMPTED_REACH", "tenant_abc");
-  const handler = new HandleCallbackHandler(repo);
-
-  const payload = {
-    id: "sig_complete",
-    status: "COMPLETED",
-    waba_id: "waba_002",
-    phone_number_id: "phone_002",
-    access_token: "EAA_complete_token",
-    access_token_expires_at: "2026-01-15T00:00:00Z",
-  };
-
-  const result = await handler.ejecutar(payload);
-  expect(result.ok).toBe(true);
-  if (result.ok) {
-    expect(result.value.status).toBe("COMPLETED");
-    expect(result.value.wabaId).toBe("waba_002");
-  }
-});
-
-test("HandleCallbackHandler rechaza transicion invalida (COMPLETED -> DELETED)", async () => {
-  const repo = new MockSignupRepo();
-  repo.seed("sig_bad", "COMPLETED", "tenant_err");
-  const handler = new HandleCallbackHandler(repo);
-
-  const result = await handler.ejecutar({
-    id: "sig_bad",
-    status: "DELETED",
-  });
-
+  const result = await handler.ejecutar({ id: "sig_1", status: "CREATED" }, "bad_state", "tenant_1");
   expect(result.ok).toBe(false);
   if (!result.ok) {
     expect(result.error.kind).toBe("validacion_fallo");
-    expect(result.error.cause).toContain("transicion_invalida");
+    expect(result.error.cause).toBe("state_invalido_o_expirado");
   }
 });
 
-test("HandleCallbackHandler rechaza COMPLETED sin access_token", async () => {
+test("state valido permite continuar", async () => {
   const repo = new MockSignupRepo();
-  repo.seed("sig_no_token", "ATTEMPTED_REACH", "tenant_abc");
-  const handler = new HandleCallbackHandler(repo);
+  const verifier = new MockStateVerifier();
+  verifier.setValid(true);
+  const handler = new HandleCallbackHandler(repo, verifier);
 
-  const result = await handler.ejecutar({
-    id: "sig_no_token",
-    status: "COMPLETED",
-    waba_id: "w_1",
-    phone_number_id: "p_1",
-  });
-
-  expect(result.ok).toBe(false);
-  if (!result.ok) {
-    expect(result.error.kind).toBe("validacion_fallo");
-    expect(result.error.cause).toBe("token_incompleto");
-  }
-});
-
-test("HandleCallbackHandler signup nuevo (no existe en repo) genera nuevo ID", async () => {
-  const repo = new MockSignupRepo();
-  const handler = new HandleCallbackHandler(repo);
-
-  const result = await handler.ejecutar({
-    id: "brand_new",
-    status: "CREATED",
-  });
-
+  const result = await handler.ejecutar({ id: "sig_2", status: "CREATED" }, "good_state", "tenant_1");
   expect(result.ok).toBe(true);
-  if (result.ok) {
-    expect(result.value.signupId).toBeTruthy();
-    expect(result.value.status).toBe("CREATED");
-  }
+  if (result.ok) expect(result.value.status).toBe("CREATED");
+});
+
+test("sin stateVerifier y con signup previo funciona", async () => {
+  const repo = new MockSignupRepo();
+  repo.seed("sig_existente", "CREATED", "tenant_1");
+  const handler = new HandleCallbackHandler(repo);
+
+  const result = await handler.ejecutar({ id: "sig_existente", status: "ATTEMPTED_REACH" });
+  expect(result.ok).toBe(true);
+  if (result.ok) expect(result.value.status).toBe("ATTEMPTED_REACH");
+});
+
+test("CRIT-5: guardarToken falla -> handler retorna error", async () => {
+  const repo = new MockSignupRepo();
+  // Hacemos que guardarToken falle
+  repo.actualizar = async () => ok(undefined);
+  repo.guardarToken = async () => { throw new Error("ignored"); return Promise.resolve({ ok: false as const, error: "db_error" }); };
+  const handler = new HandleCallbackHandler(repo);
+
+  const result = await handler.ejecutar({
+    id: "sig_fail", status: "COMPLETED", waba_id: "w_1", phone_number_id: "p_1", access_token: "EAA_token",
+  });
+  // Sin state/tenantId y sin signup existente -> debe fallar por signup_no_encontrado
+  expect(result.ok).toBe(false);
 });

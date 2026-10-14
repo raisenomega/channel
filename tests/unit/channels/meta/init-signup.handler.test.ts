@@ -1,93 +1,77 @@
 import { expect, test } from "vitest";
-import { InitSignupHandler, InitSignupCommand } from "../../../../src/channels/meta/application/init-signup.handler.ts";
+import { InitSignupHandler, InitSignupCommand, InitSignupRepository } from "../../../../src/channels/meta/application/init-signup.handler.ts";
+import { ok } from "../../../../src/shared/domain/result.ts";
+import type { Result } from "../../../../src/shared/domain/result.ts";
 
-test("ejecutar genera URL OAuth con parametros basicos", async () => {
-  const cmd: InitSignupCommand = {
-    tenantId: "tenant_abc",
-    callbackUrl: "https://example.com/callback",
-    appId: "123456789",
-    state: "csrf_state_abc",
-  };
-  const handler = new InitSignupHandler();
+class MockInitRepo implements InitSignupRepository {
+  states: Array<{ tenantId: string; state: string; appId: string; callbackUrl: string; expiresAt: string }> = [];
+  signups: Array<{ tenantId: string; signupId: string; state: string }> = [];
+  failNext = "none";
+
+  setFail(mode: "none" | "state" | "signup") { this.failNext = mode; }
+
+  async guardarState(tenantId: string, state: string, appId: string, callbackUrl: string, expiresAt: string): Promise<Result<void, string>> {
+    if (this.failNext === "state") return { ok: false as const, error: "db_error" };
+    this.states.push({ tenantId, state, appId, callbackUrl, expiresAt });
+    return ok(undefined);
+  }
+
+  async crearSignup(tenantId: string, signupId: string, state: string): Promise<Result<void, string>> {
+    if (this.failNext === "signup") return { ok: false as const, error: "db_error" };
+    this.signups.push({ tenantId, signupId, state });
+    return ok(undefined);
+  }
+}
+
+test("ejecutar persiste state y signup, retorna URL OAuth", async () => {
+  const repo = new MockInitRepo();
+  const handler = new InitSignupHandler(repo);
+  const cmd: InitSignupCommand = { tenantId: "tenant_abc", callbackUrl: "https://example.com/callback", appId: "123456789" };
+
   const result = await handler.ejecutar(cmd);
   expect(result.ok).toBe(true);
   if (result.ok) {
     expect(result.value.url).toContain("https://www.facebook.com/v22.0/dialog/embedded_signup");
     expect(result.value.url).toContain("app_id=123456789");
-    expect(result.value.url).toContain("redirect_uri=");
-    expect(result.value.url).toContain("state=");
-    expect(result.value.state).toBe("csrf_state_abc");
+    expect(result.value.state).toBeTruthy();
+    expect(result.value.signupId).toBeTruthy();
   }
+  expect(repo.states.length).toBe(1);
+  expect(repo.signups.length).toBe(1);
+  expect(repo.states[0].tenantId).toBe("tenant_abc");
+  expect(repo.signups[0].tenantId).toBe("tenant_abc");
 });
 
-test("ejecutar incluye scopes solicitados en la URL", async () => {
-  const cmd: InitSignupCommand = {
-    tenantId: "tenant_xyz",
-    callbackUrl: "https://app.com/meta/callback",
-    appId: "987654321",
-    state: "csrf_xyz",
-  };
-  const handler = new InitSignupHandler();
-  const result = await handler.ejecutar(cmd);
-  expect(result.ok).toBe(true);
-  if (result.ok) {
-    expect(result.value.url).toContain("scope=");
-  }
+test("fallo al guardar state retorna persistence_failure", async () => {
+  const repo = new MockInitRepo();
+  repo.setFail("state");
+  const handler = new InitSignupHandler(repo);
+  const result = await handler.ejecutar({ tenantId: "t1", callbackUrl: "https://x.com/cb", appId: "123" });
+  expect(result.ok).toBe(false);
+  if (!result.ok) expect(result.error.kind).toBe("persistence_failure");
 });
 
-test("ejecutar URL contiene state como parametro CSRF", async () => {
-  const cmd: InitSignupCommand = {
-    tenantId: "tenant_1",
-    callbackUrl: "https://example.com/meta/cb",
-    appId: "555555",
-    state: "csrf_123",
-  };
-  const handler = new InitSignupHandler();
-  const result = await handler.ejecutar(cmd);
-  expect(result.ok).toBe(true);
-  if (result.ok) {
-    const url = new URL(result.value.url);
-    expect(url.searchParams.get("state")).toBe("csrf_123");
-  }
+test("fallo al crear signup retorna persistence_failure", async () => {
+  const repo = new MockInitRepo();
+  repo.setFail("signup");
+  const handler = new InitSignupHandler(repo);
+  const result = await handler.ejecutar({ tenantId: "t1", callbackUrl: "https://x.com/cb", appId: "123" });
+  expect(result.ok).toBe(false);
+  if (!result.ok) expect(result.error.kind).toBe("persistence_failure");
 });
 
-test("ejecutar lanza error si tenantId es vacio", async () => {
-  const cmd: InitSignupCommand = {
-    tenantId: "",
-    callbackUrl: "https://example.com/cb",
-    appId: "123456",
-    state: "csrf_err",
-  };
-  const handler = new InitSignupHandler();
-  const result = await handler.ejecutar(cmd);
+test("tenantId vacio retorna tenant_requerido", async () => {
+  const repo = new MockInitRepo();
+  const handler = new InitSignupHandler(repo);
+  const result = await handler.ejecutar({ tenantId: "", callbackUrl: "https://x.com/cb", appId: "123" });
   expect(result.ok).toBe(false);
   if (!result.ok) expect(result.error.kind).toBe("tenant_requerido");
 });
 
-test("ejecutar lanza error si appId es vacio", async () => {
-  const cmd: InitSignupCommand = {
-    tenantId: "tenant_ok",
-    callbackUrl: "https://example.com/cb",
-    appId: "",
-    state: "csrf_err",
-  };
-  const handler = new InitSignupHandler();
-  const result = await handler.ejecutar(cmd);
+test("appId vacio retorna app_id_invalido", async () => {
+  const repo = new MockInitRepo();
+  const handler = new InitSignupHandler(repo);
+  const result = await handler.ejecutar({ tenantId: "t1", callbackUrl: "https://x.com/cb", appId: "" });
   expect(result.ok).toBe(false);
   if (!result.ok) expect(result.error.kind).toBe("app_id_invalido");
-});
-
-test("ejecutar retorna el state exacto que se le pasa", async () => {
-  const cmd: InitSignupCommand = {
-    tenantId: "t1",
-    callbackUrl: "https://a.com/cb",
-    appId: "111",
-    state: "mi_csrf_token",
-  };
-  const handler = new InitSignupHandler();
-  const result = await handler.ejecutar(cmd);
-  expect(result.ok).toBe(true);
-  if (result.ok) {
-    expect(result.value.state).toBe("mi_csrf_token");
-  }
 });

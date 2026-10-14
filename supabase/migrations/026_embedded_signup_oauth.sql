@@ -48,6 +48,7 @@ CREATE TABLE signup_tokens (
   -- Token encriptado (XChaCha20-Poly1305) como hex
   encrypted_nonce       TEXT NOT NULL,  -- nonce de 24 bytes en hex
   encrypted_token       TEXT NOT NULL,  -- ciphertext (incluye tag Poly1305) en hex
+  key_version           INTEGER NOT NULL DEFAULT 1,
   token_type            TEXT NOT NULL DEFAULT 'system_user',
   expires_at            TIMESTAMPTZ,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),

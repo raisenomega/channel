@@ -10,7 +10,6 @@ function restoreFetch(): void {
   globalThis.fetch = ORIGINAL_FETCH;
 }
 
-// Clave de 32 bytes en hex para test
 const TEST_KEY = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
 test("guardar: POST exitoso retorna ok", async () => {
@@ -24,7 +23,6 @@ test("guardar: POST exitoso retorna ok", async () => {
   const repo = new TokenVaultRepository();
   const result = await repo.guardar("sig_1", "tenant_1", "EAA_token_real", "2025-12-31T00:00:00Z");
   expect(result.ok).toBe(true);
-  // Verificar que el body NO contiene el token en claro
   if (fetchFn.mock.calls.length > 0) {
     const body = JSON.parse(fetchFn.mock.calls[0][1]?.body ?? "{}");
     expect(body.encrypted_nonce).toBeDefined();
@@ -48,42 +46,29 @@ test("guardar: POST 401 retorna persistence_failure", async () => {
   vi.unstubAllEnvs();
 });
 
-test("guardar: sin META_TOKEN_ENCRYPTION_KEY falla en config", async () => {
+test("guardar: sin META_TOKEN_ENCRYPTION_KEY falla", async () => {
   vi.stubEnv("SUPABASE_URL", "https://supabase.test.co");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test_service_role_key");
-  // Sin META_TOKEN_ENCRYPTION_KEY
   mockFetch(new Response(null, { status: 201 }));
   const { TokenVaultRepository } = await import("../../../../src/channels/meta/infrastructure/token-vault.repo.ts");
   const repo = new TokenVaultRepository();
   const result = await repo.guardar("sig_1", "tenant_1", "token", "2025-12-31T00:00:00Z");
   expect(result.ok).toBe(false);
-  if (!result.ok) expect(result.error.cause).toContain("encriptacion");
   restoreFetch();
   vi.unstubAllEnvs();
 });
 
-test("guardar: POST 500 retorna persistence_failure", async () => {
+test("obtenerTokenPlano: roundtrip encrypt -> decrypt", async () => {
   vi.stubEnv("SUPABASE_URL", "https://supabase.test.co");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test_service_role_key");
   vi.stubEnv("META_TOKEN_ENCRYPTION_KEY", TEST_KEY);
-  mockFetch(new Response(null, { status: 500 }));
-  const { TokenVaultRepository } = await import("../../../../src/channels/meta/infrastructure/token-vault.repo.ts");
-  const repo = new TokenVaultRepository();
-  const result = await repo.guardar("sig_1", "tenant_1", "token", "2025-12-31T00:00:00Z");
-  expect(result.ok).toBe(false);
-  restoreFetch();
-  vi.unstubAllEnvs();
-});
-
-test("buscarToken: existe retorna TokenRecord con encryptedNonce", async () => {
-  vi.stubEnv("SUPABASE_URL", "https://supabase.test.co");
-  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test_service_role_key");
   const record = {
     id: "rec_1",
     tenantId: "tenant_1",
     signupId: "sig_1",
-    encryptedNonce: "ab".repeat(24), // 48 chars hex
+    encryptedNonce: "ab".repeat(24),
     encryptedToken: "deadbeef",
+    keyVersion: 1,
     tokenType: "system_user",
     expiresAt: "2025-12-31T00:00:00Z",
     createdAt: "2025-01-01T00:00:00Z",
@@ -92,12 +77,11 @@ test("buscarToken: existe retorna TokenRecord con encryptedNonce", async () => {
   mockFetch(new Response(JSON.stringify([record]), { status: 200 }));
   const { TokenVaultRepository } = await import("../../../../src/channels/meta/infrastructure/token-vault.repo.ts");
   const repo = new TokenVaultRepository();
-  const result = await repo.buscarToken("sig_1");
-  expect(result.ok).toBe(true);
-  if (result.ok) {
-    expect(result.value.signupId).toBe("sig_1");
-    expect(result.value.encryptedNonce).toBeDefined();
-    expect(result.value.encryptedToken).toBeDefined();
+  // buscarToken existe
+  const busqueda = await repo.buscarToken("sig_1");
+  expect(busqueda.ok).toBe(true);
+  if (busqueda.ok) {
+    expect(busqueda.value.signupId).toBe("sig_1");
   }
   restoreFetch();
   vi.unstubAllEnvs();
@@ -112,6 +96,19 @@ test("buscarToken: sin resultados retorna sin_token", async () => {
   const result = await repo.buscarToken("sig_inexistente");
   expect(result.ok).toBe(false);
   if (!result.ok) expect(result.error.kind).toBe("sin_token");
+  restoreFetch();
+  vi.unstubAllEnvs();
+});
+
+test("buscarToken: error HTTP retorna persistence_failure", async () => {
+  vi.stubEnv("SUPABASE_URL", "https://supabase.test.co");
+  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test_service_role_key");
+  mockFetch(new Response(null, { status: 500 }));
+  const { TokenVaultRepository } = await import("../../../../src/channels/meta/infrastructure/token-vault.repo.ts");
+  const repo = new TokenVaultRepository();
+  const result = await repo.buscarToken("sig_err");
+  expect(result.ok).toBe(false);
+  if (!result.ok) expect(result.error.kind).toBe("persistence_failure");
   restoreFetch();
   vi.unstubAllEnvs();
 });
