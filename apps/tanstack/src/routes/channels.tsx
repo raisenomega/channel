@@ -67,7 +67,7 @@ function ChannelsPage() {
   if (err) {
     return (
       <div className="view">
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-border/45 bg-card p-6 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-2xl glass-card p-6 text-center">
           <p className="text-sm text-muted-foreground">{t(language, "channels.error")}</p>
           <Button variant="outline" size="sm" onClick={() => void refetch()}>
             {t(language, "channels.retry")}
@@ -87,7 +87,7 @@ function ChannelsPage() {
       </h2>
 
       {canales.length === 0 ? (
-        <div className="mb-4 rounded-2xl border border-border/45 bg-card p-4 text-sm text-muted-foreground">
+        <div className="mb-4 rounded-2xl glass-card p-4 text-sm text-muted-foreground">
           {t(language, "channels.empty")} {t(language, "channels.emptyBody")}
         </div>
       ) : null}

@@ -264,7 +264,7 @@ function ChatPanel({
   sending: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border/45 bg-card" data-chat-thread>
+    <div className="rounded-2xl glass-card" data-chat-thread>
       <div className="flex items-center justify-between gap-3 border-b border-border/30 p-3">
         <div className="flex items-center gap-3">
           <Avatar name="Conversacion" size="sm" />
@@ -331,7 +331,7 @@ function ChatPanel({
 function ContactPanel({ contact, language }: { contact: Contact360 | null | "loading"; language: Idioma }) {
   if (contact === "loading") {
     return (
-      <div className="rounded-2xl border border-border/45 bg-card p-4">
+      <div className="rounded-2xl glass-card p-4">
         <h3 className="mb-3 font-display text-base font-bold text-foreground">{t(language, "dash.ficha")}</h3>
         <p className="text-sm text-muted-foreground">{t(language, "dash.fichaCargando")}</p>
       </div>
@@ -339,7 +339,7 @@ function ContactPanel({ contact, language }: { contact: Contact360 | null | "loa
   }
   if (!contact) {
     return (
-      <div className="rounded-2xl border border-border/45 bg-card p-4">
+      <div className="rounded-2xl glass-card p-4">
         <h3 className="mb-3 font-display text-base font-bold text-foreground">{t(language, "dash.ficha")}</h3>
         <p className="text-sm text-muted-foreground">{t(language, "dash.fichaSinDatos")}</p>
       </div>
@@ -399,7 +399,7 @@ function ContactPanel({ contact, language }: { contact: Contact360 | null | "loa
       );
 
   return (
-    <div className="rounded-2xl border border-border/45 bg-card p-4" data-contact360>
+    <div className="rounded-2xl glass-card p-4" data-contact360>
       <h3 className="mb-3 font-display text-base font-bold text-foreground">{t(language, "dash.ficha")}</h3>
 
       <div className="flex items-center gap-2" style={{ padding: "14px 0" }}>

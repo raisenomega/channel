@@ -92,7 +92,7 @@ function IntegrationsPage() {
       </Card>
 
       {syncErr ? (
-        <div className="mb-4 flex flex-col items-center gap-3 rounded-2xl border border-border/45 bg-card p-4 text-center">
+        <div className="mb-4 flex flex-col items-center gap-3 rounded-2xl glass-card p-4 text-center">
           <p className="text-sm text-muted-foreground">
             {t(language, "integrations.syncError")}
           </p>
@@ -103,7 +103,7 @@ function IntegrationsPage() {
       ) : null}
 
       {integraciones.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border border-border/45 bg-card p-6 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-2xl glass-card p-6 text-center">
           <span className="text-dim">
             <IntegrationIcon kind="fleet" className="size-8" />
           </span>

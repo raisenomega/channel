@@ -209,7 +209,7 @@ function LegalPage() {
               {consentLog.slice(0, 20).map((entry) => (
                 <div
                   key={entry.id}
-                  className="feat flex items-center justify-between py-1 px-1 rounded-lg bg-card-soft"
+                  className="feat flex items-center justify-between py-1 px-1 rounded-lg bg-card-soft/60 backdrop-blur-sm"
                 >
                   <div className="flex items-center gap-2">
                     <Badge

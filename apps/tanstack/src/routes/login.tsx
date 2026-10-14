@@ -17,6 +17,17 @@ function errorText(r: AuthResult): string {
   return r.ok ? "" : r.message;
 }
 
+function LockIcon() {
+  return (
+    <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/25">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+    </span>
+  );
+}
+
 function LoginPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("login");
@@ -46,9 +57,9 @@ function LoginPage() {
 
   return (
     <div className="login-wrap">
-      <form className="login-card glass" onSubmit={onSubmit} noValidate>
+      <form className="glass-card login-card--premium" onSubmit={onSubmit} noValidate>
         <div className="login-brand">
-          <span className="nav-mark">HB</span>
+          <LockIcon />
           <div>
             <h1 className="login-title">
               HUB <small>by Raisen</small>
@@ -56,6 +67,8 @@ function LoginPage() {
             <p className="login-sub">FORTRESS. by Raisen</p>
           </div>
         </div>
+
+        <p className="login-intro">Accede a tu tenant para gestionar conversaciones, cotizaciones y canales.</p>
 
         <div className="login-tabs" role="tablist">
           <button
@@ -81,7 +94,7 @@ function LoginPage() {
         <Input name="password" label="Contraseña" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
         {error ? <p className="text-sm text-critical" role="alert">{error}</p> : null}
 
-        <Button type="submit" variant="primary" loading={loading} className="w-full">
+        <Button type="submit" variant="primary" loading={loading} className="w-full login-submit">
           {mode === "login" ? "Continuar" : "Crear cuenta"}
         </Button>
 
