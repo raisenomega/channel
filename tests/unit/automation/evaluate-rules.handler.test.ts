@@ -48,7 +48,7 @@ test("EvaluateRulesHandler â€” debe ejecutar reglas sin condiciones", async
 
   expect(result.ok).toBe(true);
   expect(result.value.length).toBe(1);
-  expect(result.value[0]).toBe(reglaSinCondiciones.actions);
+  expect(result.value[0]).toStrictEqual(reglaSinCondiciones.actions);
 });
 
 test("EvaluateRulesHandler â€” debe ejecutar regla cuando condicion eq se cumple", async () => {

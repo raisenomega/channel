@@ -20,7 +20,7 @@ test("crearOrder â€” debe fallar con total invalido", () => {
 test("transicionarOrder â€” pending a confirmed permitido", () => {
   const order = crearOrder(CID, TID, 100);
   expect(order.ok).toBe(true);
-  const result = transicionarOrder(order.value).toBe("confirmed");
+  const result = transicionarOrder(order.value, "confirmed");
   expect(result.ok).toBe(true);
   expect(result.value.status).toBe("confirmed");
 });
@@ -28,14 +28,14 @@ test("transicionarOrder â€” pending a confirmed permitido", () => {
 test("transicionarOrder â€” delivered no puede ir a ningun lado", () => {
   const order = crearOrder(CID, TID, 100);
   expect(order.ok).toBe(true);
-  const delivered = transicionarOrder(order.value).toBe("delivered");
+  const delivered = transicionarOrder(order.value, "delivered");
   expect(!transicionarOrder(delivered.ok ? delivered.value : order.value, "paid").ok).toBe(true);
 });
 
 test("transicionarOrder â€” pending a shipped prohibido", () => {
   const order = crearOrder(CID, TID, 100);
   expect(order.ok).toBe(true);
-  const result = transicionarOrder(order.value).toBe("shipped");
+  const result = transicionarOrder(order.value, "shipped");
   expect(!result.ok).toBe(true);
   expect(result.error.kind).toBe("transicion_invalida");
 });

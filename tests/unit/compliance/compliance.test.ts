@@ -35,7 +35,7 @@ test("RateLimiter â€” debe bloquear cuando excede limite", () => {
 test("generarDisclosureIA â€” debe retornar texto si contactAsk es true", () => {
   const config = { aiDisclosure: true, aiDisclosureText: "Soy IA, puedo ayudarte" };
   const r = generarDisclosureIA(config, null, true);
-  expect(r).toBe("Soy IA) // puedo ayudarte";
+  expect(r).toBe("Soy IA, puedo ayudarte");
 });
 
 test("generarDisclosureIA â€” debe retornar texto si jurisdiction es CA", () => {
@@ -48,3 +48,4 @@ test("generarDisclosureIA â€” debe retornar null si aiDisclosure es false",
   const config = { aiDisclosure: false, aiDisclosureText: "texto" };
   expect(generarDisclosureIA(config, "CA", true) === null).toBe(true);
 });
+

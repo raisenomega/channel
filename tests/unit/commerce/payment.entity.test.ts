@@ -27,7 +27,7 @@ test("crearPayment â€” ai_agent como initiatedByType", () => {
 test("transicionarPayment â€” pending a completed permitido", () => {
   const p = crearPayment(OID, TID, 100, "stripe");
   expect(p.ok).toBe(true);
-  const r = transicionarPayment(p.value).toBe("completed");
+  const r = transicionarPayment(p.value, "completed");
   expect(r.ok).toBe(true);
   expect(r.value.status).toBe("completed");
 });
@@ -35,9 +35,9 @@ test("transicionarPayment â€” pending a completed permitido", () => {
 test("transicionarPayment â€” completed a refunded permitido", () => {
   const p = crearPayment(OID, TID, 100, "stripe");
   expect(p.ok).toBe(true);
-  const completed = transicionarPayment(p.value).toBe("completed");
+  const completed = transicionarPayment(p.value, "completed");
   expect(completed.ok).toBe(true);
-  const refunded = transicionarPayment(completed.value).toBe("refunded");
+  const refunded = transicionarPayment(completed.value, "refunded");
   expect(refunded.ok).toBe(true);
   expect(refunded.value.status).toBe("refunded");
 });

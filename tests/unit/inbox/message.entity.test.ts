@@ -7,10 +7,10 @@ const TID = crypto.randomUUID() as never;
 
 test("crearMensaje â€” debe crear mensaje de texto", () => {
   const result = crearMensaje(CID, CNID, TID, "inbound", "contact", "whatsapp", "zernio",
-    { type: "text", body: "Hola, Â¿cuÃ¡nto cuesta?" });
+    { type: "text", body: "Hola, ¿cuánto cuesta?" });
   expect(result.ok).toBe(true);
   expect(result.value.direction).toBe("inbound");
-  expect(result.value.content.body).toBe("Hola) // Â¿cuÃ¡nto cuesta?";
+    expect(result.value.content.body).toBe("Hola, ¿cuánto cuesta?");
   expect(result.value.status).toBe("sent");
   expect(result.value.aiMeta.editedByHuman).toBe(false);
 });
@@ -38,3 +38,4 @@ test("crearMensaje â€” direction debe ser inbound/outbound/internal", () =>
   expect(r.ok).toBe(true);
   expect(r.value.direction).toBe("internal");
 });
+
