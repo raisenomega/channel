@@ -1,6 +1,6 @@
 /**
  * HUB by Raisen — Repositorio de state CSRF para Embedded Signup Meta.
- * Supabase REST. State single-use: DELETE despues de verificar.
+ * State single-use atomico via PATCH con Prefer: return=representation.
  * C4 ≤75 lineas.
  */
 import { ok, err } from "../../../shared/domain/result.ts";
@@ -16,7 +16,7 @@ function getEnv(n: string): string | undefined {
 function base(): string | null { return getEnv("SUPABASE_URL") ?? null; }
 function hdrs(): Record<string, string> | null {
   const k = getEnv("SUPABASE_SERVICE_ROLE_KEY");
-  return k ? { apikey: k, Authorization: `Bearer ${k}`, "content-type": "application/json" } : null;
+  return k ? { apikey: k, Authorization: `Bearer ${k}`, "content-type": "application/json", Prefer: "return=representation" } : null;
 }
 
 export interface StateData {
@@ -38,14 +38,15 @@ export class MetaSignupStateRepo {
     const u = base(); const h = hdrs();
     if (!u || !h) return err("config_incompleta");
     try {
-      const url = `${u}/signup_state_tokens?select=signup_id,tenant_id&state=eq.${encodeURIComponent(String(state))}&expires_at=gt.${encodeURIComponent(new Date().toISOString())}&used_at=is.null&limit=1`;
-      const r = await fetch(url, { headers: h });
+      const now = new Date().toISOString();
+      const url = `${u}/signup_state_tokens?state=eq.${encodeURIComponent(String(state))}&used_at=is.null&expires_at=gt.${encodeURIComponent(now)}`;
+      const r = await fetch(url, {
+        method: "PATCH", headers: { ...h!, Prefer: "return=representation" },
+        body: JSON.stringify({ used_at: now }),
+      });
       if (!r.ok) return err(`http_${r.status}`);
       const rows = await r.json() as Array<{ signup_id: string; tenant_id: string }>;
       if (!rows || rows.length === 0) return ok(null);
-      // Single-use: marcar como usado
-      const delUrl = `${u}/signup_state_tokens?state=eq.${encodeURIComponent(String(state))}`;
-      await fetch(delUrl, { method: "DELETE", headers: h });
       return ok({ signupId: rows[0]!.signup_id, tenantId: rows[0]!.tenant_id });
     } catch (e) { return err(String(e)); }
   }

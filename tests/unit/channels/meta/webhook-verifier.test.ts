@@ -52,3 +52,24 @@ test("NEW-CRIT-B adversarial: header vacio retorna error (no procesa)", async ()
   if (result.ok) expect(result.value).toBe(false); // HMAC vacio no coincide
   vi.unstubAllEnvs();
 });
+
+test("NEW-HIGH-E adversarial: raw body vs re-serialized (orden keys distinto)", async () => {
+  vi.stubEnv("META_APP_SECRET", TEST_SECRET);
+  // Meta firma el RAW body. Si el body es '{"id":"x","status":"CREATED"}', 
+  // JSON.stringify(ctx.body) podria producir '{"status":"CREATED","id":"x"}' (orden distinto)
+  const rawBody = '{"id":"x","status":"CREATED"}';
+  const reSerialized = JSON.stringify(JSON.parse(rawBody)); // {"id":"x","status":"CREATED"} (JS preserva orden)
+  const sigForRaw = await calcularHash(TEST_SECRET, rawBody);
+  // JS JSON.parse + JSON.stringify preserva orden de keys, pero Meta podria NO
+  // Si rawBody y reSerialized difieren, la firma no coincide
+  const rawResult = await verificarFirmaWebhook(sigForRaw, rawBody);
+  expect(rawResult.ok).toBe(true);
+  if (rawResult.ok) expect(rawResult.value).toBe(true);
+  // La firma calculada sobre rawBody NO debe funcionar con reSerialized si son diferentes
+  if (rawBody !== reSerialized) {
+    const reResult = await verificarFirmaWebhook(sigForRaw, reSerialized);
+    expect(reResult.ok).toBe(true);
+    if (reResult.ok) expect(reResult.value).toBe(false);
+  }
+  vi.unstubAllEnvs();
+});

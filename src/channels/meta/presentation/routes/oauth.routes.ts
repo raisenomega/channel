@@ -33,11 +33,11 @@ export function rutaCallbackMeta(): RouteDefinition {
   return {
     method: "POST", path: "/auth/meta/callback",
     handler: async (ctx) => {
-      // CRIT-B: Firma MANDATORIA
+      // CRIT-B: Firma MANDATORIA — usar rawBody (NO re-serializar)
       const sig = (ctx.headers?.["x-hub-signature-256"] ?? "") as string;
       if (!sig) return { ok: false, error: { kind: "firma_requerida" } };
-      const bodyStr = typeof ctx.body === "string" ? ctx.body : JSON.stringify(ctx.body);
-      const firmado = await verificarFirmaWebhook(sig, bodyStr);
+      const rawBody = ctx.rawBody ?? "";
+      const firmado = await verificarFirmaWebhook(sig, rawBody);
       if (!firmado.ok || !firmado.value) return { ok: false, error: { kind: "firma_invalida" } };
 
       // CRIT-C: State MANDATORIO del body (solo state, tenant_id se deriva)
