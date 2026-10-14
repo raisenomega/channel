@@ -327,32 +327,33 @@
   align-items: stretch;
   height: 100%;
   min-height: 0;
-  padding: 8px;
+  padding: 18px;
+  /* Una UNICA tarjeta flotante glass (estilo OMEGA/inbox), sin tocar el CSS global. */
+  border: 1px solid hsl(var(--border) / 0.35);
+  border-radius: 22px;
+  background: linear-gradient(160deg, hsl(var(--card) / 0.85), hsl(var(--card-soft) / 0.50));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 14px 48px -18px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 hsl(var(--primary) / 0.08);
 }
 
-/* Columna izquierda: el celular, auto-ajustado */
+/* Columna izquierda (dentro de la tarjeta): el celular, auto-ajustado y centrado */
 .cf-left {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   min-width: 0;
   min-height: 0;
 }
 
-/* Columna derecha: pestañas + contenido + composer */
+/* Columna derecha (dentro de la tarjeta): pestañas + contenido + composer.
+   Sin borde propio (la tarjeta flotante ya lo da). */
 .cf-right {
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-width: 0;
   min-height: 0;
-  padding: 10px 12px;
-  border: 1px solid hsl(var(--border) / 0.35);
-  border-radius: 18px;
-  background: linear-gradient(160deg, hsl(var(--card) / 0.75), hsl(var(--card-soft) / 0.40));
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 8px 32px -18px rgba(0, 0, 0, 0.55);
 }
 
 /* Barra de pestañas (palabras de negocio, NO pills) */
