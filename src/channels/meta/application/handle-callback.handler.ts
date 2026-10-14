@@ -8,10 +8,8 @@ import { transicionarEstado } from "../domain/embedded-signup.entity.ts";
 import type { EmbeddedSignupStatus } from "../domain/embedded-signup.entity.ts";
 import { validarSignupWebhook } from "./signup-validation.ts";
 
-export type CallbackError =
-  | { readonly kind: "validacion_fallo"; readonly cause: string }
-  | { readonly kind: "persistence_failure"; readonly cause: string }
-  | { readonly kind: "signup_no_encontrado" };
+export type CallbackError = { readonly kind: "validacion_fallo"; readonly cause: string }
+  | { readonly kind: "persistence_failure"; readonly cause: string } | { readonly kind: "signup_no_encontrado" };
 
 export interface CallbackResult {
   readonly signupId: string;
@@ -40,8 +38,6 @@ export class HandleCallbackHandler {
     // CRIT-C: State MANDATORIO. Resuelve signupId + tenantId desde state (no del body)
     if (!state) return err({ kind: "validacion_fallo", cause: "state_requerido" });
 
-    if (!this.stateResolver) return err({ kind: "validacion_fallo", cause: "state_resolver_no_configurado" });
-
     const stateData = await this.stateResolver.verificarYConsumirState(state);
     if (!stateData.ok || !stateData.value) return err({ kind: "validacion_fallo", cause: "state_invalido_o_expirado" });
 
@@ -66,8 +62,8 @@ export class HandleCallbackHandler {
       status: p.status, waba_id: p.waba_id, phone_number_id: p.phone_number_id,
       recipient_phone_number: p.recipient_phone_number, legal_entity_name: p.legal_entity_name,
       meta_business_id: p.business_id, meta_account_id: p.account_id, error_message: null,
+      ...(p.status === "COMPLETED" ? { completed_at: new Date().toISOString() } : {}),
     };
-    if (p.status === "COMPLETED") updateData.completed_at = new Date().toISOString();
     const upd = await this.repo.actualizar(signupId, updateData);
     if (!upd.ok) return err({ kind: "persistence_failure", cause: upd.error });
 
