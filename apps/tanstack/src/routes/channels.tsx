@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
-import { listarCanales, toggleCanal, setAutonomia, type Channel } from "@/lib/channels-client";
+import { listarCanales, toggleCanal, type Channel } from "@/lib/channels-client";
 import type { ChannelKind } from "@/components/ui/channel-icon";
 import { ChannelIcon } from "@/components/ui/channel-icon";
 import { Card, CardHeader, CardBody, CardTitle } from "@/components/ui/card";
@@ -104,11 +104,11 @@ function ChannelsPage() {
               className={canal ? "cursor-pointer" : "cursor-pointer opacity-80"}
               role="button"
               tabIndex={0}
-              onClick={() => void navigate({ to: "/channels/" + kind })}
+              onClick={() => void navigate({ to: "/channels/$channelId", params: { channelId: kind } })}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  void navigate({ to: "/channels/" + kind });
+                  void navigate({ to: "/channels/$channelId", params: { channelId: kind } });
                 }
               }}
             >
@@ -172,32 +172,18 @@ function ConfigRows({
   canal: Channel | undefined;
   kind: ChannelKind;
 }) {
-  const [autonomia, setAutonomiaLocal] = useState(canal?.autonomous ?? false);
-  const cambiaAut = (v: boolean) => {
-    setAutonomiaLocal(v);
-    if (canal) void setAutonomia(canal.id, v);
-  };
   return (
     <>
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">{t(language, "channels.apiKey")}</span>
-        <span className="font-mono text-foreground">
-          {canal?.apiKey ? "******" : t(language, "channels.providerNone")}
-        </span>
-      </div>
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{t(language, "channels.provider")}</span>
         <span className="text-foreground">
           {canal?.provider ?? t(language, "channels.providerNone")}
         </span>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">{t(language, "channels.autonomia")}</span>
-        <span
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          <Switch checked={autonomia} disabled={!canal} onChange={cambiaAut} />
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-muted-foreground">{t(language, "channels.syncStatus")}</span>
+        <span className="text-foreground">
+          {canal?.syncStatus ?? t(language, "channels.providerNone")}
         </span>
       </div>
       {!canal ? (

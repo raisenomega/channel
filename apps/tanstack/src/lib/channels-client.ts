@@ -9,11 +9,10 @@ export interface Channel {
   readonly id: string;
   readonly kind: ChannelKind;
   readonly active: boolean;
-  /** Modo conectado/desconectado/autonomo (vacio si no configurado). */
+  /** Modo conectado/desconectado/autonomo. */
   readonly state: "conectado" | "desconectado" | "autonomo";
   readonly provider: string | null;
-  readonly apiKey: string | null;
-  readonly autonomous: boolean;
+  readonly syncStatus: string | null;
 }
 
 export type ChannelError =
@@ -28,24 +27,22 @@ export type Result<T, E> =
 interface RowInbox {
   id: string;
   provider?: string | null;
-  api_key?: string | null;
-  active?: boolean | null;
-  autonomous?: boolean | null;
-  display_name?: string | null;
-  channel_key?: string | null;
+  is_active?: boolean | null;
+  sync_status?: string | null;
+  channel_type?: string | null;
+  name?: string | null;
 }
 
 function mapear(r: RowInbox): Channel {
-  const kind = (r.channel_key ?? r.display_name ?? "webchat").toLowerCase() as ChannelKind;
-  const autonomous = r.autonomous === true;
+  const kind = (r.channel_type ?? "webchat").toLowerCase() as ChannelKind;
+  const sync = r.sync_status ?? "pending";
   return {
     id: String(r.id),
     kind,
-    active: r.active === true,
-    state: autonomous ? "autonomo" : r.active === true ? "conectado" : "desconectado",
+    active: r.is_active === true,
+    state: sync === "connected" ? "conectado" : "desconectado",
     provider: r.provider ?? null,
-    apiKey: r.api_key ?? null,
-    autonomous,
+    syncStatus: sync,
   };
 }
 
@@ -53,8 +50,8 @@ export async function listarCanales(): Promise<Result<Channel[], ChannelError>> 
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
-  const cols = ["id", "provider", "api_key", "active", "autonomous", "display_name", "channel_key"];
-  const url = `${base}/inboxes?select=${encodeURIComponent(cols.join(","))}&order=display_name.asc`;
+  const cols = ["id", "provider", "is_active", "sync_status", "channel_type", "name"];
+  const url = `${base}/inboxes?select=${encodeURIComponent(cols.join(","))}&order=name.asc`;
   try {
     const res = await fetch(url, { headers });
     if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };
@@ -92,12 +89,5 @@ export async function toggleCanal(
   id: string,
   active: boolean,
 ): Promise<Result<void, ChannelError>> {
-  return patchCanal(id, { active });
-}
-
-export async function setAutonomia(
-  id: string,
-  autonomous: boolean,
-): Promise<Result<void, ChannelError>> {
-  return patchCanal(id, { autonomous });
+  return patchCanal(id, { is_active: active });
 }

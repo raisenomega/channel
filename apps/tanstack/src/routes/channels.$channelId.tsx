@@ -86,15 +86,33 @@ function CanalViewPage() {
 
   const accent = ACCENT[kind] ?? undefined;
 
+  async function findConversationId(): Promise<string | null> {
+    const base = supabaseRestBase();
+    const headers = supabaseAuthHeaders();
+    if (!base || !headers) return null;
+    const url = `${base}/conversations?select=${enc("id,contact_id,primary_channel")}` +
+      `&primary_channel=eq.${enc(channelId)}&limit=1`;
+    try {
+      const res = await fetch(url, { headers });
+      if (!res.ok) return null;
+      const rows = (await res.json()) as Array<{ id: string; contact_id: string | null }>;
+      const row = rows[0];
+      return row?.contact_id ? row.id : null;
+    } catch {
+      return null;
+    }
+  }
+
   async function handleSend() {
     const text = composerText.trim();
     if (!text || sending) return;
     setSending(true);
     const base = supabaseRestBase();
     const headers = supabaseAuthHeaders();
-    if (base && headers) {
+    const conversationId = await findConversationId();
+    if (base && headers && conversationId) {
       const body = {
-        channel: channelId,
+        conversation_id: conversationId,
         sender_type: "agent",
         sender_id: "",
         content: text,
