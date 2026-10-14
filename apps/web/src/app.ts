@@ -1,10 +1,10 @@
 /**
  * HUB by Raisen — App shell (punto de entrada a la SPA).
- * Estado de filtros en app-filters.ts (C4 ≤75).
+ * Lógica de render/action en app-logic.ts, filtros en app-filters.ts (C4 ≤75).
  */
 import type { PageState, TabId, InboxItem, AppContext, SafeSnapshot } from "./types.ts";
-import { createInitialState, cycleMode, navigate, popSubPage } from "./navigation.ts";
-import { renderTab } from "./tab-router.ts";
+import { createInitialState } from "./navigation.ts";
+import { renderCurrentTab, handleAction } from "./app-logic.ts";
 import { FiltrosInbox } from "./app-filters.ts";
 
 export type CargarInbox = () => Promise<InboxItem[]>;
@@ -40,8 +40,7 @@ export class HUBApp {
   }
 
   contactIdDeConversacion(conversationId: string): string | null {
-    const c = this.inbox.find((i) => i.conversationId === conversationId);
-    return c?.contactId ?? null;
+    return this.inbox.find((i) => i.conversationId === conversationId)?.contactId ?? null;
   }
 
   toggleFiltroCanal(canal: string): void {
@@ -73,8 +72,8 @@ export class HUBApp {
   }
 
   renderCurrentTab(): string {
-    return renderTab(
-      this.state.currentTab,
+    return renderCurrentTab(
+      this.state,
       this.context,
       this.inbox,
       this.safeSnapshot,
@@ -85,10 +84,6 @@ export class HUBApp {
   }
 
   handleAction(action: string, params?: Record<string, unknown>): void {
-    switch (action) {
-      case "cycleMode": this.state = cycleMode(this.state); break;
-      case "navigate": this.state = navigate(this.state, params?.tab as TabId ?? "inbox"); break;
-      case "back": this.state = popSubPage(this.state); break;
-    }
+    this.state = handleAction(this.state, action, params);
   }
 }
