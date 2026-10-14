@@ -1,10 +1,1 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2,
-  "rootDirectory": "apps/tanstack",
-  "framework": "vite",
-  "buildCommand": "npx vinxi build",
-  "installCommand": "pnpm install",
-  "outputDirectory": "dist",
-  "node": "20.x"
-}
+{"version":2,"framework":"vite","buildCommand":"npx vite build","installCommand":"pnpm install","outputDirectory":"dist"}
