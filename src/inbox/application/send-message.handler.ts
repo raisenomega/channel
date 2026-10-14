@@ -36,8 +36,8 @@ export class SendMessageHandler {
     const conv = convResult.value;
     if (!conv) return err({ kind: "conversacion_no_encontrada" });
 
-    const transResult = transicionarStatus(conv.status, "open");
-    if (!transResult.ok && conv.status === "resolved") {
+    // Regla de negocio: no se envían mensajes a conversación resuelta
+    if (conv.status === "resolved") {
       return err({ kind: "conversacion_resuelta" });
     }
 

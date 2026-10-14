@@ -1,4 +1,4 @@
-﻿import { expect, test } from "vitest";
+import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { CreateContactHandler, CreateContactCommand } from "../../../src/contacts/application/create-contact.handler.ts";
 import { ContactRepository, RepoError } from "../../../src/contacts/domain/contact.repository.ts";
@@ -39,7 +39,7 @@ test("CreateContactHandler â€” debe crear contacto con email y segmento", a
     tenantId: TID,
     displayName: "Maria Lopez",
     email: "anon@example.com",
-    segment: "qualified_lead",
+    segment: "prospect",
     language: "es",
   };
   const result = await handler.ejecutar(cmd);

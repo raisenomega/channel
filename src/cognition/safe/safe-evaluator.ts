@@ -18,8 +18,11 @@ export class SafePreSendHandler {
 
     const results = await Promise.all(this.evaluators.map((e) => e.evaluar(context)));
     const approved = results.filter((r) => r.ok && r.value.approved).length;
+    const rejected = results.length - approved;
     const total = results.length;
-    const disagreementPct = total > 0 ? Math.abs(approved - (total - approved)) / total : 0;
+    // Desacuerdo = qué tan parejo está el ensemble
+    // 0 = unanimidad; 1 = perfectamente dividido
+    const disagreementPct = total > 0 ? Math.min(approved, rejected) / (total / 2) : 0;
     const ensembleAgrees = disagreementPct < this.DISAGREEMENT_THRESHOLD;
 
     if (!ensembleAgrees) {
