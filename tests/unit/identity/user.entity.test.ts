@@ -1,45 +1,45 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { crearUser } from "../../../src/identity/domain/user.entity.ts";
 import { Email } from "../../../src/shared/domain/email.vo.ts";
 
 const TEST_TENANT = crypto.randomUUID() as never;
 
-Deno.test("crearUser — debe crear usuario en español por defecto", () => {
+test("crearUser â€” debe crear usuario en espaÃ±ol por defecto", () => {
   const emailResult = Email.crear("anon@example.com");
-  assert(emailResult.ok);
-  const result = crearUser(emailResult.value, "Juan Pérez", "agent", TEST_TENANT);
-  assert(result.ok);
-  assertEquals(result.value.language, "es");
+  expect(emailResult.ok).toBe(true);
+  const result = crearUser(emailResult.value, "Juan PÃ©rez", "agent", TEST_TENANT);
+  expect(result.ok).toBe(true);
+  expect(result.value.language).toBe("es");
 });
 
-Deno.test("crearUser — debe aceptar idioma explícito", () => {
+test("crearUser â€” debe aceptar idioma explÃ­cito", () => {
   const emailResult = Email.crear("user@example.com");
-  assert(emailResult.ok);
+  expect(emailResult.ok).toBe(true);
   const result = crearUser(emailResult.value, "John", "agent", TEST_TENANT, "en");
-  assert(result.ok);
-  assertEquals(result.value.language, "en");
+  expect(result.ok).toBe(true);
+  expect(result.value.language).toBe("en");
 });
 
-Deno.test("crearUser — debe fallar con idioma inválido", () => {
+test("crearUser â€” debe fallar con idioma invÃ¡lido", () => {
   const emailResult = Email.crear("anon@example.com");
-  assert(emailResult.ok);
+  expect(emailResult.ok).toBe(true);
   const result = crearUser(emailResult.value, "Test", "agent", TEST_TENANT, "fr" as never);
-  assert(!result.ok);
-  assertEquals(result.error.kind, "idioma_invalido");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("idioma_invalido");
 });
 
-Deno.test("crearUser — debe fallar con rol inválido", () => {
+test("crearUser â€” debe fallar con rol invÃ¡lido", () => {
   const emailResult = Email.crear("anon@example.com");
-  assert(emailResult.ok);
+  expect(emailResult.ok).toBe(true);
   const result = crearUser(emailResult.value, "Test", "ceo" as never, TEST_TENANT);
-  assert(!result.ok);
-  assertEquals(result.error.kind, "rol_invalido");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("rol_invalido");
 });
 
-Deno.test("crearUser — debe aceptar role owner", () => {
+test("crearUser â€” debe aceptar role owner", () => {
   const emailResult = Email.crear("owner@example.com");
-  assert(emailResult.ok);
-  const result = crearUser(emailResult.value, "Dueño", "owner", TEST_TENANT);
-  assert(result.ok);
-  assertEquals(result.value.role, "owner");
+  expect(emailResult.ok).toBe(true);
+  const result = crearUser(emailResult.value, "DueÃ±o", "owner", TEST_TENANT);
+  expect(result.ok).toBe(true);
+  expect(result.value.role).toBe("owner");
 });

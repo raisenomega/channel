@@ -1,32 +1,32 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { crearTenant } from "../../../src/identity/domain/tenant.entity.ts";
 
-Deno.test("crearTenant — debe crear tenant en español por defecto", () => {
+test("crearTenant â€” debe crear tenant en espaÃ±ol por defecto", () => {
   const result = crearTenant("Test", "test", "lite_pro");
-  assert(result.ok);
-  assertEquals(result.value.language, "es");
+  expect(result.ok).toBe(true);
+  expect(result.value.language).toBe("es");
 });
 
-Deno.test("crearTenant — debe aceptar idioma explícito", () => {
+test("crearTenant â€” debe aceptar idioma explÃ­cito", () => {
   const result = crearTenant("Test", "test", "lite_pro", "en");
-  assert(result.ok);
-  assertEquals(result.value.language, "en");
+  expect(result.ok).toBe(true);
+  expect(result.value.language).toBe("en");
 });
 
-Deno.test("crearTenant — debe fallar con idioma inválido", () => {
+test("crearTenant â€” debe fallar con idioma invÃ¡lido", () => {
   const result = crearTenant("Test", "test", "lite_pro", "fr" as never);
-  assert(!result.ok);
-  assertEquals(result.error.kind, "idioma_invalido");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("idioma_invalido");
 });
 
-Deno.test("crearTenant — debe fallar con nombre vacío", () => {
+test("crearTenant â€” debe fallar con nombre vacÃ­o", () => {
   const result = crearTenant("", "test", "lite_starter");
-  assert(!result.ok);
-  assertEquals(result.error.kind, "nombre_vacio");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("nombre_vacio");
 });
 
-Deno.test("crearTenant — debe generar slug en minúsculas", () => {
+test("crearTenant â€” debe generar slug en minÃºsculas", () => {
   const result = crearTenant("Mi Negocio", "Mi-Negocio-PR", "ecosystem");
-  assert(result.ok);
-  assertEquals(result.value.slug, "mi-negocio-pr");
+  expect(result.ok).toBe(true);
+  expect(result.value.slug).toBe("mi-negocio-pr");
 });

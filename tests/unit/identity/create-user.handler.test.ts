@@ -1,11 +1,11 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { CrearUserHandler, CrearUserCommand } from "../../../src/identity/application/create-user.handler.ts";
 import { UserRepository, RepoError } from "../../../src/identity/domain/identity.repository.ts";
 
 const TID = crypto.randomUUID() as never;
 
-Deno.test("CrearUserHandler — debe crear usuario exitosamente", async () => {
+test("CrearUserHandler â€” debe crear usuario exitosamente", async () => {
   const mockRepo: UserRepository = {
     guardar: async (_u) => ok(undefined),
     buscar: async (_id) => ok(null),
@@ -23,11 +23,11 @@ Deno.test("CrearUserHandler — debe crear usuario exitosamente", async () => {
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(typeof result.value, "string");
+  expect(result.ok).toBe(true);
+  expect(typeof result.value).toBe("string");
 });
 
-Deno.test("CrearUserHandler — debe usar idioma por defecto si no se provee", async () => {
+test("CrearUserHandler â€” debe usar idioma por defecto si no se provee", async () => {
   const mockRepo: UserRepository = {
     guardar: async (_u) => ok(undefined),
     buscar: async (_id) => ok(null),
@@ -44,10 +44,10 @@ Deno.test("CrearUserHandler — debe usar idioma por defecto si no se provee", a
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
 });
 
-Deno.test("CrearUserHandler — debe fallar con email_invalido si email mal formado", async () => {
+test("CrearUserHandler â€” debe fallar con email_invalido si email mal formado", async () => {
   const mockRepo: UserRepository = {
     guardar: async (_u) => ok(undefined),
     buscar: async (_id) => ok(null),
@@ -64,11 +64,11 @@ Deno.test("CrearUserHandler — debe fallar con email_invalido si email mal form
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "email_invalido");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("email_invalido");
 });
 
-Deno.test("CrearUserHandler — debe fallar con rol_invalido si role no es valido", async () => {
+test("CrearUserHandler â€” debe fallar con rol_invalido si role no es valido", async () => {
   const mockRepo: UserRepository = {
     guardar: async (_u) => ok(undefined),
     buscar: async (_id) => ok(null),
@@ -85,11 +85,11 @@ Deno.test("CrearUserHandler — debe fallar con rol_invalido si role no es valid
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "rol_invalido");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("rol_invalido");
 });
 
-Deno.test("CrearUserHandler — debe fallar si repo.guardar falla", async () => {
+test("CrearUserHandler â€” debe fallar si repo.guardar falla", async () => {
   const mockRepo: UserRepository = {
     guardar: async (_u) => err({ kind: "persistence_failure", cause: "disk_full" }),
     buscar: async (_id) => ok(null),
@@ -106,6 +106,6 @@ Deno.test("CrearUserHandler — debe fallar si repo.guardar falla", async () => 
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
 });

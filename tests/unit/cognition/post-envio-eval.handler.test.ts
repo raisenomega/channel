@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { PostEnvioEvalHandler, PostEnvioEvalCommand } from "../../../src/cognition/application/post-envio-eval.handler.ts";
 import type { AgentKnowledgeState } from "../../../src/cognition/domain/agent.service.ts";
 
@@ -16,7 +16,7 @@ const baseKnowledge: AgentKnowledgeState = Object.freeze({
   status: "active",
 });
 
-Deno.test("PostEnvioEvalHandler — debe incrementar confianza cuando wasCorrect=true", async () => {
+test("PostEnvioEvalHandler â€” debe incrementar confianza cuando wasCorrect=true", async () => {
   const handler = new PostEnvioEvalHandler();
   const cmd: PostEnvioEvalCommand = {
     knowledgeState: baseKnowledge,
@@ -24,12 +24,12 @@ Deno.test("PostEnvioEvalHandler — debe incrementar confianza cuando wasCorrect
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.newConfidence, 0.55);
-  assertEquals(result.value.timesApplied, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.newConfidence).toBe(0.55);
+  expect(result.value.timesApplied).toBe(1);
 });
 
-Deno.test("PostEnvioEvalHandler — debe decrementar confianza cuando wasCorrect=false", async () => {
+test("PostEnvioEvalHandler â€” debe decrementar confianza cuando wasCorrect=false", async () => {
   const handler = new PostEnvioEvalHandler();
   const cmd: PostEnvioEvalCommand = {
     knowledgeState: baseKnowledge,
@@ -37,12 +37,12 @@ Deno.test("PostEnvioEvalHandler — debe decrementar confianza cuando wasCorrect
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.newConfidence, 0.35);
-  assertEquals(result.value.timesApplied, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.newConfidence).toBe(0.35);
+  expect(result.value.timesApplied).toBe(1);
 });
 
-Deno.test("PostEnvioEvalHandler — shouldArchive=true si confianza cae por debajo de 0.2", async () => {
+test("PostEnvioEvalHandler â€” shouldArchive=true si confianza cae por debajo de 0.2", async () => {
   const handler = new PostEnvioEvalHandler();
   const lowKnowledge: AgentKnowledgeState = Object.freeze({
     ...baseKnowledge,
@@ -54,13 +54,13 @@ Deno.test("PostEnvioEvalHandler — shouldArchive=true si confianza cae por deba
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
   // 0.15 - 0.15 = 0.0 (Math.max con 0)
-  assertEquals(result.value.newConfidence, 0);
-  assertEquals(result.value.shouldArchive, true);
+  expect(result.value.newConfidence).toBe(0);
+  expect(result.value.shouldArchive).toBe(true);
 });
 
-Deno.test("PostEnvioEvalHandler — shouldPromote=true si confianza > 0.9 y timesConfirmed >= 5", async () => {
+test("PostEnvioEvalHandler â€” shouldPromote=true si confianza > 0.9 y timesConfirmed >= 5", async () => {
   const handler = new PostEnvioEvalHandler();
   const highKnowledge: AgentKnowledgeState = Object.freeze({
     ...baseKnowledge,
@@ -73,13 +73,13 @@ Deno.test("PostEnvioEvalHandler — shouldPromote=true si confianza > 0.9 y time
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
   // 0.88 + 0.05 = 0.93 > 0.9, timesConfirmed = 6 >= 5
-  assertEquals(result.value.newConfidence, 0.93);
-  assertEquals(result.value.shouldPromote, true);
+  expect(result.value.newConfidence).toBe(0.93);
+  expect(result.value.shouldPromote).toBe(true);
 });
 
-Deno.test("PostEnvioEvalHandler — shouldPromote=false si timesConfirmed < 5", async () => {
+test("PostEnvioEvalHandler â€” shouldPromote=false si timesConfirmed < 5", async () => {
   const handler = new PostEnvioEvalHandler();
   const knowledge: AgentKnowledgeState = Object.freeze({
     ...baseKnowledge,
@@ -92,11 +92,11 @@ Deno.test("PostEnvioEvalHandler — shouldPromote=false si timesConfirmed < 5", 
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.shouldPromote, false);
+  expect(result.ok).toBe(true);
+  expect(result.value.shouldPromote).toBe(false);
 });
 
-Deno.test("PostEnvioEvalHandler — debe topar confianza en 1.0 maximo", async () => {
+test("PostEnvioEvalHandler â€” debe topar confianza en 1.0 maximo", async () => {
   const handler = new PostEnvioEvalHandler();
   const maxKnowledge: AgentKnowledgeState = Object.freeze({
     ...baseKnowledge,
@@ -108,11 +108,11 @@ Deno.test("PostEnvioEvalHandler — debe topar confianza en 1.0 maximo", async (
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.newConfidence, 1);
+  expect(result.ok).toBe(true);
+  expect(result.value.newConfidence).toBe(1);
 });
 
-Deno.test("PostEnvioEvalHandler — debe retornar objeto congelado (inmutable)", async () => {
+test("PostEnvioEvalHandler â€” debe retornar objeto congelado (inmutable)", async () => {
   const handler = new PostEnvioEvalHandler();
   const cmd: PostEnvioEvalCommand = {
     knowledgeState: baseKnowledge,
@@ -120,6 +120,6 @@ Deno.test("PostEnvioEvalHandler — debe retornar objeto congelado (inmutable)",
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assert(Object.isFrozen(result.value));
+  expect(result.ok).toBe(true);
+  expect(Object.isFrozen(result.value)).toBe(true);
 });

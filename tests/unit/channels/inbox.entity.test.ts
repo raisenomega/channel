@@ -1,42 +1,42 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { crearInbox, activarInbox, desactivarInbox } from "../../../src/channels/domain/inbox.entity.ts";
 
 const TEST_TENANT = crypto.randomUUID() as never;
 
-Deno.test("crearInbox — debe crear inbox válido", () => {
+test("crearInbox â€” debe crear inbox vÃ¡lido", () => {
   const result = crearInbox("WhatsApp Principal", "whatsapp", "zernio", TEST_TENANT);
-  assert(result.ok);
-  assertEquals(result.value.name, "WhatsApp Principal");
-  assertEquals(result.value.channelType, "whatsapp");
-  assertEquals(result.value.provider, "zernio");
-  assertEquals(result.value.isActive, false);
-  assertEquals(result.value.syncStatus, "pending");
+  expect(result.ok).toBe(true);
+  expect(result.value.name).toBe("WhatsApp Principal");
+  expect(result.value.channelType).toBe("whatsapp");
+  expect(result.value.provider).toBe("zernio");
+  expect(result.value.isActive).toBe(false);
+  expect(result.value.syncStatus).toBe("pending");
 });
 
-Deno.test("crearInbox — debe fallar con nombre vacío", () => {
+test("crearInbox â€” debe fallar con nombre vacÃ­o", () => {
   const result = crearInbox("", "email", "resend", TEST_TENANT);
-  assert(!result.ok);
-  assertEquals(result.error.kind, "nombre_vacio");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("nombre_vacio");
 });
 
-Deno.test("crearInbox — debe fallar con provider inválido", () => {
+test("crearInbox â€” debe fallar con provider invÃ¡lido", () => {
   const result = crearInbox("Test", "webchat", "fake_provider" as never, TEST_TENANT);
-  assert(!result.ok);
-  assertEquals(result.error.kind, "provider_no_soportado");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("provider_no_soportado");
 });
 
-Deno.test("activarInbox — debe activar y cambiar syncStatus", () => {
+test("activarInbox â€” debe activar y cambiar syncStatus", () => {
   const r = crearInbox("Test", "email", "resend", TEST_TENANT);
-  assert(r.ok);
+  expect(r.ok).toBe(true);
   const activo = activarInbox(r.value);
-  assertEquals(activo.isActive, true);
-  assertEquals(activo.syncStatus, "connected");
+  expect(activo.isActive).toBe(true);
+  expect(activo.syncStatus).toBe("connected");
 });
 
-Deno.test("desactivarInbox — debe desactivar y cambiar syncStatus", () => {
+test("desactivarInbox â€” debe desactivar y cambiar syncStatus", () => {
   const r = crearInbox("Test", "telegram", "zernio", TEST_TENANT);
-  assert(r.ok);
+  expect(r.ok).toBe(true);
   const inactivo = desactivarInbox(r.value);
-  assertEquals(inactivo.isActive, false);
-  assertEquals(inactivo.syncStatus, "disconnected");
+  expect(inactivo.isActive).toBe(false);
+  expect(inactivo.syncStatus).toBe("disconnected");
 });

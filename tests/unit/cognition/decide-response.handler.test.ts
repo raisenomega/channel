@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { DecideResponseHandler, DecideResponseCommand } from "../../../src/cognition/application/decide-response.handler.ts";
 import { AutonomyConfigState } from "../../../src/cognition/domain/confidence.vo.ts";
 
@@ -24,7 +24,7 @@ const autonomiaInactiva: AutonomyConfigState = Object.freeze({
   isActive: false,
 });
 
-Deno.test("DecideResponseHandler — debe decidir responder cuando confianza es alta y autonomia activa", async () => {
+test("DecideResponseHandler â€” debe decidir responder cuando confianza es alta y autonomia activa", async () => {
   const handler = new DecideResponseHandler();
   const cmd: DecideResponseCommand = {
     tenantId: TID,
@@ -37,11 +37,11 @@ Deno.test("DecideResponseHandler — debe decidir responder cuando confianza es 
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.kind, "responder");
+  expect(result.ok).toBe(true);
+  expect(result.value.kind).toBe("responder");
 });
 
-Deno.test("DecideResponseHandler — debe decidir escalar si confianza es baja (< 0.3)", async () => {
+test("DecideResponseHandler â€” debe decidir escalar si confianza es baja (< 0.3)", async () => {
   const handler = new DecideResponseHandler();
   const cmd: DecideResponseCommand = {
     tenantId: TID,
@@ -54,12 +54,12 @@ Deno.test("DecideResponseHandler — debe decidir escalar si confianza es baja (
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.kind, "escalar");
-  assertEquals(result.value.reason, "confianza_insuficiente");
+  expect(result.ok).toBe(true);
+  expect(result.value.kind).toBe("escalar");
+  expect(result.value.reason).toBe("confianza_insuficiente");
 });
 
-Deno.test("DecideResponseHandler — debe decidir no_actuar si autonomia inactiva", async () => {
+test("DecideResponseHandler â€” debe decidir no_actuar si autonomia inactiva", async () => {
   const handler = new DecideResponseHandler();
   const cmd: DecideResponseCommand = {
     tenantId: TID,
@@ -72,11 +72,11 @@ Deno.test("DecideResponseHandler — debe decidir no_actuar si autonomia inactiv
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.kind, "no_actuar");
+  expect(result.ok).toBe(true);
+  expect(result.value.kind).toBe("no_actuar");
 });
 
-Deno.test("DecideResponseHandler — debe escalar si detecta queja (ethics guard)", async () => {
+test("DecideResponseHandler â€” debe escalar si detecta queja (ethics guard)", async () => {
   const handler = new DecideResponseHandler();
   const cmd: DecideResponseCommand = {
     tenantId: TID,
@@ -89,12 +89,12 @@ Deno.test("DecideResponseHandler — debe escalar si detecta queja (ethics guard
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.kind, "escalar");
-  assertEquals(result.value.reason, "complaint_detected");
+  expect(result.ok).toBe(true);
+  expect(result.value.kind).toBe("escalar");
+  expect(result.value.reason).toBe("complaint_detected");
 });
 
-Deno.test("DecideResponseHandler — debe decidir actuar_con_confirmacion con confianza media", async () => {
+test("DecideResponseHandler â€” debe decidir actuar_con_confirmacion con confianza media", async () => {
   const handler = new DecideResponseHandler();
   const cmd: DecideResponseCommand = {
     tenantId: TID,
@@ -107,9 +107,9 @@ Deno.test("DecideResponseHandler — debe decidir actuar_con_confirmacion con co
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
   // decidirAccionPorConfianza(0.75) -> actuar_con_confirmacion
-  // Pero decide-response.handler solo usa el kind para "responder" genérico
-  // Revisa la implementación: si accion.kind === "escalar" -> escalar, else -> responder
-  assertEquals(result.value.kind, "responder");
+  // Pero decide-response.handler solo usa el kind para "responder" genÃ©rico
+  // Revisa la implementaciÃ³n: si accion.kind === "escalar" -> escalar, else -> responder
+  expect(result.value.kind).toBe("responder");
 });

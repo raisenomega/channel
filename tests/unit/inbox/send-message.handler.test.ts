@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { SendMessageHandler, SendMessageCommand } from "../../../src/inbox/application/send-message.handler.ts";
 import { ConversationRepository, MessageRepository } from "../../../src/inbox/domain/inbox.repository.ts";
@@ -31,7 +31,7 @@ const convActiva: ConversationState = Object.freeze({
 
 const convResuelta: ConversationState = Object.freeze({ ...convActiva, status: "resolved" as const });
 
-Deno.test("SendMessageHandler — debe enviar mensaje de human_agent exitosamente", async () => {
+test("SendMessageHandler â€” debe enviar mensaje de human_agent exitosamente", async () => {
   const mockConvRepo: ConversationRepository = {
     buscar: async (_id) => ok(convActiva),
     guardar: async (_c) => ok(undefined),
@@ -52,15 +52,15 @@ Deno.test("SendMessageHandler — debe enviar mensaje de human_agent exitosament
     contactId: CID,
     channel: "whatsapp",
     provider: "zernio",
-    content: { type: "text", body: "Hola, ¿cómo estás?" },
+    content: { type: "text", body: "Hola, Â¿cÃ³mo estÃ¡s?" },
     senderType: "human_agent",
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
 });
 
-Deno.test("SendMessageHandler — debe enviar mensaje de ai_agent con metadatos", async () => {
+test("SendMessageHandler â€” debe enviar mensaje de ai_agent con metadatos", async () => {
   const mockConvRepo: ConversationRepository = {
     buscar: async (_id) => ok(convActiva),
     guardar: async (_c) => ok(undefined),
@@ -89,10 +89,10 @@ Deno.test("SendMessageHandler — debe enviar mensaje de ai_agent con metadatos"
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
 });
 
-Deno.test("SendMessageHandler — debe fallar si conversacion no existe (null)", async () => {
+test("SendMessageHandler â€” debe fallar si conversacion no existe (null)", async () => {
   const mockConvRepo: ConversationRepository = {
     buscar: async (_id) => ok(null),
     guardar: async (_c) => ok(undefined),
@@ -118,11 +118,11 @@ Deno.test("SendMessageHandler — debe fallar si conversacion no existe (null)",
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "conversacion_no_encontrada");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("conversacion_no_encontrada");
 });
 
-Deno.test("SendMessageHandler — debe fallar si conversacion esta resuelta", async () => {
+test("SendMessageHandler â€” debe fallar si conversacion esta resuelta", async () => {
   const mockConvRepo: ConversationRepository = {
     buscar: async (_id) => ok(convResuelta),
     guardar: async (_c) => ok(undefined),
@@ -148,11 +148,11 @@ Deno.test("SendMessageHandler — debe fallar si conversacion esta resuelta", as
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "conversacion_resuelta");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("conversacion_resuelta");
 });
 
-Deno.test("SendMessageHandler — debe fallar con contenido_vacio si body es vacio", async () => {
+test("SendMessageHandler â€” debe fallar con contenido_vacio si body es vacio", async () => {
   const mockConvRepo: ConversationRepository = {
     buscar: async (_id) => ok(convActiva),
     guardar: async (_c) => ok(undefined),
@@ -178,11 +178,11 @@ Deno.test("SendMessageHandler — debe fallar con contenido_vacio si body es vac
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "contenido_vacio");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("contenido_vacio");
 });
 
-Deno.test("SendMessageHandler — debe fallar con persistence_failure si msgRepo.guardar falla", async () => {
+test("SendMessageHandler â€” debe fallar con persistence_failure si msgRepo.guardar falla", async () => {
   const mockConvRepo: ConversationRepository = {
     buscar: async (_id) => ok(convActiva),
     guardar: async (_c) => ok(undefined),
@@ -208,7 +208,7 @@ Deno.test("SendMessageHandler — debe fallar con persistence_failure si msgRepo
   };
   const result = await handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
-  assertEquals(result.error.cause, "db_timeout");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
+  expect(result.error.cause).toBe("db_timeout");
 });

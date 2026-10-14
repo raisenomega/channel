@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ResolveConversationHandler } from "../../../src/inbox/application/resolve-conversation.handler.ts";
 import { ConversationRepository } from "../../../src/inbox/domain/inbox.repository.ts";
 import { ConversationState } from "../../../src/inbox/domain/conversation.entity.ts";
@@ -18,7 +18,7 @@ const convActiva: ConversationState = Object.freeze({
 
 const convResuelta: ConversationState = Object.freeze({ ...convActiva, status: "resolved" as const });
 
-Deno.test("ResolveConversationHandler — debe resolver conversación activa", async () => {
+test("ResolveConversationHandler â€” debe resolver conversaciÃ³n activa", async () => {
   const mockRepo: ConversationRepository = {
     guardar: async (_c) => ({ ok: true, value: undefined }),
     buscar: async (_id) => ({ ok: true, value: convActiva }),
@@ -27,10 +27,10 @@ Deno.test("ResolveConversationHandler — debe resolver conversación activa", a
   };
   const handler = new ResolveConversationHandler(mockRepo);
   const result = await handler.ejecutar({ conversationId: CID });
-  assert(result.ok);
+  expect(result.ok).toBe(true);
 });
 
-Deno.test("ResolveConversationHandler — debe fallar si ya está resuelta", async () => {
+test("ResolveConversationHandler â€” debe fallar si ya estÃ¡ resuelta", async () => {
   const mockRepo: ConversationRepository = {
     guardar: async (_c) => ({ ok: true, value: undefined }),
     buscar: async (_id) => ({ ok: true, value: convResuelta }),
@@ -39,6 +39,6 @@ Deno.test("ResolveConversationHandler — debe fallar si ya está resuelta", asy
   };
   const handler = new ResolveConversationHandler(mockRepo);
   const result = await handler.ejecutar({ conversationId: CID });
-  assert(!result.ok);
-  assertEquals(result.error.kind, "ya_resuelta");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("ya_resuelta");
 });

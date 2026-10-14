@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { OptInHandler, OptOutHandler } from "../../../src/compliance/application/opt-in.handler.ts";
 import { ConsentRepository, RepoError } from "../../../src/compliance/domain/compliance.repository.ts";
@@ -7,7 +7,7 @@ import { ChannelType } from "../../../src/compliance/domain/compliance.entity.ts
 const TID = crypto.randomUUID() as never;
 const CID = crypto.randomUUID() as never;
 
-Deno.test("OptInHandler — debe registrar opt-in cuando no hay registro previo", async () => {
+test("OptInHandler â€” debe registrar opt-in cuando no hay registro previo", async () => {
   const mockRepo: ConsentRepository = {
     buscarUltimo: async (_tid, _cid, _ch) => ok(null),
     guardar: async (_r) => ok(undefined),
@@ -16,11 +16,11 @@ Deno.test("OptInHandler — debe registrar opt-in cuando no hay registro previo"
   const handler = new OptInHandler(mockRepo);
   const result = await handler.ejecutar(CID, TID, "email", "explicit");
 
-  assert(result.ok);
-  assertEquals(result.value, undefined);
+  expect(result.ok).toBe(true);
+  expect(result.value).toBe(undefined);
 });
 
-Deno.test("OptInHandler — debe registrar opt-in cuando ultimo registro era opt_out", async () => {
+test("OptInHandler â€” debe registrar opt-in cuando ultimo registro era opt_out", async () => {
   const mockRepo: ConsentRepository = {
     buscarUltimo: async (_tid, _cid, _ch) => ok({
       id: crypto.randomUUID(),
@@ -38,10 +38,10 @@ Deno.test("OptInHandler — debe registrar opt-in cuando ultimo registro era opt
   const handler = new OptInHandler(mockRepo);
   const result = await handler.ejecutar(CID, TID, "email", "explicit");
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
 });
 
-Deno.test("OptInHandler — debe fallar con ya_opt_in si ultimo era opt_in", async () => {
+test("OptInHandler â€” debe fallar con ya_opt_in si ultimo era opt_in", async () => {
   const mockRepo: ConsentRepository = {
     buscarUltimo: async (_tid, _cid, _ch) => ok({
       id: crypto.randomUUID(),
@@ -59,11 +59,11 @@ Deno.test("OptInHandler — debe fallar con ya_opt_in si ultimo era opt_in", asy
   const handler = new OptInHandler(mockRepo);
   const result = await handler.ejecutar(CID, TID, "email", "explicit");
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "ya_opt_in");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("ya_opt_in");
 });
 
-Deno.test("OptInHandler — debe fallar si repo.guardar falla", async () => {
+test("OptInHandler â€” debe fallar si repo.guardar falla", async () => {
   const mockRepo: ConsentRepository = {
     buscarUltimo: async (_tid, _cid, _ch) => ok(null),
     guardar: async (_r) => err({ kind: "persistence_failure", cause: "db_down" }),
@@ -72,11 +72,11 @@ Deno.test("OptInHandler — debe fallar si repo.guardar falla", async () => {
   const handler = new OptInHandler(mockRepo);
   const result = await handler.ejecutar(CID, TID, "whatsapp", "explicit");
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
 });
 
-Deno.test("OptOutHandler — debe registrar opt-out siempre", async () => {
+test("OptOutHandler â€” debe registrar opt-out siempre", async () => {
   const mockRepo: ConsentRepository = {
     buscarUltimo: async (_tid, _cid, _ch) => ok(null),
     guardar: async (_r) => ok(undefined),
@@ -85,10 +85,10 @@ Deno.test("OptOutHandler — debe registrar opt-out siempre", async () => {
   const handler = new OptOutHandler(mockRepo);
   const result = await handler.ejecutar(CID, TID, "sms");
 
-  assert(result.ok);
+  expect(result.ok).toBe(true);
 });
 
-Deno.test("OptOutHandler — debe fallar si guardar falla", async () => {
+test("OptOutHandler â€” debe fallar si guardar falla", async () => {
   const mockRepo: ConsentRepository = {
     buscarUltimo: async (_tid, _cid, _ch) => ok(null),
     guardar: async (_r) => err({ kind: "persistence_failure", cause: "timeout" }),
@@ -97,6 +97,6 @@ Deno.test("OptOutHandler — debe fallar si guardar falla", async () => {
   const handler = new OptOutHandler(mockRepo);
   const result = await handler.ejecutar(CID, TID, "sms");
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "persistence_failure");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("persistence_failure");
 });

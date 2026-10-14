@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "jsr:@std/assert";
+﻿import { expect, test } from "vitest";
 import { ProcessWebhookHandler, ProcessWebhookCommand } from "../../../src/channels/application/process-webhook.handler.ts";
 import { ChannelRouter } from "../../../src/channels/application/channel.router.ts";
 import { ChannelAdapter, NormalizedMessage, OutboundMessage } from "../../../src/channels/domain/channel.adapter.ts";
@@ -38,7 +38,7 @@ class ZernioMockAdapter implements ChannelAdapter {
   }
 }
 
-Deno.test("ProcessWebhookHandler — debe parsear webhook exitosamente con firma valida", () => {
+test("ProcessWebhookHandler â€” debe parsear webhook exitosamente con firma valida", () => {
   const router = new ChannelRouter();
   router.registrar(new ZernioMockAdapter());
 
@@ -51,12 +51,12 @@ Deno.test("ProcessWebhookHandler — debe parsear webhook exitosamente con firma
   };
   const result = handler.ejecutar(cmd);
 
-  assert(result.ok);
-  assertEquals(result.value.length, 1);
-  assertEquals(result.value[0].content, "Hola");
+  expect(result.ok).toBe(true);
+  expect(result.value.length).toBe(1);
+  expect(result.value[0].content).toBe("Hola");
 });
 
-Deno.test("ProcessWebhookHandler — debe fallar con firma_invalida si verifyWebhook da false", () => {
+test("ProcessWebhookHandler â€” debe fallar con firma_invalida si verifyWebhook da false", () => {
   const router = new ChannelRouter();
   router.registrar(new ZernioMockAdapter());
 
@@ -69,11 +69,11 @@ Deno.test("ProcessWebhookHandler — debe fallar con firma_invalida si verifyWeb
   };
   const result = handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "firma_invalida");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("firma_invalida");
 });
 
-Deno.test("ProcessWebhookHandler — debe fallar con adapter_no_registrado si provider desconocido", () => {
+test("ProcessWebhookHandler â€” debe fallar con adapter_no_registrado si provider desconocido", () => {
   const router = new ChannelRouter();
 
   const handler = new ProcessWebhookHandler(router);
@@ -85,7 +85,7 @@ Deno.test("ProcessWebhookHandler — debe fallar con adapter_no_registrado si pr
   };
   const result = handler.ejecutar(cmd);
 
-  assert(!result.ok);
-  assertEquals(result.error.kind, "adapter_no_registrado");
-  assertEquals(result.error.provider, "twilio");
+  expect(!result.ok).toBe(true);
+  expect(result.error.kind).toBe("adapter_no_registrado");
+  expect(result.error.provider).toBe("twilio");
 });

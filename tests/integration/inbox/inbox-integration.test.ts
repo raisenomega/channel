@@ -1,5 +1,5 @@
-/**
- * HUB by Raisen — Integration tests for Inbox context.
+﻿/**
+ * HUB by Raisen â€” Integration tests for Inbox context.
  * Flujo critico: crear conversacion -> enviar mensaje -> listar inbox.
  *
  * NOTA: Estos tests usan almacenes en memoria y no requieren Supabase local.
@@ -7,7 +7,7 @@
  * y asegurar que la extension `supabase` de Deno este configurada.
  */
 
-import { assertEquals, assert } from "jsr:@std/assert";
+import { expect, test } from "vitest";
 import {
   MemoryConversationStore,
   MemoryMessageStore,
@@ -17,7 +17,7 @@ import { SendMessageHandler } from "../../../src/inbox/application/send-message.
 import { ListInboxHandler } from "../../../src/inbox/application/list-inbox.query.ts";
 import type { TenantId, ContactId, ConversationId } from "../../../src/shared/domain/ids.ts";
 
-Deno.test("Inbox: crear conversacion -> enviar mensaje -> listar inbox", async () => {
+test("Inbox: crear conversacion -> enviar mensaje -> listar inbox", async () => {
   const convs = new MemoryConversationStore();
   const msgs = new MemoryMessageStore();
   const sendMsg = new SendMessageHandler(convs, msgs);
@@ -28,11 +28,11 @@ Deno.test("Inbox: crear conversacion -> enviar mensaje -> listar inbox", async (
 
   // 1) Crear conversacion en memoria y guardarla
   const conv = crearConversacion(tenantId, contactId, "whatsapp");
-  assert(conv.ok, "la conversacion se debe crear");
+  expect(conv.ok, "la conversacion se debe crear").toBe(true);
   const convState = conv.value;
 
   const guardado = await convs.guardar(convState);
-  assert(guardado.ok);
+  expect(guardado.ok).toBe(true);
 
   const convId = convState.id;
 
@@ -46,13 +46,13 @@ Deno.test("Inbox: crear conversacion -> enviar mensaje -> listar inbox", async (
     content: { type: "text", body: "Hola, gracias por contactarnos. ?Como podemos ayudarte?" },
     senderType: "human_agent",
   });
-  assert(sendRes.ok, "el mensaje se debe enviar");
+  expect(sendRes.ok, "el mensaje se debe enviar").toBe(true);
 
   // 3) Verificar que el mensaje persiste en el store
   const mensajesEnConv = await msgs.buscarPorConversacion(convId);
-  assert(mensajesEnConv.ok);
-  assertEquals(mensajesEnConv.value.length, 1);
-  assertEquals(mensajesEnConv.value[0]?.content.body, "Hola, gracias por contactarnos. ?Como podemos ayudarte?");
+  expect(mensajesEnConv.ok).toBe(true);
+  expect(mensajesEnConv.value.length).toBe(1);
+  expect(mensajesEnConv.value[0]?.content.body).toBe("Hola) // gracias por contactarnos. ?Como podemos ayudarte?";
 
   // 4) Listar inbox activo
   const inbox = await listInbox.ejecutar({
@@ -61,13 +61,13 @@ Deno.test("Inbox: crear conversacion -> enviar mensaje -> listar inbox", async (
     assignedAgentId: null,
     limit: 20,
   });
-  assert(inbox.ok);
-  assertEquals(inbox.value.length, 1);
-  assertEquals(inbox.value[0]?.id, convId);
-  assertEquals(inbox.value[0]?.status, "open");
+  expect(inbox.ok).toBe(true);
+  expect(inbox.value.length).toBe(1);
+  expect(inbox.value[0]?.id).toBe(convId);
+  expect(inbox.value[0]?.status).toBe("open");
 });
 
-Deno.test("Inbox: mensaje a conversacion inexistente falla", async () => {
+test("Inbox: mensaje a conversacion inexistente falla", async () => {
   const convs = new MemoryConversationStore();
   const msgs = new MemoryMessageStore();
   const handler = new SendMessageHandler(convs, msgs);
@@ -81,11 +81,11 @@ Deno.test("Inbox: mensaje a conversacion inexistente falla", async () => {
     content: { type: "text", body: "Hola" },
     senderType: "system",
   });
-  assert(!res.ok, "conversacion inexistente debe fallar");
-  assertEquals(res.error.kind, "conversacion_no_encontrada");
+  expect(!res.ok, "conversacion inexistente debe fallar").toBe(true);
+  expect(res.error.kind).toBe("conversacion_no_encontrada");
 });
 
-Deno.test("Inbox: multiples conversaciones listadas correctamente", async () => {
+test("Inbox: multiples conversaciones listadas correctamente", async () => {
   const convs = new MemoryConversationStore();
   const msgs = new MemoryMessageStore();
   const sendMsg = new SendMessageHandler(convs, msgs);
@@ -96,7 +96,7 @@ Deno.test("Inbox: multiples conversaciones listadas correctamente", async () => 
   // Crear 2 conversaciones con contactos distintos
   const c1 = crearConversacion(tenantId, crypto.randomUUID() as ContactId, "webchat");
   const c2 = crearConversacion(tenantId, crypto.randomUUID() as ContactId, "email");
-  assert(c1.ok && c2.ok);
+  expect(c1.ok && c2.ok).toBe(true);
 
   await convs.guardar(c1.value);
   await convs.guardar(c2.value);
@@ -109,14 +109,14 @@ Deno.test("Inbox: multiples conversaciones listadas correctamente", async () => 
     content: { type: "text", body: "Mensaje en webchat" },
     senderType: "human_agent",
   });
-  assert(r1.ok);
+  expect(r1.ok).toBe(true);
 
   const inbox = await listInbox.ejecutar({ tenantId, status: "all", assignedAgentId: null, limit: 20 });
-  assert(inbox.ok);
-  assertEquals(inbox.value.length, 2); // ambas activas
+  expect(inbox.ok).toBe(true);
+  expect(inbox.value.length).toBe(2);
 });
 
-Deno.test("Inbox: envio de mensaje AI con metadatos", async () => {
+test("Inbox: envio de mensaje AI con metadatos", async () => {
   const convs = new MemoryConversationStore();
   const msgs = new MemoryMessageStore();
   const sendMsg = new SendMessageHandler(convs, msgs);
@@ -124,7 +124,7 @@ Deno.test("Inbox: envio de mensaje AI con metadatos", async () => {
   const tenantId = crypto.randomUUID() as TenantId;
   const contactId = crypto.randomUUID() as ContactId;
   const conv = crearConversacion(tenantId, contactId, "whatsapp");
-  assert(conv.ok);
+  expect(conv.ok).toBe(true);
   await convs.guardar(conv.value);
 
   const res = await sendMsg.ejecutar({
@@ -139,12 +139,12 @@ Deno.test("Inbox: envio de mensaje AI con metadatos", async () => {
     aiConfidence: 0.92,
     aiInteractionId: "interaction-001",
   });
-  assert(res.ok);
+  expect(res.ok).toBe(true);
 
   const msgsList = await msgs.buscarPorConversacion(conv.value.id);
-  assert(msgsList.ok);
+  expect(msgsList.ok).toBe(true);
   const msg = msgsList.value[0]!;
-  assertEquals(msg.aiMeta.mode, "autonomous");
-  assertEquals(msg.aiMeta.confidence, 0.92);
-  assertEquals(msg.aiMeta.interactionId, "interaction-001");
+  expect(msg.aiMeta.mode).toBe("autonomous");
+  expect(msg.aiMeta.confidence).toBe(0.92);
+  expect(msg.aiMeta.interactionId).toBe("interaction-001");
 });
