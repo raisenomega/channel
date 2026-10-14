@@ -213,6 +213,8 @@ const ES: Dict = {
   "safe.empty": "Aún no hay evaluaciones SAFE. Aparecerán cuando el agente empiece a operar.",
   "safe.providerLabel": "Proveedor",
 
+  "canal.realtime": "Navegación en tiempo real",
+  "cache.empty": "Sin datos aún",
   "common.selectTab": "Selecciona una pestaña",
   "common.loading": "Cargando…",
   "common.error": "Error al cargar datos",
@@ -566,6 +568,8 @@ const EN: Dict = {
   "safe.empty": "No SAFE evaluations yet. They will appear once the agent starts operating.",
   "safe.providerLabel": "Provider",
 
+  "canal.realtime": "Real-time navigation",
+  "cache.empty": "No data yet",
   "common.selectTab": "Select a tab",
   "common.loading": "Loading…",
   "common.error": "Error loading data",
