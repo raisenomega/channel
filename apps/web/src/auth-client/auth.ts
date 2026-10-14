@@ -1,10 +1,11 @@
 /**
  * HUB by Raisen — Operaciones de autenticación (auth object).
  */
-import { Result, err, ok } from "@shared/domain/result.ts";
+import { Result, err } from "@shared/domain/result.ts";
 import { logger } from "@shared/infrastructure/logger.infrastructure.ts";
 import type { SessionUsuario, AuthError } from "./types";
 import { TOKEN, getConfig, cabeceras } from "./config";
+import { sessionDe } from "./session";
 
 export const auth = {
   async registrar(email: string, password: string): Promise<Result<SessionUsuario, AuthError>> {
@@ -53,10 +54,9 @@ export const auth = {
     const token = sessionStorage.getItem(TOKEN);
     localStorage.removeItem(TOKEN);
     sessionStorage.removeItem(TOKEN);
-    if (!supabaseUrl || !token) return;
-    await fetch(`${supabaseUrl}/auth/v1/logout`, {
-      ...cabeceras({ authorization: `Bearer ${token}` }),
-    });
+    if (supabaseUrl && token) {
+      await fetch(`${supabaseUrl}/auth/v1/logout`, { ...cabeceras({ authorization: `Bearer ${token}` }) });
+    }
   },
 
   guardar(s: SessionUsuario): void {
@@ -73,17 +73,3 @@ export const auth = {
     }
   },
 };
-
-async function sessionDe(body: Record<string, unknown>, email: string): Promise<Result<SessionUsuario, AuthError>> {
-  const access = body.access_token as string | undefined;
-  const refresh = body.refresh_token as string | undefined;
-  const user = body.user as Record<string, unknown> | undefined;
-  if (!access || !refresh || !user?.id) return err({ kind: "credenciales_invalidas" });
-  return ok({
-    accessToken: access,
-    refreshToken: refresh,
-    uid: user.id as string,
-    email: (user.email as string) ?? email,
-    tenant: null,
-  });
-}
