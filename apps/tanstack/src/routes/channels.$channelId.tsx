@@ -19,7 +19,6 @@ import { usePreferences } from "@/app/preferences";
 import { t, type Idioma } from "@/lib/i18n";
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import { ChannelIcon, type ChannelKind } from "@/components/ui/channel-icon";
-import { Button } from "@/components/ui/button";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/card";
 import type { Mensaje, RowQuote, RowPayment, RowOrder } from "@/lib/types";
@@ -631,6 +630,19 @@ const PAYMENT_STATUS_TONE: Record<string, BadgeTone> = {
   pending: "warn", completed: "success", failed: "danger", refunded: "process",
 };
 
+/** Todos los canales disponibles para la barra superior de cambio de red. */
+const ALL_CHANNELS: readonly ChannelKind[] = [
+  "whatsapp", "email", "instagram", "facebook", "telegram",
+  "sms", "x", "linkedin", "webchat",
+];
+
+/** Accent (hsl) de cada canal para el borde de la pagina flotante. */
+const ALL_ACCENT: Record<string, string> = {
+  whatsapp: "142 70% 28%", email: "4 82% 56%", instagram: "332 72% 50%",
+  facebook: "221 88% 53%", telegram: "201 78% 52%", sms: "122 39% 49%",
+  x: "210 60% 55%", linkedin: "203 89% 40%", webchat: "240 100% 69%",
+};
+
 function CanalViewPage() {
   const { channelId } = useParams({ from: CanalRoute.id });
   const { language } = usePreferences();
@@ -710,14 +722,35 @@ function CanalViewPage() {
 
   return (
     <div className="view">
-      {/* Botón volver atrás */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <Button variant="ghost" size="sm" onClick={() => void navigate({ to: "/channels" })}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-        </Button>
-        <span className="text-primary"><ChannelIcon kind={kind} className="size-5" /></span>
+      {/* Barra de canales: vive en el hueco entre el header principal y la pagina flotante,
+          sin pegarse a ninguno (aire arriba/abajo). Cambiar de red sin salir. X cierra al inbox. */}
+      <div className="chbar">
+        <div className="chbar-chiplist">
+          {ALL_CHANNELS.map((c) => {
+            const activeCanal = c === kind;
+            return (
+              <button
+                key={c}
+                type="button"
+                className={"chbar-chip" + (activeCanal ? " on" : "")}
+                style={activeCanal ? { color: `hsl(${ALL_ACCENT[c]})`, borderColor: `hsl(${ALL_ACCENT[c]})` } : undefined}
+                onClick={() => { if (!activeCanal) void navigate({ to: "/channels/$channelId", params: { channelId: c } }); }}
+              >
+                <ChannelIcon kind={c} className="chbar-ico" />
+                <span>{t(language, "canal." + c)}</span>
+              </button>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          className="chbar-x"
+          aria-label={t(language, "canal.cerrar")}
+          title={t(language, "canal.cerrar")}
+          onClick={() => void navigate({ to: "/inbox" })}
+        >
+          ×
+        </button>
       </div>
 
       <ChannelFrame
