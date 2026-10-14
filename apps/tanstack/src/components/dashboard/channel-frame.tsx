@@ -89,13 +89,13 @@ export function ChannelFrame({
             <button
               key={tab}
               type="button"
-              className={"cf-tab" + (active === tab ? " on" : "")}
+              className={"chip" + (active === tab ? " active" : "")}
               onClick={() => onTabChange?.(tab)}
               style={
-                active === tab ? { color: `hsl(${accentColor})` } : undefined
+                active === tab ? { color: `hsl(${accentColor})`, borderColor: `hsl(${accentColor})` } : undefined
               }
             >
-              {t(lang, "cf." + tab)}
+              <span className="chip-name">{t(lang, "cf." + tab)}</span>
             </button>
           ))}
         </nav>

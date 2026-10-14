@@ -17,7 +17,14 @@
   filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.55));
 }
 
-/* --- Chip filtros --- */
+/* --- Chip filtros (REGLA GLOBAL declarada) ---
+ * Chip ovalado canónico del sistema OMEGA. Se usa en:
+ *   - Filtros de canal/estado del inbox (.chips en inbox)
+ *   - Lista de canales
+ *   - Pestañas de negocio del panel flotante por canal
+ *   (agentas / contactos / plantillas / cotizacion / factura / pagos / documentos)
+ * Regla: todo elemento de selección/filtro que sea "chip" usa .chip + .active.
+ * No editar en archivos aislados; modificar aqui para mantenerlo global y consistente. */
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip {
   display: inline-flex; align-items: center; gap: 6px;
@@ -28,6 +35,7 @@
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 .chip:hover { border-color: hsl(var(--primary)); }
+.chip-name { font-weight: 500; }
 .chip.active {
   border-color: hsl(var(--primary)); color: hsl(var(--primary));
   background-color: hsl(var(--primary) / 0.12);
