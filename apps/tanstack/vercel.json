@@ -4,5 +4,8 @@
   "framework": "vite",
   "buildCommand": "npx vite build",
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
