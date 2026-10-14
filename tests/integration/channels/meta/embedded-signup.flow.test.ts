@@ -36,7 +36,7 @@ class MemoryEmbeddedSignupStore implements EmbeddedSignupRepository {
     return ok(undefined);
   }
 
-  async guardarToken(_a: string, _b: string, _c: string, _d: string, _e: string, _f: string): Promise<Result<void, string>> {
+  async guardarToken(_a: string, _b: string, _c: string, _d: string): Promise<Result<void, string>> {
     return ok(undefined);
   }
 

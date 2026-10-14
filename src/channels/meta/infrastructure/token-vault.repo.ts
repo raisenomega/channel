@@ -1,10 +1,11 @@
 /**
  * HUB by Raisen — TokenVaultRepository: almacena tokens encriptados en Supabase.
- * Los tokens se encriptan con AES-GCM antes de persistir.
- * La clave maestra vive en Supabase Vault (pgsodium), no en código.
- * C4 ≤75 líneas.
+ * Encriptacion XChaCha20-Poly1305 real (no placeholder).
+ * Clave maestra desde META_TOKEN_ENCRYPTION_KEY (32 bytes hex).
+ * C4 ≤75 lineas.
  */
 import { Result, err, ok } from "../../../shared/domain/result.ts";
+import { encriptarToken } from "../../../shared/infrastructure/encryption.ts";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -22,19 +23,15 @@ function supabaseRestBase(): string | null {
 function supabaseAuthHeaders(): Record<string, string> | null {
   const key = getEnv("SUPABASE_SERVICE_ROLE_KEY");
   if (!key) return null;
-  return {
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-  };
+  return { apikey: key, Authorization: `Bearer ${key}` };
 }
 
 export interface TokenRecord {
   readonly id: string;
   readonly tenantId: string;
   readonly signupId: string;
-  readonly encryptedToken: string;
-  readonly tokenEncryptedIv: string;
-  readonly tokenEncryptedTag: string;
+  readonly encryptedNonce: string;    // hex del nonce XChaCha20
+  readonly encryptedToken: string;    // hex del ciphertext (incluye tag Poly1305)
   readonly tokenType: string;
   readonly expiresAt: string | null;
   readonly createdAt: string;
@@ -49,11 +46,12 @@ export class TokenVaultRepository {
   async guardar(
     signupId: string,
     tenantId: string,
-    encryptedToken: string,
-    iv: string,
-    tag: string,
+    tokenPlano: string,
     expiresAt: string,
   ): Promise<Result<void, VaultError>> {
+    const encriptado = encriptarToken(tokenPlano);
+    if (!encriptado.ok) return err({ kind: "persistence_failure", cause: `encriptacion:${encriptado.error.kind}` });
+
     const base = supabaseRestBase();
     const headers = supabaseAuthHeaders();
     if (!base || !headers) return err({ kind: "persistence_failure", cause: "config_incompleta" });
@@ -64,9 +62,8 @@ export class TokenVaultRepository {
         body: JSON.stringify({
           signup_id: signupId,
           tenant_id: tenantId,
-          encrypted_token: encryptedToken,
-          token_encrypted_iv: iv,
-          token_encrypted_tag: tag,
+          encrypted_nonce: encriptado.value.nonce,
+          encrypted_token: encriptado.value.ciphertext,
           token_type: "system_user",
           expires_at: expiresAt,
         }),

@@ -45,10 +45,9 @@ CREATE TABLE signup_tokens (
   id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   tenant_id       TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   signup_id       TEXT NOT NULL REFERENCES embedded_signups(id) ON DELETE CASCADE,
-  -- Token encriptado (AES-GCM) como string base64
-  encrypted_token       TEXT NOT NULL,
-  token_encrypted_iv    TEXT NOT NULL,
-  token_encrypted_tag   TEXT NOT NULL,
+  -- Token encriptado (XChaCha20-Poly1305) como hex
+  encrypted_nonce       TEXT NOT NULL,  -- nonce de 24 bytes en hex
+  encrypted_token       TEXT NOT NULL,  -- ciphertext (incluye tag Poly1305) en hex
   token_type            TEXT NOT NULL DEFAULT 'system_user',
   expires_at            TIMESTAMPTZ,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),

@@ -23,7 +23,7 @@ export interface CallbackResult {
 export interface EmbeddedSignupRepository {
   buscarPorMetaId(metaId: string): Promise<Result<{ id: string; tenantId: string; status: EmbeddedSignupStatus } | null, string>>;
   actualizar(signupId: string, data: Record<string, unknown>): Promise<Result<void, string>>;
-  guardarToken(signupId: string, tenantId: string, encryptedToken: string, iv: string, tag: string, expiresAt: string): Promise<Result<void, string>>;
+  guardarToken(signupId: string, tenantId: string, accessToken: string, expiresAt: string): Promise<Result<void, string>>;
 }
 
 export class HandleCallbackHandler {
@@ -68,9 +68,9 @@ export class HandleCallbackHandler {
     }
 
     // Guardar token encriptado si viene en el payload
+    // La encriptacion XChaCha20-Poly1305 ocurre en TokenVaultRepository.guardar()
     if (p.access_token) {
-      // Placeholder: la encriptación real AES-GCM va en token-vault.repo.ts
-      await this.repo.guardarToken(signupId, tenantId, p.access_token, "", "", p.access_token_expires_at ?? "");
+      await this.repo.guardarToken(signupId, tenantId, p.access_token, p.access_token_expires_at ?? "");
     }
 
     return ok({
