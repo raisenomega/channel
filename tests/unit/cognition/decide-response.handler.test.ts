@@ -1,4 +1,4 @@
-﻿import { expect, test } from "vitest";
+import { expect, test } from "vitest";
 import { DecideResponseHandler, DecideResponseCommand } from "../../../src/cognition/application/decide-response.handler.ts";
 import { AutonomyConfigState } from "../../../src/cognition/domain/confidence.vo.ts";
 
@@ -41,7 +41,7 @@ test("DecideResponseHandler â€” debe decidir responder cuando confianza es 
   expect(result.value.kind).toBe("responder");
 });
 
-test("DecideResponseHandler â€” debe decidir escalar si confianza es baja (< 0.3)", async () => {
+test("DecideResponseHandler â€” I9: confianza baja (<7/10) -> hold_for_human_review", async () => {
   const handler = new DecideResponseHandler();
   const cmd: DecideResponseCommand = {
     tenantId: TID,
@@ -55,8 +55,11 @@ test("DecideResponseHandler â€” debe decidir escalar si confianza es baja (
   const result = await handler.ejecutar(cmd);
 
   expect(result.ok).toBe(true);
-  expect(result.value.kind).toBe("escalar");
-  expect(result.value.reason).toBe("confianza_insuficiente");
+  expect(result.value.kind).toBe("hold_for_human_review");
+  if (result.value.kind === "hold_for_human_review") {
+    expect(result.value.reason).toBe("confidence_below_threshold");
+    expect(result.value.threshold).toBe(7);
+  }
 });
 
 test("DecideResponseHandler â€” debe decidir no_actuar si autonomia inactiva", async () => {

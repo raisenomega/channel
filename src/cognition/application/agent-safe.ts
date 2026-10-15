@@ -8,6 +8,7 @@ import { Result, ok, err } from "../../shared/domain/result.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { AgentAction } from "../domain/agent-executor.ts";
 import { TOOL_REGISTRY } from "../domain/tool.registry.ts";
+import { EthicsGuard } from "../domain/ethics.guard.ts";
 import { SafePreSendHandler } from "../safe/safe-evaluator.ts";
 import type { TenantId } from "../../shared/domain/ids.ts";
 
@@ -29,6 +30,11 @@ export class AgentSafeGate {
     response: string,
     confidence: number,
   ): Promise<Result<SafeDecision, SafePreSendError>> {
+    // X5: bloquea accion prohibida en codigo, para cualquier proveedor (provider-agnostic)
+    if (action.kind === "ejecutar_tool") {
+      const guard = EthicsGuard.evaluarAccion(action.tool);
+      if (!guard.ok) return err({ kind: "safe_blocked" });
+    }
     const toolName = action.kind === "ejecutar_tool" ? action.tool : null;
     const toolDef = toolName === null ? undefined : TOOL_REGISTRY[toolName];
     if (toolDef === undefined || !toolDef.requiresSafeEvaluation) {
