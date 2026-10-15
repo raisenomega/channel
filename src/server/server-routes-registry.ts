@@ -5,6 +5,7 @@ import type { ServerHandlers } from "./server-routes.ts";
 import type { RouteDefinition } from "./server-types.ts";
 import { handleWebhook, handleReceive, handleSend } from "./server-routes-messaging.ts";
 import { handleQuote, handleOptIn, handleListInbox } from "./server-routes-commerce.ts";
+import { rutaInitSignup, rutaCallbackMeta } from "../channels/meta/presentation/routes/oauth.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
@@ -14,6 +15,8 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     handleQuote(h),
     handleOptIn(h),
     handleListInbox(h),
+    rutaInitSignup(),
+    rutaCallbackMeta(),
   ];
 }
 

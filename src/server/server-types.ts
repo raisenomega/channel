@@ -10,6 +10,7 @@ export interface RequestContext {
   readonly path: string;
   readonly headers: Record<string, string | string[] | undefined>;
   readonly body: unknown;
+  readonly rawBody: string | null;
   readonly jwt: string | null;
 }
 

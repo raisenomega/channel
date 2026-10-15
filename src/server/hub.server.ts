@@ -43,6 +43,7 @@ const server = http.createServer(async (req, res) => {
     path: thePath,
     headers: req.headers as Record<string, string | string[] | undefined>,
     body: parseBody(rawBody),
+    rawBody,
     jwt: extractJwt(req.headers as Record<string, string | string[] | undefined>),
   };
 
