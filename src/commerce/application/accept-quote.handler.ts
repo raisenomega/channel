@@ -1,11 +1,12 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { QuoteId, OrderId } from "../../shared/domain/ids.ts";
+import { QuoteId, OrderId, TenantId } from "../../shared/domain/ids.ts";
 import { aceptarQuote } from "../domain/quote.entity.ts";
 import { crearOrder, OrderError } from "../domain/order.entity.ts";
 import { QuoteRepository, OrderRepository, RepoError } from "../domain/commerce.repository.ts";
 
 export interface AcceptQuoteCommand {
   readonly quoteId: QuoteId;
+  readonly tenantId: TenantId;
 }
 
 export type AcceptQuoteError =
@@ -20,7 +21,7 @@ export class AcceptQuoteHandler {
   ) {}
 
   async ejecutar(cmd: AcceptQuoteCommand): Promise<Result<OrderId, AcceptQuoteError>> {
-    const quoteResult = await this.quoteRepo.buscar(cmd.quoteId);
+    const quoteResult = await this.quoteRepo.buscar(cmd.quoteId, cmd.tenantId);
     if (!quoteResult.ok) return err(quoteResult.error);
     const quote = quoteResult.value;
     if (!quote) return err({ kind: "cotizacion_no_encontrada" });

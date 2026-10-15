@@ -1,11 +1,12 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { OrderId, PaymentId } from "../../shared/domain/ids.ts";
+import { OrderId, PaymentId, TenantId } from "../../shared/domain/ids.ts";
 import { crearPayment } from "../domain/payment.entity.ts";
 import { OrderRepository, PaymentRepository, PaymentGateway, RepoError } from "../domain/commerce.repository.ts";
 
 export interface ProcessPaymentCommand {
   readonly orderId: OrderId;
   readonly method: string;
+  readonly tenantId: TenantId;
 }
 
 export type ProcessPaymentError =
@@ -21,7 +22,7 @@ export class ProcessPaymentHandler {
   ) {}
 
   async ejecutar(cmd: ProcessPaymentCommand): Promise<Result<PaymentId, ProcessPaymentError>> {
-    const orderResult = await this.orderRepo.buscar(cmd.orderId);
+    const orderResult = await this.orderRepo.buscar(cmd.orderId, cmd.tenantId);
     if (!orderResult.ok) return err(orderResult.error);
     const order = orderResult.value;
     if (!order) return err({ kind: "orden_no_encontrada" });

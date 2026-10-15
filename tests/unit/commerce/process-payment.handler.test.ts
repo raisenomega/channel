@@ -1,4 +1,4 @@
-﻿import { expect, test } from "vitest";
+import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { ProcessPaymentHandler, ProcessPaymentCommand } from "../../../src/commerce/application/process-payment.handler.ts";
 import { OrderRepository, PaymentRepository, PaymentGateway, RepoError, PaymentError } from "../../../src/commerce/domain/commerce.repository.ts";
@@ -22,15 +22,15 @@ const orderFixture: OrderState = Object.freeze({
 
 test("ProcessPaymentHandler â€” debe procesar pago exitosamente", async () => {
   const mockOrderRepo: OrderRepository = {
-    buscar: async (_id) => ok(orderFixture),
+    buscar: async (_id, _tenantId) => ok(orderFixture),
     guardar: async (_o) => ok(undefined),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const mockPaymentRepo: PaymentRepository = {
     guardar: async (_p) => ok(undefined),
-    buscar: async (_id) => ok(null),
-    buscarPorOrder: async (_oid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorOrder: async (_oid, _tenantId) => ok([]),
   };
 
   const mockGateway: PaymentGateway = {
@@ -39,7 +39,7 @@ test("ProcessPaymentHandler â€” debe procesar pago exitosamente", async () 
   };
 
   const handler = new ProcessPaymentHandler(mockOrderRepo, mockPaymentRepo, mockGateway);
-  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card" };
+  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card", tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(result.ok).toBe(true);
@@ -48,15 +48,15 @@ test("ProcessPaymentHandler â€” debe procesar pago exitosamente", async () 
 
 test("ProcessPaymentHandler â€” debe fallar si orden no se encuentra (error repo)", async () => {
   const mockOrderRepo: OrderRepository = {
-    buscar: async (_id) => err({ kind: "persistence_failure", cause: "db_down" }),
+    buscar: async (_id, _tenantId) => err({ kind: "persistence_failure", cause: "db_down" }),
     guardar: async (_o) => ok(undefined),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const mockPaymentRepo: PaymentRepository = {
     guardar: async (_p) => ok(undefined),
-    buscar: async (_id) => ok(null),
-    buscarPorOrder: async (_oid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorOrder: async (_oid, _tenantId) => ok([]),
   };
 
   const mockGateway: PaymentGateway = {
@@ -65,7 +65,7 @@ test("ProcessPaymentHandler â€” debe fallar si orden no se encuentra (error
   };
 
   const handler = new ProcessPaymentHandler(mockOrderRepo, mockPaymentRepo, mockGateway);
-  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card" };
+  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card", tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
@@ -74,15 +74,15 @@ test("ProcessPaymentHandler â€” debe fallar si orden no se encuentra (error
 
 test("ProcessPaymentHandler â€” debe fallar si orden es null (no encontrada)", async () => {
   const mockOrderRepo: OrderRepository = {
-    buscar: async (_id) => ok(null),
+    buscar: async (_id, _tenantId) => ok(null),
     guardar: async (_o) => ok(undefined),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const mockPaymentRepo: PaymentRepository = {
     guardar: async (_p) => ok(undefined),
-    buscar: async (_id) => ok(null),
-    buscarPorOrder: async (_oid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorOrder: async (_oid, _tenantId) => ok([]),
   };
 
   const mockGateway: PaymentGateway = {
@@ -91,7 +91,7 @@ test("ProcessPaymentHandler â€” debe fallar si orden es null (no encontrada
   };
 
   const handler = new ProcessPaymentHandler(mockOrderRepo, mockPaymentRepo, mockGateway);
-  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card" };
+  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card", tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
@@ -100,15 +100,15 @@ test("ProcessPaymentHandler â€” debe fallar si orden es null (no encontrada
 
 test("ProcessPaymentHandler â€” debe fallar si gateway.cobrar falla", async () => {
   const mockOrderRepo: OrderRepository = {
-    buscar: async (_id) => ok(orderFixture),
+    buscar: async (_id, _tenantId) => ok(orderFixture),
     guardar: async (_o) => ok(undefined),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const mockPaymentRepo: PaymentRepository = {
     guardar: async (_p) => ok(undefined),
-    buscar: async (_id) => ok(null),
-    buscarPorOrder: async (_oid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorOrder: async (_oid, _tenantId) => ok([]),
   };
 
   const mockGateway: PaymentGateway = {
@@ -117,7 +117,7 @@ test("ProcessPaymentHandler â€” debe fallar si gateway.cobrar falla", async
   };
 
   const handler = new ProcessPaymentHandler(mockOrderRepo, mockPaymentRepo, mockGateway);
-  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card" };
+  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card", tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
@@ -127,15 +127,15 @@ test("ProcessPaymentHandler â€” debe fallar si gateway.cobrar falla", async
 
 test("ProcessPaymentHandler â€” debe fallar si paymentRepo.guardar falla", async () => {
   const mockOrderRepo: OrderRepository = {
-    buscar: async (_id) => ok(orderFixture),
+    buscar: async (_id, _tenantId) => ok(orderFixture),
     guardar: async (_o) => ok(undefined),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const mockPaymentRepo: PaymentRepository = {
     guardar: async (_p) => err({ kind: "persistence_failure", cause: "disk_full" }),
-    buscar: async (_id) => ok(null),
-    buscarPorOrder: async (_oid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorOrder: async (_oid, _tenantId) => ok([]),
   };
 
   const mockGateway: PaymentGateway = {
@@ -144,7 +144,7 @@ test("ProcessPaymentHandler â€” debe fallar si paymentRepo.guardar falla", 
   };
 
   const handler = new ProcessPaymentHandler(mockOrderRepo, mockPaymentRepo, mockGateway);
-  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card" };
+  const cmd: ProcessPaymentCommand = { orderId: OID, method: "credit_card", tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
