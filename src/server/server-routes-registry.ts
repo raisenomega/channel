@@ -9,6 +9,8 @@ import { rutaInitSignup, rutaCallbackMeta } from "../channels/meta/presentation/
 import { rutaWebhookVerify, rutaWebhookReceive } from "../channels/whatsapp-cloud/presentation/routes/webhook.routes.ts";
 import { rutaGetNotifications, rutaMarkRead, rutaUpdatePreferences } from "../notifications/presentation/routes/notifications.routes.ts";
 import { rutaAthMovilConfirm } from "../commerce/presentation/routes/ath-movil-confirm.routes.ts";
+import { rutaStripeWebhook } from "../commerce/presentation/routes/stripe-webhook.routes.ts";
+import { rutaStripeOnboarding } from "../commerce/presentation/routes/stripe-onboarding.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
@@ -26,6 +28,8 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     rutaMarkRead(h.notifications),
     rutaUpdatePreferences(h.notifications),
     rutaAthMovilConfirm(h.athConfirm),
+    rutaStripeWebhook(h.stripe),
+    rutaStripeOnboarding(h.stripe),
   ];
 }
 
