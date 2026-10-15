@@ -9,22 +9,46 @@ const TID = "tenant-1" as never;
 const OID = "order-1" as never;
 
 function makePayment(): PaymentState {
-  return { id: "p1" as never, tenantId: TID, orderId: OID, amount: 250, currency: "USD", status: "completed", provider: "stripe", initiatedByType: "human", createdAt: new Date() };
+  return { id: "p1" as never, tenantId: TID, orderId: OID, amount: 250, currency: "USD", status: "completed", provider: "stripe", initiatedByType: "human", netAmount: null, authTokenEncrypted: null, createdAt: new Date() };
 }
 
-test("guardar happy path", async () => {
+test("guardar happy path (POST nuevo pago)", async () => {
   vi.stubEnv("SUPABASE_URL", "https://s.co");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "key");
-  mockFetch(new Response(null, { status: 200 }));
+  const calls: Response[] = [
+    new Response(JSON.stringify([]), { status: 200, headers: { "content-type": "application/json" } }), // buscar -> no existe
+    new Response(null, { status: 200 }), // POST
+  ];
+  globalThis.fetch = vi.fn().mockImplementation(async () => calls.shift());
   const r = await new SupabasePaymentRepo().guardar(makePayment());
   expect(r.ok).toBe(true);
+  restoreFetch(); vi.unstubAllEnvs();
+});
+
+test("guardar existente -> PATCH (UPSERT)", async () => {
+  vi.stubEnv("SUPABASE_URL", "https://s.co");
+  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "key");
+  const calls: Response[] = [
+    new Response(JSON.stringify([{ id: "p1", tenant_id: "tenant-1", order_id: "order-1", amount: 250, currency: "USD", status: "completed", provider: "stripe", initiated_by_type: "human", net_amount: null, ath_auth_token_encrypted: null, created_at: new Date().toISOString() }]), { status: 200, headers: { "content-type": "application/json" } }),
+    new Response(null, { status: 200 }),
+  ];
+  const fetchSpy = vi.fn().mockImplementation(async () => calls.shift());
+  globalThis.fetch = fetchSpy;
+  const r = await new SupabasePaymentRepo().guardar(makePayment());
+  expect(r.ok).toBe(true);
+  const method = (fetchSpy.mock.calls[1]?.[1] as { method: string }).method;
+  expect(method).toBe("PATCH");
   restoreFetch(); vi.unstubAllEnvs();
 });
 
 test("guardar http error -> persistence_failure", async () => {
   vi.stubEnv("SUPABASE_URL", "https://s.co");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "key");
-  mockFetch(new Response(null, { status: 400 }));
+  const calls: Response[] = [
+    new Response(JSON.stringify([]), { status: 200, headers: { "content-type": "application/json" } }),
+    new Response(null, { status: 400 }),
+  ];
+  globalThis.fetch = vi.fn().mockImplementation(async () => calls.shift());
   const r = await new SupabasePaymentRepo().guardar(makePayment());
   expect(r.ok).toBe(false);
   if (!r.ok) expect(r.error.cause).toBe("http_400");
