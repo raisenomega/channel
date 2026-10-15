@@ -28,10 +28,10 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Gate: archivos ≤ 75 líneas
+      - name: "Gate: archivos <= 75 lineas"
         run: pnpm check:lines
 
-      - name: Gate: capas DDD + zero any
+      - name: "Gate: capas DDD + zero any"
         run: pnpm check:layers
 
       - name: Tests unitarios

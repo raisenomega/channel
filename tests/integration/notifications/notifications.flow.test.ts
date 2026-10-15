@@ -2,7 +2,7 @@
  * HUB by Raisen — Integration tests for BC Notifications (Slice 3).
  * Flujo + 5 adversariales de bank-grade.
  */
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { EmitNotificationHandler } from "../../../src/notifications/application/emit-notification.handler.ts";
 import { GetNotificationsHandler } from "../../../src/notifications/application/get-notifications.handler.ts";
 import { MarkReadHandler } from "../../../src/notifications/application/mark-read.handler.ts";
@@ -96,12 +96,72 @@ test("adversarial 3: muted type no persiste", async () => {
 
 test("adversarial 5: permisos de preferencias (requiere identidad autenticada)", async () => {
   const repo = new InMemoryRepo();
-  // El handler de preferencias debe recibir userId desde el contexto autenticado (JWT claims).
-  // En esta etapa (Slides parciales), la verificacion se delega a la capa de ruta/middleware que
-  // NO esta registrado (rutas deshabilitadas por NEW-CRIT-S3-A/B). El repo admin asegura RLS.
-  // Simulamos el modelo seguro: el userId siempre deriva del contexto, no del input del cliente.
   const update = new UpdatePreferencesHandler(repo);
-  // Si no hay identidad autenticada (userId vacio), el handler debe rechazar.
+  // El userId siempre deriva del contexto autenticado (JWT claims), nunca del input del cliente.
   const sinAuth = await update.ejecutar({ userId: "", tenantId: "t_A" });
   expect(sinAuth.ok).toBe(false);
+});
+
+// ─── Sprint 2: rutas reales con JWT ───────────────────────────────
+import { rutaGetNotifications, rutaMarkRead } from "../../../src/notifications/presentation/routes/notifications.routes.ts";
+import type { NotificationsHandlers } from "../../../src/notifications/presentation/routes/notifications.routes.ts";
+import type { RequestContext } from "../../../src/server/server-types.ts";
+import { SignJWT } from "jose";
+
+const JWT_SECRET = "integration-test-jwt-secret-long-enough";
+
+async function token(payload: Record<string, unknown>): Promise<string> {
+  return await new SignJWT(payload as never)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(new TextEncoder().encode(JWT_SECRET));
+}
+
+function ctxFor(auth: string | null, path = "/notifications", body: unknown = null): RequestContext {
+  return {
+    method: "GET", path, headers: auth ? { authorization: auth } : {}, body, rawBody: null, jwt: auth,
+  } as RequestContext;
+}
+
+function handlers(repo: InMemoryRepo): NotificationsHandlers {
+  return {
+    getHandler: new GetNotificationsHandler(repo),
+    markReadHandler: new MarkReadHandler(repo),
+    updatePrefsHandler: new UpdatePreferencesHandler(repo),
+  };
+}
+
+test("S2 GET /notifications sin Authorization -> token_ausente (401-equiv)", async () => {
+  vi.stubEnv("SUPABASE_JWT_SECRET", JWT_SECRET);
+  const route = rutaGetNotifications(handlers(new InMemoryRepo()));
+  const res = await route.handler(ctxFor(null));
+  expect((res as { ok: boolean }).ok).toBe(false);
+  expect((res as { error: { kind: string } }).error.kind).toBe("token_ausente");
+  vi.unstubAllEnvs();
+});
+
+test("S2 GET /notifications JWT tenant A no ve datos ajenos (RLS)", async () => {
+  vi.stubEnv("SUPABASE_JWT_SECRET", JWT_SECRET);
+  const repo = new InMemoryRepo();
+  repo.notifications.push({ id: "n_other", tenantId: "tenant_B", userId: "user_B", type: "message_received", severity: "info", title: "Ajeno", createdAt: "2025-01-01" });
+  const t = await token({ sub: "user_A", tenant_id: "tenant_A" });
+  const route = rutaGetNotifications(handlers(repo));
+  const res = await route.handler(ctxFor(`Bearer ${t}`));
+  expect(res.ok).toBe(true);
+  const data = (res as { data: Array<{ id: string }> }).data;
+  expect(data.find(n => n.id === "n_other")).toBeUndefined();
+  vi.unstubAllEnvs();
+});
+
+test("S2 POST /notifications/:id/read con JWT valido -> marca leida", async () => {
+  vi.stubEnv("SUPABASE_JWT_SECRET", JWT_SECRET);
+  const repo = new InMemoryRepo();
+  repo.notifications.push({ id: "n_r", tenantId: "tenant_A", userId: "user_A", type: "message_received", severity: "info", title: "Leer", createdAt: "2025-01-01" });
+  const t = await token({ sub: "user_A", tenant_id: "tenant_A" });
+  const route = rutaMarkRead(handlers(repo));
+  const res = await route.handler(ctxFor(`Bearer ${t}`, "/notifications/n_r/read"));
+  expect(res.ok).toBe(true);
+  expect(repo.notifications[0].readAt).toBeTruthy();
+  vi.unstubAllEnvs();
 });

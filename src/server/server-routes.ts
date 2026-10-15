@@ -12,6 +12,11 @@ import { ListInboxHandler } from "../inbox/application/list-inbox.query.ts";
 import { ConversationRepositorySupabase } from "../inbox/infrastructure/conversation.repository.supabase.ts";
 import { MessageRepositorySupabase } from "../inbox/infrastructure/message.repository.supabase.ts";
 import { ConsentRepositorySupabase } from "../compliance/infrastructure/consent.repository.supabase.ts";
+import { GetNotificationsHandler } from "../notifications/application/get-notifications.handler.ts";
+import { MarkReadHandler } from "../notifications/application/mark-read.handler.ts";
+import { UpdatePreferencesHandler } from "../notifications/application/update-preferences.handler.ts";
+import { SupabaseNotificationRepo } from "../notifications/infrastructure/supabase-notification.repo.ts";
+import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
 
 export interface ServerHandlers {
@@ -21,6 +26,7 @@ export interface ServerHandlers {
   createQuote: CreateQuoteHandler;
   optIn: OptInHandler;
   listInbox: ListInboxHandler;
+  notifications: NotificationsHandlers;
 }
 
 /** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */
@@ -39,6 +45,7 @@ export function buildHandlers(): ServerHandlers {
   const consentRepo = new ConsentRepositorySupabase();
   const channelRouter = new ChannelRouter();
   channelRouter.registrar(new DevChannelAdapter());
+  const notifRepo = new SupabaseNotificationRepo();
 
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
@@ -47,5 +54,10 @@ export function buildHandlers(): ServerHandlers {
     createQuote: new CreateQuoteHandler(quoteRepo),
     optIn: new OptInHandler(consentRepo),
     listInbox: new ListInboxHandler(convRepo),
+    notifications: {
+      getHandler: new GetNotificationsHandler(notifRepo),
+      markReadHandler: new MarkReadHandler(notifRepo),
+      updatePrefsHandler: new UpdatePreferencesHandler(notifRepo),
+    },
   };
 }

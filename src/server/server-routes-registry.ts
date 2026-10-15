@@ -7,11 +7,7 @@ import { handleWebhook, handleReceive, handleSend } from "./server-routes-messag
 import { handleQuote, handleOptIn, handleListInbox } from "./server-routes-commerce.ts";
 import { rutaInitSignup, rutaCallbackMeta } from "../channels/meta/presentation/routes/oauth.routes.ts";
 import { rutaWebhookVerify, rutaWebhookReceive } from "../channels/whatsapp-cloud/presentation/routes/webhook.routes.ts";
-// TODO (Sprint 2): Rutas de notifications DESHABILITADAS hasta middleware JWT.
-// NEW-CRIT-S3-A: jwtUserId() devolvia el JWT crudo como userId (backdoor de auth).
-// NEW-CRIT-S3-B: tenantId venia del body (atacable).
-// El BC notifications sigue funcional: Slice 1/2 inyectan EmitNotificationHandler directamente.
-// Re-habilitar NOTIFICATIONS_rutas() cuando exista src/server/jwt-verify.ts con jose.
+import { rutaGetNotifications, rutaMarkRead, rutaUpdatePreferences } from "../notifications/presentation/routes/notifications.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
@@ -25,6 +21,9 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     rutaCallbackMeta(),
     rutaWebhookVerify(),
     rutaWebhookReceive(),
+    rutaGetNotifications(h.notifications),
+    rutaMarkRead(h.notifications),
+    rutaUpdatePreferences(h.notifications),
   ];
 }
 
