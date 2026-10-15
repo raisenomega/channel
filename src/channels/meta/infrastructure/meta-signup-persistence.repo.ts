@@ -1,6 +1,7 @@
 /**
  * HUB by Raisen — Repositorio de embedded_signups en Supabase REST.
- * Implementa init (crear) y buscarPorMetaId para callback.
+ * Implementa init (crear) y buscarPorId para callback.
+ * Lookups (phone_number_id, tenant) viven en meta-signup-lookup.repo.ts.
  * C4 ≤75 lineas.
  */
 import { ok, err } from "../../../shared/domain/result.ts";
@@ -40,28 +41,6 @@ export class MetaSignupPersistenceRepo {
     if (!u || !h) return err("config_incompleta");
     try {
       const r = await fetch(`${u}/embedded_signups?select=id,tenant_id,status&id=eq.${encodeURIComponent(String(signupId))}&limit=1`, { headers: h });
-      if (!r.ok) return err(`http_${r.status}`);
-      const rows = await r.json() as SignupRow[];
-      return ok(rows && rows.length > 0 ? rows[0]! : null);
-    } catch (e) { return err(String(e)); }
-  }
-
-  async buscarPorPhoneNumberId(phoneNumberId: string): Promise<Result<SignupRow | null, string>> {
-    const u = base(); const h = hdrs();
-    if (!u || !h) return err("config_incompleta");
-    try {
-      const r = await fetch(`${u}/embedded_signups?select=id,tenant_id,status&phone_number_id=eq.${encodeURIComponent(String(phoneNumberId))}&status=eq.COMPLETED&limit=1`, { headers: h });
-      if (!r.ok) return err(`http_${r.status}`);
-      const rows = await r.json() as SignupRow[];
-      return ok(rows && rows.length > 0 ? rows[0]! : null);
-    } catch (e) { return err(String(e)); }
-  }
-
-  async buscarPorTenant(tenantId: string): Promise<Result<SignupRow | null, string>> {
-    const u = base(); const h = hdrs();
-    if (!u || !h) return err("config_incompleta");
-    try {
-      const r = await fetch(`${u}/embedded_signups?select=id,tenant_id,status&tenant_id=eq.${encodeURIComponent(String(tenantId))}&status=eq.COMPLETED&limit=1`, { headers: h });
       if (!r.ok) return err(`http_${r.status}`);
       const rows = await r.json() as SignupRow[];
       return ok(rows && rows.length > 0 ? rows[0]! : null);
