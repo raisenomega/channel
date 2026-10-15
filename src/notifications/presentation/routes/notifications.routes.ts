@@ -1,28 +1,74 @@
 /**
- * HUB by Raisen — Rutas HTTP de notificaciones (DESHABILITADAS por seguridad).
- *
- * TODO (Sprint 2): Rutas deshabilitadas hasta implementar middleware JWT.
- * - NEW-CRIT-S3-A: jwtUserId() devolvia el JWT crudo como userId (backdoor auth).
- * - NEW-CRIT-S3-B: tenantId venia del body (atacable).
- * - Fix pendiente: src/server/jwt-verify.ts con jose + parsearJwtClaims().
- *
- * El BC notifications es funcional SIN estas rutas: los handlers de Slice 1/2
- * inyectan EmitNotificationHandler/NotificationEmitter directamente.
- *
- * NO registrar estas rutas en server-routes-registry.ts hasta que exista
- * verificación JWT. Este archivo es solo referencia para la implementación.
+ * HUB by Raisen — Rutas HTTP de notificaciones.
+ * GET /notifications, POST /notifications/:id/read, PATCH /notifications/preferences.
+ * Autenticacion via JWT (parsearJwtClaims). tenantId y userId SOLO del JWT.
+ * C4 ≤75 lineas.
  */
-import type { RouteDefinition } from "../../../server/server-types.ts";
+import type { RouteDefinition, RequestContext } from "../../../server/server-types.ts";
+import { parsearJwtClaims } from "../../../server/jwt-verify.ts";
+import type { NotificationType } from "../../domain/notification-type.vo.ts";
+import { GetNotificationsHandler } from "../../application/get-notifications.handler.ts";
+import { MarkReadHandler } from "../../application/mark-read.handler.ts";
+import { UpdatePreferencesHandler } from "../../application/update-preferences.handler.ts";
 
-// Rutas deshabilitadas. Re-implementar cuando exista jwt-verify.ts (Sprint 2).
-export function rutaGetNotifications(): RouteDefinition {
-  return { method: "GET", path: "/notifications", handler: async () => ({ ok: false, error: { kind: "no_autenticado" } }) };
+export interface NotificationsHandlers {
+  readonly getHandler: GetNotificationsHandler;
+  readonly markReadHandler: MarkReadHandler;
+  readonly updatePrefsHandler: UpdatePreferencesHandler;
 }
 
-export function rutaMarkRead(): RouteDefinition {
-  return { method: "POST", path: "/notifications/:id/read", handler: async () => ({ ok: false, error: { kind: "no_autenticado" } }) };
+function authHeader(ctx: RequestContext): string | null {
+  const raw = ctx.headers["authorization"] ?? ctx.headers["Authorization"] ?? null;
+  return Array.isArray(raw) ? (raw[0] ?? null) : raw;
 }
 
-export function rutaUpdatePreferences(): RouteDefinition {
-  return { method: "PATCH", path: "/notifications/preferences", handler: async () => ({ ok: false, error: { kind: "no_autenticado" } }) };
+export function rutaGetNotifications(h: NotificationsHandlers): RouteDefinition {
+  return {
+    method: "GET", path: "/notifications",
+    handler: async (ctx) => {
+      const claims = await parsearJwtClaims(authHeader(ctx));
+      if (!claims.ok) return { ok: false, error: claims.error };
+      const q = ctx.path.includes("?") ? new URLSearchParams(ctx.path.split("?")[1] ?? "") : new URLSearchParams();
+      const result = await h.getHandler.ejecutar({
+        userId: claims.value.userId,
+        ...(q.get("unread") === "true" ? { unread: true } : {}),
+        ...(q.get("since") ? { since: q.get("since")! } : {}),
+        limit: q.get("limit") ? parseInt(q.get("limit")!, 10) : 20,
+      });
+      return result.ok ? { ok: true, data: result.value } : { ok: false, error: result.error };
+    },
+  };
+}
+
+export function rutaMarkRead(h: NotificationsHandlers): RouteDefinition {
+  return {
+    method: "POST", path: "/notifications/:id/read",
+    handler: async (ctx) => {
+      const claims = await parsearJwtClaims(authHeader(ctx));
+      if (!claims.ok) return { ok: false, error: claims.error };
+      const id = ctx.path.split("/")[2] ?? "";
+      const result = await h.markReadHandler.ejecutar({ id, userId: claims.value.userId });
+      return result.ok ? { ok: true } : { ok: false, error: result.error };
+    },
+  };
+}
+
+export function rutaUpdatePreferences(h: NotificationsHandlers): RouteDefinition {
+  return {
+    method: "PATCH", path: "/notifications/preferences",
+    handler: async (ctx) => {
+      const claims = await parsearJwtClaims(authHeader(ctx));
+      if (!claims.ok) return { ok: false, error: claims.error };
+      const b = ctx.body as Record<string, unknown> | null ?? {};
+      const result = await h.updatePrefsHandler.ejecutar({
+        userId: claims.value.userId,
+        tenantId: claims.value.tenantId,
+        ...(b["in_app_enabled"] !== undefined ? { inAppEnabled: b["in_app_enabled"] as boolean } : {}),
+        ...(b["email_enabled"] !== undefined ? { emailEnabled: b["email_enabled"] as boolean } : {}),
+        ...(b["push_enabled"] !== undefined ? { pushEnabled: b["push_enabled"] as boolean } : {}),
+        ...(b["muted_types"] !== undefined ? { mutedTypes: b["muted_types"] as NotificationType[] } : {}),
+      });
+      return result.ok ? { ok: true } : { ok: false, error: result.error };
+    },
+  };
 }
