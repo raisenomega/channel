@@ -15,6 +15,7 @@ import * as http from "node:http";
 import { buildHandlers } from "./server-routes.ts";
 import { registrarRutas, matchRoute } from "./server-routes-registry.ts";
 import { extractJwt, parseBody, readBody } from "./server-helpers.ts";
+import type { HttpResponse } from "./server-types.ts";
 import type { RequestContext } from "./server-types.ts";
 
 const PORT = parseInt(nodeProcess.env["PORT"] ?? "8080", 10);
@@ -56,6 +57,13 @@ const server = http.createServer(async (req, res) => {
 
   try {
     const result = await route.handler(ctx);
+    // Soporta respuestas custom (CRIT-S2-C): { status, contentType, body }
+    if (result && !Array.isArray(result) && typeof result === "object" && typeof (result as HttpResponse).body === "string") {
+      const custom = result as HttpResponse;
+      res.writeHead(custom.status ?? 200, { "Content-Type": custom.contentType ?? "text/plain", ...(custom.headers ?? {}) });
+      res.end(custom.body);
+      return;
+    }
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(result));
   } catch (err) {

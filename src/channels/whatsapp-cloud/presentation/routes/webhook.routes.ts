@@ -1,19 +1,21 @@
 /**
  * HUB by Raisen — Rutas webhook WhatsApp Cloud API.
- * GET /webhooks/whatsapp — challenge-response (verify_token)
+ * GET /webhooks/whatsapp — challenge-response (text/plain)
  * POST /webhooks/whatsapp — receive messages (firma MANDATORIA)
  * C4 ≤75 lineas.
  */
-import type { RouteDefinition } from "../../../../server/server-types.ts";
+import type { RouteDefinition, HttpResponse } from "../../../../server/server-types.ts";
 import { verificarFirmaWebhook } from "../../../meta/infrastructure/webhook-verifier.ts";
 import { parsearPayloadMeta } from "../../infrastructure/webhook-payload.parser.ts";
 import { SupabaseMessageRepo } from "../../infrastructure/supabase-message.repo.ts";
 import { ReceiveMessageHandler } from "../../application/receive-message.handler.ts";
+import { SupabaseMetaSignupFacade } from "../../../meta/infrastructure/meta-signup-facade.ts";
 
 declare const process: { env: Record<string, string | undefined> };
 
 const repo = new SupabaseMessageRepo();
 const receiveHandler = new ReceiveMessageHandler(repo);
+const signupLookup = new SupabaseMetaSignupFacade();
 
 export function rutaWebhookVerify(): RouteDefinition {
   return {
@@ -25,8 +27,9 @@ export function rutaWebhookVerify(): RouteDefinition {
       const challenge = q.get("hub.challenge");
       const expected = process.env["META_WEBHOOK_VERIFY_TOKEN"] ?? "";
       if (mode === "subscribe" && token === expected && challenge) {
-        // Retornar challenge como text/plain (requiere modificacion en server)
-        return { ok: true, challenge } as Record<string, unknown>;
+        // CRIT-S2-C: Meta espera text/plain con status 200
+        const httpRes: HttpResponse = { status: 200, contentType: "text/plain", body: challenge };
+        return httpRes;
       }
       return { ok: false, error: { kind: "verify_failed" } };
     },
@@ -46,10 +49,14 @@ export function rutaWebhookReceive(): RouteDefinition {
       const parsed = parsearPayloadMeta(ctx.body as Record<string, unknown>);
       if (!parsed.ok) return { ok: false, error: { kind: "payload_invalido", cause: parsed.error } };
 
-      // Para cada mensaje inbound, procesar con el tenant apropiado
+      // CRIT-S2-B: resolver tenantId real desde phone_number_id (NO usar phoneNumberId como tenant)
       for (const msg of parsed.value) {
-        const tenantId = msg.phoneNumberId; // simplificado: mapear phone_number_id a tenant
-        await receiveHandler.ejecutar(tenantId, msg);
+        const signup = await signupLookup.buscarPorPhoneNumberId(msg.phoneNumberId);
+        if (!signup.ok || !signup.value) {
+          // phoneNumberId desconocido: log + ignorar (no filtrar tenant)
+          continue;
+        }
+        await receiveHandler.ejecutar(signup.value.tenantId, msg);
       }
       return { ok: true };
     },

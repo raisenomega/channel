@@ -46,6 +46,28 @@ export class MetaSignupPersistenceRepo {
     } catch (e) { return err(String(e)); }
   }
 
+  async buscarPorPhoneNumberId(phoneNumberId: string): Promise<Result<SignupRow | null, string>> {
+    const u = base(); const h = hdrs();
+    if (!u || !h) return err("config_incompleta");
+    try {
+      const r = await fetch(`${u}/embedded_signups?select=id,tenant_id,status&phone_number_id=eq.${encodeURIComponent(String(phoneNumberId))}&status=eq.COMPLETED&limit=1`, { headers: h });
+      if (!r.ok) return err(`http_${r.status}`);
+      const rows = await r.json() as SignupRow[];
+      return ok(rows && rows.length > 0 ? rows[0]! : null);
+    } catch (e) { return err(String(e)); }
+  }
+
+  async buscarPorTenant(tenantId: string): Promise<Result<SignupRow | null, string>> {
+    const u = base(); const h = hdrs();
+    if (!u || !h) return err("config_incompleta");
+    try {
+      const r = await fetch(`${u}/embedded_signups?select=id,tenant_id,status&tenant_id=eq.${encodeURIComponent(String(tenantId))}&status=eq.COMPLETED&limit=1`, { headers: h });
+      if (!r.ok) return err(`http_${r.status}`);
+      const rows = await r.json() as SignupRow[];
+      return ok(rows && rows.length > 0 ? rows[0]! : null);
+    } catch (e) { return err(String(e)); }
+  }
+
   async actualizar(signupId: string, data: Record<string, unknown>): Promise<Result<void, string>> {
     const u = base(); const h = hdrs();
     if (!u || !h) return err("config_incompleta");

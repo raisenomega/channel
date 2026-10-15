@@ -12,7 +12,7 @@ class MockAdapter implements WhatsAppAdapterPort {
   async enviarMensaje(_t: string, _f: string, _to: string, _c: WhatsAppContent): Promise<Result<SentMessage, string>> {
     return this.failNext ? err("mock_error") : ok({ wamid: "wamid.mock_001", status: "sent" });
   }
-  async marcarLeido(_p: string, _m: string): Promise<Result<void, string>> { return ok(undefined); }
+  async marcarLeido(_t: string, _p: string, _m: string): Promise<Result<void, string>> { return ok(undefined); }
 }
 
 class MockRepo implements MessagePersistenceRepo {

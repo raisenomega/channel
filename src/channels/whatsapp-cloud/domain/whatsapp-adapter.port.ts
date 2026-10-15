@@ -19,5 +19,5 @@ export interface WhatsAppAdapterPort {
     content: WhatsAppContent,
   ): Promise<Result<SentMessage, string>>;
 
-  marcarLeido(phoneNumberId: string, messageId: string): Promise<Result<void, string>>;
+  marcarLeido(tenantId: string, phoneNumberId: string, messageId: string): Promise<Result<void, string>>;
 }

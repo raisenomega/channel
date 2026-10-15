@@ -3,7 +3,7 @@
  * Flujo: enviar → recibir mensajes con idempotencia.
  * Tests adversariales: firma, idempotencia, verify token, cross-tenant.
  */
-import { expect, test, vi } from "vitest";
+import { expect, test } from "vitest";
 import { SendMessageHandler } from "../../../../src/channels/whatsapp-cloud/application/send-message.handler.ts";
 import { ReceiveMessageHandler } from "../../../../src/channels/whatsapp-cloud/application/receive-message.handler.ts";
 import type { WhatsAppAdapterPort, SentMessage } from "../../../../src/channels/whatsapp-cloud/domain/whatsapp-adapter.port.ts";
@@ -29,7 +29,7 @@ class MockAdapter implements WhatsAppAdapterPort {
   async enviarMensaje(_t: string, _f: string, _to: string, _c: WhatsAppContent): Promise<Result<SentMessage, string>> {
     return this.failNext ? err("mock_error") : ok({ wamid: `wamid.${crypto.randomUUID()}`, status: "sent" });
   }
-  async marcarLeido(_p: string, _m: string): Promise<Result<void, string>> { return ok(undefined); }
+  async marcarLeido(_t: string, _p: string, _m: string): Promise<Result<void, string>> { return ok(undefined); }
 }
 
 test("Slice 2: enviar y recibir mensaje completo", async () => {
@@ -96,4 +96,47 @@ test("Adversarial 4: Tenant sin phone_number_id configurado", async () => {
   const result = await handler.ejecutar({ tenantId: "t_sin_pn", phoneNumberId: "", toPhone: "+15551234567", content: { type: "text", body: "Hola" } });
   expect(result.ok).toBe(false);
   if (!result.ok) expect(result.error.kind).toBe("sin_phone_number_id");
+});
+
+test("CRIT-S2-A: adapter integra con Slice 1 para resolver token real", async () => {
+  // Inyectar signupRepo mock que resuelve un signup COMPLETED y token real
+  const { WhatsAppCloudAdapter } = await import("../../../../src/channels/whatsapp-cloud/infrastructure/whatsapp-cloud.adapter.ts");
+  const fakeSignupRepo = {
+    buscarPorTenant: async (tenantId: string) => { return tenantId === "t_ok" ? ok({ id: "sig_1", tenantId: "t_ok", status: "COMPLETED" }) : ok(null); },
+    obtenerTokenPlano: async () => ok("EAA_token_real_desencriptado"),
+  } as unknown as ConstructorParameters<typeof WhatsAppCloudAdapter>[0];
+
+  const adapter = new WhatsAppCloudAdapter(fakeSignupRepo);
+  // Stub del api client via lodash: reemplazamos el meto enviar por spy
+  (adapter as unknown as { api: { enviar: () => Promise<unknown> } }).api.enviar = async () => ok({ wamid: "wamid.real_001" });
+
+  const result = await adapter.enviarMensaje("t_ok", "pn_123", "+15551234567", { type: "text", body: "Hola" });
+  expect(result.ok).toBe(true);
+  if (result.ok) expect(result.value.wamid).toBe("wamid.real_001");
+});
+
+test("CRIT-S2-A: tenant sin signup activo retorna error", async () => {
+  const { WhatsAppCloudAdapter } = await import("../../../../src/channels/whatsapp-cloud/infrastructure/whatsapp-cloud.adapter.ts");
+  const fakeSignupRepo = {
+    buscarPorTenant: async () => ok(null),
+    obtenerTokenPlano: async () => ok("unused"),
+  } as unknown as ConstructorParameters<typeof WhatsAppCloudAdapter>[0];
+
+  const adapter = new WhatsAppCloudAdapter(fakeSignupRepo);
+  const result = await adapter.enviarMensaje("t_sin_signup", "pn_123", "+15551234567", { type: "text", body: "Hola" });
+  expect(result.ok).toBe(false);
+  if (!result.ok) expect(result.error).toBe("sin_signup_activo");
+});
+
+test("CRIT-S2-D: marcarLeido recibe tenantId y resuelve token", async () => {
+  const { WhatsAppCloudAdapter } = await import("../../../../src/channels/whatsapp-cloud/infrastructure/whatsapp-cloud.adapter.ts");
+  const fakeSignupRepo = {
+    buscarPorTenant: async (tenantId: string) => { return tenantId === "t_1" ? ok({ id: "sig_9", tenantId: "t_1", status: "COMPLETED" }) : ok(null); },
+    obtenerTokenPlano: async () => ok("EAA_marcar_leido"),
+  } as unknown as ConstructorParameters<typeof WhatsAppCloudAdapter>[0];
+  const adapter = new WhatsAppCloudAdapter(fakeSignupRepo);
+  (adapter as unknown as { api: { marcarLeido: () => Promise<unknown> } }).api.marcarLeido = async () => ok(undefined);
+
+  const result = await adapter.marcarLeido("t_1", "pn_123", "wamid.x");
+  expect(result.ok).toBe(true);
 });
