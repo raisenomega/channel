@@ -9,7 +9,7 @@ import type { Result } from "../../shared/domain/result.ts";
 import type { Notification } from "../domain/notification.entity.ts";
 import type { NotificationType } from "../domain/notification-type.vo.ts";
 import type { NotificationRepository, NotificationQuery } from "../application/notification.repo.ts";
-import { supabaseBase, supabaseHdrs } from "./supabase-rest.helper.ts";
+import { supabaseBase, supabaseHdrs } from "../../shared/infrastructure/supabase-rest.helper.ts";
 import { SupabaseNotificationPrefRepo } from "./supabase-notification-pref.repo.ts";
 
 interface NotificationRow {
