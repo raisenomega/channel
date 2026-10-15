@@ -19,6 +19,9 @@ import { SupabaseNotificationRepo } from "../notifications/infrastructure/supaba
 import { SupabasePaymentRepo } from "../commerce/infrastructure/supabase-payment.repo.ts";
 import { SupabasePaymentMethodsConfigRepo } from "../commerce/infrastructure/supabase-payment-methods-config.repo.ts";
 import { AthMovilApiClient } from "../commerce/infrastructure/ath-movil-api.client.ts";
+import { buildStripe } from "./stripe-wrapper.ts";
+import type { StripeWebhookDeps } from "../commerce/presentation/routes/stripe-webhook.routes.ts";
+import type { StripeOnboardingDeps } from "../commerce/presentation/routes/stripe-onboarding.routes.ts";
 import type { AthWebhookDeps } from "../commerce/presentation/routes/ath-movil-webhook.routes.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
@@ -32,16 +35,13 @@ export interface ServerHandlers {
   listInbox: ListInboxHandler;
   notifications: NotificationsHandlers;
   athMovil: AthWebhookDeps;
+  stripe: StripeWebhookDeps & StripeOnboardingDeps;
 }
 
 /** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */
 const quoteRepo: QuoteRepository = {
-  async guardar() {
-    return { ok: true as const, value: undefined };
-  },
-  async buscar() {
-    return { ok: true as const, value: null };
-  },
+  async guardar() { return { ok: true as const, value: undefined }; },
+  async buscar() { return { ok: true as const, value: null }; },
 };
 
 export function buildHandlers(): ServerHandlers {
@@ -71,5 +71,6 @@ export function buildHandlers(): ServerHandlers {
       configRepo,
       makeClient: (env, publicToken, privateToken) => new AthMovilApiClient(env, privateToken, publicToken),
     },
+    stripe: buildStripe(),
   };
 }
