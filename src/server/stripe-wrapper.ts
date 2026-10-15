@@ -9,8 +9,8 @@ import { StripeSignatureVerifier } from "../commerce/infrastructure/stripe-signa
 import { StripeWebhookHandler } from "../commerce/infrastructure/stripe-webhook.handler.ts";
 import { StripeOnboardingHandler } from "../commerce/application/stripe-onboarding.handler.ts";
 import { StripeAdapter } from "../commerce/infrastructure/stripe.adapter.ts";
-import type { StripeWebhookDeps } from "../commerce/presentation/routes/stripe-webhook.routes.ts";
-import type { StripeOnboardingDeps } from "../commerce/presentation/routes/stripe-onboarding.routes.ts";
+import { SupabaseOrderRepo } from "../commerce/infrastructure/supabase-order.repo.ts";
+import type { StripePrepareDeps } from "../commerce/presentation/routes/stripe-prepare.routes.ts";
 
 declare const process: { env: Record<string, string | undefined> };
 function getEnv(n: string): string | undefined {
@@ -18,7 +18,16 @@ function getEnv(n: string): string | undefined {
   return d?.env?.get ? d.env.get(n) : process.env[n];
 }
 
-export function buildStripe(): StripeWebhookDeps & StripeOnboardingDeps {
+export interface StripeDeps {
+  readonly webhookHandler: StripeWebhookHandler;
+  readonly verifier: StripeSignatureVerifier;
+  readonly onboarding: StripeOnboardingHandler;
+  readonly refreshUrl: string;
+  readonly returnUrl: string;
+  readonly prepare: StripePrepareDeps;
+}
+
+export function buildStripe(): StripeDeps {
   const paymentRepo = new SupabasePaymentRepo();
   const configRepo = new SupabasePaymentMethodsConfigRepo();
   const client = new StripeApiClient(getEnv("STRIPE_SECRET_KEY") ?? "", getEnv("STRIPE_API_VERSION") ?? "2024-10-28.acacia");
@@ -28,6 +37,10 @@ export function buildStripe(): StripeWebhookDeps & StripeOnboardingDeps {
     onboarding: new StripeOnboardingHandler(client, configRepo),
     refreshUrl: getEnv("STRIPE_ONBOARDING_REFRESH_URL") ?? "",
     returnUrl: getEnv("STRIPE_ONBOARDING_RETURN_URL") ?? "",
+    prepare: {
+      orderRepo: new SupabaseOrderRepo(),
+      adapter: new StripeAdapter(configRepo, client),
+    },
   };
 }
 

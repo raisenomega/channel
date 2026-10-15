@@ -47,3 +47,11 @@ test("crearAccountLink retorna url", async () => {
   if (r.ok) expect(r.value.url).toContain("stripe.com");
   restoreFetch();
 });
+
+test("3.2b-BIS: crearPaymentIntent mapea client_secret al DTO", async () => {
+  globalThis.fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "pi_1", status: "requires_payment_method", amount: 1000, client_secret: "pi_sec_9" }), { status: 200, headers: { "content-type": "application/json" } }));
+  const r = await client.crearPaymentIntent({ amount: 1000, currency: "usd", stripeAccount: "acct_x", idempotencyKey: "o1_prepare" });
+  expect(r.ok).toBe(true);
+  if (r.ok) expect(r.value.clientSecret).toBe("pi_sec_9");
+  restoreFetch();
+});

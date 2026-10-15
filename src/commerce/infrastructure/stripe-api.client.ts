@@ -9,6 +9,7 @@ const BASE = "https://api.stripe.com/v1";
 
 export interface StripePaymentIntent {
   readonly id: string;
+  readonly clientSecret: string;
   readonly status: string;
   readonly amount: number;
 }
@@ -41,7 +42,7 @@ export class StripeApiClient {
       ...(p.applicationFeeAmount ? { application_fee_amount: p.applicationFeeAmount } : {}),
       ...(p.metadata ? Object.fromEntries(Object.entries(p.metadata).map(([k, v]) => [`metadata[${k}]`, v])) : {}),
     });
-    return this.map(res, (d) => ({ id: String(d.id), status: String(d.status), amount: Number(d.amount) }));
+    return this.map(res, (d) => ({ id: String(d.id), clientSecret: String(d.client_secret ?? ""), status: String(d.status), amount: Number(d.amount) }));
   }
 
   async crearRefund(p: { paymentIntent: string; stripeAccount: string; idempotencyKey: string }): Promise<Result<StripeRefund, string>> {

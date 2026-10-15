@@ -19,8 +19,7 @@ import { SupabaseNotificationRepo } from "../notifications/infrastructure/supaba
 import type { AthConfirmDeps } from "../commerce/presentation/routes/ath-movil-confirm.routes.ts";
 import { buildAthDeps } from "./ath-wrapper.ts";
 import { buildStripe } from "./stripe-wrapper.ts";
-import type { StripeWebhookDeps } from "../commerce/presentation/routes/stripe-webhook.routes.ts";
-import type { StripeOnboardingDeps } from "../commerce/presentation/routes/stripe-onboarding.routes.ts";
+import type { StripeDeps } from "./stripe-wrapper.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
 
@@ -33,7 +32,7 @@ export interface ServerHandlers {
   listInbox: ListInboxHandler;
   notifications: NotificationsHandlers;
   athConfirm: AthConfirmDeps;
-  stripe: StripeWebhookDeps & StripeOnboardingDeps;
+  stripe: StripeDeps;
 }
 
 /** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */

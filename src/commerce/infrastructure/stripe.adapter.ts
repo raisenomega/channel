@@ -24,7 +24,6 @@ export class StripeAdapter implements PaymentGateway {
     if (!cfg.ok || !cfg.value || !cfg.value.isActive) return err({ kind: "cobro_fallido", cause: "sin_configuracion_tenant" });
     const accountId = String(cfg.value.config["stripe_account_id"] ?? "");
     if (!accountId) return err({ kind: "cobro_fallido", cause: "sin_configuracion_tenant" });
-
     const pi = await this.client.crearPaymentIntent({
       amount: Math.round(order.totalAmount * 100),
       currency: order.currency.toLowerCase(),
@@ -35,6 +34,25 @@ export class StripeAdapter implements PaymentGateway {
     });
     if (!pi.ok) return err({ kind: "cobro_fallido", cause: pi.error });
     return ok(pi.value.id);
+  }
+  /** Prepara un PaymentIntent listo para el frontend (Stripe Elements). Devuelve client_secret. */
+  async preparar(order: OrderState): Promise<Result<{ paymentIntentId: string; clientSecret: string }, PaymentError>> {
+    if (order.totalAmount < MIN_MONTO) return err({ kind: "cobro_fallido", cause: "monto_debajo_minimo" });
+    const cfg = await this.configRepo.obtener(order.tenantId, "stripe");
+    if (!cfg.ok || !cfg.value || !cfg.value.isActive) return err({ kind: "cobro_fallido", cause: "sin_configuracion_tenant" });
+    const accountId = String(cfg.value.config["stripe_account_id"] ?? "");
+    if (!accountId) return err({ kind: "cobro_fallido", cause: "sin_configuracion_tenant" });
+    const pi = await this.client.crearPaymentIntent({
+      amount: Math.round(order.totalAmount * 100),
+      currency: order.currency.toLowerCase(),
+      stripeAccount: accountId,
+      idempotencyKey: `${order.id}_prepare`,
+      applicationFeeAmount: 0,
+      metadata: { order_id: String(order.id) },
+    });
+    if (!pi.ok) return err({ kind: "cobro_fallido", cause: pi.error });
+    if (!pi.value.clientSecret) return err({ kind: "cobro_fallido", cause: "sin_client_secret" });
+    return ok({ paymentIntentId: pi.value.id, clientSecret: pi.value.clientSecret });
   }
 
   async reembolsar(payment: PaymentState): Promise<Result<void, PaymentError>> {
