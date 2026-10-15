@@ -7,7 +7,7 @@ import { ok, err } from "../../shared/domain/result.ts";
 import type { Result } from "../../shared/domain/result.ts";
 import type { NotificationPreference } from "../domain/notification-preference.entity.ts";
 import type { NotificationType } from "../domain/notification-type.vo.ts";
-import { supabaseBase, supabaseHdrs } from "./supabase-rest.helper.ts";
+import { supabaseBase, supabaseHdrs } from "../../shared/infrastructure/supabase-rest.helper.ts";
 
 interface PrefRow {
   id: string; tenant_id: string; user_id: string; in_app_enabled: boolean;
