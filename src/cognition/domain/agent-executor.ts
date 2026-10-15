@@ -3,6 +3,7 @@ import { AgentKnowledgeState } from "./agent.service.ts";
 export type AgentAction =
   | { readonly kind: "responder"; readonly text: string }
   | { readonly kind: "ejecutar_tool"; readonly tool: string; readonly params: Readonly<Record<string, unknown>> }
+  | { readonly kind: "hold_for_human_review"; readonly reason: string; readonly confidence: number; readonly threshold: number; readonly draftContent: string }
   | { readonly kind: "escalar"; readonly reason: string }
   | { readonly kind: "no_actuar" };
 

@@ -8,6 +8,7 @@ export interface AICompletionParams {
   readonly tools: readonly unknown[] | null;
   readonly maxTokens?: number;
   readonly temperature?: number;
+  readonly tier?: "haiku" | "sonnet" | "opus";
 }
 
 export interface AIMessage {
@@ -32,9 +33,9 @@ export interface AIProvider {
 
 export type AIError =
   | { readonly kind: "authentication_failed" }
-  | { readonly kind: "rate_limited" }
-  | { readonly kind: "provider_unavailable" }
-  | { readonly kind: "timeout" }
+  | { readonly kind: "rate_limited"; readonly cause?: string }
+  | { readonly kind: "provider_unavailable"; readonly cause?: string }
+  | { readonly kind: "timeout"; readonly cause?: string }
   | { readonly kind: "invalid_request"; readonly cause: string }
   | { readonly kind: "unknown"; readonly cause: string };
 

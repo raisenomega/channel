@@ -1,54 +1,69 @@
+/**
+ * HUB by Raisen — AnthropicAdapter: completar con degradacion por tier.
+ * Modelo resuelto dinamicamente por AnthropicModelResolver.
+ * C4 ≤75 lineas.
+ */
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import { AIProvider, AICompletionParams, AICompletionResult, AIError } from "../domain/ai-provider.ts";
+import type { AIProvider, AICompletionParams, AICompletionResult, AIError } from "../domain/ai-provider.ts";
+import { DEGRADATION_CHAIN } from "../domain/routing-table.ts";
+import type { ModelTier } from "../domain/routing-table.ts";
+import { AnthropicModelResolver } from "./anthropic-model-resolver.ts";
 
 export class AnthropicAdapter implements AIProvider {
   readonly provider = "anthropic" as const;
+  private readonly resolver: AnthropicModelResolver;
+  private readonly apiKeyValue: string;
 
-  async completar(params: AICompletionParams): Promise<Result<AICompletionResult, AIError>> {
+  constructor(apiKey: string) {
+    this.apiKeyValue = apiKey;
+    this.resolver = new AnthropicModelResolver(apiKey);
+  }
+
+  async completar(params: AICompletionParams): Promise<Result<AICompletionResult & { usedTier: ModelTier; usedModel: string }, AIError>> {
+    const requestedTier = params.tier ?? "sonnet";
+    for (const tier of DEGRADATION_CHAIN[requestedTier]) {
+      const modelRes = await this.resolver.resolverModelo(tier);
+      if (!modelRes.ok) continue;
+      const resp = await this.callAnthropic(modelRes.value, params);
+      if (resp.ok) return ok({ ...resp.value, usedTier: tier, usedModel: modelRes.value } as AICompletionResult & { usedTier: ModelTier; usedModel: string });
+      if (!this.esDeDisponibilidad(resp.error.kind)) return resp;
+    }
+    return err({ kind: "provider_unavailable", cause: "todos_los_tiers_fallaron" });
+  }
+
+  async ping(): Promise<Result<boolean, AIError>> {
+    try {
+      const resp = await fetch("https://api.anthropic.com/v1/models");
+      return ok(resp.ok);
+    } catch { return err({ kind: "provider_unavailable" }); }
+  }
+
+  private esDeDisponibilidad(kind: string): boolean {
+    return kind === "provider_unavailable" || kind === "rate_limited" || kind === "timeout";
+  }
+
+  private async callAnthropic(model: string, params: AICompletionParams): Promise<Result<AICompletionResult, AIError>> {
     const startMs = Date.now();
     try {
+      const apiKey = this.apiKeyValue;
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": this.apiKey,
-          "anthropic-version": "2023-06-01",
-        },
+        headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          system: params.systemPrompt,
+          model, system: params.systemPrompt,
           messages: params.messages.map((m) => ({ role: m.role, content: m.content })),
-          max_tokens: params.maxTokens ?? 4096,
-          temperature: params.temperature ?? 0.7,
+          max_tokens: params.maxTokens ?? 4096, temperature: params.temperature ?? 0.7,
         }),
       });
-      if (!resp.ok) return err({ kind: "provider_unavailable" });
+      if (resp.status === 503 || resp.status === 429) return err({ kind: "provider_unavailable", cause: `http_${resp.status}` });
+      if (!resp.ok) return err({ kind: "provider_unavailable", cause: `http_${resp.status}` });
       const data = await resp.json() as Record<string, unknown>;
       return ok(Object.freeze({
         response: String((data.content as Record<string, unknown>[])?.[0]?.text ?? ""),
         tokensInput: (data.usage as Record<string, number>)?.input_tokens ?? 0,
         tokensOutput: (data.usage as Record<string, number>)?.output_tokens ?? 0,
-        latencyMs: Date.now() - startMs,
-        costUsd: 0,
-        model: "claude-sonnet-4-6",
+        latencyMs: Date.now() - startMs, costUsd: 0, model,
       }));
-    } catch (e) {
-      return err({ kind: "unknown", cause: String(e) });
-    }
+    } catch (e) { return err({ kind: "unknown", cause: String(e) }); }
   }
-
-  async ping(): Promise<Result<boolean, AIError>> {
-    try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": this.apiKey, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1, messages: [{ role: "user", content: "ping" }] }),
-      });
-      return ok(resp.ok);
-    } catch {
-      return err({ kind: "provider_unavailable" });
-    }
-  }
-
-  constructor(private readonly apiKey: string) {}
 }
