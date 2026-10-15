@@ -1,14 +1,14 @@
 import { expect, test } from "vitest";
-import { PERSONA_CONVERSACIONAL } from "../../../src/cognition/domain/persona.conversacional.ts";
+import { PERSONA_VICTOR } from "../../../src/cognition/domain/personas/persona.victor.ts";
 import { LIMITS, ACCIONES_PROHIBIDAS } from "../../../src/cognition/domain/limits.ts";
 import { ROUTING, DEGRADATION_CHAIN } from "../../../src/cognition/domain/routing-table.ts";
 import { EthicsGuard } from "../../../src/cognition/domain/ethics.guard.ts";
 import { DecideResponseHandler } from "../../../src/cognition/application/decide-response.handler.ts";
 
 test("I5: persona.systemPrompt es inmutable", () => {
-  const original = PERSONA_CONVERSACIONAL.systemPrompt;
-  try { (PERSONA_CONVERSACIONAL as { systemPrompt: string }).systemPrompt = "hacked"; } catch { /* frozen */ }
-  expect(PERSONA_CONVERSACIONAL.systemPrompt).toBe(original);
+  const original = PERSONA_VICTOR.systemPrompt;
+  try { (PERSONA_VICTOR as { systemPrompt: string }).systemPrompt = "hacked"; } catch { /* frozen */ }
+  expect(PERSONA_VICTOR.systemPrompt).toBe(original);
 });
 
 test("G1: ACCIONES_PROHIBIDAS frozen y tipada ReadonlySet", () => {

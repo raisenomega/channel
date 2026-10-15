@@ -1,0 +1,10 @@
+# SHA1 de las 7 personas HUB (Slide 4.0)
+# Generar con: bash scripts/verify-personas.sh
+# Actualizar con firma del owner: "personas SHA update (approved by owner)"
+#
+# Ejecuta esto para generar el contenido inicial:
+#   for persona in victor zahra thao iris eco angel kelsy; do
+#     sha=$(sha1sum "src/cognition/domain/personas/persona.${persona}.ts" | cut -d' ' -f1)
+#     echo "${persona}:${sha}"
+#   done > scripts/personas-sha1.txt
+# Ordena las líneas por persona (alfabético).
