@@ -3,21 +3,9 @@
  */
 import type * as http from "node:http";
 import type { Result } from "../shared/domain/result.ts";
-import type { HttpResponse } from "./server-types.ts";
 import type { ChannelType } from "../shared/domain/types.ts";
 import type { ContentType } from "../inbox/domain/message.entity.ts";
 import type { ChannelType as ComplianceChannelType } from "../compliance/domain/compliance.types.ts";
-
-export function sendResponse(res: http.ServerResponse, result: unknown): void {
-  if (result && !Array.isArray(result) && typeof result === "object" && typeof (result as HttpResponse).body === "string") {
-    const custom = result as HttpResponse;
-    res.writeHead(custom.status ?? 200, { "Content-Type": custom.contentType ?? "text/plain", ...(custom.headers ?? {}) });
-    res.end(custom.body);
-    return;
-  }
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(result));
-}
 
 export function extractJwt(headers: Record<string, string | string[] | undefined>): string | null {
   const raw = headers["authorization"] ?? headers["Authorization"] ?? null;

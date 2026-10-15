@@ -12,7 +12,8 @@ import * as nodeProcess from "node:process";
 import * as http from "node:http";
 import { buildHandlers } from "./server-routes.ts";
 import { registrarRutas, matchRoute } from "./server-routes-registry.ts";
-import { extractJwt, parseBody, readBody, sendResponse } from "./server-helpers.ts";
+import { extractJwt, parseBody, readBody } from "./server-helpers.ts";
+import { sendResponse } from "./server-response.ts";
 import type { RequestContext } from "./server-types.ts";
 
 const PORT = parseInt(nodeProcess.env["PORT"] ?? "8080", 10);
