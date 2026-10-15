@@ -19,6 +19,7 @@ export interface PaymentRepository {
   guardar(payment: PaymentState): Promise<Result<void, RepoError>>;
   buscar(id: PaymentId, tenantId: TenantId): Promise<Result<PaymentState | null, RepoError>>;
   buscarPorOrder(orderId: OrderId, tenantId: TenantId): Promise<Result<PaymentState[], RepoError>>;
+  buscarPorProviderPaymentId(providerPaymentId: string, tenantId: TenantId): Promise<Result<PaymentState | null, RepoError>>;
 }
 
 export interface PaymentGateway {
