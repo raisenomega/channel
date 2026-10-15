@@ -1,4 +1,4 @@
-﻿/**
+/**
  * HUB by Raisen â€” Integration tests for Commerce context.
  * Flujo critico: crear quote -> aceptar quote -> crear order (misma sesion).
  *
@@ -37,18 +37,18 @@ test("Commerce: crear quote -> aceptar -> order creada (misma sesion)", async ()
   const quoteId = quoteRes.value;
 
   // 2) Verificar que persiste
-  const quoteBuscada = await quotes.buscar(quoteId);
+  const quoteBuscada = await quotes.buscar(quoteId, tenantId);
   expect(quoteBuscada.ok).toBe(true);
   expect(quoteBuscada.value?.status).toBe("draft");
   expect(quoteBuscada.value?.totalAmount).toBe(148.99);
 
   // 3) Aceptar quote -> crea order
-  const orderRes = await acceptarQuote.ejecutar({ quoteId });
+  const orderRes = await acceptarQuote.ejecutar({ quoteId, tenantId });
   expect(orderRes.ok, "la order se debe crear al aceptar la quote").toBe(true);
   const orderId = orderRes.value;
 
   // 4) Verificar order persistida
-  const orderBuscada = await orders.buscar(orderId);
+  const orderBuscada = await orders.buscar(orderId, tenantId);
   expect(orderBuscada.ok).toBe(true);
   expect(orderBuscada.value?.status).toBe("pending");
   expect(orderBuscada.value?.quoteId).toBe(quoteId);
@@ -57,7 +57,7 @@ test("Commerce: crear quote -> aceptar -> order creada (misma sesion)", async ()
   expect(orderBuscada.value?.tenantId).toBe(tenantId);
 
   // 5) Verificar que la quote ahora esta "accepted"
-  const quoteFinal = await quotes.buscar(quoteId);
+  const quoteFinal = await quotes.buscar(quoteId, tenantId);
   expect(quoteFinal.ok).toBe(true);
   expect(quoteFinal.value?.status).toBe("accepted");
 });
@@ -81,7 +81,7 @@ test("Commerce: aceptar quote inexistente da error", async () => {
   const orders = new MemoryOrderStore();
   const handler = new AcceptQuoteHandler(quotes, orders);
 
-  const res = await handler.ejecutar({ quoteId: crypto.randomUUID() as QuoteId });
+  const res = await handler.ejecutar({ quoteId: crypto.randomUUID() as QuoteId, tenantId: crypto.randomUUID() as TenantId });
   expect(!res.ok, "quote inexistente debe fallar").toBe(true);
   expect(res.error.kind).toBe("cotizacion_no_encontrada");
 });
@@ -101,10 +101,10 @@ test("Commerce: order creada desde quote se puede buscar por contacto", async ()
   });
   expect(q1.ok).toBe(true);
 
-  const o1 = await acceptarQuote.ejecutar({ quoteId: q1.value });
+  const o1 = await acceptarQuote.ejecutar({ quoteId: q1.value, tenantId });
   expect(o1.ok).toBe(true);
 
-  const porContacto = await orders.buscarPorContacto(contactId);
+  const porContacto = await orders.buscarPorContacto(contactId, tenantId);
   expect(porContacto.ok).toBe(true);
   expect(porContacto.value.length).toBe(1);
   expect(porContacto.value[0]?.id).toBe(o1.value);

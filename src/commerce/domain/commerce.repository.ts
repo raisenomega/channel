@@ -1,24 +1,24 @@
 import { Result } from "../../shared/domain/result.ts";
-import { QuoteId, OrderId, PaymentId, ContactId } from "../../shared/domain/ids.ts";
+import { QuoteId, OrderId, PaymentId, ContactId, TenantId } from "../../shared/domain/ids.ts";
 import { QuoteState } from "./quote.entity.ts";
 import { OrderState } from "./order.entity.ts";
 import { PaymentState } from "./payment.entity.ts";
 
 export interface QuoteRepository {
   guardar(quote: QuoteState): Promise<Result<void, RepoError>>;
-  buscar(id: QuoteId): Promise<Result<QuoteState | null, RepoError>>;
+  buscar(id: QuoteId, tenantId: TenantId): Promise<Result<QuoteState | null, RepoError>>;
 }
 
 export interface OrderRepository {
   guardar(order: OrderState): Promise<Result<void, RepoError>>;
-  buscar(id: OrderId): Promise<Result<OrderState | null, RepoError>>;
-  buscarPorContacto(contactId: ContactId): Promise<Result<OrderState[], RepoError>>;
+  buscar(id: OrderId, tenantId: TenantId): Promise<Result<OrderState | null, RepoError>>;
+  buscarPorContacto(contactId: ContactId, tenantId: TenantId): Promise<Result<OrderState[], RepoError>>;
 }
 
 export interface PaymentRepository {
   guardar(payment: PaymentState): Promise<Result<void, RepoError>>;
-  buscar(id: PaymentId): Promise<Result<PaymentState | null, RepoError>>;
-  buscarPorOrder(orderId: OrderId): Promise<Result<PaymentState[], RepoError>>;
+  buscar(id: PaymentId, tenantId: TenantId): Promise<Result<PaymentState | null, RepoError>>;
+  buscarPorOrder(orderId: OrderId, tenantId: TenantId): Promise<Result<PaymentState[], RepoError>>;
 }
 
 export interface PaymentGateway {

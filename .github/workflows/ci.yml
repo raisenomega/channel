@@ -35,8 +35,8 @@ jobs:
         run: pnpm check:layers
 
       - name: Tests unitarios
-        run: pnpm test
+        run: pnpm test:unit
 
       - name: Tests de integración
-        run: pnpm test -- --integration
+        run: pnpm test:integration
         continue-on-error: true

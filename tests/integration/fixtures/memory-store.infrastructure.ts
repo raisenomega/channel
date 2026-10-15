@@ -63,7 +63,7 @@ export class MemoryQuoteStore implements QuoteRepository {
     return ok(undefined);
   }
 
-  async buscar(id: QuoteId): Promise<Result<QuoteState | null, CommerceRepoError>> {
+  async buscar(id: QuoteId, _tenantId: TenantId): Promise<Result<QuoteState | null, CommerceRepoError>> {
     return ok(this.items.find((q) => q.id === id) ?? null);
   }
 
@@ -85,11 +85,11 @@ export class MemoryOrderStore implements OrderRepository {
     return ok(undefined);
   }
 
-  async buscar(id: OrderId): Promise<Result<OrderState | null, CommerceRepoError>> {
+  async buscar(id: OrderId, _tenantId: TenantId): Promise<Result<OrderState | null, CommerceRepoError>> {
     return ok(this.items.find((o) => o.id === id) ?? null);
   }
 
-  async buscarPorContacto(contactId: ContactId): Promise<Result<OrderState[], CommerceRepoError>> {
+  async buscarPorContacto(contactId: ContactId, _tenantId: TenantId): Promise<Result<OrderState[], CommerceRepoError>> {
     return ok(this.items.filter((o) => o.contactId === contactId));
   }
 

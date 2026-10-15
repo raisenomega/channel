@@ -1,4 +1,4 @@
-﻿import { expect, test } from "vitest";
+import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 import { AcceptQuoteHandler, AcceptQuoteCommand } from "../../../src/commerce/application/accept-quote.handler.ts";
 import { QuoteRepository, OrderRepository, RepoError } from "../../../src/commerce/domain/commerce.repository.ts";
@@ -27,7 +27,7 @@ test("AcceptQuoteHandler â€” debe aceptar quote y crear order exitosamente"
   let orderGuardada: OrderState | undefined;
 
   const mockQuoteRepo: QuoteRepository = {
-    buscar: async (_id) => ok(quoteFixture),
+    buscar: async (_id, _tenantId) => ok(quoteFixture),
     guardar: async (q) => {
       quoteGuardada = q;
       return ok(undefined);
@@ -39,12 +39,12 @@ test("AcceptQuoteHandler â€” debe aceptar quote y crear order exitosamente"
       orderGuardada = o;
       return ok(undefined);
     },
-    buscar: async (_id) => ok(null),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
-  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const cmd: AcceptQuoteCommand = { quoteId: QID, tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(result.ok).toBe(true);
@@ -59,17 +59,17 @@ test("AcceptQuoteHandler â€” debe aceptar quote y crear order exitosamente"
 
 test("AcceptQuoteHandler â€” debe fallar si quoteRepo.buscar devuelve error", async () => {
   const mockQuoteRepo: QuoteRepository = {
-    buscar: async (_id) => err({ kind: "persistence_failure", cause: "db_down" }),
+    buscar: async (_id, _tenantId) => err({ kind: "persistence_failure", cause: "db_down" }),
     guardar: async (_q) => ok(undefined),
   };
   const mockOrderRepo: OrderRepository = {
     guardar: async (_o) => ok(undefined),
-    buscar: async (_id) => ok(null),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
-  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const cmd: AcceptQuoteCommand = { quoteId: QID, tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
@@ -78,17 +78,17 @@ test("AcceptQuoteHandler â€” debe fallar si quoteRepo.buscar devuelve error
 
 test("AcceptQuoteHandler â€” debe fallar si la quote no existe (null)", async () => {
   const mockQuoteRepo: QuoteRepository = {
-    buscar: async (_id) => ok(null),
+    buscar: async (_id, _tenantId) => ok(null),
     guardar: async (_q) => ok(undefined),
   };
   const mockOrderRepo: OrderRepository = {
     guardar: async (_o) => ok(undefined),
-    buscar: async (_id) => ok(null),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
-  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const cmd: AcceptQuoteCommand = { quoteId: QID, tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
@@ -97,17 +97,17 @@ test("AcceptQuoteHandler â€” debe fallar si la quote no existe (null)", asy
 
 test("AcceptQuoteHandler â€” debe fallar si quoteRepo.guardar falla", async () => {
   const mockQuoteRepo: QuoteRepository = {
-    buscar: async (_id) => ok(quoteFixture),
+    buscar: async (_id, _tenantId) => ok(quoteFixture),
     guardar: async (_q) => err({ kind: "persistence_failure", cause: "disk_full" }),
   };
   const mockOrderRepo: OrderRepository = {
     guardar: async (_o) => ok(undefined),
-    buscar: async (_id) => ok(null),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
-  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const cmd: AcceptQuoteCommand = { quoteId: QID, tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
@@ -116,17 +116,17 @@ test("AcceptQuoteHandler â€” debe fallar si quoteRepo.guardar falla", async
 
 test("AcceptQuoteHandler â€” debe fallar si orderRepo.guardar falla", async () => {
   const mockQuoteRepo: QuoteRepository = {
-    buscar: async (_id) => ok(quoteFixture),
+    buscar: async (_id, _tenantId) => ok(quoteFixture),
     guardar: async (_q) => ok(undefined),
   };
   const mockOrderRepo: OrderRepository = {
     guardar: async (_o) => err({ kind: "persistence_failure", cause: "disk_full" }),
-    buscar: async (_id) => ok(null),
-    buscarPorContacto: async (_cid) => ok([]),
+    buscar: async (_id, _tenantId) => ok(null),
+    buscarPorContacto: async (_cid, _tenantId) => ok([]),
   };
 
   const handler = new AcceptQuoteHandler(mockQuoteRepo, mockOrderRepo);
-  const cmd: AcceptQuoteCommand = { quoteId: QID };
+  const cmd: AcceptQuoteCommand = { quoteId: QID, tenantId: TID };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
