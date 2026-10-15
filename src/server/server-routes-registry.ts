@@ -6,6 +6,7 @@ import type { RouteDefinition } from "./server-types.ts";
 import { handleWebhook, handleReceive, handleSend } from "./server-routes-messaging.ts";
 import { handleQuote, handleOptIn, handleListInbox } from "./server-routes-commerce.ts";
 import { rutaInitSignup, rutaCallbackMeta } from "../channels/meta/presentation/routes/oauth.routes.ts";
+import { rutaWebhookVerify, rutaWebhookReceive } from "../channels/whatsapp-cloud/presentation/routes/webhook.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
@@ -17,6 +18,8 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     handleListInbox(h),
     rutaInitSignup(),
     rutaCallbackMeta(),
+    rutaWebhookVerify(),
+    rutaWebhookReceive(),
   ];
 }
 
