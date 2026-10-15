@@ -16,10 +16,8 @@ import { GetNotificationsHandler } from "../notifications/application/get-notifi
 import { MarkReadHandler } from "../notifications/application/mark-read.handler.ts";
 import { UpdatePreferencesHandler } from "../notifications/application/update-preferences.handler.ts";
 import { SupabaseNotificationRepo } from "../notifications/infrastructure/supabase-notification.repo.ts";
-import { SupabasePaymentRepo } from "../commerce/infrastructure/supabase-payment.repo.ts";
-import { SupabasePaymentMethodsConfigRepo } from "../commerce/infrastructure/supabase-payment-methods-config.repo.ts";
-import { AthMovilApiClient } from "../commerce/infrastructure/ath-movil-api.client.ts";
-import type { AthWebhookDeps } from "../commerce/presentation/routes/ath-movil-webhook.routes.ts";
+import type { AthConfirmDeps } from "../commerce/presentation/routes/ath-movil-confirm.routes.ts";
+import { buildAthDeps } from "./ath-wrapper.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
 
@@ -31,7 +29,7 @@ export interface ServerHandlers {
   optIn: OptInHandler;
   listInbox: ListInboxHandler;
   notifications: NotificationsHandlers;
-  athMovil: AthWebhookDeps;
+  athConfirm: AthConfirmDeps;
 }
 
 /** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */
@@ -51,8 +49,7 @@ export function buildHandlers(): ServerHandlers {
   const channelRouter = new ChannelRouter();
   channelRouter.registrar(new DevChannelAdapter());
   const notifRepo = new SupabaseNotificationRepo();
-  const paymentRepo = new SupabasePaymentRepo();
-  const configRepo = new SupabasePaymentMethodsConfigRepo();
+  const ath = buildAthDeps();
 
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
@@ -66,10 +63,6 @@ export function buildHandlers(): ServerHandlers {
       markReadHandler: new MarkReadHandler(notifRepo),
       updatePrefsHandler: new UpdatePreferencesHandler(notifRepo),
     },
-    athMovil: {
-      paymentRepo,
-      configRepo,
-      makeClient: (env, publicToken, privateToken) => new AthMovilApiClient(env, privateToken, publicToken),
-    },
+    athConfirm: ath.confirm,
   };
 }
