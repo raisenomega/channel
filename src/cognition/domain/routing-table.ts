@@ -1,6 +1,7 @@
 /**
  * HUB by Raisen — Routing por tier (I2). No versiones fijas.
  * El adapter resuelve el modelo concreto dinamicamente por tier.
+ * Añadido: PERSONA_ROUTING para las 7 personas HUB (Slide 4.0).
  * C4 ≤75 lineas.
  */
 export type ModelTier = "haiku" | "sonnet" | "opus";
@@ -13,6 +14,17 @@ export const ROUTING = Object.freeze({
   reasoning: "sonnet" as const,
   escalation: "opus" as const,
   critical_action: "opus" as const,
+});
+
+/** Tier por persona HUB (del §10.4 del doc v2.0). */
+export const PERSONA_ROUTING: Readonly<Record<string, ModelTier>> = Object.freeze({
+  victor: "opus",
+  angel: "opus",
+  kelsy: "sonnet",
+  iris: "sonnet",
+  zahra: "sonnet",
+  thao: "sonnet",
+  eco: "sonnet",
 });
 
 export type Task = keyof typeof ROUTING;
