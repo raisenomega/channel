@@ -12,6 +12,10 @@ import { rutaAthMovilConfirm } from "../commerce/presentation/routes/ath-movil-c
 import { rutaStripeWebhook } from "../commerce/presentation/routes/stripe-webhook.routes.ts";
 import { rutaStripeOnboarding } from "../commerce/presentation/routes/stripe-onboarding.routes.ts";
 import { rutaStripePrepare } from "../commerce/presentation/routes/stripe-prepare.routes.ts";
+import { rutaLandingPage } from "../pay/presentation/routes/landing-page.routes.ts";
+import { rutaAthCharge } from "../pay/presentation/routes/charge-ath.routes.ts";
+import { rutaAthPoll } from "../pay/presentation/routes/ath-poll.routes.ts";
+import { rutaPagoSuccess, rutaPagoFailed } from "../pay/presentation/routes/pago-result.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
@@ -32,6 +36,11 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     rutaStripeWebhook(h.stripe),
     rutaStripeOnboarding(h.stripe),
     rutaStripePrepare(h.stripe.prepare),
+    rutaLandingPage(h.pay.landing),
+    rutaAthCharge(h.pay.charge),
+    rutaAthPoll(h.pay.poll),
+    rutaPagoSuccess(h.pay.result),
+    rutaPagoFailed(h.pay.result),
   ];
 }
 
