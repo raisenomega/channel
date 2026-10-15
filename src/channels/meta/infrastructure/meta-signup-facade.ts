@@ -7,6 +7,7 @@ import { ok } from "../../../shared/domain/result.ts";
 import type { Result } from "../../../shared/domain/result.ts";
 import type { EmbeddedSignupStatus } from "../domain/embedded-signup.entity.ts";
 import { MetaSignupPersistenceRepo } from "./meta-signup-persistence.repo.ts";
+import { MetaSignupLookupRepo } from "./meta-signup-lookup.repo.ts";
 import { MetaSignupStateRepo } from "./meta-signup-state.repo.ts";
 import { MetaSignupTokenRepo } from "./meta-signup-token.repo.ts";
 import type { StateData } from "./meta-signup-state.repo.ts";
@@ -15,6 +16,7 @@ import type { StateResolver } from "../application/embedded-signup.repo.ts";
 import type { InitSignupRepository } from "../application/init-signup.handler.ts";
 
 const persist = new MetaSignupPersistenceRepo();
+const lookup = new MetaSignupLookupRepo();
 const stateRepo = new MetaSignupStateRepo();
 const token = new MetaSignupTokenRepo();
 
@@ -34,4 +36,21 @@ export class SupabaseMetaSignupFacade implements EmbeddedSignupRepository, InitS
 
   // StateResolver
   async verificarYConsumirState(stateStr: string): Promise<Result<StateData | null, string>> { return stateRepo.verificarYConsumirState(stateStr); }
+
+  // Lookup auxiliar para adapter WhatsApp
+  async buscarPorPhoneNumberId(phoneNumberId: string): Promise<Result<{ id: string; tenantId: string; status: EmbeddedSignupStatus } | null, string>> {
+    const r = await lookup.buscarPorPhoneNumberId(phoneNumberId);
+    if (!r.ok) return r;
+    return ok(r.value ? { id: r.value.id, tenantId: r.value.tenant_id, status: r.value.status as EmbeddedSignupStatus } : null);
+  }
+
+  async buscarPorTenant(tenantId: string): Promise<Result<{ id: string; tenantId: string; status: EmbeddedSignupStatus } | null, string>> {
+    const r = await lookup.buscarPorTenant(tenantId);
+    if (!r.ok) return r;
+    return ok(r.value ? { id: r.value.id, tenantId: r.value.tenant_id, status: r.value.status as EmbeddedSignupStatus } : null);
+  }
+
+  async obtenerTokenPlano(signupId: string): Promise<Result<string, string>> {
+    return token.obtenerTokenPlano(signupId);
+  }
 }

@@ -1,9 +1,7 @@
 /**
  * HUB by Raisen — HTTP Server minimo (Node.js native: node:http).
- *
- * Arranca el runtime que conecta los handlers de application con
- * repositorios reales de infrastructure (Supabase).
- * Submódulos bajo src/server/ (C4 ≤75 líneas por archivo).
+ * Arranca el runtime que conecta handlers de application con repos
+ * reales de infrastructure (Supabase). Submodulos en src/server/.
  *
  * USO:
  *   node --experimental-strip-types src/server/hub.server.ts
@@ -15,6 +13,7 @@ import * as http from "node:http";
 import { buildHandlers } from "./server-routes.ts";
 import { registrarRutas, matchRoute } from "./server-routes-registry.ts";
 import { extractJwt, parseBody, readBody } from "./server-helpers.ts";
+import { sendResponse } from "./server-response.ts";
 import type { RequestContext } from "./server-types.ts";
 
 const PORT = parseInt(nodeProcess.env["PORT"] ?? "8080", 10);
@@ -56,8 +55,7 @@ const server = http.createServer(async (req, res) => {
 
   try {
     const result = await route.handler(ctx);
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(result));
+    sendResponse(res, result);
   } catch (err) {
     console.error("[HUB] Error en handler:", err);
     res.writeHead(500, { "Content-Type": "application/json" });
@@ -67,7 +65,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`[HUB] Server escuchando en http://${HOST}:${PORT}`);
-  console.log(`[HUB] Rutas registradas:`);
+  console.log("[HUB] Rutas registradas:");
   for (const r of routes) {
     console.log(`       ${r.method} ${r.path}`);
   }

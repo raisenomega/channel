@@ -14,7 +14,16 @@ export interface RequestContext {
   readonly jwt: string | null;
 }
 
-export type RouteHandler = (ctx: RequestContext) => Promise<Record<string, unknown>>;
+export interface HttpResponse {
+  readonly status?: number;
+  readonly contentType?: string;
+  readonly body: string;
+  readonly headers?: Record<string, string>;
+}
+
+export type RouteHandlerResult = Record<string, unknown> | HttpResponse;
+
+export type RouteHandler = (ctx: RequestContext) => Promise<RouteHandlerResult>;
 
 export interface RouteDefinition {
   readonly method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";

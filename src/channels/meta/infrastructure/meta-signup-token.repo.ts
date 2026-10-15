@@ -15,4 +15,10 @@ export class MetaSignupTokenRepo {
     if (!r.ok) return err((r.error as { cause: string }).cause ?? "error_desconocido");
     return ok(undefined);
   }
+
+  async obtenerTokenPlano(signupId: string): Promise<Result<string, string>> {
+    const r = await vault.obtenerTokenPlano(signupId);
+    if (!r.ok) return err((r.error as { cause?: string; kind: string }).kind ?? "error_vault");
+    return ok(r.value);
+  }
 }

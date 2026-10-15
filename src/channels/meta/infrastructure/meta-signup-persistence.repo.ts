@@ -1,6 +1,7 @@
 /**
  * HUB by Raisen — Repositorio de embedded_signups en Supabase REST.
- * Implementa init (crear) y buscarPorMetaId para callback.
+ * Implementa init (crear) y buscarPorId para callback.
+ * Lookups (phone_number_id, tenant) viven en meta-signup-lookup.repo.ts.
  * C4 ≤75 lineas.
  */
 import { ok, err } from "../../../shared/domain/result.ts";
