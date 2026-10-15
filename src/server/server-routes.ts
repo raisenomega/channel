@@ -20,6 +20,8 @@ import type { AthConfirmDeps } from "../commerce/presentation/routes/ath-movil-c
 import { buildAthDeps } from "./ath-wrapper.ts";
 import { buildStripe } from "./stripe-wrapper.ts";
 import type { StripeDeps } from "./stripe-wrapper.ts";
+import { buildPayDeps } from "./pay-wrapper.ts";
+import type { PayDeps } from "./pay-wrapper.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
 
@@ -33,6 +35,7 @@ export interface ServerHandlers {
   notifications: NotificationsHandlers;
   athConfirm: AthConfirmDeps;
   stripe: StripeDeps;
+  pay: PayDeps;
 }
 
 /** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */
@@ -49,6 +52,7 @@ export function buildHandlers(): ServerHandlers {
   channelRouter.registrar(new DevChannelAdapter());
   const notifRepo = new SupabaseNotificationRepo();
   const ath = buildAthDeps();
+  const pay = buildPayDeps();
 
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
@@ -64,5 +68,6 @@ export function buildHandlers(): ServerHandlers {
     },
     athConfirm: ath.confirm,
     stripe: buildStripe(),
+    pay,
   };
 }

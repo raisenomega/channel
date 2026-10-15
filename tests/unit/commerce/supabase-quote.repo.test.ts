@@ -31,15 +31,20 @@ test("guardar happy path (quotes + line items bulk)", async () => {
   restoreFetch(); vi.unstubAllEnvs();
 });
 
-test("guardar con items vacios: solo 1 fetch (no line items)", async () => {
+test("DEUDA-INFO-S3.1-D: guardar con items vacios -> DELETE SIEMPRE corre (2 fetches: quotes + DELETE)", async () => {
   vi.stubEnv("SUPABASE_URL", "https://s.co");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "key");
-  const fetchSpy = vi.fn().mockResolvedValueOnce(new Response(null, { status: 200 }));
+  const fetchSpy = vi.fn()
+    .mockResolvedValueOnce(new Response(null, { status: 200 })) // quotes POST
+    .mockResolvedValueOnce(new Response(null, { status: 200 })); // line_items DELETE (siempre)
   globalThis.fetch = fetchSpy;
   const empty = { ...makeQuote(), items: Object.freeze([]) };
   const r = await new SupabaseQuoteRepo().guardar(empty);
   expect(r.ok).toBe(true);
-  expect(fetchSpy.mock.calls.length).toBe(1);
+  // el DELETE (2º fetch) siempre ocurre; sin INSERT porque items vacías
+  expect(fetchSpy.mock.calls.length).toBe(2);
+  const delUrl = fetchSpy.mock.calls[1]?.[0] as string;
+  expect(delUrl).toContain("/quote_line_items?quote_id=eq.");
   restoreFetch(); vi.unstubAllEnvs();
 });
 

@@ -28,9 +28,9 @@ export class SupabaseQuoteRepo implements QuoteRepository {
     try {
       const q = await fetch(`${u}/quotes`, { method: "POST", headers: h, body: JSON.stringify({ id: quote.id, tenant_id: quote.tenantId, contact_id: quote.contactId, mode: quote.mode, status: quote.status, total_amount: quote.totalAmount, currency: quote.currency, created_by_type: quote.createdByType, created_at: quote.createdAt.toISOString() }) });
       if (!q.ok) return err(mapErr(`http_${q.status}`));
+      const del = await fetch(`${u}/quote_line_items?quote_id=eq.${encodeURIComponent(String(quote.id))}`, { method: "DELETE", headers: h });
+      if (!del.ok) return err(mapErr("line_items_divergent"));
       if (quote.items.length > 0) {
-        const del = await fetch(`${u}/quote_line_items?quote_id=eq.${encodeURIComponent(String(quote.id))}`, { method: "DELETE", headers: h });
-        if (!del.ok) return err(mapErr("line_items_divergent"));
         const ins = await fetch(`${u}/quote_line_items`, { method: "POST", headers: h, body: JSON.stringify(this.lineItemsBody(quote.id, quote.items)) });
         if (!ins.ok) return err(mapErr("line_items_divergent"));
       }
