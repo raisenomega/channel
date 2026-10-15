@@ -7,6 +7,7 @@ import { Result, err, ok } from "../../../shared/domain/result.ts";
 import { transicionarEstado } from "../domain/embedded-signup.entity.ts";
 import type { EmbeddedSignupStatus } from "../domain/embedded-signup.entity.ts";
 import { validarSignupWebhook } from "./signup-validation.ts";
+import type { SignupNotificationPort } from "./signup-notification.port.ts";
 
 export type CallbackError = { readonly kind: "validacion_fallo"; readonly cause: string }
   | { readonly kind: "persistence_failure"; readonly cause: string } | { readonly kind: "signup_no_encontrado" };
@@ -32,6 +33,7 @@ export class HandleCallbackHandler {
   constructor(
     private readonly repo: EmbeddedSignupRepository,
     private readonly stateResolver: StateResolver,
+    private readonly notificationEmitter?: SignupNotificationPort,
   ) {}
 
   async ejecutar(metaPayload: unknown, state: string): Promise<Result<CallbackResult, CallbackError>> {
@@ -71,6 +73,16 @@ export class HandleCallbackHandler {
       const tok = await this.repo.guardarToken(signupId, tenantId, p.access_token, p.access_token_expires_at ?? "");
       if (!tok.ok) return err({ kind: "persistence_failure", cause: tok.error });
     }
+
+    // Notificar signup_completed (BEST-EFFORT: error no rompe el flujo)
+    if (this.notificationEmitter && transicion.value === "COMPLETED") {
+      await this.notificationEmitter.ejecutar({
+        tenantId, userId: "", type: "signup_completed", severity: "info",
+        title: "WhatsApp configurado", body: "Tu numero de WhatsApp esta listo.",
+        payload: { signup_id: signupId, waba_id: p.waba_id ?? null, phone_number_id: p.phone_number_id ?? null },
+      });
+    }
+
     return ok({ signupId, status: transicion.value, wabaId: p.waba_id ?? null, phoneNumberId: p.phone_number_id ?? null });
   }
 }
