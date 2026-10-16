@@ -1,4 +1,4 @@
-﻿-- Slide 4.9 — WhatsApp Templates (bank-grade). Tabla de plantillas Meta WABA gestionadas via Zernio.
+-- Slide 4.9 — WhatsApp Templates (bank-grade). Tabla de plantillas Meta WABA gestionadas via Zernio.
 -- Fuente: brief Slide 4.9 §3. UNIQUE (tenant_id, name, language) = namespace por tenant (R20).
 create table if not exists whatsapp_templates (
   id uuid primary key default gen_random_uuid(),
@@ -29,4 +29,3 @@ drop policy if exists "tenant_scope" on whatsapp_templates;
 create policy "tenant_scope" on whatsapp_templates
   for select to authenticated
   using (tenant_id::text = (auth.jwt() ->> 'tenant_id'));
-
