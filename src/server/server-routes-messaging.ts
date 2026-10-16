@@ -13,7 +13,7 @@ export function handleWebhook(h: ServerHandlers): RouteDefinition {
     handler: async (ctx) => {
       const b = obj(ctx.body);
       return resultToJson(
-        h.processWebhook.ejecutar({
+        await h.processWebhook.ejecutar({
           provider: (b["provider"] as string) ?? "",
           signature: (b["signature"] as string) ?? "",
           body: (b["body"] as string) ?? "",

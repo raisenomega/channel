@@ -18,12 +18,12 @@ export type ProcessWebhookError =
 export class ProcessWebhookHandler {
   constructor(private readonly router: ChannelRouter) {}
 
-  ejecutar(cmd: ProcessWebhookCommand): Result<readonly NormalizedMessage[], ProcessWebhookError> {
+  async ejecutar(cmd: ProcessWebhookCommand): Promise<Result<readonly NormalizedMessage[], ProcessWebhookError>> {
     const adapterResult = this.router.resolver(cmd.provider);
     if (!adapterResult.ok) return err(adapterResult.error);
 
     const adapter = adapterResult.value;
-    if (!adapter.verifyWebhook(cmd.signature, cmd.body)) {
+    if (!(await adapter.verifyWebhook(cmd.signature, cmd.body))) {
       return err({ kind: "firma_invalida" });
     }
 

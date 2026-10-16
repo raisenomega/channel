@@ -17,6 +17,7 @@ import { rutaAthCharge } from "../pay/presentation/routes/charge-ath.routes.ts";
 import { rutaAthPoll } from "../pay/presentation/routes/ath-poll.routes.ts";
 import { rutaPagoSuccess, rutaPagoFailed } from "../pay/presentation/routes/pago-result.routes.ts";
 import { rutaConnectUrl, rutaZernioSync, rutaConnectedAccounts, rutaListChannels } from "../channels/presentation/channels.routes.ts";
+import { handleZernioWebhook } from "../channels/presentation/webhooks.zernio.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
@@ -46,6 +47,7 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     rutaZernioSync(h.channels),
     rutaConnectedAccounts(h.channels),
     rutaListChannels(h.channels),
+    handleZernioWebhook(h),
   ];
 }
 
