@@ -15,7 +15,8 @@ export interface Channel {
 export type ChannelError =
   | { kind: "no_autorizado"; cause?: string }
   | { kind: "red"; cause?: string }
-  | { kind: "config_incompleta"; cause?: string };
+  | { kind: "config_incompleta"; cause?: string }
+  | { kind: "not_implemented"; cause?: string };
 
 export type Result<T, E> =
   | { ok: true; value: T }

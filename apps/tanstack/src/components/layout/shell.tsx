@@ -2,7 +2,6 @@ import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
 import { BottomNav, type NavItem } from "./bottom-nav";
-
 const LINKS: NavItem[] = [
   { to: "/inbox", label: "nav.dashboard" },
   { to: "/contacts", label: "nav.contacts" },
@@ -13,6 +12,7 @@ const LINKS: NavItem[] = [
   { to: "/reports", label: "nav.reports" },
   { to: "/agent", label: "nav.agent" },
   { to: "/channels", label: "nav.channels" },
+  { to: "/templates", label: "nav.templates" },
   { to: "/settings", label: "nav.settings" },
 ];
 
