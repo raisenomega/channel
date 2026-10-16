@@ -1,4 +1,4 @@
-﻿import { expect, test } from "vitest";
+import { expect, test } from "vitest";
 import { ProcessWebhookHandler, ProcessWebhookCommand } from "../../../src/channels/application/process-webhook.handler.ts";
 import { ChannelRouter } from "../../../src/channels/application/channel.router.ts";
 import { ChannelAdapter, NormalizedMessage, OutboundMessage } from "../../../src/channels/domain/channel.adapter.ts";
@@ -8,7 +8,7 @@ class ZernioMockAdapter implements ChannelAdapter {
   readonly provider = "zernio" as const;
   readonly supportedChannels: readonly ChannelType[] = ["whatsapp"];
 
-  verifyWebhook(_sig: string, _body: string): boolean {
+  async verifyWebhook(_sig: string, _body: string): Promise<boolean> {
     return _sig === "valid_sig";
   }
 
@@ -38,7 +38,7 @@ class ZernioMockAdapter implements ChannelAdapter {
   }
 }
 
-test("ProcessWebhookHandler â€” debe parsear webhook exitosamente con firma valida", () => {
+test("ProcessWebhookHandler â€” debe parsear webhook exitosamente con firma valida", async () => {
   const router = new ChannelRouter();
   router.registrar(new ZernioMockAdapter());
 
@@ -49,14 +49,14 @@ test("ProcessWebhookHandler â€” debe parsear webhook exitosamente con firma
     body: '{"dummy":true}',
     rawPayload: { entry: [] },
   };
-  const result = handler.ejecutar(cmd);
+  const result = await handler.ejecutar(cmd);
 
   expect(result.ok).toBe(true);
   expect(result.value.length).toBe(1);
   expect(result.value[0].content).toBe("Hola");
 });
 
-test("ProcessWebhookHandler â€” debe fallar con firma_invalida si verifyWebhook da false", () => {
+test("ProcessWebhookHandler â€” debe fallar con firma_invalida si verifyWebhook da false", async () => {
   const router = new ChannelRouter();
   router.registrar(new ZernioMockAdapter());
 
@@ -67,13 +67,13 @@ test("ProcessWebhookHandler â€” debe fallar con firma_invalida si verifyWeb
     body: '{}',
     rawPayload: {},
   };
-  const result = handler.ejecutar(cmd);
+  const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
   expect(result.error.kind).toBe("firma_invalida");
 });
 
-test("ProcessWebhookHandler â€” debe fallar con adapter_no_registrado si provider desconocido", () => {
+test("ProcessWebhookHandler â€” debe fallar con adapter_no_registrado si provider desconocido", async () => {
   const router = new ChannelRouter();
 
   const handler = new ProcessWebhookHandler(router);
@@ -83,7 +83,7 @@ test("ProcessWebhookHandler â€” debe fallar con adapter_no_registrado si pr
     body: '{}',
     rawPayload: {},
   };
-  const result = handler.ejecutar(cmd);
+  const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
   expect(result.error.kind).toBe("adapter_no_registrado");
