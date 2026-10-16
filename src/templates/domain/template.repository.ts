@@ -10,6 +10,7 @@ export interface WhatsAppTemplateRepository {
   buscar(id: string): Promise<Result<WhatsAppTemplateState | null, RepoError>>;
   buscarPorTenant(tenantId: TenantId): Promise<Result<WhatsAppTemplateState[], RepoError>>;
   buscarPorMetaId(metaTemplateId: string): Promise<Result<WhatsAppTemplateState | null, RepoError>>;
+  buscarPorNombre(nombre: string, language?: string): Promise<Result<WhatsAppTemplateState[], RepoError>>;
   actualizarStatus(id: string, status: WhatsAppTemplateState["status"], rejectionReason?: string): Promise<Result<void, RepoError>>;
 }
 
