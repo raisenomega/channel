@@ -11,7 +11,8 @@ import "./deno-polyfill.ts";
 import * as nodeProcess from "node:process";
 import * as http from "node:http";
 import { buildHandlers } from "./server-routes.ts";
-import { registrarRutas, matchRoute } from "./server-routes-registry.ts";
+import { registrarRutas } from "./server-routes-registry.ts";
+import { matchRoute } from "./server-route-matcher.ts";
 import { extractJwt, parseBody, readBody } from "./server-helpers.ts";
 import { sendResponse } from "./server-response.ts";
 import type { RequestContext } from "./server-types.ts";
@@ -37,6 +38,13 @@ const server = http.createServer(async (req, res) => {
   const thePath = req.url ?? "/";
   const theMethod = req.method ?? "GET";
 
+  const match = matchRoute(routes, theMethod, thePath);
+  if (!match) {
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ ok: false, error: { kind: "ruta_no_encontrada", path: thePath } }));
+    return;
+  }
+
   const ctx: RequestContext = {
     method: theMethod,
     path: thePath,
@@ -44,17 +52,11 @@ const server = http.createServer(async (req, res) => {
     body: parseBody(rawBody),
     rawBody,
     jwt: extractJwt(req.headers as Record<string, string | string[] | undefined>),
+    params: match.params,
   };
 
-  const route = matchRoute(routes, theMethod, thePath);
-  if (!route) {
-    res.writeHead(404, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ ok: false, error: { kind: "ruta_no_encontrada", path: thePath } }));
-    return;
-  }
-
   try {
-    const result = await route.handler(ctx);
+    const result = await match.route.handler(ctx);
     sendResponse(res, result);
   } catch (err) {
     console.error("[HUB] Error en handler:", err);

@@ -50,13 +50,3 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     handleZernioWebhook(h),
   ];
 }
-
-export function matchRoute(routes: RouteDefinition[], method: string, pathname: string): RouteDefinition | null {
-  const clean = pathname.replace(/\/+$/, "") || "/";
-  for (const r of routes) {
-    if (r.method !== method) continue;
-    const rClean = r.path.replace(/\/+$/, "") || "/";
-    if (rClean === clean || rClean === pathname) return r;
-  }
-  return null;
-}
