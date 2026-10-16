@@ -5,6 +5,13 @@ import type { Dict } from "./i18n-types";
 
 export const enCore: Dict = {
   "nav.inbox": "Dashboard",
+  "nav.dashboard": "Dashboard",
+  "nav.contacts": "Contacts",
+  "nav.quotes": "Quotes",
+  "nav.orders": "Orders",
+  "nav.payments": "Payments",
+  "nav.automation": "Automation",
+  "nav.reports": "Reports",
   "nav.agent": "AI",
   "nav.channels": "Channels",
   "nav.settings": "Settings",
