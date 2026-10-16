@@ -18,7 +18,7 @@ export function TenantWizardShell({ lang }: { lang: Idioma }) {
     const res = await fetch("/api/tenants", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, primary_phone: data.phone }),
     });
     if (!res.ok) throw new Error("POST /tenants failed");
     void navigate({ to: "/inbox" });

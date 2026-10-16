@@ -10,6 +10,8 @@ export interface TenantFormData {
   name: string; email: string; phone: string;
 }
 
+const E164_RE = /^\+[1-9]\d{6,14}$/;
+
 const P: Platform[] = ["whatsapp", "instagram", "facebook"];
 
 export function TenantForm({ lang, onSave }: {
@@ -35,15 +37,16 @@ export function TenantForm({ lang, onSave }: {
 
   const save = async () => {
     if (!f.name || !f.email || !f.phone) { setErr(t(lang, "onboard.required")); return; }
+if (!E164_RE.test(f.phone)) { setErr("Phone must be E.164 format (+1XXXYYYZZZZ)"); return; }
     setBusy(true); setErr(null);
     try { await onSave(f); } catch { setErr(t(lang, "onboard.error")); }
     finally { setBusy(false); }
   };
 
-  const inp = (k: keyof TenantFormData, t?: string) => (
+  const inp = (k: keyof TenantFormData, typ?: string) => (
     <input className="chbar-chip" style={{ fontSize:13, padding:"7px 12px", width:"100%" }}
-      placeholder={(t ? t(lang, k === "name" ? "onboard.businessName" : k === "email" ? "onboard.contactEmail" : "onboard.phoneNumber") : f[k]) + " *"}
-      type={t || "text"} value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })}
+      placeholder={typ ? (k==="name"?t(lang,"onboard.businessName"):k==="email"?t(lang,"onboard.contactEmail"):t(lang,"onboard.phoneNumber")) + " *" : f[k]}
+      type={typ || "text"} value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })}
     />
   );
 

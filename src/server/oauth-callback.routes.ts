@@ -1,7 +1,7 @@
 /**
  * HUB by Raisen — Ruta HTTP: GET /oauth/callback (Meta OAuth redirect).
  */
-import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
+import type { RouteDefinition, RequestContext } from "./server-types.ts";
 
 export function rutaOAuthCallback(): RouteDefinition {
   return {
