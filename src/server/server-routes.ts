@@ -17,14 +17,14 @@ import { UpdatePreferencesHandler } from "../notifications/application/update-pr
 import { SupabaseNotificationRepo } from "../notifications/infrastructure/supabase-notification.repo.ts";
 import type { AthConfirmDeps } from "../commerce/presentation/routes/ath-movil-confirm.routes.ts";
 import { buildAthDeps } from "./ath-wrapper.ts";
-import { buildStripe } from "./stripe-wrapper.ts";
-import type { StripeDeps } from "./stripe-wrapper.ts";
-import { buildPayDeps } from "./pay-wrapper.ts";
-import type { PayDeps } from "./pay-wrapper.ts";
+import { buildStripe, type StripeDeps } from "./stripe-wrapper.ts";
+import { buildPayDeps, type PayDeps } from "./pay-wrapper.ts";
 import { buildChannelsDeps } from "./channels-wrapper.ts";
 import type { ChannelsDeps } from "../channels/presentation/channels.routes.ts";
 import { buildDraftsDeps } from "./drafts-wrapper.ts";
 import type { DraftsDeps } from "../cognition/presentation/drafts.routes.ts";
+import { buildTemplatesDeps } from "./templates-wrapper.ts";
+import type { TemplatesDeps } from "../templates/presentation/templates.routes.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
 export interface ServerHandlers {
@@ -40,6 +40,7 @@ export interface ServerHandlers {
   pay: PayDeps;
   channels: ChannelsDeps;
   drafts: DraftsDeps;
+  templates: TemplatesDeps;
 }
 
 /** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */
@@ -55,6 +56,7 @@ export async function buildHandlers(): Promise<ServerHandlers> {
   const pay = buildPayDeps();
   const channels = buildChannelsDeps();
   const drafts = buildDraftsDeps(channelRouter);
+  const templates = await buildTemplatesDeps();
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
     receiveMessage: new ReceiveMessageHandler(convRepo),
@@ -69,6 +71,6 @@ export async function buildHandlers(): Promise<ServerHandlers> {
     },
     athConfirm: ath.confirm,
     stripe: buildStripe(),
-    pay, channels, drafts,
+    pay, channels, drafts, templates,
   };
 }

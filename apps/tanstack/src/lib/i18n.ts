@@ -9,6 +9,7 @@ import { esBiz } from "./i18n/es-biz";
 import { esBizOrders } from "./i18n/es-biz-orders";
 import { esBizOps } from "./i18n/es-biz-ops";
 import { esOnboarding } from "./i18n/es-onboarding";
+import { esTemplates } from "./i18n/es-templates";
 import { enCore } from "./i18n/en-core";
 import { enDash } from "./i18n/en-dash";
 import { enChannels } from "./i18n/en-channels";
@@ -19,6 +20,7 @@ import { enBiz } from "./i18n/en-biz";
 import { enBizOrders } from "./i18n/en-biz-orders";
 import { enBizOps } from "./i18n/en-biz-ops";
 import { enOnboarding } from "./i18n/en-onboarding";
+import { enTemplates } from "./i18n/en-templates";
 
 const ES: Dict = {
   ...esCore,
@@ -31,6 +33,7 @@ const ES: Dict = {
   ...esBizOrders,
   ...esBizOps,
   ...esOnboarding,
+  ...esTemplates,
 };
 
 const EN: Dict = {
@@ -44,6 +47,7 @@ const EN: Dict = {
   ...enBizOrders,
   ...enBizOps,
   ...enOnboarding,
+  ...enTemplates,
 };
 
 const TABLAS: Record<Idioma, Dict> = { es: ES, en: EN };

@@ -9,14 +9,14 @@ import {
 /* ═══════════════ Mappers (row ↔ domain) ═══════════════ */
 
 export const desdeRowWhatsApp = (row: Record<string, unknown>): WhatsAppTemplateState => {
-  const headerRaw = row.header_json as Record<string, unknown> | null;
-  const buttonsRaw = row.buttons_json as Record<string, unknown>[] | null;
+  const buttonsRaw = (row.buttons as Record<string, unknown>[] | null) ?? null;
 
   let headerType = "none";
   let headerContent: string | null = null;
-  if (headerRaw && typeof headerRaw.type === "string") {
-    headerType = headerRaw.type;
-    headerContent = (headerRaw.content as string) ?? null;
+  const rawHt = row.header_type as string | undefined;
+  if (typeof rawHt === "string" && rawHt && rawHt !== "none") {
+    headerType = rawHt;
+    headerContent = (row.header_content as string) ?? null;
   }
 
   return Object.freeze({
@@ -29,12 +29,39 @@ export const desdeRowWhatsApp = (row: Record<string, unknown>): WhatsAppTemplate
     body: row.body as string,
     footer: (row.footer as string) ?? null,
     buttons: Object.freeze((buttonsRaw ?? []).map((b) => Object.freeze(b) as unknown as WhatsAppButton)),
-    status: row.status as TemplateStatus,
-    metaTemplateId: (row.meta_template_id as string) ?? null,
+    status: fromSqlStatus(row.status as string),
+    metaTemplateId: (row.zernio_template_id as string) ?? null,
     rejectionReason: (row.rejection_reason as string) ?? null,
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
   });
+};
+
+/** Mapea el status SQL del brief (§3) al vocabulario del domain. */
+export const fromSqlStatus = (s: string): TemplateStatus => {
+  switch (s) {
+    case "pending_create":
+    case "pending_meta": return "pending";
+    case "approved": return "approved";
+    case "rejected": return "rejected";
+    case "paused": return "paused";
+    case "disabled": return "disabled";
+    case "error": return "rejected";
+    default: return "draft";
+  }
+};
+
+/** Mapea el status del domain al status SQL del brief (§3). */
+export const toSqlStatus = (s: TemplateStatus): string => {
+  switch (s) {
+    case "draft": return "pending_create";
+    case "pending": return "pending_meta";
+    case "approved": return "approved";
+    case "rejected": return "rejected";
+    case "paused": return "paused";
+    case "disabled": return "disabled";
+    default: return "pending_create";
+  }
 };
 
 export const desdeRowCanned = (row: Record<string, unknown>): CannedResponseState => {

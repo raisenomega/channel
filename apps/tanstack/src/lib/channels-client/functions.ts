@@ -4,7 +4,8 @@
  * toggleCanal devuelve not_implemented (no existe PATCH backend aun). C4 <=75.
  */
 import { apiFetch, resolveTenantId } from "../api-client";
-import type { Channel, ChannelError } from "./types";
+import type { Channel, ChannelError, Result } from "./types";
+import type { ChannelKind } from "@/components/ui/channel-icon";
 
 export async function listarCanales(): Promise<Result<Channel[], ChannelError>> {
   const tenantId = resolveTenantId();
@@ -26,8 +27,6 @@ export async function listarCanales(): Promise<Result<Channel[], ChannelError>> 
   }
 }
 
-export async function toggleCanal(): Promise<Result<void, ChannelError>> {
+export async function toggleCanal(_channelId: string, _active: boolean): Promise<Result<void, ChannelError>> {
   return { ok: false, error: { kind: "not_implemented" } };
 }
-
-type ChannelKind = string;

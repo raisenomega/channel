@@ -17,6 +17,7 @@ import { AutomationRoute } from "@/routes/automation";
 import { ReportsRoute } from "@/routes/reports";
 import { SlaRoute } from "@/routes/settings.sla";
 import { OnboardingRoute } from "@/routes/onboarding.tenant";
+import { TemplatesRoute } from "@/routes/templates";
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
@@ -37,4 +38,5 @@ export const routeTree = rootRoute.addChildren([
   IntegrationsRoute,
   SlaRoute,
   OnboardingRoute,
+  TemplatesRoute,
 ]);
