@@ -26,8 +26,9 @@ CREATE INDEX IF NOT EXISTS idx_channel_connections_tenant ON public.channel_conn
 ALTER TABLE public.channel_connections ENABLE ROW LEVEL SECURITY;
 
 -- RLS: cada tenant ve solo sus propias conexiones
+DROP POLICY IF EXISTS channel_connections_tenant_isolation ON public.channel_connections;
 CREATE POLICY channel_connections_tenant_isolation ON public.channel_connections
-  FOR ALL USING (tenant_id = auth.jwt() ->> 'tenant_id'::text::uuid);
+  FOR ALL USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
 COMMENT ON TABLE public.channel_connections IS
   'Conexiones OAuth por red social por tenant. 7 plataformas soportadas.';
