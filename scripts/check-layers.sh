@@ -24,6 +24,26 @@ while IFS= read -r -d '' f; do
 done < <(find "$SRC" -path '*/domain/*' -name '*.ts' -print0 2>/dev/null)
 
 # ──────────────────────────────────────────────────────────────────
+# R21: React/JSX archivos NO pueden vivir en src/ (es backend puro)
+# ──────────────────────────────────────────────────────────────────
+TSX_IN_BACKEND=$(find "$SRC" \( -name "*.tsx" -o -name "*.jsx" \) -print 2>/dev/null)
+if [ -n "$TSX_IN_BACKEND" ]; then
+  echo "❌ R21 VIOLATION: archivos React/JSX en src/ (backend puro):"
+  echo "$TSX_IN_BACKEND"
+  echo "React y JSX viven SOLO en apps/tanstack/src/"
+  FAIL=1
+fi
+REACT_IMPORTS=$(grep -rE "from ['\"]react['\"]|from ['\"]react-dom['\"]|from ['\"]@tanstack/react" "$SRC" 2>/dev/null || true)
+if [ -n "$REACT_IMPORTS" ]; then
+  echo "❌ R21 VIOLATION: imports de React detectados en src/ backend:"
+  echo "$REACT_IMPORTS"
+  FAIL=1
+fi
+if [ -n "$TSX_IN_BACKEND" ] || [ -n "$REACT_IMPORTS" ]; then
+  FAIL=1
+fi
+
+# ──────────────────────────────────────────────────────────────────
 # Resultado
 # ──────────────────────────────────────────────────────────────────
 if [ "$FAIL" -eq 0 ]; then
