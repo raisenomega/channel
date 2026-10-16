@@ -21,6 +21,9 @@ export type AdapterError =
   | { readonly kind: "provider_unavailable" }
   | { readonly kind: "invalid_payload" }
   | { readonly kind: "timeout" }
+  | { readonly kind: "firma_invalida"; readonly causa: string }
+  | { readonly kind: "retry_agotado"; readonly intentos: number; readonly ultimo_error: string }
+  | { readonly kind: "credencial_ausente"; readonly nombre: string }
   | { readonly kind: "unknown"; readonly cause: string };
 
 export interface ChannelAdapter {
@@ -30,7 +33,7 @@ export interface ChannelAdapter {
   sendMessage(msg: OutboundMessage): Promise<Result<void, AdapterError>>;
   sendTemplate(params: SendTemplateParams): Promise<Result<void, AdapterError>>;
   parseInboundWebhook(payload: unknown): Result<readonly NormalizedMessage[], ParseError>;
-  verifyWebhook(signature: string, body: string): boolean;
+  verifyWebhook(signature: string, body: string): Promise<boolean>;
   ping(): Promise<Result<boolean, AdapterError>>;
 }
 

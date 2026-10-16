@@ -53,7 +53,7 @@ export class ResendAdapter implements ChannelAdapter {
     }
   }
 
-  verifyWebhook(signature: string, body: string): boolean {
+  async verifyWebhook(signature: string, body: string): Promise<boolean> {
     return signature.length > 0 && body.length > 0;
   }
 
