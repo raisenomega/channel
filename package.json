@@ -56,5 +56,8 @@
     "@noble/ciphers": "^2.4.0",
     "@supabase/supabase-js": "^2.117.3",
     "jose": "^6.2.12"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
   }
 }
