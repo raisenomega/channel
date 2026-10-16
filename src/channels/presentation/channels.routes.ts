@@ -7,7 +7,8 @@ import type { RouteDefinition, RequestContext } from "../../server/server-types.
 import type { ConnectSocialAccountHandler } from "../application/connect-social-account.handler.ts";
 import type { ZernioSyncHandler } from "../application/zernio-sync.handler.ts";
 import type { ChannelConnectionsRepo } from "../infrastructure/channel-connections.repository.ts";
-import type { ConnectedItem } from "../../lib/zernioConnect.ts";
+
+interface ConnectedItem { platform: string; handle: string | null; zernio_account_id: string; followers_count?: number | null; }
 
 export interface ChannelsDeps {
   readonly connectHandler: ConnectSocialAccountHandler;
