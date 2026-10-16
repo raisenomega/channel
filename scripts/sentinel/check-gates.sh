@@ -11,6 +11,7 @@ GATES=(
   "check:layers|pnpm run check:layers"
   "check:emojis|pnpm run check:emojis"
   "check:auth|pnpm run check:auth"
+  "check:migrations|pnpm run check:migrations"
   "test:unit|pnpm run test:unit"
   "test:integration|pnpm exec vitest run tests/integration/"
   "adversarial|bash scripts/test-gates.sh"

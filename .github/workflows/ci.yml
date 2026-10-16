@@ -47,6 +47,11 @@ jobs:
       - name: "Gate: auth (Compuerta 17)"
         run: pnpm check:auth
 
+      - name: "Compuerta #20 — Migrations drift"
+        run: pnpm run check:migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
       - name: "Gate: build pipeline"
         run: pnpm build
 
