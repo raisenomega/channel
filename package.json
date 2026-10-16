@@ -21,6 +21,7 @@
     "check:layers": "bash scripts/check-layers.sh",
     "check:emojis": "bash scripts/check-emojis.sh",
     "check:auth": "bash scripts/check-auth.sh",
+    "check:eslint-no-raw-login": "eslint apps/tanstack/src/ --config eslint.config.js",
     "check:migrations": "bash scripts/check-migrations-drift.sh",
     "check:build": "rm -rf dist/ && pnpm exec tsc --project tsconfig.build.json",
     "check:server-smoke": "bash scripts/check-server-smoke.sh",

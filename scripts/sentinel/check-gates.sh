@@ -12,6 +12,7 @@ GATES=(
   "check:emojis|pnpm run check:emojis"
   "check:auth|pnpm run check:auth"
   "check:migrations|pnpm run check:migrations"
+  "check:eslint-no-raw-login|pnpm run check:eslint-no-raw-login"
   "test:unit|pnpm run test:unit"
   "test:integration|pnpm exec vitest run tests/integration/"
   "adversarial|bash scripts/test-gates.sh"
