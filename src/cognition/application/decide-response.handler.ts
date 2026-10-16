@@ -13,6 +13,8 @@ export interface DecideResponseCommand {
   readonly channel: string;
   readonly confidence: number;
   readonly autonomyConfig: AutonomyConfigState;
+  readonly personaSlug: string;
+  readonly draftContent: string;        // contenido real del draft, no vacio
 }
 
 export class DecideResponseHandler {
@@ -33,7 +35,8 @@ export class DecideResponseHandler {
         reason: "confidence_below_threshold",
         confidence: confidence10,
         threshold: LIMITS.MIN_CONFIDENCE_TO_ACT,
-        draftContent: "",
+        draftContent: cmd.draftContent,
+        personaSlug: cmd.personaSlug,
       });
     }
 
