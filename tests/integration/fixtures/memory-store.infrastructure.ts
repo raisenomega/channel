@@ -253,6 +253,14 @@ export class MemoryUserStore implements UserRepository {
     return ok(this.items.find((u) => u.email.valor === email) ?? null);
   }
 
+  /** Hotfix G: enlaza una fila existente sin tenant con su primer tenant como owner. */
+  async vincularTenant(userId: UserId, tenantId: TenantId): Promise<Result<void, RepoError>> {
+    const idx = this.items.findIndex((u) => u.id === userId);
+    if (idx < 0) return err({ kind: "not_found" });
+    this.items[idx] = { ...this.items[idx]!, tenantId, role: "owner" };
+    return ok(undefined);
+  }
+
   limpiar(): void {
     this.items = [];
   }

@@ -3,11 +3,11 @@
  * POST /commerce/stripe/prepare. JWT requerido, tenantId del claim.
  * Devuelve client_secret listo para Stripe Elements en el frontend.
  * El client_secret es efímero y confidencial: nunca se loguea ni persiste. C4 ≤75.
+ * Hotfix G: requireTenantAuth (antes extractJwt+parsearJwtClaims eran incompatibles: 401 siempre).
  */
 import type { RouteDefinition } from "../../../server/server-types.ts";
-import { parsearJwtClaims } from "../../../server/jwt-verify.ts";
+import { requireTenantAuth } from "../../../server/auth-helpers.ts";
 import { tid } from "../../../server/server-types.ts";
-import { extractJwt } from "../../../server/server-helpers.ts";
 import type { OrderRepository } from "../../domain/commerce.repository.ts";
 import type { StripeAdapter } from "../../infrastructure/stripe.adapter.ts";
 
@@ -20,9 +20,9 @@ export function rutaStripePrepare(deps: StripePrepareDeps): RouteDefinition {
   return {
     method: "POST", path: "/commerce/stripe/prepare",
     handler: async (ctx) => {
-      const claims = await parsearJwtClaims(extractJwt(ctx.headers));
-      if (!claims.ok) return { ok: false, error: claims.error };
-      const tenantId = tid(claims.value.tenantId);
+      const auth = await requireTenantAuth(ctx);
+      if (!auth.ok) return auth.error;
+      const tenantId = tid(auth.value.tenantId);
       const orderId = String(((ctx.body ?? {}) as Record<string, unknown>)["orderId"] ?? "");
       if (!orderId) return { ok: false, error: { kind: "order_requerido" } };
 

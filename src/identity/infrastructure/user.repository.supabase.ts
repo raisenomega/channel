@@ -5,6 +5,9 @@ import { UserRepository, RepoError } from "../../identity/domain/identity.reposi
 import { Email } from "../../shared/domain/email.vo.ts";
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 
+/** PGRST116 = .single() sin filas: no es un fallo de persistencia, es "no existe". */
+const SIN_FILAS = "PGRST116";
+
 export class UserRepositorySupabase implements UserRepository {
   async guardar(user: UserState): Promise<Result<void, RepoError>> {
     try {
@@ -16,19 +19,16 @@ export class UserRepositorySupabase implements UserRepository {
       });
       if (error) return err({ kind: "persistence_failure", cause: error.message });
       return ok(undefined);
-    } catch (e) {
-      return err({ kind: "persistence_failure", cause: String(e) });
-    }
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
   }
 
   async buscar(id: UserId): Promise<Result<UserState | null, RepoError>> {
     try {
       const { data, error } = await supabase.from("users").select("*").eq("id", id).single();
+      if (error && error.code === SIN_FILAS) return ok(null);
       if (error) return err({ kind: "persistence_failure", cause: error.message });
       return ok(data ? this.mapear(data) : null);
-    } catch (e) {
-      return err({ kind: "persistence_failure", cause: String(e) });
-    }
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
   }
 
   async buscarPorTenant(tenantId: TenantId): Promise<Result<UserState[], RepoError>> {
@@ -36,9 +36,7 @@ export class UserRepositorySupabase implements UserRepository {
       const { data, error } = await supabase.from("users").select("*").eq("tenant_id", tenantId);
       if (error) return err({ kind: "persistence_failure", cause: error.message });
       return ok((data ?? []).map((r: Record<string, unknown>) => this.mapear(r)));
-    } catch (e) {
-      return err({ kind: "persistence_failure", cause: String(e) });
-    }
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
   }
 
   async buscarPorEmail(email: string): Promise<Result<UserState | null, RepoError>> {
@@ -46,12 +44,19 @@ export class UserRepositorySupabase implements UserRepository {
     if (!emailVO.ok) return ok(null);
     try {
       const { data, error } = await supabase.from("users").select("*").eq("email", emailVO.value.valor).single();
-      if (error && error.code === "PGRST116") return ok(null);
+      if (error && error.code === SIN_FILAS) return ok(null);
       if (error) return err({ kind: "persistence_failure", cause: error.message });
       return ok(data ? this.mapear(data) : null);
-    } catch (e) {
-      return err({ kind: "persistence_failure", cause: String(e) });
-    }
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
+  }
+
+  /** Hotfix G: fila users ya existente sin tenant -> se enlaza como owner de su primer tenant. */
+  async vincularTenant(userId: UserId, tenantId: TenantId): Promise<Result<void, RepoError>> {
+    try {
+      const { error } = await supabase.from("users").update({ tenant_id: tenantId, role: "owner" }).eq("id", userId);
+      if (error) return err({ kind: "persistence_failure", cause: error.message });
+      return ok(undefined);
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
   }
 
   private mapear(row: Record<string, unknown>): UserState {

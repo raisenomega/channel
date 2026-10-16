@@ -12,7 +12,7 @@ TOTAL=0
 echo "Compuerta #17: verificando auth en handlers *.routes.ts bajo src/..."
 while IFS= read -r -d '' f; do
   TOTAL=$((TOTAL + 1))
-  if grep -qE 'requireTenantAuth\(|parsearJwtClaims\(' "$f"; then
+  if grep -qE 'requireTenantAuth\(|requireUserAuth\(|parsearJwtClaims\(' "$f"; then
     echo "  AUTH    $f"
     continue
   fi

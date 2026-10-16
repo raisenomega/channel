@@ -18,6 +18,12 @@ export function readLocalSession(): Session | null {
   }
 }
 
+/** Hotfix G: persistir una sesion refrescada (nuevo JWT con app_metadata.tenant_id). */
+export function writeLocalSession(session: Session): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+}
+
 export function clearLocalSession(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(STORAGE_KEY);

@@ -1,16 +1,15 @@
 /**
  * HUB by Raisen — Rutas de canales/social accounts (Slide 4.2a).
  * 4 rutas: connect-url, zernio-sync, connected-accounts (Zernio en vivo), list channels.
- * JWT obligatorio + tenant del path == claim (Compuerta #17, Hotfix F). C4 <=75.
+ * JWT obligatorio + tenant del path == claim (Compuerta #17). Hotfix G (D4): connected-accounts
+ * solo devuelve cuentas enlazadas al tenant (R20), nunca el perfil Zernio completo. C4 <=75.
  */
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
 import { requireTenantAuth } from "../../server/auth-helpers.ts";
 import type { ConnectSocialAccountHandler } from "../application/connect-social-account.handler.ts";
 import type { ZernioSyncHandler } from "../application/zernio-sync.handler.ts";
 import type { ChannelConnectionsRepo } from "../infrastructure/channel-connections.repository.ts";
-
-interface ConnectedItem { platform: string; handle: string | null; zernio_account_id: string; followers_count?: number | null; }
-interface ZernioAccount { platform: string; handle?: string; followers_count?: number; zernio_account_id: string; }
+import { filtrarPorTenant, listarCuentasZernio } from "../infrastructure/zernio-accounts.client.ts";
 
 export interface ChannelsDeps {
   readonly connectHandler: ConnectSocialAccountHandler;
@@ -48,16 +47,14 @@ export function rutaConnectedAccounts(deps: ChannelsDeps): RouteDefinition {
     method: "GET", path: "/tenants/:id/connected-accounts",
     handler: async (ctx: RequestContext) => {
       const auth = await requireTenantAuth(ctx, seg(ctx, "id", 2)); if (!auth.ok) return auth.error;
-      try {
-        const r = await fetch("https://api.zernio.io/v1/connected-accounts", { headers: { Authorization: `Bearer ${deps.zernioApiKey}` } });
-        if (!r.ok) return { ok: false, error: { kind: "zernio_error" } };
-        const data = await r.json() as { items?: ZernioAccount[] };
-        const items: ConnectedItem[] = (data.items ?? []).map((a) => ({
-          platform: a.platform, handle: a.handle ?? null, zernio_account_id: a.zernio_account_id,
-          ...(a.followers_count !== undefined ? { followers_count: a.followers_count } : {}),
-        }));
-        return { ok: true, items };
-      } catch { return { ok: false, error: { kind: "zernio_error" } }; }
+      const enlaces = await deps.repo.listar(auth.value.tenantId as never);
+      if (!enlaces.ok) return { ok: false, error: { kind: "persistence_error" } };
+      const cuentas = await listarCuentasZernio(deps.zernioApiKey);
+      if (!cuentas.ok) return { ok: false, error: { kind: "zernio_error" } };
+      const items = filtrarPorTenant(cuentas.value, enlaces.value).map((a) => ({
+        platform: a.platform, handle: a.handle, zernio_account_id: a.zernioAccountId, followers_count: a.followersCount,
+      }));
+      return { ok: true, items };
     },
   };
 }

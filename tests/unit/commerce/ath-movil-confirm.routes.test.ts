@@ -59,8 +59,10 @@ function cfgOk(): PaymentMethodsConfigRepo {
 
 test("adversarial: sin JWT → token_ausente", async () => {
   const route = rutaAthMovilConfirm(deps(new MockPayRepo(), new MockOrderRepo(100), client("COMPLETED"), cfgOk()));
-  const res = await route.handler(ctx(""));
-  expect((res as { error: { kind: string } }).error.kind).toBe("token_ausente");
+  const res = await route.handler(ctx("")) as { status?: number; body: string };
+  // Hotfix G: requireTenantAuth devuelve HttpResponse 401 con el error en el body JSON.
+  expect(res.status).toBe(401);
+  expect(JSON.parse(res.body).error.kind).toBe("token_ausente");
 });
 
 test("adversarial: findPayment OPEN → pending sin persistir", async () => {
