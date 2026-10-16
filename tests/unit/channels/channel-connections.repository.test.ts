@@ -52,3 +52,21 @@ test("A-11 RLS_AISLAMIENTO: listar filtra tenant_id en URL", async () => {
   expect(url).toContain("tenant_id=eq.tenant-B");
   restoreFetch(); vi.unstubAllEnvs();
 });
+
+test("H-OBS-1 UPSERT: guardar usa on_conflict=tenant_id,platform + Prefer merge-duplicates", async () => {
+  vi.stubEnv("SUPABASE_URL", "https://s.co");
+  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "key");
+  const spy = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
+  globalThis.fetch = spy;
+  const repo = new ChannelConnectionsRepo();
+  const conn = { id: "c1", tenantId: "t1", platform: "instagram" as never, zernioAccountId: "z-1", handle: null, followersCount: null, status: "connected" as never, isPrimary: false, isPaused: false, autoPublishAllowed: false, createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" };
+  const r = await repo.guardar(conn);
+  expect(r.ok).toBe(true);
+  const url = spy.mock.calls[0]?.[0] as string;
+  const hdrs = spy.mock.calls[0]?.[1]?.headers as Record<string, string>;
+  // URL lleva on_conflict por (tenant_id, platform) -> upsert, no duplica en reconexion.
+  expect(url).toContain("on_conflict=tenant_id,platform");
+  // Header Prefer resolution=merge-duplicates para el merge de filas en conflicto.
+  expect(hdrs["Prefer"]).toBe("resolution=merge-duplicates");
+  restoreFetch(); vi.unstubAllEnvs();
+});
