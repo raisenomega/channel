@@ -13,6 +13,13 @@ export function useCanales() {
       if (!r.ok) {
         if (r.error.kind === "config_incompleta") {
           if (typeof window !== "undefined") {
+            // Sin tenant_id en JWT = user autenticado sin tenant → crear tenant primero
+            window.location.href = "/onboarding/tenant";
+          }
+        }
+        if (r.error.kind === "no_autorizado") {
+          if (typeof window !== "undefined") {
+            // Sesión real cerrada → login
             window.location.href = "/login";
           }
         }
