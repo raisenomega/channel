@@ -20,6 +20,7 @@ export NODE_ENV=test
 export PORT=18080
 export SUPABASE_URL="https://test.supabase.co"
 export SUPABASE_SERVICE_ROLE_KEY="test-key"
+# SUPABASE_JWT_SECRET es REQUERIDO en prod (Railway). Sin el: 500 config_incompleta en toda ruta JWT. Ver docs/DEPLOY.md.
 export SUPABASE_JWT_SECRET="smoke-test-secret"
 export STRIPE_SECRET_KEY="sk_test_smoke"
 export STRIPE_WEBHOOK_SECRET="whsec_smoke"

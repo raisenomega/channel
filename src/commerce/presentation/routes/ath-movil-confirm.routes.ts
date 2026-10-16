@@ -3,6 +3,7 @@
  * POST /commerce/ath-movil/confirm. tenantId del JWT, nunca del body.
  * Fuente de verdad = ATH (findPayment + authorization), anti-tamper con total.
  * Persiste netAmount; limpia authToken. C4 ≤75.
+ * Hotfix G: requireTenantAuth (antes extractJwt+parsearJwtClaims eran incompatibles: 401 siempre).
  */
 import type { RouteDefinition } from "../../../server/server-types.ts";
 import type { PaymentRepository, OrderRepository } from "../../domain/commerce.repository.ts";
@@ -11,8 +12,7 @@ import type { AuthTokenCrypto } from "../../infrastructure/ath-token.crypto.ts";
 import type { AthMovilApiClient, AthMovilTransaction } from "../../infrastructure/ath-movil-api.client.ts";
 import type { PaymentState } from "../../domain/payment.entity.ts";
 import { confirmarPaymentAth } from "../../domain/payment.entity.ts";
-import { extractJwt } from "../../../server/server-helpers.ts";
-import { parsearJwtClaims } from "../../../server/jwt-verify.ts";
+import { requireTenantAuth } from "../../../server/auth-helpers.ts";
 import { tid } from "../../../server/server-types.ts";
 export interface AthConfirmDeps {
   readonly paymentRepo: PaymentRepository;
@@ -25,9 +25,9 @@ export function rutaAthMovilConfirm(deps: AthConfirmDeps): RouteDefinition {
   return {
     method: "POST", path: "/commerce/ath-movil/confirm",
     handler: async (ctx) => {
-      const claims = await parsearJwtClaims(extractJwt(ctx.headers));
-      if (!claims.ok) return { error: { kind: claims.error.kind } };
-      const tenantId = tid(claims.value.tenantId);
+      const auth = await requireTenantAuth(ctx);
+      if (!auth.ok) return auth.error;
+      const tenantId = tid(auth.value.tenantId);
       const ecommerceId = String(((ctx.body ?? {}) as Record<string, unknown>)["ecommerceId"] ?? "");
 
       const pending = await deps.paymentRepo.buscarPorProviderPaymentId(ecommerceId, tenantId);
@@ -45,9 +45,9 @@ export function rutaAthMovilConfirm(deps: AthConfirmDeps): RouteDefinition {
 
       if (find.value.estado === "CONFIRM") {
         if (!pending.value.authTokenEncrypted) return { error: { kind: "auth_token_ausente" } };
-        const auth = await deps.crypto.descifrar(pending.value.authTokenEncrypted);
-        if (!auth.ok) return { error: { kind: "auth_token_invalido" } };
-        const tx = await client.autorizar(auth.value);
+        const authTok = await deps.crypto.descifrar(pending.value.authTokenEncrypted);
+        if (!authTok.ok) return { error: { kind: "auth_token_invalido" } };
+        const tx = await client.autorizar(authTok.value);
         if (!tx.ok) return { error: { kind: "authorize_error", cause: tx.error } };
         if (tx.value.estado !== "COMPLETED") return { error: { kind: "authorize_no_completed" } };
         return finalizar(deps, pending.value, tx.value);

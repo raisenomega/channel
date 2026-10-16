@@ -7,6 +7,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { TenantForm, type TenantFormData } from "./tenant-form";
+import { createTenant } from "@/lib/tenant-client/create-tenant";
 
 type SubChip = "basicos" | "canales" | "resumen";
 
@@ -15,12 +16,8 @@ export function TenantWizardShell({ lang }: { lang: Idioma }) {
   const [chip, setChip] = useState<SubChip>("basicos");
 
   const handleSave = async (data: TenantFormData) => {
-    const res = await fetch("/api/tenants", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, primary_phone: data.phone }),
-    });
-    if (!res.ok) throw new Error("POST /tenants failed");
+    // Hotfix G: createTenant adjunta el JWT, recuerda el tenant y refresca la sesion.
+    await createTenant({ ...data, primary_phone: data.phone });
     void navigate({ to: "/inbox" });
   };
 

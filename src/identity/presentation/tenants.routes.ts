@@ -1,18 +1,24 @@
 /**
  * HUB by Raisen — Ruta HTTP: POST /tenants (crear tenant). JWT obligatorio (Compuerta #17).
- * 401 sin JWT · 400 body incompleto o invalido · 409 duplicado · 500 persistencia · 201 creado.
+ * Hotfix G: requireUserAuth (JWT valido SIN exigir tenant_id: el usuario aun no tiene tenant).
+ * 401 sin JWT · 400 body incompleto/invalido · 409 duplicado o tenant_ya_existe · 500 persistencia · 201 creado.
  */
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
-import { jsonResponse, requireTenantAuth } from "../../server/auth-helpers.ts";
+import { jsonResponse, requireUserAuth } from "../../server/auth-helpers.ts";
 import { CrearTenantHandler } from "../application/create-tenant.handler.ts";
 import { TenantRepositorySupabase } from "../infrastructure/tenant.repository.supabase.ts";
+import { UserRepositorySupabase } from "../infrastructure/user.repository.supabase.ts";
+import { OwnerClaimsLinkerSupabase } from "../infrastructure/owner-claims.linker.supabase.ts";
 
-const repo = new TenantRepositorySupabase();
-const handler = new CrearTenantHandler(repo);
+const handler = new CrearTenantHandler(
+  new TenantRepositorySupabase(),
+  new UserRepositorySupabase(),
+  new OwnerClaimsLinkerSupabase(),
+);
 
 function statusDeError(kind: string): number {
-  if (kind === "persistence_failure") return 500;
-  if (kind === "slug_ya_existe" || kind === "duplicado") return 409;
+  if (kind === "persistence_failure" || kind === "owner_link_failed") return 500;
+  if (kind === "slug_ya_existe" || kind === "duplicado" || kind === "tenant_ya_existe") return 409;
   return 400;
 }
 
@@ -20,7 +26,7 @@ export function rutaCrearTenant(): RouteDefinition {
   return {
     method: "POST", path: "/tenants",
     handler: async (ctx: RequestContext) => {
-      const auth = await requireTenantAuth(ctx);
+      const auth = await requireUserAuth(ctx);
       if (!auth.ok) return auth.error;
       const body = (ctx.body as Record<string, unknown> | null) ?? {};
       const name = String(body["name"] ?? "").trim();

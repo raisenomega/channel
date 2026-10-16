@@ -16,6 +16,7 @@ export default defineConfig({
     environmentMatchGlobs: [
       ['tests/unit/components/dashboard/**', 'jsdom'], // UI tests corren en jsdom
       ['tests/unit/hooks/**', 'jsdom'], // hooks tambien
+      ['tests/unit/frontend/**', 'jsdom'], // lib del frontend (api-client, session) Hotfix G
     ],
     include: ['tests/unit/**/*.test.{ts,tsx}', 'tests/integration/**/*.test.{ts,tsx}'],
     exclude: ['tests/e2e/**'],

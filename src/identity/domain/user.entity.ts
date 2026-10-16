@@ -27,6 +27,7 @@ export const crearUser = (
   role: Role,
   tenantId: TenantId,
   language: Language = "es",
+  id?: UserId,
 ): Result<UserState, UserCreateError> => {
   const roles: readonly Role[] = ["owner", "admin", "supervisor", "agent", "viewer", "superadmin"];
   if (!roles.includes(role)) {
@@ -37,7 +38,7 @@ export const crearUser = (
     return err({ kind: "idioma_invalido" });
   }
   const state: UserState = Object.freeze({
-    id: crypto.randomUUID() as UserId,
+    id: id ?? (crypto.randomUUID() as UserId),
     tenantId,
     email,
     fullName: fullName.trim(),

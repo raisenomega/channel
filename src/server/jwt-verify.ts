@@ -2,8 +2,10 @@
  * HUB by Raisen — Verificación de JWT (Supabase HS256) + extracción de claims.
  * Usa jose. Jamás acepta token sin firma válida ni expirado.
  * Jamás loguea el token. C4 ≤75 lineas.
+ * Hotfix G: verificarJwt + tenantIdDePayload se comparten con jwt-verify-user.ts.
  */
 import { jwtVerify, errors as joseErrors } from "jose";
+import type { JWTPayload } from "jose";
 import { ok, err } from "../shared/domain/result.ts";
 import type { Result } from "../shared/domain/result.ts";
 
@@ -26,7 +28,8 @@ function getEnv(n: string): string | undefined {
   return d?.env?.get ? d.env.get(n) : process.env[n];
 }
 
-export async function parsearJwtClaims(authHeader: string | null): Promise<Result<JwtClaims, JwtError>> {
+/** Verifica "Bearer <jwt>" (firma HS256 + exp) y devuelve el payload crudo. */
+export async function verificarJwt(authHeader: string | null): Promise<Result<JWTPayload, JwtError>> {
   if (!authHeader || !authHeader.startsWith("Bearer ")) return err({ kind: "token_ausente" });
 
   const secret = getEnv("SUPABASE_JWT_SECRET");
@@ -37,22 +40,32 @@ export async function parsearJwtClaims(authHeader: string | null): Promise<Resul
 
   try {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), { algorithms: ["HS256"] });
-
-    const sub = payload.sub as string | undefined;
-    if (!sub) return err({ kind: "claims_faltantes", campo: "sub" });
-    const metadata = payload.app_metadata as Record<string, unknown> | undefined;
-    const tenantId = (metadata?.tenant_id ?? payload.tenant_id) as string | undefined;
-    if (!tenantId) return err({ kind: "claims_faltantes", campo: "tenant_id" });
-
-    return ok(Object.freeze({
-      userId: sub,
-      tenantId,
-      ...(payload.email ? { email: String(payload.email) } : {}),
-      exp: payload.exp ?? 0,
-    }));
+    return ok(payload);
   } catch (e) {
     if (e instanceof joseErrors.JWTExpired) return err({ kind: "token_expirado" });
-    if (e instanceof joseErrors.JWSSignatureVerificationFailed) return err({ kind: "firma_invalida" });
     return err({ kind: "firma_invalida" });
   }
+}
+
+/** tenant_id desde app_metadata (Supabase) o raiz del payload; null si no existe. */
+export function tenantIdDePayload(payload: JWTPayload): string | null {
+  const metadata = payload.app_metadata as Record<string, unknown> | undefined;
+  const t = (metadata?.tenant_id ?? payload.tenant_id) as string | undefined;
+  return t ? String(t) : null;
+}
+
+export async function parsearJwtClaims(authHeader: string | null): Promise<Result<JwtClaims, JwtError>> {
+  const v = await verificarJwt(authHeader);
+  if (!v.ok) return v;
+  const sub = v.value.sub;
+  if (!sub) return err({ kind: "claims_faltantes", campo: "sub" });
+  const tenantId = tenantIdDePayload(v.value);
+  if (!tenantId) return err({ kind: "claims_faltantes", campo: "tenant_id" });
+
+  return ok(Object.freeze({
+    userId: sub,
+    tenantId,
+    ...(v.value.email ? { email: String(v.value.email) } : {}),
+    exp: v.value.exp ?? 0,
+  }));
 }

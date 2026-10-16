@@ -54,8 +54,10 @@ test("happy: preparar devuelve paymentIntentId + clientSecret", async () => {
 
 test("sin JWT -> token_ausente", async () => {
   const route = rutaStripePrepare(deps());
-  const res = await route.handler(ctx(""));
-  expect((res as { error: { kind: string } }).error.kind).toBe("token_ausente");
+  const res = await route.handler(ctx("")) as { status?: number; body: string };
+  // Hotfix G: requireTenantAuth devuelve HttpResponse 401 con el error en el body JSON.
+  expect(res.status).toBe(401);
+  expect(JSON.parse(res.body).error.kind).toBe("token_ausente");
 });
 
 test("sin orderId en body -> order_requerido", async () => {

@@ -1,13 +1,16 @@
 /**
  * HUB by Raisen — Compuerta #17: autenticacion JWT obligatoria por handler HTTP.
  * requireTenantAuth(ctx, pathTenantId?) centraliza parsearJwtClaims + match del tenant
- * del path contra el claim. El error es una HttpResponse lista para retornar:
+ * del path contra el claim. requireUserAuth(ctx) (Hotfix G) exige JWT valido pero NO
+ * tenant_id: solo para POST /tenants. El error es una HttpResponse lista para retornar:
  *   401 token ausente/expirado/firma invalida · 403 tenant_mismatch · 500 config_incompleta.
  * Nunca loguea el token. C4 <=75.
  */
 import type { HttpResponse, RequestContext } from "./server-types.ts";
 import { parsearJwtClaims } from "./jwt-verify.ts";
-import type { JwtClaims } from "./jwt-verify.ts";
+import type { JwtClaims, JwtError } from "./jwt-verify.ts";
+import { parsearUserClaimsSinTenant } from "./jwt-verify-user.ts";
+import type { UserClaims } from "./jwt-verify-user.ts";
 import { ok, err } from "../shared/domain/result.ts";
 import type { Result } from "../shared/domain/result.ts";
 
@@ -21,17 +24,25 @@ export function jsonResponse(status: number, payload: Record<string, unknown>): 
   return { status, contentType: "application/json", body: JSON.stringify(payload) };
 }
 
+function fallaAuth(error: JwtError): HttpResponse {
+  return jsonResponse(error.kind === "config_incompleta" ? 500 : 401, { ok: false, error });
+}
+
 export async function requireTenantAuth(
   ctx: RequestContext,
   pathTenantId?: string,
 ): Promise<Result<JwtClaims, HttpResponse>> {
   const claims = await parsearJwtClaims(authHeader(ctx));
-  if (!claims.ok) {
-    const status = claims.error.kind === "config_incompleta" ? 500 : 401;
-    return err(jsonResponse(status, { ok: false, error: claims.error }));
-  }
+  if (!claims.ok) return err(fallaAuth(claims.error));
   if (pathTenantId !== undefined && claims.value.tenantId !== pathTenantId) {
     return err(jsonResponse(403, { ok: false, error: { kind: "tenant_mismatch" } }));
   }
+  return ok(claims.value);
+}
+
+/** JWT valido obligatorio; tenant_id opcional (usuario creando su primer tenant). */
+export async function requireUserAuth(ctx: RequestContext): Promise<Result<UserClaims, HttpResponse>> {
+  const claims = await parsearUserClaimsSinTenant(authHeader(ctx));
+  if (!claims.ok) return err(fallaAuth(claims.error));
   return ok(claims.value);
 }

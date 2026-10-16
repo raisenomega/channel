@@ -1,9 +1,12 @@
 /**
  * HUB by Raisen — Tenant form, 1 vista única. Sub-chips state-based.
+ * Hotfix G: OAuth via getConnectUrl(tenantId) con JWT; exige tenant ya creado.
  */
 import { useState } from "react";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
+import { resolveTenantId } from "@/lib/api-client";
+import { getConnectUrl } from "@/lib/tenant-client/connect-channel";
 import { ChannelConnectButton, type Platform } from "./channel-connect-button";
 
 export interface TenantFormData {
@@ -26,10 +29,9 @@ export function TenantForm({ lang, onSave }: {
   const oauth = async (p: Platform) => {
     setCn(p);
     try {
-      const r = await fetch("/api/tenants/connect-url?platform=" + p);
-      if (!r.ok) throw Error("");
-      const d = (await r.json()) as { url: string };
-      window.open(d.url, "_blank");
+      const tenantId = resolveTenantId();
+      if (!tenantId) throw Error("tenant_requerido");
+      window.open(await getConnectUrl(tenantId, p), "_blank");
       setCh((x) => ({ ...x, [p]: true }));
     } catch { setErr(t(lang, "onboard.oauthError")); }
     finally { setCn(null); }
@@ -37,7 +39,7 @@ export function TenantForm({ lang, onSave }: {
 
   const save = async () => {
     if (!f.name || !f.email || !f.phone) { setErr(t(lang, "onboard.required")); return; }
-if (!E164_RE.test(f.phone)) { setErr("Phone must be E.164 format (+1XXXYYYZZZZ)"); return; }
+    if (!E164_RE.test(f.phone)) { setErr("Phone must be E.164 format (+1XXXYYYZZZZ)"); return; }
     setBusy(true); setErr(null);
     try { await onSave(f); } catch { setErr(t(lang, "onboard.error")); }
     finally { setBusy(false); }
