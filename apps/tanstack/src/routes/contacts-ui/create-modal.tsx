@@ -19,7 +19,7 @@ export function CreateModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-xl max-h-[85vh] overflow-y-auto">
         <CardHeader>
           <CardTitle>{t(language, "contacts.createTitle")}</CardTitle>
         </CardHeader>

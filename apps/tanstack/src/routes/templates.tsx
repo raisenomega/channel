@@ -9,6 +9,7 @@ import { usePreferences } from "@/app/preferences";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import { handleFetcherError } from "@/lib/redirect-on-error";
 import { listarTemplates } from "@/lib/templates-client/functions";
 import { TemplatesList } from "./templates-ui/templates-list";
 import { TemplateCreateForm } from "./templates-ui/template-create-form";
@@ -31,8 +32,8 @@ function TemplatesPage() {
     queryFn: async () => {
       const r = await listarTemplates();
       if (!r.ok) {
-        if (r.error.kind === "config_incompleta" && typeof window !== "undefined") {
-          window.location.href = "/login";
+        if (r.error.kind === "config_incompleta" || r.error.kind === "no_autorizado") {
+          handleFetcherError(r.error.kind as "config_incompleta" | "no_autorizado");
         }
         return { templates: [], syncFailed: false };
       }

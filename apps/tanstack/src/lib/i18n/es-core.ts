@@ -14,13 +14,17 @@ export const esCore: Dict = {
   "nav.reports": "Reportes",
   "nav.agent": "IA",
   "nav.channels": "Canales",
+  "nav.templates": "Plantillas",
   "nav.settings": "Ajustes",
-
+  "onboard.step1.title": "Paso 1/2 · Datos del cliente",
+  "onboard.step2.title": "Paso 2/2 · Conectar redes",
+  "onboard.saveFinal": "Crear cliente",
+  "common.back": "Atrás",
+  "common.next": "Siguiente →",
   "kpi.tenant": "Tenant",
   "kpi.wasCorrect": "IA Was Correct",
   "kpi.salesChat": "Ventas desde chat",
   "kpi.autonomy": "Autonomía",
-
   "inbox.channels": "Canales",
   "inbox.seeAll": "Ver todos",
   "inbox.filtros": "Filtros",
@@ -32,14 +36,12 @@ export const esCore: Dict = {
   "inbox.justNow": "ahora",
   "inbox.min": "m",
   "inbox.hour": "h",
-
   "filtro.estado.open": "Abierta",
   "filtro.estado.pending": "Pendiente",
   "filtro.estado.snoozed": "Diferido",
   "filtro.estado.resolved": "Resuelta",
   "filtro.sla.violated": "SLA violado",
   "filtro.clean": "Limpiar",
-
   "canal.whatsapp": "WhatsApp",
   "canal.email": "Email",
   "canal.instagram": "Instagram",
@@ -49,7 +51,6 @@ export const esCore: Dict = {
   "canal.x": "X",
   "canal.linkedin": "LinkedIn",
   "canal.webchat": "Webchat",
-
   "channelFrame.templates": "Templates WA",
   "channelFrame.cotizacion": "Cotización",
   "channelFrame.pagos": "Pagos",

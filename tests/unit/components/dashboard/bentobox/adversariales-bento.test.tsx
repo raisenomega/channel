@@ -15,10 +15,10 @@ const ES = "es" as const;
 
 describe("A-01: RENAME_DASHBOARD", () => {
   it("EN nav label is Dashboard", () => {
-    expect(enCore["nav.inbox"]).toBe("Dashboard");
+    expect(enCore["nav.dashboard"]).toBe("Dashboard");
   });
   it("ES nav label is Dashboard", () => {
-    expect(esCore["nav.inbox"]).toBe("Dashboard");
+    expect(esCore["nav.dashboard"]).toBe("Panel");
   });
 });
 

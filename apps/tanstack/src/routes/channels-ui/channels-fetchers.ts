@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listarCanales, toggleCanal } from "@/lib/channels-client";
+import { handleFetcherError } from "@/lib/redirect-on-error";
 import type { Channel } from "@/lib/channels-client";
 
 export function useCanales() {
@@ -11,17 +12,8 @@ export function useCanales() {
     queryFn: async () => {
       const r = await listarCanales();
       if (!r.ok) {
-        if (r.error.kind === "config_incompleta") {
-          if (typeof window !== "undefined") {
-            // Sin tenant_id en JWT = user autenticado sin tenant → crear tenant primero
-            window.location.href = "/onboarding/tenant";
-          }
-        }
-        if (r.error.kind === "no_autorizado") {
-          if (typeof window !== "undefined") {
-            // Sesión real cerrada → login
-            window.location.href = "/login";
-          }
+        if (r.error.kind === "config_incompleta" || r.error.kind === "no_autorizado") {
+          handleFetcherError(r.error.kind as "config_incompleta" | "no_autorizado");
         }
         setErr(true);
         return [];

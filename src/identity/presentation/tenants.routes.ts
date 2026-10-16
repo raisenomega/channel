@@ -33,12 +33,19 @@ export function rutaCrearTenant(): RouteDefinition {
       const email = String(body["email"] ?? "").trim();
       const phone = String(body["phone"] ?? "").trim();
       const primaryPhone = String(body["primary_phone"] ?? phone).trim();
+      const countryCode = String(body["country_code"] ?? "PR").trim();
+      const timezone = String(body["timezone"] ?? "America/Puerto_Rico").trim();
+      const defaultLanguage = String(body["default_language"] ?? "es").trim();
+      const plan = String(body["plan"] ?? "lite_starter").trim();
       if (!name || !email || !phone) {
         return jsonResponse(400, { ok: false, error: { kind: "campos_incompletos" } });
       }
       const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
       const result = await handler.ejecutar({
-        name, slug, plan: "lite_starter", ownerEmail: email, ownerUserId: auth.value.userId,
+        name, slug, plan: plan as never, ownerEmail: email, ownerUserId: auth.value.userId,
+        language: defaultLanguage as never,
+        countryCode: countryCode,
+        timezone: timezone,
       });
       if (!result.ok) return jsonResponse(statusDeError(result.error.kind), { ok: false, error: result.error });
       return jsonResponse(201, { ok: true, id: result.value, name, email, phone, primary_phone: primaryPhone });
