@@ -23,9 +23,10 @@ import { buildPayDeps } from "./pay-wrapper.ts";
 import type { PayDeps } from "./pay-wrapper.ts";
 import { buildChannelsDeps } from "./channels-wrapper.ts";
 import type { ChannelsDeps } from "../channels/presentation/channels.routes.ts";
+import { buildDraftsDeps } from "./drafts-wrapper.ts";
+import type { DraftsDeps } from "../cognition/presentation/drafts.routes.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
-
 export interface ServerHandlers {
   processWebhook: ProcessWebhookHandler;
   receiveMessage: ReceiveMessageHandler;
@@ -38,6 +39,7 @@ export interface ServerHandlers {
   stripe: StripeDeps;
   pay: PayDeps;
   channels: ChannelsDeps;
+  drafts: DraftsDeps;
 }
 
 /** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */
@@ -52,7 +54,7 @@ export async function buildHandlers(): Promise<ServerHandlers> {
   const ath = buildAthDeps();
   const pay = buildPayDeps();
   const channels = buildChannelsDeps();
-
+  const drafts = buildDraftsDeps(channelRouter);
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
     receiveMessage: new ReceiveMessageHandler(convRepo),
@@ -67,7 +69,6 @@ export async function buildHandlers(): Promise<ServerHandlers> {
     },
     athConfirm: ath.confirm,
     stripe: buildStripe(),
-    pay,
-    channels,
+    pay, channels, drafts,
   };
 }

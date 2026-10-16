@@ -22,6 +22,7 @@ import { rutaCrearTenant } from "../identity/presentation/tenants.routes.ts";
 import { rutaAgentStatus } from "../cognition/presentation/agents.routes.ts";
 import { rutaRecentActivity } from "../notifications/presentation/activity.routes.ts";
 import { rutaOAuthCallback } from "./oauth-callback.routes.ts";
+import { rutaDraftsPending, rutaDraftsApprove, rutaDraftsReject, rutaDraftsWasCorrect } from "../cognition/presentation/drafts.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
@@ -56,5 +57,9 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     rutaAgentStatus(),
     rutaRecentActivity(),
     rutaOAuthCallback(),
+    rutaDraftsPending(h.drafts),
+    rutaDraftsApprove(h.drafts),
+    rutaDraftsReject(h.drafts),
+    rutaDraftsWasCorrect(h.drafts),
   ];
 }
