@@ -47,3 +47,22 @@ supabase/.temp/
 
 # Reportes del sentinela (locales)
 .sentinel-reports/
+
+# Briefs del Project (NUNCA se commitean — viven solo en claude.ai Project)
+HUB_*_Brief.md
+HUB_*_Anexo*.md
+HUB_Research_*.md
+HUB_Agente_*.md
+HUB_Plan_*.md
+HUB_Backlog_*.md
+HUB_Analisis_*.md
+HUB_Embedding_*.md
+HUB_Alineacion_*.md
+HUB_Protocolo_*.md
+HUB_Documentation_*.md
+RAISEN_*.md
+CEREBRO_*.md
+Constitucion_*.md
+
+# Reportes de auditoria (deliverables, no se versionan)
+REPORTE_R22_AUDITOR.md
