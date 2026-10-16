@@ -4,6 +4,7 @@
  * POST /webhooks/whatsapp — receive messages (firma MANDATORIA)
  * C4 ≤75 lineas.
  */
+// PUBLIC: webhook de WhatsApp Cloud; GET verifica hub.verify_token, POST verifica firma de Meta.
 import type { RouteDefinition, HttpResponse } from "../../../../server/server-types.ts";
 import { verificarFirmaWebhook } from "../../../meta/infrastructure/webhook-verifier.ts";
 import { parsearPayloadMeta } from "../../infrastructure/webhook-payload.parser.ts";

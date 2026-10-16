@@ -10,6 +10,8 @@ export interface CrearTenantCommand {
   readonly slug: string;
   readonly plan: TenantPlan;
   readonly ownerEmail: string;
+  /** userId del JWT que crea el tenant (Compuerta #17). Persistencia en users.role=owner pendiente. */
+  readonly ownerUserId?: string;
   readonly language?: Language;
 }
 

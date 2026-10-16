@@ -1,7 +1,7 @@
 /**
  * HUB by Raisen — GET /pay/:tenantSlug/:orderId/ath-poll (Slide 3.3).
- * Polling público ATH. Verifica que ecommerceId pertenezca a (tenantId, orderId).
- * Reutiliza la lógica findPayment -> authorize -> finalize del BC commerce. C4 <=75.
+ * // PUBLIC: polling publico desde la landing /pay; rate limit 60/min (ip,path), solo expone estado.
+ * Verifica que ecommerceId pertenezca a (tenantId, orderId). Reutiliza la lógica findPayment -> authorize -> finalize del BC commerce. C4 <=75.
  */
 import type { RouteDefinition } from "../../../server/server-types.ts";
 import { RateLimiter } from "../../infrastructure/rate-limit.ts";

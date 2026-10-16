@@ -44,6 +44,9 @@ jobs:
       - name: "Gate: emojis"
         run: pnpm check:emojis
 
+      - name: "Gate: auth (Compuerta 17)"
+        run: pnpm check:auth
+
       - name: "Gate: build pipeline"
         run: pnpm build
 
