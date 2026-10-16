@@ -25,13 +25,14 @@ describe("A-01: RENAME_DASHBOARD", () => {
 describe("A-02: BENTO_NUEVO_3_CARDS", () => {
   it("renders 3 cards EN", () => {
     render(<BentoRowNueva lang={EN} onOpen={vi.fn()} events={[]} />);
-    expect(screen.getByText("Add client")).toBeDefined();
+    // Titulo de card + CTA comparten texto: basta que exista al menos uno.
+    expect(screen.getAllByText("Add client").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("AI Agents status")).toBeDefined();
     expect(screen.getByText("Recent activity")).toBeDefined();
   });
   it("renders 3 cards ES", () => {
     render(<BentoRowNueva lang={ES} onOpen={vi.fn()} events={[]} />);
-    expect(screen.getByText("Agregar cliente")).toBeDefined();
+    expect(screen.getAllByText("Agregar cliente").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Estado de agentes IA")).toBeDefined();
     expect(screen.getByText("Actividad reciente")).toBeDefined();
   });

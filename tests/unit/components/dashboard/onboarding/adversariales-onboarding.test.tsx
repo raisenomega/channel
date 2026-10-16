@@ -53,7 +53,6 @@ describe("A-12: X_ROJA", () => {
 
 describe("A-13: MODELO_TENANT_OMEGA", () => {
   it("pre-flight fields documented in PR body", () => {
-    const { TenantForm } = require("@/components/dashboard/onboarding/tenant-form");
     expect(TenantForm).toBeDefined();
   });
 });

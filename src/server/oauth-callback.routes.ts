@@ -14,7 +14,6 @@ export function rutaOAuthCallback(): RouteDefinition {
       if (!code || !state) {
         return { status: 400, body: JSON.stringify({ ok: false, error: { kind: "oauth_callback_missing_code" } }) };
       }
-      const userId = state.split(":")[0] ?? "";
       const platform = state.split(":")[1] ?? "";
       const callZernio = await fetch("https://api.zernio.io/v1/oauth/callback", {
         method: "POST",
