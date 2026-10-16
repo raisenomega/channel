@@ -82,4 +82,20 @@ export default [
       }],
     },
   },
+  {
+    // Compuerta #19 — fabless: los *-wrapper.ts RECIBEN dependencias reales y las cablean.
+    // Un parametro sin uso (p.ej. `router`) es un bug de DI (los stubs inline disfrazan errores).
+    // NO permite stubs silenciosos: cualquier variable/parametro sin uso es error.
+    files: ["src/server/*-wrapper.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ];

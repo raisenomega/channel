@@ -26,7 +26,10 @@ export class ChannelConnectionsRepo {
     const u = supabaseBase(); const h = supabaseHdrs();
     if (!u || !h) return err("config_incompleta");
     try {
-      const r = await fetch(`${u}/channel_connections`, { method: "POST", headers: h, body: JSON.stringify({ id: conn.id, tenant_id: conn.tenantId, platform: conn.platform, zernio_account_id: conn.zernioAccountId, handle: conn.handle, followers_count: conn.followersCount, status: conn.status, is_primary: conn.isPrimary, is_paused: conn.isPaused, auto_publish_allowed: conn.autoPublishAllowed, created_at: conn.createdAt, updated_at: conn.updatedAt }) });
+      // UPSERT (H-OBS-1): on_conflict por (tenant_id, platform) + Prefer resolution=merge-duplicates.
+      // Asi un reconexion/reejecucion del OAuth actualiza la conexion en lugar de duplicarla (A-04).
+      const hdrs = { ...h, Prefer: "resolution=merge-duplicates" };
+      const r = await fetch(`${u}/channel_connections?on_conflict=tenant_id,platform`, { method: "POST", headers: hdrs, body: JSON.stringify({ id: conn.id, tenant_id: conn.tenantId, platform: conn.platform, zernio_account_id: conn.zernioAccountId, handle: conn.handle, followers_count: conn.followersCount, status: conn.status, is_primary: conn.isPrimary, is_paused: conn.isPaused, auto_publish_allowed: conn.autoPublishAllowed, created_at: conn.createdAt, updated_at: conn.updatedAt }) });
       return r.ok ? ok(undefined) : err(`http_${r.status}`);
     } catch (e) { return err(String(e)); }
   }
