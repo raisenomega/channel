@@ -51,6 +51,7 @@ export class PersistDraftHandler {
       metadata,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      approvedBy: null, approvedAt: null, rejectedReason: null, sentAt: null, providerMessageId: null, wasCorrect: null, feedbackNote: null,
     };
     const r = await this.repo.insertar(draft);
     return r.ok ? ok(r.value) : err({ kind: "REPO_ERROR", causa: r.error.causa });

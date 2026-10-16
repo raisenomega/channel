@@ -22,6 +22,14 @@ export interface AgentDraft {
   readonly metadata: Readonly<Record<string, unknown>>;
   readonly createdAt: string;
   readonly updatedAt: string;
+  // Columnas de aprobacion (Slide 4.2b-2)
+  readonly approvedBy: string | null;
+  readonly approvedAt: string | null;
+  readonly rejectedReason: string | null;
+  readonly sentAt: string | null;
+  readonly providerMessageId: string | null;
+  readonly wasCorrect: boolean | null;
+  readonly feedbackNote: string | null;
 }
 
 export const CANONICAL_PERSONA_SLUGS: ReadonlyArray<string> = Object.freeze(
