@@ -4,6 +4,7 @@
  * Reusa verifyZernioHmac + ZernioAdapter.parseInboundWebhook + ProcessWebhookHandler.
  * C4 <=75.
  */
+// PUBLIC: webhook entrante de Zernio; autenticado por HMAC-SHA256 (X-Zernio-Signature), 401 si falla.
 import type { RouteDefinition } from "../../server/server-types.ts";
 import type { ServerHandlers } from "../../server/server-routes.ts";
 

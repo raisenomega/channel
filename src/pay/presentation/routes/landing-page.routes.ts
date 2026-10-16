@@ -3,6 +3,7 @@
  * Pública (sin JWT, R15). Rate-limited, CSRF-rendered, CSP nonce, escape HTML.
  * C4 ≤75.
  */
+// PUBLIC: landing publica de pago /pay/:slug/:order (R15); defensas R16 escapeHtml, R17 CSP nonce, R18 rate limit.
 import type { RouteDefinition, HttpResponse } from "../../../server/server-types.ts";
 import { LoadPagoPageHandler } from "../../application/load-pago-page.handler.ts";
 import { renderPagoPage } from "../../infrastructure/landing-page.renderer.ts";

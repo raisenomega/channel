@@ -3,6 +3,7 @@
  * Pública + rate-limit + CSRF. Valida phone, llama AthMovilAdapter.cobrar().
  * C4 ≤75.
  */
+// PUBLIC: cobro desde la landing publica; protegido por CSRF token HMAC (X-CSRF-Token) + rate limit.
 import type { RouteDefinition } from "../../../server/server-types.ts";
 import { verificarCsrf } from "../../infrastructure/csrf-token.ts";
 import { RateLimiter } from "../../infrastructure/rate-limit.ts";

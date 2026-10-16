@@ -4,6 +4,7 @@
  * /auth/meta/callback — recibe callback (firma MANDATORIA, state MANDATORIO, single-use)
  * C4 ≤75 lineas.
  */
+// PUBLIC: flujo de signup OAuth Meta; init crea state server-side, callback exige state MANDATORIO single-use.
 import type { RouteDefinition } from "../../../../server/server-types.ts";
 import { tid } from "../../../../server/server-types.ts";
 import { obj } from "../../../../server/server-helpers.ts";

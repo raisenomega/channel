@@ -2,6 +2,7 @@
  * HUB by Raisen — GET /pay/:tenantSlug/:orderId/success|failed (Slide 3.3).
  * Páginas de resultado. Rate-limited. Escape de referenceNumber. C4 <=75.
  */
+// PUBLIC: paginas de resultado success/failed de la landing publica; rate limit, sin datos sensibles.
 import type { RouteDefinition } from "../../../server/server-types.ts";
 import { RateLimiter } from "../../infrastructure/rate-limit.ts";
 import { escapeHtml } from "../../infrastructure/landing-page.renderer.ts";

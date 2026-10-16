@@ -3,6 +3,7 @@
  * contra rawBody, resuelve tenant por account, dispatcha evento.
  * Nunca loguea header Stripe-Signature ni crudos. C4 ≤75 lineas.
  */
+// PUBLIC: webhook de Stripe; autenticado por firma Stripe-Signature via verifier.verify, rechaza si falla.
 import type { RouteDefinition } from "../../../server/server-types.ts";
 import type { StripeWebhookHandler, StripeEvent } from "../../infrastructure/stripe-webhook.handler.ts";
 import { StripeSignatureVerifier } from "../../infrastructure/stripe-signature.verifier.ts";

@@ -20,6 +20,7 @@
     "check:lines": "bash scripts/check-lines.sh",
     "check:layers": "bash scripts/check-layers.sh",
     "check:emojis": "bash scripts/check-emojis.sh",
+    "check:auth": "bash scripts/check-auth.sh",
     "check:build": "rm -rf dist/ && pnpm exec tsc --project tsconfig.build.json",
     "check:server-smoke": "bash scripts/check-server-smoke.sh",
     "check:tanstack": "cd apps/tanstack && pnpm typecheck",
