@@ -2,8 +2,7 @@
  * HUB by Raisen — Construcción de dependencias y handlers del servidor.
  */
 import { ProcessWebhookHandler } from "../channels/application/process-webhook.handler.ts";
-import { ChannelRouter } from "../channels/application/channel.router.ts";
-import { DevChannelAdapter } from "../channels/infrastructure/dev-channel.adapter.ts";
+import { buildChannelRouter } from "./channel-router-wrapper.ts";
 import { ReceiveMessageHandler } from "../inbox/application/receive-message.handler.ts";
 import { SendMessageHandler } from "../inbox/application/send-message.handler.ts";
 import { CreateQuoteHandler } from "../commerce/application/create-quote.handler.ts";
@@ -44,12 +43,11 @@ export interface ServerHandlers {
 /** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */
 const quoteRepo: QuoteRepository = { async guardar() { return { ok: true as const, value: undefined }; }, async buscar() { return { ok: true as const, value: null }; } };
 
-export function buildHandlers(): ServerHandlers {
+export async function buildHandlers(): Promise<ServerHandlers> {
   const convRepo = new ConversationRepositorySupabase();
   const msgRepo = new MessageRepositorySupabase();
   const consentRepo = new ConsentRepositorySupabase();
-  const channelRouter = new ChannelRouter();
-  channelRouter.registrar(new DevChannelAdapter());
+  const channelRouter = await buildChannelRouter();
   const notifRepo = new SupabaseNotificationRepo();
   const ath = buildAthDeps();
   const pay = buildPayDeps();

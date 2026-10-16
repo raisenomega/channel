@@ -20,7 +20,7 @@ import type { RequestContext } from "./server-types.ts";
 const PORT = parseInt(nodeProcess.env["PORT"] ?? "8080", 10);
 const HOST = nodeProcess.env["HOST"] ?? "0.0.0.0";
 
-const handlers = buildHandlers();
+const handlers = await buildHandlers();
 const routes = registrarRutas(handlers);
 
 const server = http.createServer(async (req, res) => {
