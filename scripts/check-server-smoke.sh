@@ -23,7 +23,7 @@ export STRIPE_SECRET_KEY="sk_test_smoke"
 export STRIPE_WEBHOOK_SECRET="whsec_smoke"
 export STRIPE_API_VERSION="2024-10-28.acacia"
 export ATH_MOVIL_STUB="1"
-export CSRF_SECRET="a".repeat(64)
+export CSRF_SECRET=$(openssl rand -hex 32)
 export HUB_PUBLIC_URL="http://localhost:18080"
 
 node dist/server/hub.server.js &
