@@ -43,7 +43,7 @@ export class NativeWebchatAdapter implements ChannelAdapter {
     }
   }
 
-  verifyWebhook(signature: string, _body: string): boolean {
+  async verifyWebhook(signature: string, _body: string): Promise<boolean> {
     return signature.length > 0;
   }
 
