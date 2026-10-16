@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # HUB — compuerta "server-smoke" (Sentinela).
 # Verifica que `pnpm start` arranca sin crashear por al menos 3 segundos.
+echo "[SMOKE] Compilando dist/ antes del smoke..."
+pnpm build || { echo "[SMOKE] build fallo — abortando"; exit 1; }
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
