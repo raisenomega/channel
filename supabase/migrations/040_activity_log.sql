@@ -16,8 +16,9 @@ CREATE INDEX IF NOT EXISTS idx_activity_log_tenant ON public.activity_log(tenant
 
 ALTER TABLE public.activity_log ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS activity_log_tenant_isolation ON public.activity_log;
 CREATE POLICY activity_log_tenant_isolation ON public.activity_log
-  FOR ALL USING (tenant_id = auth.jwt() ->> 'tenant_id'::text::uuid);
+  FOR ALL USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
 COMMENT ON TABLE public.activity_log IS
   'Log de eventos recientes del tenant para el Dashboard.';
