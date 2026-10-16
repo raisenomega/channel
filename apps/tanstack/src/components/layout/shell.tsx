@@ -4,7 +4,7 @@ import { t } from "@/lib/i18n";
 import { BottomNav, type NavItem } from "./bottom-nav";
 
 const LINKS: NavItem[] = [
-  { to: "/inbox", label: "nav.inbox" },
+  { to: "/inbox", label: "nav.dashboard" },
   { to: "/contacts", label: "nav.contacts" },
   { to: "/quotes", label: "nav.quotes" },
   { to: "/orders", label: "nav.orders" },

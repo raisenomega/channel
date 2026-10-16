@@ -4,7 +4,7 @@
 import type { Dict } from "./i18n-types";
 
 export const esCore: Dict = {
-  "nav.inbox": "Inbox",
+  "nav.inbox": "Dashboard",
   "nav.agent": "IA",
   "nav.channels": "Canales",
   "nav.settings": "Ajustes",
