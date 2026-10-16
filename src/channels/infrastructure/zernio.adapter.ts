@@ -28,7 +28,7 @@ export class ZernioAdapter implements ChannelAdapter {
   }
 
   async sendTemplate(params: SendTemplateParams): Promise<Result<void, AdapterError>> {
-    const r = await conReintentos(() => this.post("/v1/templates", { ...params }), RETRY_CFG);
+    const r = await conReintentos(() => this.post("/v1/whatsapp/templates", { ...params }), RETRY_CFG);
     if (!r.ok) return err({ kind: "retry_agotado", intentos: r.error.intentos, ultimo_error: r.error.ultimo_error });
     return ok(undefined);
   }
