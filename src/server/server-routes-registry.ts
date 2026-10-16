@@ -18,6 +18,10 @@ import { rutaAthPoll } from "../pay/presentation/routes/ath-poll.routes.ts";
 import { rutaPagoSuccess, rutaPagoFailed } from "../pay/presentation/routes/pago-result.routes.ts";
 import { rutaConnectUrl, rutaZernioSync, rutaConnectedAccounts, rutaListChannels } from "../channels/presentation/channels.routes.ts";
 import { handleZernioWebhook } from "../channels/presentation/webhooks.zernio.routes.ts";
+import { rutaCrearTenant } from "../identity/presentation/tenants.routes.ts";
+import { rutaAgentStatus } from "../cognition/presentation/agents.routes.ts";
+import { rutaRecentActivity } from "../notifications/presentation/activity.routes.ts";
+import { rutaOAuthCallback } from "./oauth-callback.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
@@ -48,5 +52,9 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     rutaConnectedAccounts(h.channels),
     rutaListChannels(h.channels),
     handleZernioWebhook(h),
+    rutaCrearTenant(),
+    rutaAgentStatus(),
+    rutaRecentActivity(),
+    rutaOAuthCallback(),
   ];
 }

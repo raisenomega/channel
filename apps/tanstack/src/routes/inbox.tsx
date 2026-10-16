@@ -11,6 +11,8 @@ import { CANALES, calcularStats, fetchInbox } from "./inbox/inbox-mappers";
 import { FiltersBar } from "./inbox/inbox-sections";
 import { ConversationList } from "./inbox/inbox-list";
 import { KpiRow, WidgetsRow } from "./inbox/inbox-widgets";
+import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
+import { useRecentActivity } from "@/hooks/useRecentActivity";
 
 const InboxRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -46,12 +48,15 @@ function InboxPage() {
     );
   }
 
+  const { events } = useRecentActivity();
+  const handleOpenOnboarding = () => void navigate({ to: "/onboarding/tenant" });
   const sinDatos = items === undefined || items.length === 0;
 
   return (
     <div className="view">
       <KpiRow language={language} stats={stats} total={items?.length ?? 0} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={sinDatos} />
+      <BentoRowNueva lang={language} onOpen={handleOpenOnboarding} events={events} />
       <FiltersBar
         language={language}
         canalesActivos={canalesActivos}
