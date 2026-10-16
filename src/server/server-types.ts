@@ -12,6 +12,7 @@ export interface RequestContext {
   readonly body: unknown;
   readonly rawBody: string | null;
   readonly jwt: string | null;
+  readonly params: Readonly<Record<string, string>>;
 }
 
 export interface HttpResponse {
