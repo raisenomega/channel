@@ -4,6 +4,7 @@
  * Sin JWT (es redirect del navegador, publica). Defensa: state validado por forma.
  * C4 <=75.
  */
+// PUBLIC: GET /oauth/callback redirect de Meta OAuth via Zernio; sin JWT (browser redirect), defensa state validado por forma (STATE_RE) + code regex, persiste channel_connections tras exito.
 import type { RouteDefinition, RequestContext } from "./server-types.ts";
 import { ejecutarOAuthLink } from "../channels/infrastructure/oauth-callback.linker.ts";
 import { ChannelConnectionsRepo } from "../channels/infrastructure/channel-connections.repository.ts";
