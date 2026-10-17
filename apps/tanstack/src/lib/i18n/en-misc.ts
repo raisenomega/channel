@@ -42,4 +42,5 @@ export const enMisc: Dict = {
   "nav.automation": "Automation",
   "nav.reports": "Reports",
   "nav.sla": "SLA",
+  "nav.logout": "Log out",
 };
