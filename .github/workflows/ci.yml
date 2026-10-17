@@ -52,8 +52,16 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
+      - name: "Compuerta #21 — ESLint no-raw-login-redirect"
+        run: pnpm run check:eslint-no-raw-login
+        continue-on-error: true
+
       - name: "Gate: build pipeline"
         run: pnpm build
 
       - name: "Gate: server smoke"
         run: pnpm check:server-smoke
+
+      - name: "Compuerta #21 — ESLint no-raw-login-redirect"
+        run: pnpm run check:eslint-no-raw-login
+        continue-on-error: true
