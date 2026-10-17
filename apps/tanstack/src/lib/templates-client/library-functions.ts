@@ -2,14 +2,15 @@
  * HUB by Raisen — Cliente de plantillas WhatsApp: importar/actualizar (Slide 4.9).
  * C4 <=75. Funciones separadas por limite de lineas. Sin throw. Sin any.
  */
-import { apiFetch, resolveTenantId } from "../api-client";
+import { apiFetch } from "../api-client";
+import { ensureTenantId, errorSinTenant } from "../tenant-client/mi-tenant";
 import type { TemplateError, Result } from "./types";
 
 interface SimpleResponse { ok: boolean; error?: { kind: string; cause?: string } }
 
 export async function importarLibrary(nombre: string, language: string): Promise<Result<void, TemplateError>> {
-  const tenantId = resolveTenantId();
-  if (!tenantId) return { ok: false, error: { kind: "config_incompleta" } };
+  const tenantId = await ensureTenantId();
+  if (!tenantId) return { ok: false, error: errorSinTenant() };
   try {
     const res = await apiFetch(`/tenants/${tenantId}/templates/${encodeURIComponent(nombre)}/import-library`, {
       method: "POST", body: JSON.stringify({ libraryTemplateName: nombre, language }),
@@ -27,8 +28,8 @@ export async function importarLibrary(nombre: string, language: string): Promise
 export async function actualizarTemplate(
   templateName: string, edits: { body?: string; category?: string; footer?: string },
 ): Promise<Result<void, TemplateError>> {
-  const tenantId = resolveTenantId();
-  if (!tenantId) return { ok: false, error: { kind: "config_incompleta" } };
+  const tenantId = await ensureTenantId();
+  if (!tenantId) return { ok: false, error: errorSinTenant() };
   try {
     const res = await apiFetch(`/tenants/${tenantId}/templates/${encodeURIComponent(templateName)}`, {
       method: "PATCH", body: JSON.stringify(edits),

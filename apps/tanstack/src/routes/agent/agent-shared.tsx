@@ -42,12 +42,14 @@ export const ESCALATION_ITEMS = [
   { key: "agent.askHuman" },
 ] as const;
 
-export function ErrorCard({ message }: { message: string }) {
+/** L-4: `detail` muestra la causa REAL del fallo (status / mensaje), no un error generico. */
+export function ErrorCard({ message, detail }: { message: string; detail?: string }) {
   const { language } = usePreferences();
   return (
     <Card className="mb-4 border-critical/30">
       <CardBody className="flex flex-col items-center py-6 text-center">
         <p className="text-sm text-critical">{message}</p>
+        {detail ? <p className="mt-1 text-xs text-dim" data-testid="agent-error-detail">{detail}</p> : null}
         <button
           type="button"
           onClick={() => window.location.reload()}

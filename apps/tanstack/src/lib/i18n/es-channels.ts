@@ -22,4 +22,6 @@ export const esChannels: Dict = {
   "channels.error": "No se pudieron cargar los canales.",
   "channels.retry": "Reintentar",
   "channels.providerNone": "Sin proveedor",
+  "channels.needTenant": "Necesitas crear un cliente antes de conectar canales.",
+  "channels.createClient": "Crear cliente",
 };

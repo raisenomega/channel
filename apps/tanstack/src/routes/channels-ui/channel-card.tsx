@@ -20,21 +20,25 @@ function navigateCard(e: React.KeyboardEvent, navigate: ReturnType<typeof useNav
 }
 
 export function ChannelCard({
-  language, kind, canal, esAbierto, onToggleExpand,
+  language, kind, canal, esAbierto, onToggleExpand, disabled = false,
 }: {
   language: Idioma;
   kind: ChannelKind;
   canal: Channel | undefined;
   esAbierto: boolean;
   onToggleExpand: () => void;
+  /** L-2: sin tenant la card se ve pero no navega al detalle (nada que configurar aun). */
+  disabled?: boolean;
 }) {
   const navigate = useNavigate();
   const state = canal?.state ?? "desconectado";
 
   return (
-    <Card className={canal ? "cursor-pointer" : "cursor-pointer opacity-80"} role="button" tabIndex={0}
-      onClick={() => void navigate({ to: "/channels/$channelId", params: { channelId: kind } })}
-      onKeyDown={(e) => navigateCard(e, navigate, kind)}
+    <Card data-testid="channel-card" aria-disabled={disabled}
+      className={disabled ? "cursor-not-allowed opacity-70" : canal ? "cursor-pointer" : "cursor-pointer opacity-80"}
+      role="button" tabIndex={disabled ? -1 : 0}
+      onClick={() => { if (!disabled) void navigate({ to: "/channels/$channelId", params: { channelId: kind } }); }}
+      onKeyDown={(e) => { if (!disabled) navigateCard(e, navigate, kind); }}
     >
       <div className="flex items-center gap-3">
         <span className="text-primary"><ChannelIcon kind={kind} className="size-6" /></span>
@@ -47,7 +51,8 @@ export function ChannelCard({
           <Switch checked={canal?.active ?? false} disabled={!canal} onChange={(v) => onToggleCanal(canal, v)} />
         </span>
       </CardHeader>
-      <Button variant="ghost" size="sm" className="w-full" onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}>
+      <Button variant="ghost" size="sm" className="w-full" disabled={disabled}
+        onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}>
         {t(language, "channels.config")}
       </Button>
       {esAbierto ? <CardBody className="mt-2 border-t border-border/40 pt-3"><ConfigRows language={language} canal={canal} kind={kind} /></CardBody> : null}

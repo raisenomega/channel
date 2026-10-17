@@ -41,4 +41,6 @@ export const esTemplates: Dict = {
   "templates.bodyPreview": "Vista previa:",
   "templates.category": "Categoría",
   "templates.name": "Nombre",
+  "templates.needTenant": "Necesitas crear un cliente antes de gestionar plantillas.",
+  "templates.createClient": "Crear cliente",
 };

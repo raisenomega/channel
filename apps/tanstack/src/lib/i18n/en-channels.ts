@@ -22,4 +22,6 @@ export const enChannels: Dict = {
   "channels.error": "Could not load channels.",
   "channels.retry": "Retry",
   "channels.providerNone": "No provider",
+  "channels.needTenant": "You need to create a client before connecting channels.",
+  "channels.createClient": "Create client",
 };
