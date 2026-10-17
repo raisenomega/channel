@@ -16,10 +16,16 @@ export function resolveUserRole(): string | null {
   return typeof meta?.role === "string" ? meta.role : null;
 }
 
+/** Redirect duro a /login. Única fuente del redirect (Compuerta #21); logout (H5) y fetchers lo reutilizan. */
+export function redirectToLogin(): void {
+  if (typeof window === "undefined") return;
+  window.location.href = "/login";
+}
+
 export function handleFetcherError(kind: "config_incompleta" | "no_autorizado"): void {
   if (typeof window === "undefined") return;
   // L-1: solo la sesion caida justifica un redirect duro. config_incompleta se
   // queda en la pagina (9 cards de canales, tabs de templates, banner con CTA).
   if (kind !== "no_autorizado") return;
-  window.location.href = "/login";
+  redirectToLogin();
 }
