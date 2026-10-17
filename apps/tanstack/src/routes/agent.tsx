@@ -40,7 +40,7 @@ function AgentPage() {
     <div className="view">
       <AgentHeader language={language} metrics={metrics} hasError={!!metricsError} />
       {metricsError ? (
-        <ErrorCard message={t(language, "common.error")} />
+        <ErrorCard message={t(language, "common.error")} detail={metricsError.message} />
       ) : metrics && metrics.totalInteractions > 0 ? (
         <KpiGrid metrics={metrics} language={language} />
       ) : metrics && metrics.totalInteractions === 0 ? (
@@ -54,7 +54,7 @@ function AgentPage() {
       <ProviderConfigCard language={language} metrics={metrics} hasError={!!metricsError} />
       <AutonomyCard language={language} />
       <EscalateCard language={language} />
-      {safeError ? <ErrorCard message={t(language, "common.error")} /> : <SafePanel safe={safe} language={language} />}
+      {safeError ? <ErrorCard message={t(language, "common.error")} detail={safeError.message} /> : <SafePanel safe={safe} language={language} />}
     </div>
   );
 }

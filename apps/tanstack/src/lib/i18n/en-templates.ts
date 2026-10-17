@@ -41,4 +41,6 @@ export const enTemplates: Dict = {
   "templates.bodyPreview": "Preview:",
   "templates.category": "Category",
   "templates.name": "Name",
+  "templates.needTenant": "You need to create a client before managing templates.",
+  "templates.createClient": "Create client",
 };

@@ -1,30 +1,39 @@
+/**
+ * HUB by Raisen — Fetchers de /channels (Hotfix L-2).
+ * L-2: config_incompleta YA NO llama a handleFetcherError (cero redirect). La
+ * pagina sigue en /channels y renderiza el CATALOGO completo + banner con CTA.
+ * Solo no_autorizado (sesion caida) delega al helper -> /login.
+ * C4 <=75.
+ */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listarCanales, toggleCanal } from "@/lib/channels-client";
 import { handleFetcherError } from "@/lib/redirect-on-error";
-import type { Channel } from "@/lib/channels-client";
+import type { Channel, ChannelError } from "@/lib/channels-client";
+
+export type CanalesErrKind = ChannelError["kind"] | null;
 
 export function useCanales() {
-  const [err, setErr] = useState(false);
+  const [errKind, setErrKind] = useState<CanalesErrKind>(null);
 
   const query = useQuery({
     queryKey: ["channels"],
     queryFn: async () => {
       const r = await listarCanales();
       if (!r.ok) {
-        if (r.error.kind === "config_incompleta" || r.error.kind === "no_autorizado") {
-          handleFetcherError(r.error.kind as "config_incompleta" | "no_autorizado");
+        if (r.error.kind === "no_autorizado") {
+          handleFetcherError("no_autorizado");
         }
-        setErr(true);
+        setErrKind(r.error.kind);
         return [];
       }
-      setErr(false);
+      setErrKind(null);
       return r.value;
     },
     staleTime: 30_000,
   });
 
-  return { ...query, err };
+  return { ...query, errKind, err: errKind !== null };
 }
 
 export function onToggleCanal(canal: Channel | undefined, v: boolean) {

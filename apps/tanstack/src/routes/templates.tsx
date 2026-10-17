@@ -1,16 +1,17 @@
 /**
  * HUB by Raisen — Ruta /templates (Slide 4.9). Dos tabs: Mis templates + Library.
- * C4 <=75. Usa useState para tab activo + useQuery para carga.
+ * Hotfix L-3: los tabs se renderizan SIEMPRE (con o sin tenant); sin tenant la
+ * lista queda vacia con banner CTA, nunca un redirect al wizard.
+ * C4 <=75.
  */
 import { useState } from "react";
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
-import { useQuery } from "@tanstack/react-query";
 import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { handleFetcherError } from "@/lib/redirect-on-error";
-import { listarTemplates } from "@/lib/templates-client/functions";
+import { NeedTenantBanner } from "@/components/ui/need-tenant-banner";
+import { useTemplates } from "./templates-ui/templates-fetchers";
 import { TemplatesList } from "./templates-ui/templates-list";
 import { TemplateCreateForm } from "./templates-ui/template-create-form";
 import { LibraryImport } from "./templates-ui/library-import";
@@ -26,26 +27,13 @@ type TabKey = "mine" | "library";
 function TemplatesPage() {
   const { language } = usePreferences();
   const [tab, setTab] = useState<TabKey>("mine");
-
-  const query = useQuery({
-    queryKey: ["templates"],
-    queryFn: async () => {
-      const r = await listarTemplates();
-      if (!r.ok) {
-        if (r.error.kind === "config_incompleta" || r.error.kind === "no_autorizado") {
-          handleFetcherError(r.error.kind as "config_incompleta" | "no_autorizado");
-        }
-        return { templates: [], syncFailed: false };
-      }
-      return r.value;
-    },
-    staleTime: 10_000,
-  });
+  const query = useTemplates();
+  const vista = query.data;
 
   return (
     <div className="view">
       <h2 className="mb-1 text-lg font-bold text-foreground">{t(language, "templates.title")}</h2>
-      <div className="flex gap-2 mb-3">
+      <div className="flex gap-2 mb-3" data-testid="templates-tabs">
         <Button variant={tab === "mine" ? "primary" : "ghost"} size="sm"
           onClick={() => setTab("mine")}>
           {t(language, "templates.tab.mine")}
@@ -56,13 +44,20 @@ function TemplatesPage() {
         </Button>
       </div>
 
+      {vista?.needTenant ? <NeedTenantBanner language={language} prefijo="templates" /> : null}
+      {vista?.fallo ? (
+        <div className="mb-4 rounded-2xl glass-card p-4 text-sm text-critical" data-testid="templates-error">
+          {t(language, "templates.error")}
+        </div>
+      ) : null}
+
       {query.isPending ? (
         <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
           {t(language, "templates.loading")}
         </div>
       ) : tab === "mine" ? (
         <>
-          <TemplatesList language={language} templates={query.data?.templates ?? []} syncFailed={query.data?.syncFailed ?? false} />
+          <TemplatesList language={language} templates={vista?.templates ?? []} syncFailed={vista?.syncFailed ?? false} />
           <div className="mt-4">
             <TemplateCreateForm language={language} onCreated={() => void query.refetch()} />
           </div>

@@ -3,13 +3,14 @@
  * Reemplaza Supabase REST directo por apiFetch a GET /tenants/:id/channels.
  * toggleCanal devuelve not_implemented (no existe PATCH backend aun). C4 <=75.
  */
-import { apiFetch, resolveTenantId } from "../api-client";
+import { apiFetch } from "../api-client";
+import { ensureTenantId, errorSinTenant } from "../tenant-client/mi-tenant";
 import type { Channel, ChannelError, Result } from "./types";
 import type { ChannelKind } from "@/components/ui/channel-icon";
 
 export async function listarCanales(): Promise<Result<Channel[], ChannelError>> {
-  const tenantId = resolveTenantId();
-  if (!tenantId) return { ok: false, error: { kind: "config_incompleta" } };
+  const tenantId = await ensureTenantId();
+  if (!tenantId) return { ok: false, error: errorSinTenant() };
   try {
     const res = await apiFetch(`/tenants/${tenantId}/channels`);
     if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };

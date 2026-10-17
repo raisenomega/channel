@@ -2,7 +2,8 @@
  * HUB by Raisen — Cliente de plantillas WhatsApp contra backend HUB (Slide 4.9).
  * C4 <=75. listarTemplates + crearTemplate. Sin throw. Sin any.
  */
-import { apiFetch, resolveTenantId } from "../api-client";
+import { apiFetch } from "../api-client";
+import { ensureTenantId, errorSinTenant } from "../tenant-client/mi-tenant";
 import type { WhatsAppTemplate, TemplateError, Result, TemplateStatus } from "./types";
 
 interface ListaResponse {
@@ -13,8 +14,8 @@ interface CreaResponse {
 }
 
 export async function listarTemplates(): Promise<Result<{ templates: WhatsAppTemplate[]; syncFailed: boolean }, TemplateError>> {
-  const tenantId = resolveTenantId();
-  if (!tenantId) return { ok: false, error: { kind: "config_incompleta" } };
+  const tenantId = await ensureTenantId();
+  if (!tenantId) return { ok: false, error: errorSinTenant() };
   try {
     const res = await apiFetch(`/tenants/${tenantId}/templates`);
     if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };
@@ -41,8 +42,8 @@ export async function listarTemplates(): Promise<Result<{ templates: WhatsAppTem
 export async function crearTemplate(input: {
   name: string; language: string; category: string; body: string;
 }): Promise<Result<{ id: string; status: string } | null, TemplateError>> {
-  const tenantId = resolveTenantId();
-  if (!tenantId) return { ok: false, error: { kind: "config_incompleta" } };
+  const tenantId = await ensureTenantId();
+  if (!tenantId) return { ok: false, error: errorSinTenant() };
   try {
     const res = await apiFetch(`/tenants/${tenantId}/templates`, {
       method: "POST", body: JSON.stringify(input),
