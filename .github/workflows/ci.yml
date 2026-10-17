@@ -39,7 +39,6 @@ jobs:
 
       - name: Tests de integración
         run: pnpm test:integration
-        continue-on-error: true
 
       - name: "Gate: emojis"
         run: pnpm check:emojis
@@ -54,14 +53,9 @@ jobs:
 
       - name: "Compuerta #21 — ESLint no-raw-login-redirect"
         run: pnpm run check:eslint-no-raw-login
-        continue-on-error: true
 
       - name: "Gate: build pipeline"
         run: pnpm build
 
       - name: "Gate: server smoke"
         run: pnpm check:server-smoke
-
-      - name: "Compuerta #21 — ESLint no-raw-login-redirect"
-        run: pnpm run check:eslint-no-raw-login
-        continue-on-error: true
