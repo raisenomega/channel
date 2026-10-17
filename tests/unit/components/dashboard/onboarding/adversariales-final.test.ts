@@ -8,11 +8,12 @@ import { existsSync, readFileSync } from "node:fs";
 
 const SHELL = "apps/tanstack/src/components/dashboard/onboarding/tenant-wizard-shell.tsx";
 
-describe("A-14: SUBCHIP_NO_URL_CHANGE", () => {
-  it("TenantWizardShell uses state not router for sub-chips", () => {
+describe("A-14: PASO_STATE_NO_URL_CHANGE", () => {
+  it("TenantWizardShell uses state (paso) not router for slide navigation", () => {
     const src = readFileSync(SHELL, "utf8");
-    expect(src).toContain('useState<SubChip>("basicos")');
-    expect(src).toContain("onClick={() => setChip(c)}");
+    expect(src).toContain("setPaso(2)");
+    expect(src).toContain("setPaso(1)");
+    expect(src).toContain("const [paso, setPaso] = useState");
     expect(src).not.toMatch(/useSearch\(|search:\s*\{|to:\s*"\/onboarding/);
   });
 });

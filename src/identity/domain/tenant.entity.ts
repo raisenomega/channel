@@ -26,6 +26,8 @@ export const crearTenant = (
   slug: string,
   plan: TenantPlan,
   language: Language = "es",
+  countryCode = "PR",
+  timezone = "America/Puerto_Rico",
 ): Result<TenantState, TenantCreateError> => {
   if (!name || name.trim().length === 0) {
     return err({ kind: "nombre_vacio" });
@@ -39,8 +41,8 @@ export const crearTenant = (
     name: name.trim(),
     slug: slug.trim().toLowerCase(),
     plan,
-    countryCode: "PR",
-    timezone: "America/Puerto_Rico",
+    countryCode,
+    timezone,
     language,
     featuresEnabled: Object.freeze({}),
     status: "active",

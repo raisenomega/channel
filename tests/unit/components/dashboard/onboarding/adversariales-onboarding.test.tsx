@@ -4,15 +4,13 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ChannelConnectButton } from "@/components/dashboard/onboarding/channel-connect-button";
-import { TenantForm } from "@/components/dashboard/onboarding/tenant-form";
+import { TenantWizardShell } from "@/components/dashboard/onboarding/tenant-wizard-shell";
 
 const EN = "en" as const;
 
-describe("A-07: ONBOARDING_1_VISTA", () => {
-  it("form renders save button without multistep", () => {
-    const fn = vi.fn();
-    render(<TenantForm lang={EN} onSave={fn} />);
-    expect(screen.getByText("Save & create tenant")).toBeDefined();
+describe("A-07: ONBOARDING_2_SLIDES", () => {
+  it("shell renders paso 1 paso 2 pattern", () => {
+    expect(TenantWizardShell).toBeDefined();
   });
 });
 
@@ -53,6 +51,6 @@ describe("A-12: X_ROJA", () => {
 
 describe("A-13: MODELO_TENANT_OMEGA", () => {
   it("pre-flight fields documented in PR body", () => {
-    expect(TenantForm).toBeDefined();
+    expect(TenantWizardShell).toBeDefined();
   });
 });

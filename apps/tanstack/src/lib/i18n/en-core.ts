@@ -4,7 +4,6 @@
 import type { Dict } from "./i18n-types";
 
 export const enCore: Dict = {
-  "nav.inbox": "Dashboard",
   "nav.dashboard": "Dashboard",
   "nav.contacts": "Contacts",
   "nav.quotes": "Quotes",
@@ -14,7 +13,15 @@ export const enCore: Dict = {
   "nav.reports": "Reports",
   "nav.agent": "AI",
   "nav.channels": "Channels",
+  "nav.templates": "Templates",
   "nav.settings": "Settings",
+
+  "onboard.step1.title": "Step 1/2 · Client data",
+  "onboard.step2.title": "Step 2/2 · Connect networks",
+  "onboard.saveFinal": "Create client",
+  "common.back": "Back",
+  "common.next": "Next →",
+
   "kpi.tenant": "Tenant",
   "kpi.wasCorrect": "AI Was Correct",
   "kpi.salesChat": "Chat sales",

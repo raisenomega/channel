@@ -21,12 +21,11 @@ export interface CrearTenantCommand {
   /** sub del JWT que crea el tenant (Compuerta #17). Obligatorio. */
   readonly ownerUserId: string;
   readonly language?: Language;
+  readonly countryCode?: string;
+  readonly timezone?: string;
 }
 
-export type CrearTenantError =
-  | TenantCreateError
-  | UserCreateError
-  | RepoError
+export type CrearTenantError = TenantCreateError | UserCreateError | RepoError
   | { readonly kind: "email_invalido" }
   | { readonly kind: "owner_requerido" }
   | { readonly kind: "tenant_ya_existe"; readonly tenantId: string }
@@ -50,7 +49,7 @@ export class CrearTenantHandler {
     const email = Email.crear(cmd.ownerEmail);
     if (!email.ok) return err({ kind: "email_invalido" });
 
-    const tenantResult = crearTenant(cmd.name, cmd.slug, cmd.plan, lang);
+    const tenantResult = crearTenant(cmd.name, cmd.slug, cmd.plan, lang, cmd.countryCode, cmd.timezone);
     if (!tenantResult.ok) return err(tenantResult.error);
     const tenant = tenantResult.value;
 
