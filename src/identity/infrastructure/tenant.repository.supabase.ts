@@ -16,9 +16,7 @@ export class TenantRepositorySupabase implements TenantRepository {
       });
       if (error) return err({ kind: "persistence_failure", cause: error.message });
       return ok(undefined);
-    } catch (e) {
-      return err({ kind: "persistence_failure", cause: String(e) });
-    }
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
   }
 
   async buscar(id: TenantId): Promise<Result<TenantState | null, RepoError>> {
@@ -26,9 +24,7 @@ export class TenantRepositorySupabase implements TenantRepository {
       const { data, error } = await supabase.from("tenants").select("*").eq("id", id).single();
       if (error) return err({ kind: "persistence_failure", cause: error.message });
       return ok(data ? this.mapear(data) : null);
-    } catch (e) {
-      return err({ kind: "persistence_failure", cause: String(e) });
-    }
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
   }
 
   async buscarPorSlug(slug: string): Promise<Result<TenantState | null, RepoError>> {
@@ -37,20 +33,26 @@ export class TenantRepositorySupabase implements TenantRepository {
       if (error && error.code === "PGRST116") return ok(null);
       if (error) return err({ kind: "persistence_failure", cause: error.message });
       return ok(data ? this.mapear(data) : null);
-    } catch (e) {
-      return err({ kind: "persistence_failure", cause: String(e) });
-    }
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
+  }
+
+  // UPDATE puntual de tenants (trigger trg_tenants_updated_at bumpea updated_at).
+  private async actualizar(id: TenantId, patch: Record<string, unknown>): Promise<Result<void, RepoError>> {
+    try {
+      const { error } = await supabase.from("tenants").update(patch).eq("id", id);
+      if (error) return err({ kind: "persistence_failure", cause: error.message });
+      return ok(undefined);
+    } catch (e) { return err({ kind: "persistence_failure", cause: String(e) }); }
   }
 
   // O-6: persiste el profile Zernio del tenant (idempotente desde ensureProfileForTenant).
-  async actualizarZernioProfileId(id: TenantId, zernioProfileId: string): Promise<Result<void, RepoError>> {
-    try {
-      const { error } = await supabase.from("tenants").update({ zernio_profile_id: zernioProfileId }).eq("id", id);
-      if (error) return err({ kind: "persistence_failure", cause: error.message });
-      return ok(undefined);
-    } catch (e) {
-      return err({ kind: "persistence_failure", cause: String(e) });
-    }
+  actualizarZernioProfileId(id: TenantId, zernioProfileId: string): Promise<Result<void, RepoError>> {
+    return this.actualizar(id, { zernio_profile_id: zernioProfileId });
+  }
+
+  // R-3/R-4: edit-number. Solo phone (ya validado E.164 por el handler).
+  actualizarTelefono(id: TenantId, phone: string): Promise<Result<void, RepoError>> {
+    return this.actualizar(id, { phone });
   }
 
   private mapear(row: Record<string, unknown>): TenantState {

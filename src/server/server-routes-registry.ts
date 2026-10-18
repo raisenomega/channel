@@ -20,6 +20,8 @@ import { rutaConnectUrl, rutaZernioSync, rutaConnectedAccounts, rutaListChannels
 import { registrarOAuthChannelsRutas } from "./oauth-channels-wrapper.ts";
 import { handleZernioWebhook } from "../channels/presentation/webhooks.zernio.routes.ts";
 import { rutaCrearTenant } from "../identity/presentation/tenants.routes.ts";
+import { rutaActualizarTenant } from "../identity/presentation/tenant-update.routes.ts";
+import { TenantRepositorySupabase } from "../identity/infrastructure/tenant.repository.supabase.ts";
 import { rutaAgentStatus } from "../cognition/presentation/agents.routes.ts";
 import { rutaRecentActivity } from "../notifications/presentation/activity.routes.ts";
 import { rutaOAuthCallback } from "./oauth-callback.routes.ts";
@@ -57,6 +59,7 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     ...registrarOAuthChannelsRutas(),
     handleZernioWebhook(h),
     rutaCrearTenant(),
+    ((r) => rutaActualizarTenant({ buscar: (id) => r.buscar(id), actualizarTelefono: (id, p) => r.actualizarTelefono(id, p) }))(new TenantRepositorySupabase()), // R-3/R-4 PATCH /tenants/:id
     rutaAgentStatus(),
     rutaRecentActivity(),
     rutaOAuthCallback(),
