@@ -30,7 +30,12 @@ export function SlideDatosCliente({ language, data, onChange, onGoToStep2 }: {
       {opts.map((o) => typeof o === "string" ? <option key={o}>{o}</option> : <option key={o[0]} value={o[0]}>{o[1]}</option>)}
     </select>;
 
-  const valid = () => data.name.trim().length > 0 && E164_RE.test(data.phone) && data.plan.length > 0;
+  // M-11 (D-39-bis): el "Siguiente" se deshabilita si falta algo; antes era mudo.
+  const motivo = !data.name.trim() ? "Falta el nombre comercial"
+    : !E164_RE.test(data.phone) ? "Teléfono en formato E.164 (ej. +17871234567)"
+    : !data.plan ? "Elige un plan"
+    : "";
+  const valid = () => motivo === "";
 
   return (
     <div className="flex flex-col gap-3 p-3" style={{ maxWidth:400 }}>
@@ -48,6 +53,7 @@ export function SlideDatosCliente({ language, data, onChange, onGoToStep2 }: {
       <button type="button" className="chbar-chip on" disabled={!valid()}
         style={{fontSize:13,padding:"9px 18px",alignSelf:"flex-start",marginTop:4}}
         onClick={onGoToStep2}>{t(language, "common.next")}</button>
+      {motivo ? <p className="text-xs text-critical" style={{marginTop:-2}}>{motivo}</p> : null}
     </div>
   );
 }

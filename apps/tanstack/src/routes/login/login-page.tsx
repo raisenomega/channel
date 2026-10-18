@@ -41,7 +41,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="login-wrap">
+    <div className="login-wrap" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
       <LoginForm
         mode={mode} setMode={setMode}
         email={email} setEmail={setEmail}

@@ -7,6 +7,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { handleFetcherError } from "@/lib/redirect-on-error";
+import { readLocalSession } from "@/lib/auth";
 import { listarTemplates } from "@/lib/templates-client/functions";
 import type { WhatsAppTemplate } from "@/lib/templates-client/types";
 
@@ -23,7 +24,9 @@ export function useTemplates() {
     queryFn: async () => {
       const r = await listarTemplates();
       if (!r.ok) {
-        if (r.error.kind === "no_autorizado") {
+        // M-13: solo /login si NO hay sesion. Con sesion valida, un 401 del backend
+        // (D-43) NO expulsa: se renderizan los tabs + banner honesto (como L-3).
+        if (r.error.kind === "no_autorizado" && readLocalSession() === null) {
           handleFetcherError("no_autorizado");
         }
         return {
