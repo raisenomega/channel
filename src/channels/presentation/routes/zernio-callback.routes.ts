@@ -34,7 +34,12 @@ export function rutaZernioCallback(deps: OAuthCallbackDeps): RouteDefinition {
   return {
     method: "GET", path: "/channels/zernio/callback",
     handler: async (ctx) => {
-      const v = await verifyState(qp(ctx, "st"), (n) => deps.noncesRepo.consume(n));
+      // V (#135/#136 replant OMEGA): el nonce va FIRMADO en el state (CSRF), pero NO se consume
+      // single-use. El consumo N-9 rompia el flujo real: un prefetch/doble-hit del navegador consumia
+      // el nonce y el hit real daba state_nonce_replayed. Guards reales (identicos al OMEGA en prod):
+      // firma HMAC constant-time + TTL 5min + origin firmado re-validado vs CORS. El callback es ahora
+      // idempotente (noncesRepo.registrar queda como rastro de auditoria; consume ya no se invoca).
+      const v = await verifyState(qp(ctx, "st"), async () => true);
       if (!v.ok) return jsonResponse(401, { ok: false, error: v.error });
       const { tenantId, platform, origin, userId } = v.value;
       if (!originPermitido(origin)) return jsonResponse(403, { ok: false, error: { kind: "origin_rejected" } });

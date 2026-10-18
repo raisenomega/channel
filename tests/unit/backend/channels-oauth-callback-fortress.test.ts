@@ -59,10 +59,10 @@ test("A-O-6 state con firma alterada -> 401 state_signature_invalid", async () =
   const r = await rutaZernioCallback(deps()).handler(ctx(bad));
   expect((r as { status?: number }).status).toBe(401);
 });
-test("A-O-7 nonce replay (consume=false) -> 401 state_nonce_replayed", async () => {
+test("A-O-7 (#135/#136 replant OMEGA) nonce 'replayed' es IDEMPOTENTE: el callback ya NO consume single-use -> procede 302 connected (no 401)", async () => {
   const r = await rutaZernioCallback(deps({ noncesRepo: { consume: async () => false } })).handler(ctx(await signed()));
-  expect((r as { status?: number }).status).toBe(401);
-  expect(JSON.stringify(r)).toContain("state_nonce_replayed");
+  expect((r as { status?: number }).status).toBe(302);
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=connected");
 });
 test("A-O-8 state expirado (ts > 5 min) -> 401 state_expired", async () => {
   const r = await rutaZernioCallback(deps()).handler(ctx(await signed({ ts: Date.now() - 6 * 60 * 1000 })));
