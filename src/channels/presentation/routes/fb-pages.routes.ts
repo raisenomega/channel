@@ -38,6 +38,7 @@ async function fbContexto(deps: OAuthFbDeps, ctx: RequestContext): Promise<Resul
 export function rutaPendingPages(deps: OAuthFbDeps): RouteDefinition {
   return { method: "GET", path: "/tenants/:id/channels/facebook/pending-pages", handler: async (ctx) => {
     const c = await fbContexto(deps, ctx); if (!c.ok) return c.error;
+    console.info(`[fb-pages] GET pending-pages: X-Connect-Token forwarded to Zernio (tenant=${c.value.tenantId}, pages=${c.value.pages.length})`);
     return { ok: true, pages: c.value.pages };
   } };
 }
@@ -47,6 +48,7 @@ export function rutaSelectPage(deps: OAuthFbDeps): RouteDefinition {
     const c = await fbContexto(deps, ctx); if (!c.ok) return c.error;
     const pageId = String(obj(ctx.body)["page_id"] ?? "");
     if (!c.value.pages.some((p) => p.id === pageId)) return jsonResponse(403, { ok: false, error: { kind: "page_ajena_al_profile" } });
+    console.info(`[fb-pages] POST select-page: pageId=${pageId} selected, forwarding X-Connect-Token to Zernio + persisting tenant`);
     const sel = await selectFacebookPage(deps.apiKey, c.value.pending.connectToken, c.value.pending.tempToken, pageId, c.value.pid, c.value.pending.userProfile);
     if (!sel.ok) return jsonResponse(502, { ok: false, error: { kind: "zernio_fb_error" } });
     const now = new Date().toISOString();
