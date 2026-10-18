@@ -13,7 +13,8 @@ export type MessageDirection = "inbound" | "outbound" | "internal";
 export type SenderType = "contact" | "human_agent" | "ai_agent" | "system";
 
 export type Role =
-  | "owner" | "admin" | "supervisor" | "agent" | "viewer" | "superadmin";
+  | "owner" | "admin" | "supervisor" | "agent" | "viewer" | "superadmin"
+  | "buyer"; // M-7: C2C sin tenant (Sprint 5 marketplace). SUPERSET, no reemplaza.
 
 export type TenantPlan =
   | "lite_starter" | "lite_pro" | "lite_business"
