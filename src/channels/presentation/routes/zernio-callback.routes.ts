@@ -19,6 +19,9 @@ export interface OAuthCallbackDeps {
   readonly noncesRepo: { consume(nonce: string): Promise<boolean> };
   readonly tenantRepo: { buscar(id: TenantId): Promise<Result<TenantState | null, { readonly kind: string }>> };
   readonly connRepo: { guardar(conn: ChannelConnection): Promise<Result<void, string>> };
+  // #4 hardening: cuentas REALES del profile (Zernio) para re-validar el accountId del callback
+  // (query param NO firmado) + handle autoritativo. Sin match -> NO persiste.
+  readonly listOwnAccounts: (profileId: string) => Promise<ReadonlyArray<{ readonly id: string; readonly platform: string; readonly handle: string | null }>>;
 }
 
 const qp = (ctx: RequestContext, k: string): string => new URLSearchParams(ctx.path.includes("?") ? ctx.path.split("?")[1] : "").get(k) ?? "";
@@ -38,8 +41,11 @@ export function rutaZernioCallback(deps: OAuthCallbackDeps): RouteDefinition {
       if (!t.ok || !t.value || t.value.zernioProfileId !== qp(ctx, "profileId")) return backToTab(origin, "error", platform);
       const accountId = qp(ctx, "accountId");
       if (platform === "facebook" && !accountId) return backToTab(origin, "needs_page", platform);
+      // #4: el accountId (query NO firmado) DEBE existir en el profile del tenant; si no, no persiste.
+      const match = (await deps.listOwnAccounts(qp(ctx, "profileId"))).find((a) => a.id === accountId);
+      if (!match) return backToTab(origin, "error", platform);
       const now = new Date().toISOString();
-      await deps.connRepo.guardar({ id: crypto.randomUUID(), tenantId: tenantId as TenantId, platform: platform as SocialPlatform, zernioAccountId: accountId, handle: null, followersCount: null, status: "connected", isPrimary: false, isPaused: false, autoPublishAllowed: false, createdAt: now, updatedAt: now });
+      await deps.connRepo.guardar({ id: crypto.randomUUID(), tenantId: tenantId as TenantId, platform: platform as SocialPlatform, zernioAccountId: match.id, handle: match.handle, followersCount: null, status: "connected", isPrimary: false, isPaused: false, autoPublishAllowed: false, createdAt: now, updatedAt: now });
       return backToTab(origin, "connected", platform);
     },
   };

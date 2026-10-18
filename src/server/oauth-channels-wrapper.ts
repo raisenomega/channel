@@ -10,6 +10,7 @@ import { OAuthNoncesRepository } from "../oauth/infrastructure/oauth-nonces.repo
 import { ZernioProfileService } from "../channels/application/zernio-profile.service.ts";
 import { rutaChannelConnectUrl } from "../channels/presentation/routes/connect-url.routes.ts";
 import { rutaZernioCallback } from "../channels/presentation/routes/zernio-callback.routes.ts";
+import { listOwnAccounts } from "../channels/infrastructure/zernio-connect.client.ts";
 
 function getEnv(n: string): string {
   const d = (globalThis as Record<string, unknown>)["Deno"] as { env?: { get?(k: string): string | undefined } } | undefined;
@@ -26,6 +27,6 @@ export function registrarOAuthChannelsRutas(): RouteDefinition[] {
   const profileService = new ZernioProfileService(tenantRepo, apiKey);
   return [
     rutaChannelConnectUrl({ profileService, noncesRepo, apiKey, redirectBase }),
-    rutaZernioCallback({ noncesRepo, tenantRepo, connRepo }),
+    rutaZernioCallback({ noncesRepo, tenantRepo, connRepo, listOwnAccounts: (pid) => listOwnAccounts(apiKey, pid) }),
   ];
 }

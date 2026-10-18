@@ -17,6 +17,7 @@ function deps(over: Record<string, unknown> = {}) {
     noncesRepo: { consume: async () => true },
     tenantRepo: { buscar: async () => ({ ok: true as const, value: { zernioProfileId: "prof-A" } }) },
     connRepo: { guardar: vi.fn(async () => ({ ok: true as const, value: undefined })) },
+    listOwnAccounts: async () => [{ id: "acc-1", platform: "whatsapp", handle: "@zafacones" }],
     ...over,
   } as never;
 }
@@ -32,6 +33,12 @@ test("A-O-4 state valido + profileId matching -> persist + redirect connected", 
   expect((r as { status?: number }).status).toBe(302);
   expect((r as { headers?: { location: string } }).headers?.location).toContain("status=connected");
   expect((d as { connRepo: { guardar: { mock: { calls: unknown[] } } } }).connRepo.guardar.mock.calls.length).toBe(1);
+});
+test("A-O-4b (#4 hardening) accountId NO pertenece al profile -> NO persiste + redirect error", async () => {
+  const d = deps({ listOwnAccounts: async () => [{ id: "otra-cuenta", platform: "whatsapp", handle: "x" }] });
+  const r = await rutaZernioCallback(d).handler(ctx(await signed(), "prof-A", "acc-ajena"));
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=error");
+  expect((d as { connRepo: { guardar: { mock: { calls: unknown[] } } } }).connRepo.guardar.mock.calls.length).toBe(0);
 });
 test("A-O-5 profileId NO matching tenant.zernioProfileId -> abort sin persist + redirect error", async () => {
   const d = deps(); const r = await rutaZernioCallback(d).handler(ctx(await signed(), "prof-AJENO"));

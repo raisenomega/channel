@@ -7,7 +7,7 @@ import { ok, err } from "../../shared/domain/result.ts";
 import type { Result } from "../../shared/domain/result.ts";
 import type { TenantId } from "../../shared/domain/ids.ts";
 import type { TenantState } from "../../identity/domain/tenant.entity.ts";
-import { createProfile } from "../infrastructure/zernio-connect.client.ts";
+import { createProfile, findProfileByName } from "../infrastructure/zernio-connect.client.ts";
 
 // Dependencia minima (ISP): no acopla toda la TenantRepository.
 export interface TenantProfileStore {
@@ -30,12 +30,19 @@ export class ZernioProfileService {
     if (!t.value) return err({ kind: "tenant_not_found" });
     if (t.value.zernioProfileId) return ok({ zernioProfileId: t.value.zernioProfileId });
 
-    const created = await createProfile(this.apiKey, t.value.slug);
-    if (!created.ok) {
-      return err(created.error.kind === "no_configurado" ? { kind: "zernio_no_configurado" } : { kind: "zernio_error", cause: created.error.kind });
+    // #5: nombre con el PK del tenant embebido (unico/idempotente, evita colision entre slugs).
+    const name = `${t.value.name} · ${String(tenantId)}`;
+    // #3: find-primero (match exacto por nombre, que lleva el PK) -> luego create (evita 409).
+    const found = await findProfileByName(this.apiKey, name);
+    if (!found.ok) return err(found.error.kind === "no_configurado" ? { kind: "zernio_no_configurado" } : { kind: "zernio_error", cause: found.error.kind });
+    let pid = found.value;
+    if (!pid) {
+      const created = await createProfile(this.apiKey, name);
+      if (!created.ok) return err(created.error.kind === "no_configurado" ? { kind: "zernio_no_configurado" } : { kind: "zernio_error", cause: created.error.kind });
+      pid = created.value.profileId;
     }
-    const saved = await this.store.actualizarZernioProfileId(tenantId, created.value.profileId);
+    const saved = await this.store.actualizarZernioProfileId(tenantId, pid);
     if (!saved.ok) return err({ kind: "persistence_error" });
-    return ok({ zernioProfileId: created.value.profileId });
+    return ok({ zernioProfileId: pid });
   }
 }

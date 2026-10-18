@@ -36,8 +36,12 @@ export function rutaChannelConnectUrl(deps: OAuthConnectDeps): RouteDefinition {
       await deps.noncesRepo.registrar(nonce, auth.value.tenantId);
       const st = await signState({ tenantId: auth.value.tenantId, platform, origin: hdr(ctx, "Origin"), userId: auth.value.userId, nonce, ts: Date.now() });
       if (!st.ok) return jsonResponse(500, { ok: false, error: st.error });
-      const redirectUrl = `${deps.redirectBase}/channels/zernio/callback?st=${encodeURIComponent(st.value)}`;
-      const r = await fetchConnectUrl(deps.apiKey, platform, prof.value.zernioProfileId, redirectUrl); if (!r.ok) return zErr(r.error);
+      // #7: sanea OAUTH_REDIRECT_BASE con URL() -> solo scheme://host (descarta path pegado);
+      // si no es http(s)://host valido, falla claro (Zernio rechaza un redirectUrl relativo).
+      let cbUrl: string;
+      try { const u = new URL(deps.redirectBase); cbUrl = `${u.protocol}//${u.host}/channels/zernio/callback?st=${encodeURIComponent(st.value)}`; }
+      catch { return jsonResponse(500, { ok: false, error: { kind: "oauth_redirect_base_invalida" } }); }
+      const r = await fetchConnectUrl(deps.apiKey, platform, prof.value.zernioProfileId, cbUrl); if (!r.ok) return zErr(r.error);
       return { ok: true, auth_url: r.value.authUrl };
     },
   };
