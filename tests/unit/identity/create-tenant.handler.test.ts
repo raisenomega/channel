@@ -7,7 +7,7 @@ import type { OwnerClaimsLinker, TenantRepository, UserRepository } from "../../
 import type { UserState } from "../../../src/identity/domain/user.entity.ts";
 import { ok, err } from "../../../src/shared/domain/result.ts";
 
-const CMD = { name: "Test", slug: "test", plan: "lite_starter" as const, ownerEmail: "owner@example.com", ownerUserId: "sub-1" };
+const CMD = { name: "Test", slug: "test", plan: "esencial" as const, ownerEmail: "owner@example.com", ownerUserId: "sub-1" };
 
 function tenantRepo(falla = false): TenantRepository {
   return {

@@ -36,7 +36,7 @@ export function rutaCrearTenant(): RouteDefinition {
       const countryCode = String(body["country_code"] ?? "PR").trim();
       const timezone = String(body["timezone"] ?? "America/Puerto_Rico").trim();
       const defaultLanguage = String(body["default_language"] ?? "es").trim();
-      const plan = String(body["plan"] ?? "lite_starter").trim();
+      const plan = String(body["plan"] ?? "esencial").trim();
       if (!name || !email || !phone) {
         return jsonResponse(400, { ok: false, error: { kind: "campos_incompletos" } });
       }

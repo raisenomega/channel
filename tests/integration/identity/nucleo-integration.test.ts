@@ -21,7 +21,7 @@ test("Identity: crear tenant -> owner creado por el handler -> agente extra -> l
   const crearUser = new CrearUserHandler(users);
 
   const tenantRes = await crearTenant.ejecutar({
-    name: "Sabor Criollo", slug: "sabor-criollo", plan: "lite_starter", ownerEmail: "owner@example.com", ownerUserId: "sub-owner",
+    name: "Sabor Criollo", slug: "sabor-criollo", plan: "esencial", ownerEmail: "owner@example.com", ownerUserId: "sub-owner",
   });
   expect(tenantRes.ok, "se debe crear el tenant").toBe(true);
   if (!tenantRes.ok) return;
@@ -45,7 +45,7 @@ test("Identity: crear tenant -> owner creado por el handler -> agente extra -> l
 test("Identity: slug duplicado es rechazado por el store (owners distintos)", async () => {
   const tenants = new MemoryTenantStore();
   const handler = new CrearTenantHandler(tenants, new MemoryUserStore(), linkerEnMemoria([]));
-  const cmd = { name: "A", slug: "mismo-slug", plan: "lite_starter" as const, ownerEmail: "a@example.com", ownerUserId: "sub-a" };
+  const cmd = { name: "A", slug: "mismo-slug", plan: "esencial" as const, ownerEmail: "a@example.com", ownerUserId: "sub-a" };
 
   const primero = await handler.ejecutar(cmd);
   expect(primero.ok, "el primer tenant se crea").toBe(true);
@@ -57,9 +57,9 @@ test("Identity: slug duplicado es rechazado por el store (owners distintos)", as
 
 test("Identity: D1 un tenant por usuario -> el mismo owner no puede crear un segundo tenant", async () => {
   const handler = new CrearTenantHandler(new MemoryTenantStore(), new MemoryUserStore(), linkerEnMemoria([]));
-  const primero = await handler.ejecutar({ name: "Uno", slug: "uno", plan: "lite_starter", ownerEmail: "o@example.com", ownerUserId: "sub-o" });
+  const primero = await handler.ejecutar({ name: "Uno", slug: "uno", plan: "esencial", ownerEmail: "o@example.com", ownerUserId: "sub-o" });
   expect(primero.ok).toBe(true);
-  const segundo = await handler.ejecutar({ name: "Dos", slug: "dos", plan: "lite_starter", ownerEmail: "o@example.com", ownerUserId: "sub-o" });
+  const segundo = await handler.ejecutar({ name: "Dos", slug: "dos", plan: "esencial", ownerEmail: "o@example.com", ownerUserId: "sub-o" });
   expect(!segundo.ok).toBe(true);
   if (!segundo.ok) expect(segundo.error.kind).toBe("tenant_ya_existe");
 });
@@ -70,8 +70,8 @@ test("Identity: email duplicado es rechazado entre tenants distintos", async () 
   const crearTenant = new CrearTenantHandler(tenants, users, linkerEnMemoria([]));
   const crearUser = new CrearUserHandler(users);
 
-  const t1 = await crearTenant.ejecutar({ name: "One", slug: "one", plan: "lite_starter", ownerEmail: "x1@example.com", ownerUserId: "sub-1" });
-  const t2 = await crearTenant.ejecutar({ name: "Two", slug: "two", plan: "lite_starter", ownerEmail: "x2@example.com", ownerUserId: "sub-2" });
+  const t1 = await crearTenant.ejecutar({ name: "One", slug: "one", plan: "esencial", ownerEmail: "x1@example.com", ownerUserId: "sub-1" });
+  const t2 = await crearTenant.ejecutar({ name: "Two", slug: "two", plan: "esencial", ownerEmail: "x2@example.com", ownerUserId: "sub-2" });
   expect(t1.ok && t2.ok).toBe(true);
   if (!t1.ok || !t2.ok) return;
 
