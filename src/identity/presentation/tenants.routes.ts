@@ -6,6 +6,9 @@
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
 import { jsonResponse, requireUserAuth } from "../../server/auth-helpers.ts";
 import { CrearTenantHandler } from "../application/create-tenant.handler.ts";
+import { esPlanValido } from "../domain/tenant.entity.ts";
+import { sanitizarPerfil } from "../domain/tenant-profile.ts";
+import type { TenantPlan } from "../../shared/domain/types.ts";
 import { TenantRepositorySupabase } from "../infrastructure/tenant.repository.supabase.ts";
 import { UserRepositorySupabase } from "../infrastructure/user.repository.supabase.ts";
 import { OwnerClaimsLinkerSupabase } from "../infrastructure/owner-claims.linker.supabase.ts";
@@ -30,23 +33,33 @@ export function rutaCrearTenant(): RouteDefinition {
       if (!auth.ok) return auth.error;
       const body = (ctx.body as Record<string, unknown> | null) ?? {};
       const name = String(body["name"] ?? "").trim();
-      const email = String(body["email"] ?? "").trim();
+      // S-3 (#97): el email del tenant owner es el del JWT autenticado (fuente de verdad), NUNCA
+      // body.email (spoofeable). Fallback a body solo si el token no trae email. El trigger 051
+      // reimpone auth.users.email en public.users de todos modos (defensa en profundidad).
+      const email = String(auth.value.email ?? body["email"] ?? "").trim();
       const phone = String(body["phone"] ?? "").trim();
       const primaryPhone = String(body["primary_phone"] ?? phone).trim();
       const countryCode = String(body["country_code"] ?? "PR").trim();
       const timezone = String(body["timezone"] ?? "America/Puerto_Rico").trim();
       const defaultLanguage = String(body["default_language"] ?? "es").trim();
-      const plan = String(body["plan"] ?? "esencial").trim();
-      if (!name || !email || !phone) {
+      const planRaw = body["plan"];
+      if (planRaw !== undefined && planRaw !== null && !esPlanValido(String(planRaw).trim())) {
+        return jsonResponse(400, { ok: false, error: { kind: "plan_invalido" } });
+      }
+      const plan = esPlanValido(String(planRaw ?? "").trim()) ? String(planRaw).trim() : "esencial";
+      // S-9 (#102): solo `name` es obligatorio. email viene del token (S-3); phone es opcional
+      // (NULL permitido). email verdaderamente ausente -> el handler devuelve email_invalido.
+      if (!name) {
         return jsonResponse(400, { ok: false, error: { kind: "campos_incompletos" } });
       }
       const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
       const result = await handler.ejecutar({
-        name, slug, plan: plan as never, ownerEmail: email, ownerUserId: auth.value.userId,
+        name, slug, plan: plan as TenantPlan, ownerEmail: email, ownerUserId: auth.value.userId,
         language: defaultLanguage as never,
         countryCode: countryCode,
         timezone: timezone,
         phone: phone,
+        perfil: sanitizarPerfil(body),
       });
       if (!result.ok) return jsonResponse(statusDeError(result.error.kind), { ok: false, error: result.error });
       return jsonResponse(201, { ok: true, id: result.value, name, email, phone, primary_phone: primaryPhone });

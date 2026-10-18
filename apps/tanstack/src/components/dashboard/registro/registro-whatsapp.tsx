@@ -1,38 +1,48 @@
 /**
- * HUB by Raisen — R-2/R-3/R-4: tarjeta de registro WhatsApp del dashboard.
- * Sin tenant -> CTA "Registrar WhatsApp" (abre modal create). Con tenant -> muestra el TENANT
- * (nombre, no contacto; Compuerta #66) + boton "Registrado" (abre modal edit del numero). C4 <=75.
+ * HUB by Raisen — S-10 (Compuertas #98/#101): tarjeta de registro del dashboard con CTA state
+ * machine de 3 estados: sin tenant -> "Registrar WhatsApp" (abre overlay create); con tenant + 0
+ * canales -> "Conectar Canales y Redes" (navega /channels); con tenant + canales -> "Editar datos"
+ * (abre overlay edit). Un único botón (S-7, sin "Registrar" central). WhatsAppIcon #25D366. C4 <=75.
  */
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
-import { RegistroModal } from "./registro-modal";
+import { readLocalSession } from "@/lib/auth";
+import { OnboardingOverlay } from "./onboarding-overlay";
 
-export function RegistroWhatsApp({ language, tenant, onDone }: {
+export function RegistroWhatsApp({ language, tenant, channelsConectados = 0, onDone }: {
   language: Idioma;
-  /** null = usuario sin tenant (muestra CTA Registrar); con tenant = muestra Registrado. */
   tenant: { id: string; name: string; plan: string } | null;
+  channelsConectados?: number;
   onDone: () => void;
 }) {
-  const [open, setOpen] = useState<null | "create" | "edit">(null);
-  const registrado = tenant !== null;
+  const [overlay, setOverlay] = useState<null | "create" | "edit">(null);
+  const navigate = useNavigate();
+  const email = readLocalSession()?.user?.email ?? "";
+  const cta = !tenant
+    ? { btn: "registro.ctaBtn", act: () => setOverlay("create") }
+    : channelsConectados > 0
+      ? { btn: "registro.editData", act: () => setOverlay("edit") }
+      : { btn: "registro.connectCta", act: () => void navigate({ to: "/channels" }) };
   return (
     <div data-testid="registro-whatsapp" className="mb-4 flex items-center justify-between rounded-2xl glass-card p-3.5">
       <div className="flex items-center gap-2">
         <WhatsAppIcon size={22} />
         <div>
-          <p className="text-sm font-bold text-foreground">{registrado ? tenant.name : t(language, "registro.cta")}</p>
-          <p className="text-xs text-muted-foreground">{registrado ? t(language, "registro.registered") : t(language, "registro.ctaHint")}</p>
+          <p className="text-sm font-bold text-foreground">{tenant ? tenant.name : t(language, "registro.cta")}</p>
+          <p className="text-xs text-muted-foreground">{t(language, tenant ? "registro.registered" : "registro.ctaHint")}</p>
         </div>
       </div>
-      <button type="button" className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground"
-        onClick={() => setOpen(registrado ? "edit" : "create")}>
-        {registrado ? t(language, "registro.registeredBtn") : t(language, "registro.ctaBtn")}
+      <button type="button" data-testid="registro-cta" onClick={cta.act}
+        className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground">
+        {t(language, cta.btn)}
       </button>
-      {open ? (
-        <RegistroModal language={language} mode={open} tenantId={tenant?.id}
-          onClose={() => setOpen(null)} onDone={() => { setOpen(null); onDone(); }} />
+      {overlay ? (
+        <OnboardingOverlay language={language} mode={overlay} email={email} plan={tenant?.plan ?? "esencial"}
+          tenantId={tenant?.id} initial={overlay === "edit" && tenant ? { name: tenant.name } : undefined}
+          onClose={() => setOverlay(null)} onDone={() => { setOverlay(null); onDone(); }} />
       ) : null}
     </div>
   );
