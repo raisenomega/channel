@@ -69,10 +69,12 @@ test("A-O-8 state expirado (ts > 5 min) -> 401 state_expired", async () => {
   expect((r as { status?: number }).status).toBe(401);
   expect(JSON.stringify(r)).toContain("state_expired");
 });
-test("A-O-9 origin NO en CORS_ORIGINS_ALLOWLIST -> 403 origin_rejected (anti open-redirect)", async () => {
+test("A-O-9 (#139 replant OMEGA) origin NO allowlisted -> 302 a allowed[0] (NUNCA al origin ajeno · anti open-redirect)", async () => {
   const r = await rutaZernioCallback(deps()).handler(ctx(await signed({ origin: "https://evil.test" })));
-  expect((r as { status?: number }).status).toBe(403);
-  expect(JSON.stringify(r)).toContain("origin_rejected");
+  expect((r as { status?: number }).status).toBe(302);
+  const locn = (r as { headers?: { location: string } }).headers?.location ?? "";
+  expect(locn.startsWith("https://app.hub.test/zernio/return")).toBe(true); // allowed[0], no evil.test
+  expect(locn).not.toContain("evil.test");
 });
 
 import { getPending } from "../../../src/channels/infrastructure/oauth-pending-stash.ts";
