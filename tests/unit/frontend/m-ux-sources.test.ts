@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 const LF = readFileSync("apps/tanstack/src/routes/login/login-form.tsx", "utf8");
 const LP = readFileSync("apps/tanstack/src/routes/login/login-page.tsx", "utf8");
 const SHELL = readFileSync("apps/tanstack/src/components/layout/shell.tsx", "utf8");
-const BENTO = readFileSync("apps/tanstack/src/components/dashboard/bentobox/bento-agregar-cliente.tsx", "utf8");
+const WIDG = readFileSync("apps/tanstack/src/routes/inbox/inbox-widgets.tsx", "utf8");
 const ESD = readFileSync("apps/tanstack/src/lib/i18n/es-dash.ts", "utf8");
 
 test("A-M-5 'FORTRESS' ausente en /login (login-form + login-page)", () => {
@@ -33,7 +33,8 @@ test("A-M-2 Shell condiciona nav de usuario a sesion (loggedIn gate)", () => {
   expect(SHELL).toMatch(/loggedIn\s*\?/);
 });
 
-test("A-M-8 CTA 'Crear mi negocio' (bento + i18n)", () => {
-  expect(BENTO).toContain("dash.createMyBusiness");
+test("A-M-8 / R-1 CTA 'Crear mi negocio' vive en el KPI Tenant (no en card aparte)", () => {
+  expect(WIDG).toContain("dash.createMyBusiness");
+  expect(WIDG).toContain("onCreateTenant");
   expect(ESD).toContain("Crear mi negocio");
 });

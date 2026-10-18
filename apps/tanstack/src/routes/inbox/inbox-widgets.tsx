@@ -5,18 +5,21 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import type { InboxItem, DashboardStats } from "@/lib/types";
 import { BentoTitle, BentoKpi, DistribucionCanales, AnilloSLA, Pendientes } from "@/components/dashboard/bentobox-dashboard";
+import { BentoTenant } from "@/components/dashboard/bentobox/bento-tenant";
 import { IconBars, IconDona, IconFlag } from "./inbox-icons";
 
-export function KpiRow({ language, stats, total, tenantName, tenantPlan }: {
+export function KpiRow({ language, stats, total, tenantName, tenantPlan, onCreateTenant }: {
   language: Idioma;
   stats: DashboardStats;
   total: number;
   tenantName?: string;
   tenantPlan?: string;
+  onCreateTenant?: () => void;
 }) {
   return (
     <div className="bento">
-      <BentoKpi label={t(language, "kpi.tenant")} num={tenantName || "—"} unit={tenantPlan || t(language, "dash.plan")} />
+      <BentoTenant label={t(language, "kpi.tenant")} name={tenantName} plan={tenantPlan}
+        createLabel={t(language, "dash.createMyBusiness")} onCreate={onCreateTenant} />
       <BentoKpi label={t(language, "dash.activas")} num={stats.abiertas} trend={t(language, "dash.vivas")} />
       <BentoKpi label={t(language, "dash.sinAsignar")} num={stats.sinAsignar} trend={t(language, "dash.pend.asignar")} down />
       <BentoKpi label={t(language, "inbox.total")} num={total} unit={t(language, "inbox.min")} />

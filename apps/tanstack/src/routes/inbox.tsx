@@ -54,9 +54,9 @@ function InboxPage() {
 
   return (
     <div className="view">
-      <KpiRow language={language} stats={stats} total={items?.length ?? 0} tenantName={miTenant?.name} tenantPlan={miTenant?.plan} />
+      <KpiRow language={language} stats={stats} total={items?.length ?? 0} tenantName={miTenant?.name} tenantPlan={miTenant?.plan} onCreateTenant={handleOpenOnboarding} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={sinDatos} />
-      <BentoRowNueva lang={language} onOpen={handleOpenOnboarding} events={events} />
+      <BentoRowNueva lang={language} events={events} />
       <FiltersBar
         language={language} canalesActivos={canalesActivos}
         filtroEstado={filtroEstado} filtroSLA={filtroSLA}
