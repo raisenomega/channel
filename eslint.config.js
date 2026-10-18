@@ -13,6 +13,7 @@ import noServiceRoleBypass from "./scripts/eslint-rules/no-service-role-bypass.j
 import webhookSignatureFirst from "./scripts/eslint-rules/webhook-signature-first.js";
 import p1HonestidadOauth from "./scripts/eslint-rules/p1-honestidad-oauth.js";
 import oauthStateCorsAllowlist from "./scripts/eslint-rules/oauth-state-cors-allowlist.js";
+import jwtJwksRequired from "./scripts/eslint-rules/jwt-jwks-required.js";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -138,5 +139,12 @@ export default [
     files: ["apps/tanstack/src/routes/channels-ui/connect-cta.tsx", "apps/tanstack/src/components/dashboard/onboarding/channel-connect-button.tsx"],
     plugins: { "fortress": { rules: { "p1-honestidad-oauth": p1HonestidadOauth } } },
     rules: { "fortress/p1-honestidad-oauth": "error" },
+  },
+  // Compuerta #58 (FORTRESS Q) — SUPABASE_JWT_SECRET solo via jwt-jwks-verify + no 'jsonwebtoken'.
+  // Scope src/ (no tests/: los tests stubean el secret legitimamente con vi.stubEnv).
+  {
+    files: ["src/**/*.ts"],
+    plugins: { "fortressq": { rules: { "jwt-jwks-required": jwtJwksRequired } } },
+    rules: { "fortressq/jwt-jwks-required": "error" },
   },
 ];

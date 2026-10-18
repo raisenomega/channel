@@ -1,10 +1,9 @@
 import { t } from "@/lib/i18n";
 import { useNavigate } from "@tanstack/react-router";
 import { ChannelIcon } from "@/components/ui/channel-icon";
-import { Card, CardHeader, CardBody, CardTitle } from "@/components/ui/card";
+import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { TONE } from "./channels-data";
 import { onToggleCanal } from "./channels-fetchers";
 import { ConfigRows } from "./config-rows";
@@ -12,6 +11,15 @@ import { ConnectCta } from "./connect-cta";
 import type { Channel } from "@/lib/channels-client";
 import type { ChannelKind } from "@/components/ui/channel-icon";
 import type { Idioma } from "@/lib/i18n";
+
+/** O-8-bis: engrane compacto (Lucide settings-2) — reemplaza el boton ancho "Configuracion". */
+function GearIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4" aria-hidden="true">
+      <path d="M20 7h-9M14 17H5" /><circle cx="17" cy="17" r="3" /><circle cx="7" cy="7" r="3" />
+    </svg>
+  );
+}
 
 function navigateCard(e: React.KeyboardEvent, navigate: ReturnType<typeof useNavigate>, kind: string) {
   if (e.key === "Enter" || e.key === " ") {
@@ -34,6 +42,7 @@ export function ChannelCard({
   const navigate = useNavigate();
   const state = canal?.state ?? "desconectado";
 
+  // O-8-bis: layout compacto (match /reportes). Header icono+nombre+engrane; chip+switch inline.
   return (
     <Card data-testid="channel-card" aria-disabled={disabled} padded={false}
       className={`p-3.5 ${disabled ? "cursor-not-allowed opacity-70" : canal ? "cursor-pointer" : "cursor-pointer opacity-80"}`}
@@ -41,25 +50,25 @@ export function ChannelCard({
       onClick={() => { if (!disabled) void navigate({ to: "/channels/$channelId", params: { channelId: kind } }); }}
       onKeyDown={(e) => { if (!disabled) navigateCard(e, navigate, kind); }}
     >
-      <div className="flex items-center gap-3">
-        <span className="text-primary"><ChannelIcon kind={kind} className="size-6" /></span>
-        <div className="flex-1"><CardTitle className="text-sm">{t(language, "canal." + kind)}</CardTitle></div>
-        <Badge tone={TONE[state]} dot>{t(language, "channels.state." + state)}</Badge>
+      <div className="flex items-center gap-2">
+        <span className="text-primary"><ChannelIcon kind={kind} className="size-5" /></span>
+        <span className="flex-1 truncate font-display text-sm font-bold text-foreground">{t(language, "canal." + kind)}</span>
+        <button type="button" className="shrink-0 text-muted-foreground hover:text-foreground disabled:opacity-40"
+          disabled={disabled} aria-label={t(language, "channels.config")} title={t(language, "channels.config")}
+          onClick={(e) => { e.stopPropagation(); onToggleExpand(); }} onKeyDown={(e) => e.stopPropagation()}>
+          <GearIcon />
+        </button>
       </div>
-      <CardHeader className="mb-2 mt-3 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{t(language, "channels.active")}</span>
-        <span onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+      <div className="mt-2 flex items-center justify-between">
+        <Badge tone={TONE[state]} dot>{t(language, "channels.state." + state)}</Badge>
+        <span aria-label={t(language, "channels.active")} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
           <Switch checked={canal?.active ?? false} disabled={!canal} onChange={(v) => onToggleCanal(canal, v)} />
         </span>
-      </CardHeader>
+      </div>
       {!disabled && state === "desconectado" ? (
-        <div className="mb-2"><ConnectCta language={language} kind={kind} /></div>
+        <div className="mt-2"><ConnectCta language={language} kind={kind} /></div>
       ) : null}
-      <Button variant="ghost" size="sm" className="w-full" disabled={disabled}
-        onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}>
-        {t(language, "channels.config")}
-      </Button>
-      {esAbierto ? <CardBody className="mt-2 border-t border-border/40 pt-3"><ConfigRows language={language} canal={canal} kind={kind} /></CardBody> : null}
+      {esAbierto ? <CardBody className="mt-2 border-t border-border/40 pt-2"><ConfigRows language={language} canal={canal} kind={kind} /></CardBody> : null}
     </Card>
   );
 }
