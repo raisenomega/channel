@@ -11,6 +11,8 @@ export const enChannels: Dict = {
   "channels.fbConnectPage": "Connect page",
   "channels.awaitingVerify": "Awaiting verification…",
   "channels.connectError": "Could not start connection",
+  "channels.connectTimeout": "Connection not completed. Please try again.",
+  "channels.cancel": "Cancel",
   "channels.active": "Active",
   "channels.inactive": "Inactive",
   "channels.state.conectado": "Connected",

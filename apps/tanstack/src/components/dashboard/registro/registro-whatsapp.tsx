@@ -1,8 +1,9 @@
 /**
- * HUB by Raisen — S-10 (Compuertas #98/#101): tarjeta de registro del dashboard con CTA state
- * machine de 3 estados: sin tenant -> "Registrar WhatsApp" (abre overlay create); con tenant + 0
- * canales -> "Conectar Canales y Redes" (navega /channels); con tenant + canales -> "Editar datos"
- * (abre overlay edit). Un único botón (S-7, sin "Registrar" central). WhatsAppIcon #25D366. C4 <=75.
+ * HUB by Raisen — T-1/T-3 (Compuertas #112/#113): barra de registro UNIFICADA. TODA la barra es
+ * el area clickeable que abre el overlay (sin tenant -> crear; con tenant -> editar, prefill).
+ * Sin boton dorado "Registrar" separado (T-1, elimina el CTA duplicado). Recovery: la barra es
+ * clickeable en CUALQUIER estado, aun si OAuth fallo. "Conectar Canales" = enlace secundario
+ * (no dorado) con stopPropagation. WhatsAppIcon #25D366. C4 <=75.
  */
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -21,13 +22,12 @@ export function RegistroWhatsApp({ language, tenant, channelsConectados = 0, onD
   const [overlay, setOverlay] = useState<null | "create" | "edit">(null);
   const navigate = useNavigate();
   const email = readLocalSession()?.user?.email ?? "";
-  const cta = !tenant
-    ? { btn: "registro.ctaBtn", act: () => setOverlay("create") }
-    : channelsConectados > 0
-      ? { btn: "registro.editData", act: () => setOverlay("edit") }
-      : { btn: "registro.connectCta", act: () => void navigate({ to: "/channels" }) };
+  const abrir = () => setOverlay(tenant ? "edit" : "create"); // T-3: barra clickeable en todo estado
+  const necesitaCanales = tenant !== null && channelsConectados === 0;
   return (
-    <div data-testid="registro-whatsapp" className="mb-4 flex items-center justify-between rounded-2xl glass-card p-3.5">
+    <div data-testid="registro-whatsapp" role="button" tabIndex={0} onClick={abrir}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrir(); } }}
+      className="mb-4 flex cursor-pointer items-center justify-between rounded-2xl glass-card p-3.5 hover:border-primary/50">
       <div className="flex items-center gap-2">
         <WhatsAppIcon size={22} />
         <div>
@@ -35,10 +35,17 @@ export function RegistroWhatsApp({ language, tenant, channelsConectados = 0, onD
           <p className="text-xs text-muted-foreground">{t(language, tenant ? "registro.registered" : "registro.ctaHint")}</p>
         </div>
       </div>
-      <button type="button" data-testid="registro-cta" onClick={cta.act}
-        className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground">
-        {t(language, cta.btn)}
-      </button>
+      {necesitaCanales ? (
+        <button type="button" data-testid="registro-connect"
+          onClick={(e) => { e.stopPropagation(); void navigate({ to: "/channels" }); }}
+          className="shrink-0 rounded-lg border border-border/50 px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary/60">
+          {t(language, "registro.connectCta")}
+        </button>
+      ) : (
+        <span data-testid="registro-hint" className="shrink-0 text-xs font-semibold text-primary">
+          {t(language, tenant ? "registro.editData" : "registro.ctaBtn")}
+        </span>
+      )}
       {overlay ? (
         <OnboardingOverlay language={language} mode={overlay} email={email} plan={tenant?.plan ?? "esencial"}
           tenantId={tenant?.id} initial={overlay === "edit" && tenant ? { name: tenant.name } : undefined}

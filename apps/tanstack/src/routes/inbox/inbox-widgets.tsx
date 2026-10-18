@@ -36,15 +36,15 @@ export function WidgetsRow({ language, stats, items, sinDatos }: {
   const emp = <p className="text-sm text-muted-foreground">{t(language, "dash.emptyBody")}</p>;
   return (
     <div className="bento mt-4">
-      <div className="bento-card bento-col-4">
+      <div className="bento-card bento-col-6">
         <BentoTitle icon={<IconBars />} label={t(language, "dash.distribucion")} />
         {sinDatos ? emp : <DistribucionCanales stats={stats} lang={language} />}
       </div>
-      <div className="bento-card bento-col-4">
+      <div className="bento-card bento-col-6">
         <BentoTitle icon={<IconDona />} label={t(language, "dash.slaTitulo")} />
         {sinDatos ? emp : <AnilloSLA items={items} lang={language} />}
       </div>
-      <div className="bento-card bento-col-4">
+      <div className="bento-card bento-col-6">
         <BentoTitle icon={<IconFlag />} label={t(language, "dash.pendientes")} />
         {sinDatos ? emp : <Pendientes items={items} lang={language} />}
       </div>
