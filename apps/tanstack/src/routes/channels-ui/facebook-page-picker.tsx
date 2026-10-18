@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { obtenerPaginasFb, seleccionarPaginaFb, type FbPage } from "@/lib/channels-client/fb-pages";
+import { logOauth, readReqId } from "@/lib/oauth-telemetry";
 import { t, type Idioma } from "@/lib/i18n";
 
 export function FacebookPagePicker({ language, onClose, onConnected }: {
@@ -15,13 +16,21 @@ export function FacebookPagePicker({ language, onClose, onConnected }: {
   const [pages, setPages] = useState<FbPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [reqId] = useState(() => readReqId());
 
-  useEffect(() => { void (async () => { setPages(await obtenerPaginasFb()); setLoading(false); })(); }, []);
+  useEffect(() => { void (async () => {
+    logOauth("fb-picker", reqId, "GET pending-pages");
+    const p = await obtenerPaginasFb(reqId);
+    logOauth("fb-picker", reqId, `received ${p.length} pages`);
+    setPages(p); setLoading(false);
+  })(); }, [reqId]);
 
   async function select(id: string) {
     setSaving(id);
-    const okSel = await seleccionarPaginaFb(id);
+    logOauth("fb-picker", reqId, `POST select-page pageId=${id}`);
+    const okSel = await seleccionarPaginaFb(id, reqId);
     setSaving(null);
+    logOauth("fb-picker", reqId, `select-page ${okSel ? "OK -> connected" : "FAILED"}`);
     if (okSel) onConnected();
   }
 
