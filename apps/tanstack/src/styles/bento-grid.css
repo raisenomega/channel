@@ -14,3 +14,9 @@
 .bento-col-8 { grid-column: span 8; }
 .bento-col-9 { grid-column: span 9; }
 .bento-col-12 { grid-column: span 12; }
+
+/* T-2 (Compuerta #111): en movil cada modulo ocupa el ancho completo (1 col). */
+@media (max-width: 640px) {
+  .bento-col-3, .bento-col-4, .bento-col-5, .bento-col-6,
+  .bento-col-7, .bento-col-8, .bento-col-9 { grid-column: span 12; }
+}

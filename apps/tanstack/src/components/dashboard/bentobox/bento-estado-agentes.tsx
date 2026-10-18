@@ -13,7 +13,7 @@ const STATUS: Record<string, boolean> = {
 
 export function BentoEstadoAgentes({ lang }: { lang: Idioma }) {
   return (
-    <div className="bento-card bento-col-3">
+    <div className="bento-card bento-col-6">
       <div className="bento-title">
         <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
           <circle cx="10" cy="7" r="3" /><path d="M3 18c0-3 3-6 7-6s7 3 7 6" />
