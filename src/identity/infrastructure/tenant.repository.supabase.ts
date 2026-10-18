@@ -42,6 +42,17 @@ export class TenantRepositorySupabase implements TenantRepository {
     }
   }
 
+  // O-6: persiste el profile Zernio del tenant (idempotente desde ensureProfileForTenant).
+  async actualizarZernioProfileId(id: TenantId, zernioProfileId: string): Promise<Result<void, RepoError>> {
+    try {
+      const { error } = await supabase.from("tenants").update({ zernio_profile_id: zernioProfileId }).eq("id", id);
+      if (error) return err({ kind: "persistence_failure", cause: error.message });
+      return ok(undefined);
+    } catch (e) {
+      return err({ kind: "persistence_failure", cause: String(e) });
+    }
+  }
+
   private mapear(row: Record<string, unknown>): TenantState {
     return Object.freeze({
       id: row.id as TenantId,
@@ -52,6 +63,7 @@ export class TenantRepositorySupabase implements TenantRepository {
       timezone: row.timezone as string,
       language: (row.default_language ?? "es") as "es" | "en",
       phone: (row.phone ?? null) as string | null,
+      zernioProfileId: (row.zernio_profile_id ?? null) as string | null,
       featuresEnabled: Object.freeze(row.features_enabled as Record<string, unknown>),
       status: row.status as TenantState["status"],
       createdAt: new Date(row.created_at as string),

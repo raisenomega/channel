@@ -6,7 +6,7 @@ beforeEach(() => vi.stubEnv("OAUTH_STATE_SECRET", SECRET));
 afterEach(() => vi.unstubAllEnvs());
 
 const freshConsume = () => { const used = new Set<string>(); return async (n: string) => (used.has(n) ? false : (used.add(n), true)); };
-const payload = (over: Record<string, unknown> = {}) => ({ tenantId: "t-A", platform: "whatsapp", nonce: nuevoNonce(), ts: Date.now(), ...over });
+const payload = (over: Record<string, unknown> = {}) => ({ tenantId: "t-A", platform: "whatsapp", origin: "https://app.test", userId: "u-1", nonce: nuevoNonce(), ts: Date.now(), ...over });
 
 test("A-N-9 valido: sign -> verify ok, payload intacto", async () => {
   const s = await signState(payload({ tenantId: "t-A" }));
