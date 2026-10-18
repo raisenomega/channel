@@ -21,9 +21,16 @@ const DEFAULT_DEPS: ChannelRouterDeps = Object.freeze({
   },
 });
 
+function nodeEnv(): string {
+  const d = (globalThis as { Deno?: { env?: { get?(k: string): string | undefined } } }).Deno;
+  const p = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
+  return d?.env?.get?.("NODE_ENV") ?? p?.env?.["NODE_ENV"] ?? "";
+}
+
 export async function buildChannelRouter(deps: ChannelRouterDeps = DEFAULT_DEPS): Promise<ChannelRouter> {
   const router = new ChannelRouter();
-  router.registrar(new DevChannelAdapter());
+  // N-7: el DevChannelAdapter (acepta firmas debiles) NUNCA se registra en produccion.
+  if (nodeEnv() !== "production") router.registrar(new DevChannelAdapter());
   const creds = await deps.creds.leer();
   if (creds.ok) {
     router.registrar(new ZernioAdapter(creds.value.webhookSecret, creds.value.apiKey));

@@ -3,9 +3,9 @@ import { rutaWebhookVerify, rutaWebhookReceive } from "../../../../src/channels/
 import type { RequestContext } from "../../../../src/server/server-types.ts";
 
 test("CRIT-S2-C: verify GET con token correcto retorna challenge text/plain", async () => {
-  vi.stubEnv("META_WEBHOOK_VERIFY_TOKEN", "mi_token");
+  vi.stubEnv("META_WEBHOOK_VERIFY_TOKEN", "tok_verificacion_webhook_meta_fortress_32x");
   const route = rutaWebhookVerify();
-  const ctx = { path: "/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=mi_token&hub.challenge=123456" } as RequestContext;
+  const ctx = { path: "/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=tok_verificacion_webhook_meta_fortress_32x&hub.challenge=123456" } as RequestContext;
   const result = await route.handler(ctx);
   expect(result).toMatchObject({ contentType: "text/plain", status: 200, body: "123456" });
   vi.unstubAllEnvs();

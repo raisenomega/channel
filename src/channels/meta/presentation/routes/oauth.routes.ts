@@ -8,6 +8,7 @@
 import type { RouteDefinition } from "../../../../server/server-types.ts";
 import { tid } from "../../../../server/server-types.ts";
 import { obj } from "../../../../server/server-helpers.ts";
+import { requireTenantAuth } from "../../../../server/auth-helpers.ts";
 import { InitSignupHandler } from "../../application/init-signup.handler.ts";
 import { HandleCallbackHandler } from "../../application/handle-callback.handler.ts";
 import { verificarFirmaWebhook } from "../../infrastructure/webhook-verifier.ts";
@@ -21,10 +22,12 @@ export function rutaInitSignup(): RouteDefinition {
   return {
     method: "POST", path: "/auth/meta/init",
     handler: async (ctx) => {
-      const b = obj(ctx.body);
+      // N-4: JWT obligatorio; el tenant del OAuth init sale del claim, NUNCA del body.
+      const auth = await requireTenantAuth(ctx);
+      if (!auth.ok) return auth.error;
       const appId = process.env["META_APP_ID"] ?? "";
       const callbackUrl = `${process.env["PUBLIC_URL"] ?? ""}/auth/meta/callback`;
-      const result = await initHandler.ejecutar({ tenantId: tid(b["tenantId"] as string), callbackUrl, appId });
+      const result = await initHandler.ejecutar({ tenantId: tid(auth.value.tenantId), callbackUrl, appId });
       return result.ok ? { ok: true, data: { url: result.value.url, state: result.value.state, signupId: result.value.signupId } } : { ok: false, error: result.error };
     },
   };

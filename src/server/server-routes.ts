@@ -1,6 +1,4 @@
-/**
- * HUB by Raisen — Construcción de dependencias y handlers del servidor.
- */
+/** HUB by Raisen — Construcción de dependencias y handlers del servidor. */
 import { ProcessWebhookHandler } from "../channels/application/process-webhook.handler.ts";
 import { buildChannelRouter } from "./channel-router-wrapper.ts";
 import { ReceiveMessageHandler } from "../inbox/application/receive-message.handler.ts";
@@ -27,10 +25,13 @@ import { buildTemplatesDeps } from "./templates-wrapper.ts";
 import type { TemplatesDeps } from "../templates/presentation/templates.routes.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
+import type { ContactRepository } from "../contacts/domain/contact.repository.ts";
+import { ContactRepositorySupabase } from "../contacts/infrastructure/contact.repository.supabase.ts";
 export interface ServerHandlers {
   processWebhook: ProcessWebhookHandler;
   receiveMessage: ReceiveMessageHandler;
   sendMessage: SendMessageHandler;
+  contactsRepo: ContactRepository;
   createQuote: CreateQuoteHandler;
   optIn: OptInHandler;
   listInbox: ListInboxHandler;
@@ -42,10 +43,8 @@ export interface ServerHandlers {
   drafts: DraftsDeps;
   templates: TemplatesDeps;
 }
-
-/** QuoteRepository minimo (no hay implementacion Supabase en infrastructure). */
+// QuoteRepository minimo (no hay implementacion Supabase en infrastructure).
 const quoteRepo: QuoteRepository = { async guardar() { return { ok: true as const, value: undefined }; }, async buscar() { return { ok: true as const, value: null }; } };
-
 export async function buildHandlers(): Promise<ServerHandlers> {
   const convRepo = new ConversationRepositorySupabase();
   const msgRepo = new MessageRepositorySupabase();
@@ -61,6 +60,7 @@ export async function buildHandlers(): Promise<ServerHandlers> {
     processWebhook: new ProcessWebhookHandler(channelRouter),
     receiveMessage: new ReceiveMessageHandler(convRepo),
     sendMessage: new SendMessageHandler(convRepo, msgRepo),
+    contactsRepo: new ContactRepositorySupabase(),
     createQuote: new CreateQuoteHandler(quoteRepo),
     optIn: new OptInHandler(consentRepo),
     listInbox: new ListInboxHandler(convRepo),

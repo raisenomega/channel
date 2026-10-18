@@ -7,6 +7,7 @@ import type { ServerHandlers } from "./server-routes.ts";
 import type { RouteDefinition } from "./server-types.ts";
 import { tid, cid } from "./server-types.ts";
 import { obj, resultToJson, complianceChannel } from "./server-helpers.ts";
+import { requireTenantAuth } from "./auth-helpers.ts";
 
 export function handleQuote(h: ServerHandlers): RouteDefinition {
   return {
@@ -54,12 +55,13 @@ export function handleListInbox(h: ServerHandlers): RouteDefinition {
   return {
     method: "GET", path: "/api/inbox/list",
     handler: async (ctx) => {
+      const auth = await requireTenantAuth(ctx); if (!auth.ok) return auth.error; // N-3: tenant del claim, no del query
       const url = new URL(ctx.path, "http://localhost");
       const status = url.searchParams.get("status") ?? "all";
       const limit = parseInt(url.searchParams.get("limit") ?? "50", 10) || 50;
       return resultToJson(
         await h.listInbox.ejecutar({
-          tenantId: tid(url.searchParams.get("tenantId")),
+          tenantId: tid(auth.value.tenantId),
           status: status as "all" | "open" | "pending" | "snoozed" | "resolved" | "archived",
           assignedAgentId: null,
           limit,

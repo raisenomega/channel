@@ -9,6 +9,8 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import noRawLoginRedirect from "./scripts/eslint-rules/no-raw-login-redirect.js";
 import noOrphanSessionCleanup from "./scripts/eslint-rules/no-orphan-session-cleanup.js";
+import noServiceRoleBypass from "./scripts/eslint-rules/no-service-role-bypass.js";
+import webhookSignatureFirst from "./scripts/eslint-rules/webhook-signature-first.js";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -110,5 +112,17 @@ export default [
       // Permitir parametros _-prefix (ej. toggleCanal(_channelId, _active))
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
     },
+  },
+  // Compuerta #23 (FORTRESS N) — no service_role/supabaseAdmin directo en rutas publicas
+  {
+    files: ["src/server/*-routes-*.ts"],
+    plugins: { "fortress": { rules: { "no-service-role-bypass": noServiceRoleBypass } } },
+    rules: { "fortress/no-service-role-bypass": "error" },
+  },
+  // Compuerta #24 (FORTRESS N) — firma del webhook como primer await
+  {
+    files: ["src/channels/**/routes/webhook*.ts"],
+    plugins: { "fortress": { rules: { "webhook-signature-first": webhookSignatureFirst } } },
+    rules: { "fortress/webhook-signature-first": "error" },
   },
 ];

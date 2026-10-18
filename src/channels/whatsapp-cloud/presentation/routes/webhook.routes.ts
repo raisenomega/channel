@@ -27,6 +27,9 @@ export function rutaWebhookVerify(): RouteDefinition {
       const token = q.get("hub.verify_token");
       const challenge = q.get("hub.challenge");
       const expected = process.env["META_WEBHOOK_VERIFY_TOKEN"] ?? "";
+      // N-8: token mal configurado (ausente o <32) NUNCA valida handshakes (defensa en ruta;
+      // el arranque ademas hace fail-fast en hub.server.ts). Evita aceptar token vacio.
+      if (expected.length < 32) return { ok: false, error: { kind: "verify_misconfigured" } };
       if (mode === "subscribe" && token === expected && challenge) {
         // CRIT-S2-C: Meta espera text/plain con status 200
         const httpRes: HttpResponse = { status: 200, contentType: "text/plain", body: challenge };
