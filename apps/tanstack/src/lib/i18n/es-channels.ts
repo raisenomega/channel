@@ -6,6 +6,9 @@ import type { Dict } from "./i18n-types";
 export const esChannels: Dict = {
   "channels.connected": "Canales conectados",
   "channels.connect": "Conectar",
+  "channels.fbPickerTitle": "Elige tu página de Facebook",
+  "channels.fbNoPages": "No hay páginas pendientes",
+  "channels.fbConnectPage": "Conectar página",
   "channels.awaitingVerify": "Esperando verificación…",
   "channels.connectError": "No se pudo iniciar la conexión",
   "channels.active": "Activo",

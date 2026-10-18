@@ -3,7 +3,7 @@
  * Hotfix L-2: el CATALOGO (9 cards) se renderiza SIEMPRE, con o sin tenant.
  * Ningun estado de error saca al usuario de /channels (ver redirect-on-error L-1).
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
@@ -12,6 +12,8 @@ import { CATALOGO } from "./channels-ui/channels-data";
 import { useCanales } from "./channels-ui/channels-fetchers";
 import { ChannelCard } from "./channels-ui/channel-card";
 import { ChannelsNotice, LoadingNotice } from "./channels-ui/channels-notices";
+import { FacebookPagePicker } from "./channels-ui/facebook-page-picker";
+import { useOauthRelay } from "./channels-ui/use-oauth-relay";
 
 export const ChannelsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -22,17 +24,11 @@ export const ChannelsRoute = createRoute({
 function ChannelsPage() {
   const { language } = usePreferences();
   const [abierto, setAbierto] = useState<string | null>(null);
+  const [fbPicker, setFbPicker] = useState(false);
   const { data, isPending, errKind, refetch } = useCanales();
 
-  // O-3: el popup OAuth notifica por BroadcastChannel; al 'connected' refetch (P1: el verde
-  // solo aparece si el fetch real lo confirma, nunca por abrir el popup).
-  useEffect(() => {
-    try {
-      const bc = new BroadcastChannel("zernio-oauth");
-      bc.onmessage = (ev) => { if ((ev.data as { status?: string } | null)?.status === "connected") void refetch(); };
-      return () => bc.close();
-    } catch { return undefined; }
-  }, [refetch]);
+  // O-3/O-4: relay del popup OAuth (BroadcastChannel). P1: el verde solo del fetch real.
+  useOauthRelay(refetch, setFbPicker);
 
   if (isPending) return <LoadingNotice language={language} />;
 
@@ -66,6 +62,11 @@ function ChannelsPage() {
           />
         ))}
       </div>
+
+      {fbPicker ? (
+        <FacebookPagePicker language={language} onClose={() => setFbPicker(false)}
+          onConnected={() => { setFbPicker(false); void refetch(); }} />
+      ) : null}
     </div>
   );
 }
