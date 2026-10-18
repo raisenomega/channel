@@ -31,13 +31,13 @@ async function signed(over: Record<string, unknown> = {}): Promise<string> {
 test("A-O-4 state valido + profileId matching -> persist + redirect connected", async () => {
   const d = deps(); const r = await rutaZernioCallback(d).handler(ctx(await signed()));
   expect((r as { status?: number }).status).toBe(302);
-  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=connected");
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("oauth=connected");
   expect((d as { connRepo: { guardar: { mock: { calls: unknown[] } } } }).connRepo.guardar.mock.calls.length).toBe(1);
 });
 test("A-O-4b (#4 hardening) accountId NO pertenece al profile -> NO persiste + redirect error", async () => {
   const d = deps({ listOwnAccounts: async () => [{ id: "otra-cuenta", platform: "whatsapp", handle: "x" }] });
   const r = await rutaZernioCallback(d).handler(ctx(await signed(), "prof-A", "acc-ajena"));
-  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=error");
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("oauth=error");
   expect((d as { connRepo: { guardar: { mock: { calls: unknown[] } } } }).connRepo.guardar.mock.calls.length).toBe(0);
 });
 test("O-7 derive_bindings: barre TODAS las cuentas del profile (upsert) -> no nace binding vacio", async () => {
@@ -46,12 +46,12 @@ test("O-7 derive_bindings: barre TODAS las cuentas del profile (upsert) -> no na
     { id: "acc-2", platform: "instagram", handle: "@ig" },
   ] });
   const r = await rutaZernioCallback(d).handler(ctx(await signed(), "prof-A", "acc-1"));
-  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=connected");
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("oauth=connected");
   expect((d as { connRepo: { guardar: { mock: { calls: unknown[] } } } }).connRepo.guardar.mock.calls.length).toBe(2);
 });
 test("A-O-5 profileId NO matching tenant.zernioProfileId -> abort sin persist + redirect error", async () => {
   const d = deps(); const r = await rutaZernioCallback(d).handler(ctx(await signed(), "prof-AJENO"));
-  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=error");
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("oauth=error");
   expect((d as { connRepo: { guardar: { mock: { calls: unknown[] } } } }).connRepo.guardar.mock.calls.length).toBe(0);
 });
 test("A-O-6 state con firma alterada -> 401 state_signature_invalid", async () => {
@@ -62,7 +62,7 @@ test("A-O-6 state con firma alterada -> 401 state_signature_invalid", async () =
 test("A-O-7 (#135/#136 replant OMEGA) nonce 'replayed' es IDEMPOTENTE: el callback ya NO consume single-use -> procede 302 connected (no 401)", async () => {
   const r = await rutaZernioCallback(deps({ noncesRepo: { consume: async () => false } })).handler(ctx(await signed()));
   expect((r as { status?: number }).status).toBe(302);
-  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=connected");
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("oauth=connected");
 });
 test("A-O-8 state expirado (ts > 5 min) -> 401 state_expired", async () => {
   const r = await rutaZernioCallback(deps()).handler(ctx(await signed({ ts: Date.now() - 6 * 60 * 1000 })));
@@ -73,7 +73,7 @@ test("A-O-9 (#139 replant OMEGA) origin NO allowlisted -> 302 a allowed[0] (NUNC
   const r = await rutaZernioCallback(deps()).handler(ctx(await signed({ origin: "https://evil.test" })));
   expect((r as { status?: number }).status).toBe(302);
   const locn = (r as { headers?: { location: string } }).headers?.location ?? "";
-  expect(locn.startsWith("https://app.hub.test/zernio/return")).toBe(true); // allowed[0], no evil.test
+  expect(locn.startsWith("https://app.hub.test/channels")).toBe(true); // allowed[0], no evil.test
   expect(locn).not.toContain("evil.test");
 });
 
@@ -82,7 +82,7 @@ test("A-O-4a callback FB step=select_page -> stash server-side + needs_page (tok
   const st = await signed({ userId: "u-fb", tenantId: "t-A", platform: "facebook" });
   const c = { path: `/channels/zernio/callback?st=${encodeURIComponent(st)}&profileId=prof-A&step=select_page&tempToken=TT&connect_token=CT` } as RequestContext;
   const r = await rutaZernioCallback(deps()).handler(c);
-  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=needs_page");
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("oauth=needs_page");
   expect((r as { headers?: { location: string } }).headers?.location).not.toContain("TT");  // sin tokens en la URL
   const p = getPending("u-fb", "t-A", "facebook");
   expect(p?.tempToken).toBe("TT"); expect(p?.connectToken).toBe("CT");

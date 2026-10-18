@@ -33,7 +33,7 @@ function frontBase(origin: string): string {
   return (corsAllowlist().map((x) => x.replace(/\/+$/, ""))[0]) ?? ""; // fallback OMEGA
 }
 function backToTab(origin: string, status: string, platform: string, reqId: string): HttpResponse {
-  const loc = `${frontBase(origin)}/zernio/return?status=${status}&platform=${encodeURIComponent(platform)}&req=${reqId}`;
+  const loc = `${frontBase(origin)}/channels?oauth=${status}&platform=${encodeURIComponent(platform)}&req=${reqId}`;
   logOauth("zernio-callback", reqId, `302 -> ${status}`);
   return { status: 302, body: "", headers: { location: loc } };
 }
