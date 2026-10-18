@@ -32,8 +32,9 @@ export function LoginPage() {
     const r = mode === "login" ? await login(email, password) : await registerUser(email, password);
     setLoading(false);
     if (r.ok) {
-      // M-1: signup -> wizard de tenant; login -> inbox.
-      void navigate({ to: mode === "register" ? "/onboarding/tenant" : "/inbox" });
+      // R-1: signup YA NO fuerza el wizard; va al dashboard, que muestra el CTA "Registrar
+      // WhatsApp" si aun no hay tenant. El wizard /onboarding/tenant queda para acceso manual.
+      void navigate({ to: "/inbox" });
       return;
     }
     // M-4: error diferenciado segun el modo.

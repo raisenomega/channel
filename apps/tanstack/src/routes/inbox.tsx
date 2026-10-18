@@ -14,6 +14,7 @@ import { KpiRow, WidgetsRow } from "./inbox/inbox-widgets";
 import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
 import { useRecentActivity } from "@/hooks/useRecentActivity";
 import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
+import { RegistroWhatsApp } from "@/components/dashboard/registro/registro-whatsapp";
 
 const InboxRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -27,7 +28,7 @@ function InboxPage() {
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [filtroSLA, setFiltroSLA] = useState<boolean | null>(null);
   const { data: items, isPending } = useQuery({ queryKey: ["inbox"], queryFn: fetchInbox, staleTime: 30_000 });
-  const { data: miTenant } = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 60_000 });
+  const { data: miTenant, refetch: refetchTenant } = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 60_000 });
   const { events } = useRecentActivity(); // hooks antes del early return (rules-of-hooks)
   const itemsFiltrados = (items ?? []).filter((i) => {
     if (filtroEstado && i.status !== filtroEstado) return false;
@@ -41,8 +42,6 @@ function InboxPage() {
   const toggleEstado = (e: string) => setFiltroEstado(filtroEstado === e ? null : e);
   const toggleSLA = () => setFiltroSLA(filtroSLA === true ? null : true);
   const cleanFilters = () => { setFiltroEstado(null); setFiltroSLA(null); };
-  const handleOpenOnboarding = () => void navigate({ to: "/onboarding/tenant" });
-  const sinDatos = items === undefined || items.length === 0;
 
   if (isPending) {
     return (
@@ -54,8 +53,9 @@ function InboxPage() {
 
   return (
     <div className="view">
-      <KpiRow language={language} stats={stats} total={items?.length ?? 0} tenantName={miTenant?.name} tenantPlan={miTenant?.plan} onCreateTenant={handleOpenOnboarding} />
-      <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={sinDatos} />
+      <RegistroWhatsApp language={language} tenant={miTenant ? { id: miTenant.tenantId, name: miTenant.name, plan: miTenant.plan } : null} onDone={() => void refetchTenant()} />
+      <KpiRow language={language} stats={stats} total={items?.length ?? 0} tenantName={miTenant?.name} tenantPlan={miTenant?.plan} />
+      <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={items === undefined || items.length === 0} />
       <BentoRowNueva lang={language} events={events} />
       <FiltersBar
         language={language} canalesActivos={canalesActivos}
