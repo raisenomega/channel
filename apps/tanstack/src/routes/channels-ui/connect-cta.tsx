@@ -10,41 +10,28 @@ import { obtenerConnectUrl } from "@/lib/channels-client";
 import { t, type Idioma } from "@/lib/i18n";
 
 const OAUTH_TIMEOUT_MS = 60_000;
-const POPUP_GRACE_MS = 3_000; // V-vig-3: tras cerrarse el popup, margen para que el relay confirme exito
 const stop = (e: { stopPropagation: () => void }): void => e.stopPropagation();
-type Timer = ReturnType<typeof setTimeout>;
 
 export function ConnectCta({ language, kind }: { language: Idioma; kind: string }) {
   const [awaiting, setAwaiting] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const timer = useRef<Timer | null>(null);
-  const grace = useRef<Timer | null>(null);
-  const poll = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const limpiar = (): void => {
-    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
-    if (grace.current) { clearTimeout(grace.current); grace.current = null; }
-    if (poll.current) { clearInterval(poll.current); poll.current = null; }
-  };
-  const fallo = (): void => { limpiar(); setAwaiting(false); setTimedOut(true); };
+  const limpiar = (): void => { if (timer.current) { clearTimeout(timer.current); timer.current = null; } };
   useEffect(() => limpiar, []);
 
   async function abrir() {
     setErr(null); setTimedOut(false);
     const r = await obtenerConnectUrl(kind);
     if (!r.ok) { setErr(t(language, "channels.connectError")); return; }
-    const popup = window.open(r.value, "_blank", "noopener,noreferrer,width=600,height=720");
+    window.open(r.value, "_blank", "noopener,noreferrer,width=600,height=720");
     setAwaiting(true);
     limpiar();
-    timer.current = setTimeout(fallo, OAUTH_TIMEOUT_MS); // T-4 60s (fallback duro)
-    // V-vig-3: popup cerrado sin exito (user lo cierra / crash) -> feedback rapido. En EXITO el popup
-    // tambien se autocierra, pero el relay refetchea y desmonta este CTA antes de que venza la gracia.
-    if (popup) poll.current = setInterval(() => {
-      if (!popup.closed) return;
-      if (poll.current) { clearInterval(poll.current); poll.current = null; }
-      grace.current = setTimeout(fallo, POPUP_GRACE_MS);
-    }, 500);
+    // V-vig-3 (corregido): NO poll de popup.closed. En FB (select_page) el popup se autocierra a mitad
+    // del flujo (needs_page -> el picker toma el relevo), asi que popup.closed NO es senal de fallo
+    // -> daba un falso "Conexion no completada". Unico timeout duro = T-4 60s; el verde lo da el refetch.
+    timer.current = setTimeout(() => { setAwaiting(false); setTimedOut(true); }, OAUTH_TIMEOUT_MS);
   }
   function cancelar() { limpiar(); setAwaiting(false); setTimedOut(false); }
 
