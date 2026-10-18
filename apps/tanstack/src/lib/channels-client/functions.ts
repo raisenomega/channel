@@ -28,6 +28,20 @@ export async function listarCanales(): Promise<Result<Channel[], ChannelError>> 
   }
 }
 
+// O-2/O-3: pide el auth_url del OAuth (patron OMEGA). NO afirma conexion (P1): solo
+// devuelve la URL para el popup; el verde real llega por refetch tras el BroadcastChannel.
+export async function obtenerConnectUrl(platform: string): Promise<Result<string, ChannelError>> {
+  const tenantId = await ensureTenantId();
+  if (!tenantId) return { ok: false, error: errorSinTenant() };
+  try {
+    const res = await apiFetch(`/tenants/${tenantId}/channels/${platform}/connect-url`);
+    if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };
+    if (!res.ok) return { ok: false, error: { kind: "red", cause: `status ${res.status}` } };
+    const b = await res.json() as { ok?: boolean; auth_url?: string };
+    return b.auth_url ? { ok: true, value: b.auth_url } : { ok: false, error: { kind: "red", cause: "auth_url_ausente" } };
+  } catch (e) { return { ok: false, error: { kind: "red", cause: String(e) } }; }
+}
+
 export async function toggleCanal(_channelId: string, _active: boolean): Promise<Result<void, ChannelError>> {
   return { ok: false, error: { kind: "not_implemented" } };
 }

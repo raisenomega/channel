@@ -3,7 +3,7 @@
  * Hotfix L-2: el CATALOGO (9 cards) se renderiza SIEMPRE, con o sin tenant.
  * Ningun estado de error saca al usuario de /channels (ver redirect-on-error L-1).
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
@@ -23,6 +23,16 @@ function ChannelsPage() {
   const { language } = usePreferences();
   const [abierto, setAbierto] = useState<string | null>(null);
   const { data, isPending, errKind, refetch } = useCanales();
+
+  // O-3: el popup OAuth notifica por BroadcastChannel; al 'connected' refetch (P1: el verde
+  // solo aparece si el fetch real lo confirma, nunca por abrir el popup).
+  useEffect(() => {
+    try {
+      const bc = new BroadcastChannel("zernio-oauth");
+      bc.onmessage = (ev) => { if ((ev.data as { status?: string } | null)?.status === "connected") void refetch(); };
+      return () => bc.close();
+    } catch { return undefined; }
+  }, [refetch]);
 
   if (isPending) return <LoadingNotice language={language} />;
 

@@ -5,6 +5,9 @@ import type { Dict } from "./i18n-types";
 
 export const enChannels: Dict = {
   "channels.connected": "Connected channels",
+  "channels.connect": "Connect",
+  "channels.awaitingVerify": "Awaiting verification…",
+  "channels.connectError": "Could not start connection",
   "channels.active": "Active",
   "channels.inactive": "Inactive",
   "channels.state.conectado": "Connected",

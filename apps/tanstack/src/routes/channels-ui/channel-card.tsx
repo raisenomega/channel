@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { TONE } from "./channels-data";
 import { onToggleCanal } from "./channels-fetchers";
 import { ConfigRows } from "./config-rows";
+import { ConnectCta } from "./connect-cta";
 import type { Channel } from "@/lib/channels-client";
 import type { ChannelKind } from "@/components/ui/channel-icon";
 import type { Idioma } from "@/lib/i18n";
@@ -51,6 +52,9 @@ export function ChannelCard({
           <Switch checked={canal?.active ?? false} disabled={!canal} onChange={(v) => onToggleCanal(canal, v)} />
         </span>
       </CardHeader>
+      {!disabled && state === "desconectado" ? (
+        <div className="mb-2"><ConnectCta language={language} kind={kind} /></div>
+      ) : null}
       <Button variant="ghost" size="sm" className="w-full" disabled={disabled}
         onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}>
         {t(language, "channels.config")}
