@@ -66,3 +66,6 @@ Constitucion_*.md
 
 # Reportes de auditoria (deliverables, no se versionan)
 REPORTE_R22_AUDITOR.md
+
+# Gate self-test backups (test-gates.sh) — nunca al repo
+*.bak
