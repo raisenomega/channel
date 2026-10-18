@@ -30,3 +30,25 @@ test("crearTenant â€” debe generar slug en minÃºsculas", () => {
   expect(result.ok).toBe(true);
   expect(result.value.slug).toBe("mi-negocio-pr");
 });
+
+// K-5-bis (A-06): phone del negocio E.164 persiste en TenantState
+test("K-5-bis phone E.164 valido se guarda en state.phone", () => {
+  const result = crearTenant("Test", "test", "lite_starter", "es", "PR", "America/Puerto_Rico", "+17871234567");
+  expect(result.ok).toBe(true);
+  if (!result.ok) return;
+  expect(result.value.phone).toBe("+17871234567");
+});
+
+test("K-5-bis phone invalido (+PR123) -> telefono_invalido", () => {
+  const result = crearTenant("Test", "test", "lite_starter", "es", "PR", "America/Puerto_Rico", "+PR123");
+  expect(!result.ok).toBe(true);
+  if (result.ok) return;
+  expect(result.error.kind).toBe("telefono_invalido");
+});
+
+test("K-5-bis phone vacio -> phone = null (nullable, coherente con CHECK 045)", () => {
+  const result = crearTenant("Test", "test", "lite_starter");
+  expect(result.ok).toBe(true);
+  if (!result.ok) return;
+  expect(result.value.phone).toBeNull();
+});

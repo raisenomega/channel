@@ -23,6 +23,7 @@ export interface CrearTenantCommand {
   readonly language?: Language;
   readonly countryCode?: string;
   readonly timezone?: string;
+  readonly phone?: string;
 }
 
 export type CrearTenantError = TenantCreateError | UserCreateError | RepoError
@@ -49,7 +50,7 @@ export class CrearTenantHandler {
     const email = Email.crear(cmd.ownerEmail);
     if (!email.ok) return err({ kind: "email_invalido" });
 
-    const tenantResult = crearTenant(cmd.name, cmd.slug, cmd.plan, lang, cmd.countryCode, cmd.timezone);
+    const tenantResult = crearTenant(cmd.name, cmd.slug, cmd.plan, lang, cmd.countryCode, cmd.timezone, cmd.phone);
     if (!tenantResult.ok) return err(tenantResult.error);
     const tenant = tenantResult.value;
 

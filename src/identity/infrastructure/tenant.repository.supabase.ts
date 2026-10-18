@@ -11,6 +11,7 @@ export class TenantRepositorySupabase implements TenantRepository {
         id: tenant.id, name: tenant.name, slug: tenant.slug,
         plan: tenant.plan, country_code: tenant.countryCode,
         timezone: tenant.timezone, default_language: tenant.language,
+        phone: tenant.phone,
         features_enabled: tenant.featuresEnabled, status: tenant.status,
       });
       if (error) return err({ kind: "persistence_failure", cause: error.message });
@@ -50,6 +51,7 @@ export class TenantRepositorySupabase implements TenantRepository {
       countryCode: row.country_code as string,
       timezone: row.timezone as string,
       language: (row.default_language ?? "es") as "es" | "en",
+      phone: (row.phone ?? null) as string | null,
       featuresEnabled: Object.freeze(row.features_enabled as Record<string, unknown>),
       status: row.status as TenantState["status"],
       createdAt: new Date(row.created_at as string),
