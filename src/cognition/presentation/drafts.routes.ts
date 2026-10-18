@@ -38,7 +38,7 @@ export function rutaDraftsApprove(deps: DraftsDeps): RouteDefinition {
     const auth = await requireTenantAuth(ctx, pathTenant(ctx)); if (!auth.ok) return auth.error;
     const draftId = ctx.params["draftId"] ?? cp(ctx)[4] ?? "";
     const body = (ctx.body ?? {}) as Record<string, unknown>;
-    const r = await deps.approve.ejecutar(draftId, tid(auth.value.tenantId), (body as { editedContent?: string }).editedContent);
+    const r = await deps.approve.ejecutar(draftId, tid(auth.value.tenantId), auth.value.userId, (body as { editedContent?: string }).editedContent);
     if (r.ok) return { ok: true, draft: r.value };
     if (kindOf(r.error) === "DRAFT_NOT_FOUND") return { ok: false, error: { kind: "not_found" }, status: 404 };
     if (kindOf(r.error) === "STATUS_NOT_DRAFT") return { ok: false, error: { kind: "conflict" }, status: 409 };

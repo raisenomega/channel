@@ -16,11 +16,12 @@ import { matchRoute } from "./server-route-matcher.ts";
 import { extractJwt, parseBody, readBody } from "./server-helpers.ts";
 import { sendResponse } from "./server-response.ts";
 import "./tenant-fallback.supabase.ts"; // M-6: registra fallback sub->users.tenant_id en auth-helpers
+import { assertCriticalEnv } from "./fail-fast-env.ts";
 import type { RequestContext } from "./server-types.ts";
 
 const PORT = parseInt(nodeProcess.env["PORT"] ?? "8080", 10);
 const HOST = nodeProcess.env["HOST"] ?? "0.0.0.0";
-
+assertCriticalEnv(nodeProcess.env); // FORTRESS N-8/N-9: env de seguridad obligatorias en prod
 const handlers = await buildHandlers();
 const routes = registrarRutas(handlers);
 
