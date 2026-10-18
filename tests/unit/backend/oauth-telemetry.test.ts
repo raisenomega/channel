@@ -35,6 +35,6 @@ test("A-V-vig-2: el 302 del callback propaga &req= (trackable end-to-end)", asyn
   const c = { path: `/channels/zernio/callback?st=${encodeURIComponent(st.value)}&step=select_page&tempToken=T&connect_token=C` } as RequestContext;
   const r = await rutaZernioCallback(deps()).handler(c);
   const locn = (r as { headers?: { location: string } }).headers?.location ?? "";
-  expect(locn).toContain("status=needs_page");
+  expect(locn).toContain("oauth=needs_page");
   expect(locn).toMatch(/[?&]req=[0-9a-f-]{8,}/i); // req_id propagado en el redirect
 });

@@ -13,7 +13,7 @@ import { useCanales } from "./channels-ui/channels-fetchers";
 import { ChannelCard } from "./channels-ui/channel-card";
 import { ChannelsNotice, LoadingNotice } from "./channels-ui/channels-notices";
 import { FacebookPagePicker } from "./channels-ui/facebook-page-picker";
-import { useOauthRelay } from "./channels-ui/use-oauth-relay";
+import { useOauthReturn } from "./channels-ui/use-oauth-return";
 
 export const ChannelsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -27,8 +27,8 @@ function ChannelsPage() {
   const [fbPicker, setFbPicker] = useState(false);
   const { data, isPending, errKind, refetch } = useCanales();
 
-  // O-3/O-4: relay del popup OAuth (BroadcastChannel). P1: el verde solo del fetch real.
-  useOauthRelay(refetch, setFbPicker);
+  // W (same-tab): retorno OAuth por query param /channels?oauth=<status> (sin popup). P1: verde del fetch real.
+  useOauthReturn(refetch, setFbPicker);
 
   if (isPending) return <LoadingNotice language={language} />;
 
