@@ -25,7 +25,16 @@ test("A-R-7-3: migracion 050 = CHECK-swap (no CREATE TYPE enum) + default esenci
   expect(mig).toContain("'esencial'");
   expect(mig).not.toMatch(/CREATE\s+TYPE\s+\w+\s+AS\s+ENUM/i); // 050 NO crea enum pg
   expect(mig).toContain("SET DEFAULT 'esencial'");
-  expect(mig).toContain("inbox_addon"); // KEEP (decision owner)
+  // Compuerta #84: inbox_addon eliminado del CHECK (0 uso). El CHECK solo lista los 5 oficiales.
+  expect(mig).toMatch(/CHECK \(plan IN \('esencial', 'pro', 'business', 'ecosystem', 'enterprise'\)\)/);
+});
+
+test("A-R-7-5: inbox_addon eliminado del tipo y del CHECK (Compuerta #84)", () => {
+  const types = readFileSync("src/shared/domain/types.ts", "utf8");
+  expect(types).not.toContain("inbox_addon");
+  const mig = readFileSync("supabase/migrations/050_rename_plan_values.sql", "utf8");
+  // No debe aparecer como valor valido del CHECK (un INSERT con inbox_addon violaria el constraint).
+  expect(mig).not.toMatch(/'inbox_addon'/);
 });
 
 test("A-R-7-4: POST /tenants default plan = esencial", () => {

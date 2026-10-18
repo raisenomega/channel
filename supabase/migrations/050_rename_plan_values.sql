@@ -2,7 +2,7 @@
 -- R-7 (Compuerta #81): renombra los planes a los nombres oficiales. `plan` es columna TEXT + CHECK
 -- (NO enum pg), asi que el approach correcto es backfill + swap del CHECK (no CREATE TYPE/ALTER TYPE).
 -- Mapping firmado owner: lite_starter->esencial, lite_pro->pro, lite_business->business.
--- ecosystem / enterprise / inbox_addon se preservan (KEEP inbox_addon, default owner).
+-- ecosystem / enterprise se preservan; inbox_addon ELIMINADO (Compuerta #84: 0 uso real).
 -- Idempotente y no-destructivo. Owner aplica por SQL Editor pre-merge (ordering: 050 antes del code).
 
 BEGIN;
@@ -16,10 +16,10 @@ UPDATE public.tenants SET plan = CASE plan
 END
 WHERE plan IN ('lite_starter', 'lite_pro', 'lite_business');
 
--- 2) Swap del CHECK: valores oficiales (+ inbox_addon KEEP)
+-- 2) Swap del CHECK: 5 valores oficiales (SIN inbox_addon)
 ALTER TABLE public.tenants DROP CONSTRAINT IF EXISTS tenants_plan_check;
 ALTER TABLE public.tenants ADD CONSTRAINT tenants_plan_check
-  CHECK (plan IN ('esencial', 'pro', 'business', 'ecosystem', 'enterprise', 'inbox_addon'));
+  CHECK (plan IN ('esencial', 'pro', 'business', 'ecosystem', 'enterprise'));
 
 -- 3) Default del plan base oficial
 ALTER TABLE public.tenants ALTER COLUMN plan SET DEFAULT 'esencial';

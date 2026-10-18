@@ -18,6 +18,6 @@ export type Role =
 
 export type TenantPlan =
   | "esencial" | "pro" | "business"
-  | "ecosystem" | "enterprise" | "inbox_addon";
+  | "ecosystem" | "enterprise";
 
 export type Confidence_0_1 = number; // branded type: 0..1
