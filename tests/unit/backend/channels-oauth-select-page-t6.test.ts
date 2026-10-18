@@ -33,7 +33,7 @@ test("A-T-6-1: step=select_page SIN profileId (como lo manda Zernio) -> stash co
   const st = await signed({ tenantId: "t-T6a", userId: "u-T6a" });
   const c = { path: `/channels/zernio/callback?st=${encodeURIComponent(st)}&step=select_page&tempToken=TT6&connect_token=CT6` } as RequestContext;
   const r = await rutaZernioCallback(deps()).handler(c);
-  expect(loc(r)).toContain("status=needs_page");
+  expect(loc(r)).toContain("oauth=needs_page");
   expect(loc(r)).not.toContain("TT6"); // tokens NUNCA en la URL
   const p = getPending("u-T6a", "t-T6a", "facebook");
   expect(p?.connectToken).toBe("CT6");
@@ -44,7 +44,7 @@ test("A-T-6-1b: step=select_page con profileId que NO matchea -> igual stashea (
   const st = await signed({ tenantId: "t-T6b", userId: "u-T6b" });
   const c = { path: `/channels/zernio/callback?st=${encodeURIComponent(st)}&profileId=prof-AJENO&step=select_page&tempToken=T2&connect_token=C2` } as RequestContext;
   const r = await rutaZernioCallback(deps()).handler(c);
-  expect(loc(r)).toContain("status=needs_page");
+  expect(loc(r)).toContain("oauth=needs_page");
   expect(getPending("u-T6b", "t-T6b", "facebook")?.connectToken).toBe("C2");
 });
 
@@ -52,7 +52,7 @@ test("A-T-6-regresion: NO select_page + profileId mismatch -> sigue dando error 
   const st = await signed({ tenantId: "t-T6c", userId: "u-T6c" });
   const c = { path: `/channels/zernio/callback?st=${encodeURIComponent(st)}&profileId=prof-AJENO&accountId=acc-1` } as RequestContext;
   const r = await rutaZernioCallback(deps()).handler(c);
-  expect(loc(r)).toContain("status=error");
+  expect(loc(r)).toContain("oauth=error");
 });
 
 test("A-T-6-4: el stash respeta TTL >=15min; expirado -> getPending null (recovery via timeout T-4)", () => {
