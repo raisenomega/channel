@@ -59,7 +59,7 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     ...registrarOAuthChannelsRutas(),
     handleZernioWebhook(h),
     rutaCrearTenant(),
-    ((r) => rutaActualizarTenant({ buscar: (id) => r.buscar(id), actualizarTelefono: (id, p) => r.actualizarTelefono(id, p) }))(new TenantRepositorySupabase()), // R-3/R-4 PATCH /tenants/:id
+    ((r) => rutaActualizarTenant({ buscar: (id) => r.buscar(id), actualizarTelefono: (id, p) => r.actualizarTelefono(id, p), actualizarPerfil: (id, c) => r.actualizarPerfil(id, c) }))(new TenantRepositorySupabase()), // R-3/R-4/S-10 PATCH /tenants/:id
     rutaAgentStatus(),
     rutaRecentActivity(),
     rutaOAuthCallback(),
