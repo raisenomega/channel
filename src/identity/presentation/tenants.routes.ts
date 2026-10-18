@@ -46,6 +46,7 @@ export function rutaCrearTenant(): RouteDefinition {
         language: defaultLanguage as never,
         countryCode: countryCode,
         timezone: timezone,
+        phone: phone,
       });
       if (!result.ok) return jsonResponse(statusDeError(result.error.kind), { ok: false, error: result.error });
       return jsonResponse(201, { ok: true, id: result.value, name, email, phone, primary_phone: primaryPhone });

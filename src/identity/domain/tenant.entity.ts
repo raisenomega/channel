@@ -11,6 +11,8 @@ export interface TenantState {
   readonly countryCode: string;
   readonly timezone: string;
   readonly language: Language;
+  /** Telefono del negocio E.164 (K-5-bis + migracion 045). null si aun no se capturo. */
+  readonly phone: string | null;
   readonly featuresEnabled: Readonly<Record<string, unknown>>;
   readonly status: "trial" | "active" | "suspended" | "cancelled" | "churned";
   readonly createdAt: Date;
@@ -19,7 +21,10 @@ export interface TenantState {
 export type TenantCreateError =
   | { readonly kind: "slug_ya_existe" }
   | { readonly kind: "nombre_vacio" }
-  | { readonly kind: "idioma_invalido" };
+  | { readonly kind: "idioma_invalido" }
+  | { readonly kind: "telefono_invalido" };
+
+const E164_RE = /^\+[1-9]\d{6,14}$/;
 
 export const crearTenant = (
   name: string,
@@ -28,6 +33,7 @@ export const crearTenant = (
   language: Language = "es",
   countryCode = "PR",
   timezone = "America/Puerto_Rico",
+  phone = "",
 ): Result<TenantState, TenantCreateError> => {
   if (!name || name.trim().length === 0) {
     return err({ kind: "nombre_vacio" });
@@ -35,6 +41,10 @@ export const crearTenant = (
   const langs: readonly string[] = ["es", "en"];
   if (!langs.includes(language)) {
     return err({ kind: "idioma_invalido" });
+  }
+  const tel = phone.trim();
+  if (tel && !E164_RE.test(tel)) {
+    return err({ kind: "telefono_invalido" });
   }
   const state: TenantState = Object.freeze({
     id: crypto.randomUUID() as TenantId,
@@ -44,6 +54,7 @@ export const crearTenant = (
     countryCode,
     timezone,
     language,
+    phone: tel || null,
     featuresEnabled: Object.freeze({}),
     status: "active",
     createdAt: new Date(),
