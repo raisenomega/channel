@@ -13,7 +13,7 @@ import type { TenantId } from "../../../shared/domain/ids.ts";
 import type { TenantState } from "../../../identity/domain/tenant.entity.ts";
 import type { ChannelConnection, SocialPlatform } from "../../domain/social-account.entity.ts";
 import { verifyState } from "../../../identity/infrastructure/oauth-state.ts";
-import { originPermitido } from "../../infrastructure/cors-allowlist.ts";
+import { corsAllowlist, originPermitido } from "../../infrastructure/cors-allowlist.ts";
 import { stashPending } from "../../infrastructure/oauth-pending-stash.ts";
 
 export interface OAuthCallbackDeps {
@@ -26,28 +26,29 @@ export interface OAuthCallbackDeps {
 }
 
 const qp = (ctx: RequestContext, k: string): string => new URLSearchParams(ctx.path.includes("?") ? ctx.path.split("?")[1] : "").get(k) ?? "";
+// V2 (#139 replant OMEGA): nunca 403 por origin. El origin va FIRMADO (HMAC) y ademas se resuelve
+// contra el allowlist: si esta -> se usa; si no -> allowed[0] (fallback OMEGA _front_base). NUNCA
+// redirige a un origen ajeno (anti open-redirect) ni falla cerrado (403 rompia el relay en previews).
+function frontBase(origin: string): string {
+  const o = origin.replace(/\/+$/, "");
+  if (originPermitido(o)) return o;                                    // Compuerta #40: re-valida origin vs allowlist
+  return (corsAllowlist().map((x) => x.replace(/\/+$/, ""))[0]) ?? ""; // fallback OMEGA: 1er origen permitido
+}
 function backToTab(origin: string, status: string, platform: string): HttpResponse {
-  return { status: 302, body: "", headers: { location: `${origin}/zernio/return?status=${status}&platform=${encodeURIComponent(platform)}` } };
+  return { status: 302, body: "", headers: { location: `${frontBase(origin)}/zernio/return?status=${status}&platform=${encodeURIComponent(platform)}` } };
 }
 
 export function rutaZernioCallback(deps: OAuthCallbackDeps): RouteDefinition {
   return {
     method: "GET", path: "/channels/zernio/callback",
     handler: async (ctx) => {
-      // V (#135/#136 replant OMEGA): el nonce va FIRMADO en el state (CSRF), pero NO se consume
-      // single-use. El consumo N-9 rompia el flujo real: un prefetch/doble-hit del navegador consumia
-      // el nonce y el hit real daba state_nonce_replayed. Guards reales (identicos al OMEGA en prod):
-      // firma HMAC constant-time + TTL 5min + origin firmado re-validado vs CORS. El callback es ahora
-      // idempotente (noncesRepo.registrar queda como rastro de auditoria; consume ya no se invoca).
+      // V (#135/#136): nonce FIRMADO (CSRF) pero NO single-use (el consume N-9 rompia el flujo con
+      // prefetch/doble-hit -> state_nonce_replayed). Guards: firma HMAC + TTL 5min + origin (frontBase).
       const v = await verifyState(qp(ctx, "st"), async () => true);
       if (!v.ok) return jsonResponse(401, { ok: false, error: v.error });
       const { tenantId, platform, origin, userId } = v.value;
-      if (!originPermitido(origin)) return jsonResponse(403, { ok: false, error: { kind: "origin_rejected" } });
-      // T-6 (causa raiz del OAuth FB stuck): el callback step=select_page NO trae profileId todavia
-      // (Zernio no ha finalizado el profile). Se maneja ANTES del guard de match de profileId; el
-      // trust anchor del paso select_page es el STATE FIRMADO (userId/tenantId), no el query param.
-      // Antes el guard de L42 bailaba con "error" y el stash+needs_page nunca ocurrian -> picker nunca
-      // abria -> el POST a Zernio nunca llegaba (confirmado por Zernio support).
+      // T-6: step=select_page NO trae profileId aun -> se maneja ANTES del guard de profileId (trust
+      // anchor = state firmado). Antes bailaba "error" y el stash+needs_page nunca ocurrian.
       if (qp(ctx, "step") === "select_page") {
         let up: unknown = null; try { up = JSON.parse(decodeURIComponent(qp(ctx, "userProfile"))); } catch { /* userProfile ilegible -> null (degrada honesto) */ }
         stashPending(userId, String(tenantId), platform, qp(ctx, "tempToken"), qp(ctx, "connect_token"), up);
