@@ -5,6 +5,8 @@
 import { waIcon } from "./wa-icons";
 import { type WaChat } from "./wa-types";
 import { WaChatList } from "./wa-chat-list";
+import { PhoneShellEmptyState } from "./phone-shell-empty-state";
+import { importHistoryEnabled } from "@/lib/feature-flags";
 
 function TabPlaceholder({ label }: { label: string }) {
   return (
@@ -35,7 +37,9 @@ export function WaHome({ chats, tab, onTab, onSelect }: {
         <span className={"wa-tab" + (tab === "calls" ? " on" : "")} onClick={() => onTab("calls")}>Llamadas</span>
       </div>
       {tab === "chats" ? (
-        <WaChatList chats={chats} onSelect={onSelect} />
+        chats.length === 0
+          ? <PhoneShellEmptyState importEnabled={importHistoryEnabled()} />
+          : <WaChatList chats={chats} onSelect={onSelect} />
       ) : (
         <TabPlaceholder label={tab === "status" ? "Estados" : "Llamadas"} />
       )}

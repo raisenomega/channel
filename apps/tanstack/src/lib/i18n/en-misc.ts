@@ -35,7 +35,7 @@ export const enMisc: Dict = {
   "common.claude35": "Claude 3.5 Sonnet",
   "common.deepseekChat": "DeepSeek Chat",
   "common.qwenMax": "Qwen-Max",
-  "nav.contacts": "Contacts",
+  "nav.contacts": "CRM",
   "nav.quotes": "Quotes",
   "nav.orders": "Orders",
   "nav.payments": "Payments",

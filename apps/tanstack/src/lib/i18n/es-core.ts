@@ -6,7 +6,7 @@ import type { Dict } from "./i18n-types";
 export const esCore: Dict = {
   "nav.inbox": "Dashboard",
   "nav.dashboard": "Panel",
-  "nav.contacts": "Contactos",
+  "nav.contacts": "CRM",
   "nav.quotes": "Cotizaciones",
   "nav.orders": "Pedidos",
   "nav.payments": "Pagos",

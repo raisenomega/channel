@@ -12,7 +12,7 @@ function semillaSession(page: Page): void {
       refreshToken: "ref-generico",
       uid: "uid-generico",
       email: "anon@example.com",
-      tenant: { tenantId: "tnt-generico", name: "Empresa demo", plan: "lite_starter", slug: "empresa-demo" },
+      tenant: { tenantId: "tnt-generico", name: "Empresa demo", plan: "esencial", slug: "empresa-demo" },
     };
     localStorage.setItem("hub.session", JSON.stringify(session));
   });
@@ -23,7 +23,7 @@ function mockSupabase(page: Page): void {
     await r.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify([{ tenant_id: "tnt-generico", name: "Empresa demo", plan: "lite_starter", slug: "empresa-demo" }]),
+      body: JSON.stringify([{ tenant_id: "tnt-generico", name: "Empresa demo", plan: "esencial", slug: "empresa-demo" }]),
     });
   });
   // Inbox vacio (N5 — ni datos fabricados ni placeholders).

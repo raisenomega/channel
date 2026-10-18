@@ -6,7 +6,7 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { Chip } from "@/components/ui/chip";
 
-const PLANES = ["lite_starter", "lite_pro", "lite_business", "ecosystem", "enterprise"] as const;
+const PLANES = ["esencial", "pro", "business", "ecosystem", "enterprise"] as const;
 export type PlanSlug = (typeof PLANES)[number];
 
 export function PlanChips({ language, value, onChange }: {

@@ -17,7 +17,7 @@ export type Role =
   | "buyer"; // M-7: C2C sin tenant (Sprint 5 marketplace). SUPERSET, no reemplaza.
 
 export type TenantPlan =
-  | "lite_starter" | "lite_pro" | "lite_business"
-  | "ecosystem" | "enterprise" | "inbox_addon";
+  | "esencial" | "pro" | "business"
+  | "ecosystem" | "enterprise";
 
 export type Confidence_0_1 = number; // branded type: 0..1

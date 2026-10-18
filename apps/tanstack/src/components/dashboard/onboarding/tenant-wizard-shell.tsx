@@ -14,7 +14,7 @@ export function TenantWizardShell({ lang }: { lang: Idioma }) {
   const [paso, setPaso] = useState(1);
   const [formData, setFormData] = useState<TenantFormData>({
     name: "", email: "", phone: "", country_code: "PR", timezone: "America/Puerto_Rico",
-    default_language: "es", plan: "lite_starter",
+    default_language: "es", plan: "esencial",
   });
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

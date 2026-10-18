@@ -51,9 +51,9 @@ export const esOnboarding: Dict = {
   "activity.draftGenerated": "Borrador generado por {agent}",
   "activity.draftApproved": "Borrador aprobado por {agent}",
   "activity.draftSent": "Mensaje enviado",
-  "plan.lite_starter": "Lite Starter",
-  "plan.lite_pro": "Lite Pro",
-  "plan.lite_business": "Lite Business",
+  "plan.esencial": "Esencial",
+  "plan.pro": "Pro",
+  "plan.business": "Business",
   "plan.ecosystem": "Ecosystem",
   "plan.enterprise": "Enterprise",
 };

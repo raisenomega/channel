@@ -8,7 +8,7 @@ import { SlideDatosCliente, type TenantFormData } from "@/components/dashboard/o
 
 const VALIDO: TenantFormData = {
   name: "Zafacones Ramos", email: "z@z.com", phone: "+17871234567",
-  country_code: "PR", timezone: "America/Puerto_Rico", default_language: "es", plan: "lite_starter",
+  country_code: "PR", timezone: "America/Puerto_Rico", default_language: "es", plan: "esencial",
 };
 
 test("A-M-11 7 campos validos -> Siguiente habilitado y dispara onGoToStep2", () => {
