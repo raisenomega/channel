@@ -31,6 +31,10 @@ const E164_RE = /^\+[1-9]\d{6,14}$/;
 /** R-3: valida telefono E.164 (reusa el patron de 045). Vacio = invalido (el caller decide opcionalidad). */
 export const esTelefonoE164 = (phone: string): boolean => E164_RE.test(phone.trim());
 
+/** S-1 (#95): planes validos runtime (espejo exacto del CHECK de migracion 050). */
+export const PLANES_VALIDOS: readonly TenantPlan[] = ["esencial", "pro", "business", "ecosystem", "enterprise"];
+export const esPlanValido = (plan: string): plan is TenantPlan => (PLANES_VALIDOS as readonly string[]).includes(plan);
+
 export const crearTenant = (
   name: string,
   slug: string,

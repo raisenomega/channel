@@ -6,6 +6,8 @@
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
 import { jsonResponse, requireUserAuth } from "../../server/auth-helpers.ts";
 import { CrearTenantHandler } from "../application/create-tenant.handler.ts";
+import { esPlanValido } from "../domain/tenant.entity.ts";
+import type { TenantPlan } from "../../shared/domain/types.ts";
 import { TenantRepositorySupabase } from "../infrastructure/tenant.repository.supabase.ts";
 import { UserRepositorySupabase } from "../infrastructure/user.repository.supabase.ts";
 import { OwnerClaimsLinkerSupabase } from "../infrastructure/owner-claims.linker.supabase.ts";
@@ -36,13 +38,17 @@ export function rutaCrearTenant(): RouteDefinition {
       const countryCode = String(body["country_code"] ?? "PR").trim();
       const timezone = String(body["timezone"] ?? "America/Puerto_Rico").trim();
       const defaultLanguage = String(body["default_language"] ?? "es").trim();
-      const plan = String(body["plan"] ?? "esencial").trim();
+      const planRaw = body["plan"];
+      if (planRaw !== undefined && planRaw !== null && !esPlanValido(String(planRaw).trim())) {
+        return jsonResponse(400, { ok: false, error: { kind: "plan_invalido" } });
+      }
+      const plan = esPlanValido(String(planRaw ?? "").trim()) ? String(planRaw).trim() : "esencial";
       if (!name || !email || !phone) {
         return jsonResponse(400, { ok: false, error: { kind: "campos_incompletos" } });
       }
       const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
       const result = await handler.ejecutar({
-        name, slug, plan: plan as never, ownerEmail: email, ownerUserId: auth.value.userId,
+        name, slug, plan: plan as TenantPlan, ownerEmail: email, ownerUserId: auth.value.userId,
         language: defaultLanguage as never,
         countryCode: countryCode,
         timezone: timezone,
