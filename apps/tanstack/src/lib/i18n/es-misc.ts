@@ -42,4 +42,5 @@ export const esMisc: Dict = {
   "nav.automation": "Automacion",
   "nav.reports": "Reportes",
   "nav.sla": "SLA",
+  "nav.logout": "Salir",
 };
