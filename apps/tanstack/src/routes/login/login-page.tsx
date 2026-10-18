@@ -4,7 +4,8 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { login, registerUser } from "@/lib/auth";
-import { type Mode, errorText } from "./login-utils";
+import { mapLoginError, mapSignupError } from "@/lib/auth-error-map";
+import { type Mode } from "./login-utils";
 import { LoginForm } from "./login-form";
 
 export function LoginPage() {
@@ -30,8 +31,13 @@ export function LoginPage() {
     setLoading(true);
     const r = mode === "login" ? await login(email, password) : await registerUser(email, password);
     setLoading(false);
-    setError(errorText(r));
-    if (r.ok) void navigate({ to: "/inbox" });
+    if (r.ok) {
+      // M-1: signup -> wizard de tenant; login -> inbox.
+      void navigate({ to: mode === "register" ? "/onboarding/tenant" : "/inbox" });
+      return;
+    }
+    // M-4: error diferenciado segun el modo.
+    setError(mode === "register" ? mapSignupError(r.message) : mapLoginError(r.message));
   }
 
   return (
@@ -44,7 +50,7 @@ export function LoginPage() {
         error={error} loading={loading}
         onSubmit={onSubmit}
       />
-      <footer className="login-footer">FORTRESS. by Raisen</footer>
+      <footer className="login-footer">HUB by Raisen</footer>
     </div>
   );
 }

@@ -7,14 +7,16 @@ import type { InboxItem, DashboardStats } from "@/lib/types";
 import { BentoTitle, BentoKpi, DistribucionCanales, AnilloSLA, Pendientes } from "@/components/dashboard/bentobox-dashboard";
 import { IconBars, IconDona, IconFlag } from "./inbox-icons";
 
-export function KpiRow({ language, stats, total }: {
+export function KpiRow({ language, stats, total, tenantName, tenantPlan }: {
   language: Idioma;
   stats: DashboardStats;
   total: number;
+  tenantName?: string;
+  tenantPlan?: string;
 }) {
   return (
     <div className="bento">
-      <BentoKpi label={t(language, "kpi.tenant")} num="" unit={t(language, "dash.plan")} />
+      <BentoKpi label={t(language, "kpi.tenant")} num={tenantName || "—"} unit={tenantPlan || t(language, "dash.plan")} />
       <BentoKpi label={t(language, "dash.activas")} num={stats.abiertas} trend={t(language, "dash.vivas")} />
       <BentoKpi label={t(language, "dash.sinAsignar")} num={stats.sinAsignar} trend={t(language, "dash.pend.asignar")} down />
       <BentoKpi label={t(language, "inbox.total")} num={total} unit={t(language, "inbox.min")} />

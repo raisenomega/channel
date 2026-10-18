@@ -53,11 +53,14 @@ export async function registerUser(email: string, password: string): Promise<Aut
   return { ok: true, session: data.session };
 }
 
+/** M-10: revoca sesion REAL (signOut global) + barre TODA key sb-* de ambos storages. */
 export async function logout(): Promise<AuthResult> {
-  clearLocalSession();
   const sb = getSupabase();
-  if (!sb) return { ok: true, session: null };
-  const { error } = await sb.auth.signOut();
-  if (error) return { ok: false, message: messageOf(error) };
+  try { if (sb) await sb.auth.signOut({ scope: "global" }); } catch { /* best-effort: igual limpiamos */ }
+  clearLocalSession();
+  try {
+    for (const k of Object.keys(window.localStorage)) if (k.startsWith("sb-")) window.localStorage.removeItem(k);
+    for (const k of Object.keys(window.sessionStorage)) if (k.startsWith("sb-")) window.sessionStorage.removeItem(k);
+  } catch { /* storage bloqueado: el redirect del caller corta la sesion igual */ }
   return { ok: true, session: null };
 }

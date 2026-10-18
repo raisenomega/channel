@@ -8,6 +8,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import noRawLoginRedirect from "./scripts/eslint-rules/no-raw-login-redirect.js";
+import noOrphanSessionCleanup from "./scripts/eslint-rules/no-orphan-session-cleanup.js";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -102,9 +103,10 @@ export default [
   // Compuerta #21 — dedicada: prohibe window.location.href = "/login" fuera del helper
   {
     files: ["apps/tanstack/src/**/*.{ts,tsx}"],
-    plugins: { "custom": { rules: { "no-raw-login-redirect": noRawLoginRedirect } } },
+    plugins: { "custom": { rules: { "no-raw-login-redirect": noRawLoginRedirect, "no-orphan-session-cleanup": noOrphanSessionCleanup } } },
     rules: {
       "custom/no-raw-login-redirect": "error",
+      "custom/no-orphan-session-cleanup": "error",
       // Permitir parametros _-prefix (ej. toggleCanal(_channelId, _active))
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
     },

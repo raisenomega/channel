@@ -13,6 +13,7 @@ import { ConversationList } from "./inbox/inbox-list";
 import { KpiRow, WidgetsRow } from "./inbox/inbox-widgets";
 import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
 import { useRecentActivity } from "@/hooks/useRecentActivity";
+import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
 
 const InboxRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -26,9 +27,8 @@ function InboxPage() {
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [filtroSLA, setFiltroSLA] = useState<boolean | null>(null);
   const { data: items, isPending } = useQuery({ queryKey: ["inbox"], queryFn: fetchInbox, staleTime: 30_000 });
-  // Hooks SIEMPRE antes del early return (React rules-of-hooks).
-  const { events } = useRecentActivity();
-
+  const { data: miTenant } = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 60_000 });
+  const { events } = useRecentActivity(); // hooks antes del early return (rules-of-hooks)
   const itemsFiltrados = (items ?? []).filter((i) => {
     if (filtroEstado && i.status !== filtroEstado) return false;
     if (filtroSLA === true && !i.slaViolated) return false;
@@ -54,7 +54,7 @@ function InboxPage() {
 
   return (
     <div className="view">
-      <KpiRow language={language} stats={stats} total={items?.length ?? 0} />
+      <KpiRow language={language} stats={stats} total={items?.length ?? 0} tenantName={miTenant?.name} tenantPlan={miTenant?.plan} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={sinDatos} />
       <BentoRowNueva lang={language} onOpen={handleOpenOnboarding} events={events} />
       <FiltersBar
