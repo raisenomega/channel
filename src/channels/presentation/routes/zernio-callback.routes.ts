@@ -14,6 +14,7 @@ import type { TenantState } from "../../../identity/domain/tenant.entity.ts";
 import type { ChannelConnection, SocialPlatform } from "../../domain/social-account.entity.ts";
 import { verifyState } from "../../../identity/infrastructure/oauth-state.ts";
 import { originPermitido } from "../../infrastructure/cors-allowlist.ts";
+import { stashPending } from "../../infrastructure/oauth-pending-stash.ts";
 
 export interface OAuthCallbackDeps {
   readonly noncesRepo: { consume(nonce: string): Promise<boolean> };
@@ -35,12 +36,18 @@ export function rutaZernioCallback(deps: OAuthCallbackDeps): RouteDefinition {
     handler: async (ctx) => {
       const v = await verifyState(qp(ctx, "st"), (n) => deps.noncesRepo.consume(n));
       if (!v.ok) return jsonResponse(401, { ok: false, error: v.error });
-      const { tenantId, platform, origin } = v.value;
+      const { tenantId, platform, origin, userId } = v.value;
       if (!originPermitido(origin)) return jsonResponse(403, { ok: false, error: { kind: "origin_rejected" } });
       const t = await deps.tenantRepo.buscar(tenantId as TenantId);
       if (!t.ok || !t.value || t.value.zernioProfileId !== qp(ctx, "profileId")) return backToTab(origin, "error", platform);
       const accountId = qp(ctx, "accountId");
-      if (platform === "facebook" && !accountId) return backToTab(origin, "needs_page", platform);
+      // O-4 FB: Zernio pide elegir pagina (step=select_page) -> stash server-side (tokens NUNCA
+      // al navegador) keyed por el userId FIRMADO + handoff al page-picker (needs_page, sin tokens en URL).
+      if (qp(ctx, "step") === "select_page") {
+        let up: unknown = null; try { up = JSON.parse(decodeURIComponent(qp(ctx, "userProfile"))); } catch { /* userProfile ilegible -> queda null (degrada honesto) */ }
+        stashPending(userId, String(tenantId), platform, qp(ctx, "tempToken"), qp(ctx, "connect_token"), up);
+        return backToTab(origin, "needs_page", platform);
+      }
       // #4: el accountId (query NO firmado) DEBE existir en el profile del tenant; si no, no persiste.
       const accts = await deps.listOwnAccounts(qp(ctx, "profileId"));
       if (!accts.some((a) => a.id === accountId)) return backToTab(origin, "error", platform);

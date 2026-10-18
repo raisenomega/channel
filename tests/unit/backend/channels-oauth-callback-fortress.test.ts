@@ -74,3 +74,14 @@ test("A-O-9 origin NO en CORS_ORIGINS_ALLOWLIST -> 403 origin_rejected (anti ope
   expect((r as { status?: number }).status).toBe(403);
   expect(JSON.stringify(r)).toContain("origin_rejected");
 });
+
+import { getPending } from "../../../src/channels/infrastructure/oauth-pending-stash.ts";
+test("A-O-4a callback FB step=select_page -> stash server-side + needs_page (tokens NO en URL)", async () => {
+  const st = await signed({ userId: "u-fb", tenantId: "t-A", platform: "facebook" });
+  const c = { path: `/channels/zernio/callback?st=${encodeURIComponent(st)}&profileId=prof-A&step=select_page&tempToken=TT&connect_token=CT` } as RequestContext;
+  const r = await rutaZernioCallback(deps()).handler(c);
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=needs_page");
+  expect((r as { headers?: { location: string } }).headers?.location).not.toContain("TT");  // sin tokens en la URL
+  const p = getPending("u-fb", "t-A", "facebook");
+  expect(p?.tempToken).toBe("TT"); expect(p?.connectToken).toBe("CT");
+});
