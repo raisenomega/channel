@@ -30,4 +30,6 @@ export const enChannels: Dict = {
   "channels.providerNone": "No provider",
   "channels.needTenant": "You need to create a client before connecting channels.",
   "channels.createClient": "Create client",
+  "phoneShell.noHistory": "History prior to this connection is unavailable due to a WhatsApp Business API (Meta) limitation. New messages will appear here in real time.",
+  "phoneShell.importBtn": "Import history manually (.txt)",
 };
