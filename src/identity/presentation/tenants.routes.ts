@@ -7,6 +7,7 @@ import type { RouteDefinition, RequestContext } from "../../server/server-types.
 import { jsonResponse, requireUserAuth } from "../../server/auth-helpers.ts";
 import { CrearTenantHandler } from "../application/create-tenant.handler.ts";
 import { esPlanValido } from "../domain/tenant.entity.ts";
+import { sanitizarPerfil } from "../domain/tenant-profile.ts";
 import type { TenantPlan } from "../../shared/domain/types.ts";
 import { TenantRepositorySupabase } from "../infrastructure/tenant.repository.supabase.ts";
 import { UserRepositorySupabase } from "../infrastructure/user.repository.supabase.ts";
@@ -53,6 +54,7 @@ export function rutaCrearTenant(): RouteDefinition {
         countryCode: countryCode,
         timezone: timezone,
         phone: phone,
+        perfil: sanitizarPerfil(body),
       });
       if (!result.ok) return jsonResponse(statusDeError(result.error.kind), { ok: false, error: result.error });
       return jsonResponse(201, { ok: true, id: result.value, name, email, phone, primary_phone: primaryPhone });

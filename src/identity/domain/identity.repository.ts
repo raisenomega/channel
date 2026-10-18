@@ -4,7 +4,7 @@ import { TenantState } from "./tenant.entity.ts";
 import { UserState } from "./user.entity.ts";
 
 export interface TenantRepository {
-  guardar(tenant: TenantState): Promise<Result<void, RepoError>>;
+  guardar(tenant: TenantState, extra?: Record<string, unknown>): Promise<Result<void, RepoError>>;
   buscar(id: TenantId): Promise<Result<TenantState | null, RepoError>>;
   buscarPorSlug(slug: string): Promise<Result<TenantState | null, RepoError>>;
 }

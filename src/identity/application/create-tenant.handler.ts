@@ -18,9 +18,9 @@ export interface CrearTenantCommand {
   readonly slug: string;
   readonly plan: TenantPlan;
   readonly ownerEmail: string;
-  /** sub del JWT que crea el tenant (Compuerta #17). Obligatorio. */
-  readonly ownerUserId: string;
+  readonly ownerUserId: string; // sub del JWT que crea el tenant (#17). Obligatorio.
   readonly language?: Language;
+  readonly perfil?: Record<string, unknown>; // S-6: columnas de perfil saneadas (snake_case).
   readonly countryCode?: string;
   readonly timezone?: string;
   readonly phone?: string;
@@ -54,7 +54,7 @@ export class CrearTenantHandler {
     if (!tenantResult.ok) return err(tenantResult.error);
     const tenant = tenantResult.value;
 
-    const guardarTenant = await this.tenantRepo.guardar(tenant);
+    const guardarTenant = await this.tenantRepo.guardar(tenant, cmd.perfil);
     if (!guardarTenant.ok) return err(guardarTenant.error);
 
     const enlace = existente.value
