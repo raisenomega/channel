@@ -57,4 +57,5 @@ export const enDash: Dict = {
   "agent.indistinguishability": "Indistinguishability",
   "agent.autoResolve": "Autonomous resolution",
   "agent.latency": "Avg latency",
+  "dash.createMyBusiness": "Create my business",
 };

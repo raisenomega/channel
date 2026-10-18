@@ -57,4 +57,5 @@ export const esDash: Dict = {
   "agent.indistinguishability": "Indistinguibilidad",
   "agent.autoResolve": "Resolución autónoma",
   "agent.latency": "Latencia media",
+  "dash.createMyBusiness": "Crear mi negocio",
 };

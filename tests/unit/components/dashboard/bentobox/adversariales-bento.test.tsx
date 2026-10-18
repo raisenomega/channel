@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { BentoAgregarCliente } from "@/components/dashboard/bentobox/bento-agregar-cliente";
+import { BentoTenant } from "@/components/dashboard/bentobox/bento-tenant";
 import { BentoEstadoAgentes } from "@/components/dashboard/bentobox/bento-estado-agentes";
 import { BentoActividadReciente } from "@/components/dashboard/bentobox/bento-actividad-reciente";
 import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
@@ -22,27 +22,25 @@ describe("A-01: RENAME_DASHBOARD", () => {
   });
 });
 
-describe("A-02: BENTO_NUEVO_3_CARDS", () => {
-  it("renders 3 cards EN", () => {
-    render(<BentoRowNueva lang={EN} onOpen={vi.fn()} events={[]} />);
-    // Titulo de card + CTA comparten texto: basta que exista al menos uno.
-    expect(screen.getAllByText("Add client").length).toBeGreaterThanOrEqual(1);
+describe("A-02: BENTO_NUEVO_2_CARDS (R-1: card AgregarCliente eliminada)", () => {
+  it("renders EstadoAgentes + Actividad EN (sin card Add client)", () => {
+    render(<BentoRowNueva lang={EN} events={[]} />);
+    expect(screen.queryByText("Add client")).toBeNull();
     expect(screen.getByText("AI Agents status")).toBeDefined();
     expect(screen.getByText("Recent activity")).toBeDefined();
   });
-  it("renders 3 cards ES", () => {
-    render(<BentoRowNueva lang={ES} onOpen={vi.fn()} events={[]} />);
-    expect(screen.getAllByText("Agregar cliente").length).toBeGreaterThanOrEqual(1);
+  it("renders EstadoAgentes + Actividad ES", () => {
+    render(<BentoRowNueva lang={ES} events={[]} />);
     expect(screen.getByText("Estado de agentes IA")).toBeDefined();
     expect(screen.getByText("Actividad reciente")).toBeDefined();
   });
 });
 
-describe("A-03: CARD1_CTA", () => {
-  it("button triggers onOpen", () => {
+describe("A-03: CTA crear negocio ahora vive en el KPI Tenant ([+])", () => {
+  it("boton [+] del BentoTenant dispara onCreate", () => {
     const fn = vi.fn();
-    render(<BentoAgregarCliente lang={EN} onOpen={fn} />);
-    screen.getByRole("button").click();
+    render(<BentoTenant label="TENANT" name="Zafacones" plan="ecosystem" createLabel="Crear mi negocio" onCreate={fn} />);
+    screen.getByRole("button", { name: "Crear mi negocio" }).click();
     expect(fn).toHaveBeenCalledOnce();
   });
 });
@@ -71,11 +69,11 @@ describe("A-05: CARD3_5_EVENTOS", () => {
   });
 });
 
-describe("A-06: CLICK_CARD1_NAV", () => {
+describe("A-06: CLICK [+] KPI navega a onboarding", () => {
   it("triggers navigation callback", () => {
     const fn = vi.fn();
-    render(<BentoAgregarCliente lang={EN} onOpen={fn} />);
-    screen.getByRole("button").click();
+    render(<BentoTenant label="TENANT" name="X" plan="p" createLabel="Crear mi negocio" onCreate={fn} />);
+    screen.getByRole("button", { name: "Crear mi negocio" }).click();
     expect(fn).toHaveBeenCalled();
   });
 });

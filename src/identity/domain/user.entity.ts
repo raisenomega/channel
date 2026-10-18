@@ -29,7 +29,7 @@ export const crearUser = (
   language: Language = "es",
   id?: UserId,
 ): Result<UserState, UserCreateError> => {
-  const roles: readonly Role[] = ["owner", "admin", "supervisor", "agent", "viewer", "superadmin"];
+  const roles: readonly Role[] = ["owner", "admin", "supervisor", "agent", "viewer", "superadmin", "buyer"];
   if (!roles.includes(role)) {
     return err({ kind: "rol_invalido" });
   }

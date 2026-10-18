@@ -6,9 +6,11 @@
  * Sin datos mock (N5). i18n completo.
  */
 import { createRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
 import { readLocalSession } from "@/lib/auth";
+import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
 import { t } from "@/lib/i18n";
 import { datosDeSesion } from "./settings-ui/session-utils";
 import { AccountCard } from "./settings-ui/account-card";
@@ -26,6 +28,8 @@ function SettingsPage() {
   const nextLang = language === "es" ? "en" : "es";
   const session = readLocalSession();
   const { email, tenant, plan } = datosDeSesion(session);
+  // M-9: nombre/plan reales del tenant via RPC mi_tenant (user_metadata venia vacio).
+  const { data: miTenant } = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 60_000 });
   const whiteLabel = localStorage.getItem("hub.whiteLabel") === "true";
 
   function toggleWhiteLabel() {
@@ -39,7 +43,7 @@ function SettingsPage() {
       <h2 className="mb-4 text-lg font-bold text-foreground">
         {t(language, "settings.account")}
       </h2>
-      <AccountCard language={language} email={email} tenant={tenant} plan={plan} />
+      <AccountCard language={language} email={email} tenant={miTenant?.name || tenant} plan={miTenant?.plan || plan} />
 
       <h2 className="mb-4 text-lg font-bold text-foreground">
         {t(language, "settings.preferences")}

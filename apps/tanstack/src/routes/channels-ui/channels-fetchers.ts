@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listarCanales, toggleCanal } from "@/lib/channels-client";
 import { handleFetcherError } from "@/lib/redirect-on-error";
+import { readLocalSession } from "@/lib/auth";
 import type { Channel, ChannelError } from "@/lib/channels-client";
 
 export type CanalesErrKind = ChannelError["kind"] | null;
@@ -21,7 +22,9 @@ export function useCanales() {
     queryFn: async () => {
       const r = await listarCanales();
       if (!r.ok) {
-        if (r.error.kind === "no_autorizado") {
+        // M-13: solo /login si NO hay sesion. Con sesion valida, un 401 del backend
+        // (D-43) NO expulsa: se renderizan las 9 cards + banner honesto (como L-2).
+        if (r.error.kind === "no_autorizado" && readLocalSession() === null) {
           handleFetcherError("no_autorizado");
         }
         setErrKind(r.error.kind);

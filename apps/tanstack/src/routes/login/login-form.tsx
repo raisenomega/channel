@@ -25,7 +25,7 @@ export function LoginForm({
           <h1 className="login-title">
             HUB <small>by Raisen</small>
           </h1>
-          <p className="login-sub">FORTRESS. by Raisen</p>
+          <p className="login-sub">Comunicación omnicanal</p>
         </div>
       </div>
 
@@ -56,7 +56,7 @@ export function LoginForm({
       {error ? <p className="text-sm text-critical" role="alert">{error}</p> : null}
 
       <Button type="submit" variant="primary" loading={loading} className="w-full login-submit">
-        {mode === "login" ? "Continuar" : "Crear cuenta"}
+        {mode === "login" ? "Entrar" : "Crear cuenta"}
       </Button>
 
       <p className="login-hint">Con el correo y la contraseña del tenant.</p>
