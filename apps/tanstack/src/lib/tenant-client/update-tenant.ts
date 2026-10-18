@@ -10,10 +10,16 @@ export interface UpdateTenantResult {
 }
 
 export async function actualizarTelefonoTenant(tenantId: string, phone: string): Promise<UpdateTenantResult> {
-  const res = await apiFetch(`/tenants/${encodeURIComponent(tenantId)}`, {
-    method: "PATCH",
-    body: JSON.stringify({ phone }),
-  });
+  return patchTenant(tenantId, { phone });
+}
+
+/** S-10: edita datos del negocio (name + perfil + phone opcional). NO refresca sesion (scope intacto). */
+export async function actualizarPerfilTenant(tenantId: string, patch: Record<string, unknown>): Promise<UpdateTenantResult> {
+  return patchTenant(tenantId, patch);
+}
+
+async function patchTenant(tenantId: string, body: Record<string, unknown>): Promise<UpdateTenantResult> {
+  const res = await apiFetch(`/tenants/${encodeURIComponent(tenantId)}`, { method: "PATCH", body: JSON.stringify(body) });
   if (!res.ok) return { ok: false, error: (await res.text()) || `PATCH /tenants failed (${res.status})` };
   return { ok: true };
 }

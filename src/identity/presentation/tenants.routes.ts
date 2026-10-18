@@ -47,7 +47,9 @@ export function rutaCrearTenant(): RouteDefinition {
         return jsonResponse(400, { ok: false, error: { kind: "plan_invalido" } });
       }
       const plan = esPlanValido(String(planRaw ?? "").trim()) ? String(planRaw).trim() : "esencial";
-      if (!name || !email || !phone) {
+      // S-9 (#102): solo `name` es obligatorio. email viene del token (S-3); phone es opcional
+      // (NULL permitido). email verdaderamente ausente -> el handler devuelve email_invalido.
+      if (!name) {
         return jsonResponse(400, { ok: false, error: { kind: "campos_incompletos" } });
       }
       const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");

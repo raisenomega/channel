@@ -37,6 +37,8 @@ test("A-R-7-5: inbox_addon eliminado del tipo y del CHECK (Compuerta #84)", () =
   expect(mig).not.toMatch(/'inbox_addon'/);
 });
 
-test("A-R-7-4: POST /tenants default plan = esencial", () => {
-  expect(readFileSync("src/identity/presentation/tenants.routes.ts", "utf8")).toContain('?? "esencial"');
+test("A-R-7-4: POST /tenants default plan = esencial (S-1 guard: plan invalido -> fallback esencial)", () => {
+  const src = readFileSync("src/identity/presentation/tenants.routes.ts", "utf8");
+  expect(src).toContain(': "esencial"'); // rama default del guard esPlanValido (#95)
+  expect(src).toContain("esPlanValido");
 });

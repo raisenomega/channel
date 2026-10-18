@@ -6,10 +6,10 @@
 import { apiFetch, rememberTenantId } from "../api-client";
 import { readLocalSession, writeLocalSession } from "../auth";
 import { getSupabase } from "../supabase";
+import type { Perfil } from "./onboarding-fields";
 
-export interface CreateTenantInput {
-  name: string; email: string; phone: string; primary_phone?: string;
-}
+/** S-2: ademas de name/email/phone, puede traer cualquier campo de perfil (snake_case) opcional. */
+export type CreateTenantInput = { name: string; email: string; phone: string; primary_phone?: string } & Partial<Perfil>;
 
 export interface CreateTenantResult {
   readonly id: string;
