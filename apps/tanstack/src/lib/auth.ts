@@ -50,6 +50,9 @@ export async function registerUser(email: string, password: string): Promise<Aut
   if (!sb) return { ok: false, message: "Autenticación no configurada" };
   const { data, error } = await sb.auth.signUp({ email, password });
   if (error) return { ok: false, message: messageOf(error) };
+  // D-51: persistir la sesion del signup (igual que login) -> el shell ve la nav y apiFetch
+  // tiene token. Sin esto, tras registrarse hub.session quedaba vacia (nav oculta + data 0).
+  if (data.session) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data.session));
   return { ok: true, session: data.session };
 }
 

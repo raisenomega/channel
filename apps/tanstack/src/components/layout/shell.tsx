@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
-import { readLocalSession } from "@/lib/auth";
+import { useSession } from "@/lib/use-session";
 import { BottomNav } from "./bottom-nav";
 import { LINKS } from "./nav-items";
 import { LogoutButton } from "./logout-button";
@@ -10,7 +10,7 @@ export function Shell() {
   const { language, theme, toggleTheme, setLanguage } = usePreferences();
   const { pathname } = useLocation();
   const nextLang = language === "es" ? "en" : "es";
-  const loggedIn = readLocalSession() !== null; // M-2: sin sesion (ej. /login) solo logo
+  const loggedIn = useSession() !== null; // M-2 + D-51: reactivo (onAuthStateChange), no one-shot
 
   return (
     <div id="shell">

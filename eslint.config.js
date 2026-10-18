@@ -11,6 +11,8 @@ import noRawLoginRedirect from "./scripts/eslint-rules/no-raw-login-redirect.js"
 import noOrphanSessionCleanup from "./scripts/eslint-rules/no-orphan-session-cleanup.js";
 import noServiceRoleBypass from "./scripts/eslint-rules/no-service-role-bypass.js";
 import webhookSignatureFirst from "./scripts/eslint-rules/webhook-signature-first.js";
+import p1HonestidadOauth from "./scripts/eslint-rules/p1-honestidad-oauth.js";
+import oauthStateCorsAllowlist from "./scripts/eslint-rules/oauth-state-cors-allowlist.js";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -124,5 +126,17 @@ export default [
     files: ["src/channels/**/routes/webhook*.ts"],
     plugins: { "fortress": { rules: { "webhook-signature-first": webhookSignatureFirst } } },
     rules: { "fortress/webhook-signature-first": "error" },
+  },
+  // Compuerta #40 (FORTRESS O) — callback OAuth revalida origin vs CORS allowlist tras HMAC
+  {
+    files: ["src/channels/presentation/routes/*.ts", "src/server/*callback*.ts"],
+    plugins: { "fortress": { rules: { "oauth-state-cors-allowlist": oauthStateCorsAllowlist } } },
+    rules: { "fortress/oauth-state-cors-allowlist": "error" },
+  },
+  // Compuerta #39 (FORTRESS O) — P1 honestidad: componentes de inicio de conexion no afirman conectado
+  {
+    files: ["apps/tanstack/src/routes/channels-ui/connect-cta.tsx", "apps/tanstack/src/components/dashboard/onboarding/channel-connect-button.tsx"],
+    plugins: { "fortress": { rules: { "p1-honestidad-oauth": p1HonestidadOauth } } },
+    rules: { "fortress/p1-honestidad-oauth": "error" },
   },
 ];

@@ -29,7 +29,7 @@ test("A-M-1 register llama signUp (registerUser), login llama login", () => {
 });
 
 test("A-M-2 Shell condiciona nav de usuario a sesion (loggedIn gate)", () => {
-  expect(SHELL).toContain("readLocalSession");
+  expect(SHELL).toContain("useSession"); // D-51: fuente reactiva (antes readLocalSession one-shot)
   expect(SHELL).toMatch(/loggedIn\s*\?/);
 });
 

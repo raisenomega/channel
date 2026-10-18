@@ -8,7 +8,14 @@
 import { ok, err } from "../../shared/domain/result.ts";
 import type { Result } from "../../shared/domain/result.ts";
 
-export interface OAuthStatePayload { readonly tenantId: string; readonly platform: string; readonly nonce: string; readonly ts: number; }
+export interface OAuthStatePayload {
+  readonly tenantId: string;
+  readonly platform: string;
+  readonly origin: string;   // O-9: origin del iniciador, re-validado vs CORS allowlist (Compuerta #40)
+  readonly userId: string;   // O-9: quien inicio el OAuth (auditoria)
+  readonly nonce: string;
+  readonly ts: number;
+}
 export type OAuthStateError =
   | { readonly kind: "state_secret_missing" } | { readonly kind: "state_malformed" }
   | { readonly kind: "state_signature_invalid" } | { readonly kind: "state_expired" }

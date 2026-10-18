@@ -13,6 +13,8 @@ export interface TenantState {
   readonly language: Language;
   /** Telefono del negocio E.164 (K-5-bis + migracion 045). null si aun no se capturo. */
   readonly phone: string | null;
+  /** Zernio profile ID per-tenant (O-5 + migracion 049). null hasta ensureProfileForTenant. */
+  readonly zernioProfileId: string | null;
   readonly featuresEnabled: Readonly<Record<string, unknown>>;
   readonly status: "trial" | "active" | "suspended" | "cancelled" | "churned";
   readonly createdAt: Date;
@@ -55,6 +57,7 @@ export const crearTenant = (
     timezone,
     language,
     phone: tel || null,
+    zernioProfileId: null,
     featuresEnabled: Object.freeze({}),
     status: "active",
     createdAt: new Date(),

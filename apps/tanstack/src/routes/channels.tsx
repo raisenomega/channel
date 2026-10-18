@@ -12,6 +12,8 @@ import { CATALOGO } from "./channels-ui/channels-data";
 import { useCanales } from "./channels-ui/channels-fetchers";
 import { ChannelCard } from "./channels-ui/channel-card";
 import { ChannelsNotice, LoadingNotice } from "./channels-ui/channels-notices";
+import { FacebookPagePicker } from "./channels-ui/facebook-page-picker";
+import { useOauthRelay } from "./channels-ui/use-oauth-relay";
 
 export const ChannelsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -22,7 +24,11 @@ export const ChannelsRoute = createRoute({
 function ChannelsPage() {
   const { language } = usePreferences();
   const [abierto, setAbierto] = useState<string | null>(null);
+  const [fbPicker, setFbPicker] = useState(false);
   const { data, isPending, errKind, refetch } = useCanales();
+
+  // O-3/O-4: relay del popup OAuth (BroadcastChannel). P1: el verde solo del fetch real.
+  useOauthRelay(refetch, setFbPicker);
 
   if (isPending) return <LoadingNotice language={language} />;
 
@@ -56,6 +62,11 @@ function ChannelsPage() {
           />
         ))}
       </div>
+
+      {fbPicker ? (
+        <FacebookPagePicker language={language} onClose={() => setFbPicker(false)}
+          onConnected={() => { setFbPicker(false); void refetch(); }} />
+      ) : null}
     </div>
   );
 }
