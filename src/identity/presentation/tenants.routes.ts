@@ -33,7 +33,10 @@ export function rutaCrearTenant(): RouteDefinition {
       if (!auth.ok) return auth.error;
       const body = (ctx.body as Record<string, unknown> | null) ?? {};
       const name = String(body["name"] ?? "").trim();
-      const email = String(body["email"] ?? "").trim();
+      // S-3 (#97): el email del tenant owner es el del JWT autenticado (fuente de verdad), NUNCA
+      // body.email (spoofeable). Fallback a body solo si el token no trae email. El trigger 051
+      // reimpone auth.users.email en public.users de todos modos (defensa en profundidad).
+      const email = String(auth.value.email ?? body["email"] ?? "").trim();
       const phone = String(body["phone"] ?? "").trim();
       const primaryPhone = String(body["primary_phone"] ?? phone).trim();
       const countryCode = String(body["country_code"] ?? "PR").trim();
