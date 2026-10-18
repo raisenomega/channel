@@ -40,6 +40,15 @@ test("A-O-4b (#4 hardening) accountId NO pertenece al profile -> NO persiste + r
   expect((r as { headers?: { location: string } }).headers?.location).toContain("status=error");
   expect((d as { connRepo: { guardar: { mock: { calls: unknown[] } } } }).connRepo.guardar.mock.calls.length).toBe(0);
 });
+test("O-7 derive_bindings: barre TODAS las cuentas del profile (upsert) -> no nace binding vacio", async () => {
+  const d = deps({ listOwnAccounts: async () => [
+    { id: "acc-1", platform: "whatsapp", handle: "@wa" },
+    { id: "acc-2", platform: "instagram", handle: "@ig" },
+  ] });
+  const r = await rutaZernioCallback(d).handler(ctx(await signed(), "prof-A", "acc-1"));
+  expect((r as { headers?: { location: string } }).headers?.location).toContain("status=connected");
+  expect((d as { connRepo: { guardar: { mock: { calls: unknown[] } } } }).connRepo.guardar.mock.calls.length).toBe(2);
+});
 test("A-O-5 profileId NO matching tenant.zernioProfileId -> abort sin persist + redirect error", async () => {
   const d = deps(); const r = await rutaZernioCallback(d).handler(ctx(await signed(), "prof-AJENO"));
   expect((r as { headers?: { location: string } }).headers?.location).toContain("status=error");

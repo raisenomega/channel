@@ -42,10 +42,14 @@ export function rutaZernioCallback(deps: OAuthCallbackDeps): RouteDefinition {
       const accountId = qp(ctx, "accountId");
       if (platform === "facebook" && !accountId) return backToTab(origin, "needs_page", platform);
       // #4: el accountId (query NO firmado) DEBE existir en el profile del tenant; si no, no persiste.
-      const match = (await deps.listOwnAccounts(qp(ctx, "profileId"))).find((a) => a.id === accountId);
-      if (!match) return backToTab(origin, "error", platform);
+      const accts = await deps.listOwnAccounts(qp(ctx, "profileId"));
+      if (!accts.some((a) => a.id === accountId)) return backToTab(origin, "error", platform);
+      // O-7 derive_bindings: barre TODAS las cuentas del profile y las upsertea (idempotente,
+      // on_conflict tenant_id,platform) -> ningun negocio nace con binding vacio. Best-effort.
       const now = new Date().toISOString();
-      await deps.connRepo.guardar({ id: crypto.randomUUID(), tenantId: tenantId as TenantId, platform: platform as SocialPlatform, zernioAccountId: match.id, handle: match.handle, followersCount: null, status: "connected", isPrimary: false, isPaused: false, autoPublishAllowed: false, createdAt: now, updatedAt: now });
+      for (const a of accts) {
+        await deps.connRepo.guardar({ id: crypto.randomUUID(), tenantId: tenantId as TenantId, platform: a.platform as SocialPlatform, zernioAccountId: a.id, handle: a.handle, followersCount: null, status: "connected", isPrimary: false, isPaused: false, autoPublishAllowed: false, createdAt: now, updatedAt: now });
+      }
       return backToTab(origin, "connected", platform);
     },
   };
