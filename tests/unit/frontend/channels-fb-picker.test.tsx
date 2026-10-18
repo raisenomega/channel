@@ -19,6 +19,6 @@ test("A-O-4 picker lista paginas + seleccionar -> POST select-page + onConnected
   render(<FacebookPagePicker language="es" onClose={() => {}} onConnected={onConnected} />);
   await waitFor(() => expect(screen.getByRole("button", { name: /Mi Pagina/ })).toBeDefined());
   fireEvent.click(screen.getByRole("button", { name: /Mi Pagina/ }));
-  await waitFor(() => expect(seleccionarPaginaFb).toHaveBeenCalledWith("pg-1"));
+  await waitFor(() => expect(seleccionarPaginaFb).toHaveBeenCalledWith("pg-1", "-")); // V-vigía: + reqId ("-" sin URL param)
   await waitFor(() => expect(onConnected).toHaveBeenCalled());
 });
