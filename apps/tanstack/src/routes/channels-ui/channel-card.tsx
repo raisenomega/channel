@@ -35,8 +35,8 @@ export function ChannelCard({
   const state = canal?.state ?? "desconectado";
 
   return (
-    <Card data-testid="channel-card" aria-disabled={disabled}
-      className={disabled ? "cursor-not-allowed opacity-70" : canal ? "cursor-pointer" : "cursor-pointer opacity-80"}
+    <Card data-testid="channel-card" aria-disabled={disabled} padded={false}
+      className={`p-3.5 ${disabled ? "cursor-not-allowed opacity-70" : canal ? "cursor-pointer" : "cursor-pointer opacity-80"}`}
       role="button" tabIndex={disabled ? -1 : 0}
       onClick={() => { if (!disabled) void navigate({ to: "/channels/$channelId", params: { channelId: kind } }); }}
       onKeyDown={(e) => { if (!disabled) navigateCard(e, navigate, kind); }}
