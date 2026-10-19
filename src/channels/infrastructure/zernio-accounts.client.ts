@@ -50,8 +50,9 @@ export async function listarCuentasZernio(apiKey: string, platform?: string): Pr
   } catch { return err("zernio_error"); }
 }
 
-/** R20: solo cuentas enlazadas al tenant (channel_connections.zernio_account_id). */
+/** R20 + toggle: solo cuentas enlazadas al tenant Y con status 'connected'. Un canal desconectado
+ * (toggle off) queda FUERA -> HUB deja de usarlo (no publica/opera por ahi), aunque siga en Zernio. */
 export function filtrarPorTenant(cuentas: readonly ZernioAccount[], enlaces: readonly ChannelConnection[]): readonly ZernioAccount[] {
-  const propias = new Set(enlaces.map((c) => c.zernioAccountId).filter((x): x is string => !!x));
+  const propias = new Set(enlaces.filter((c) => c.status === "connected").map((c) => c.zernioAccountId).filter((x): x is string => !!x));
   return Object.freeze(cuentas.filter((c) => propias.has(c.zernioAccountId)));
 }

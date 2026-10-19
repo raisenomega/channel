@@ -6,8 +6,8 @@ import { filtrarPorTenant, listarCuentasZernio, normalizarCuenta } from "../../.
 import type { ZernioAccount } from "../../../src/channels/infrastructure/zernio-accounts.client.ts";
 import type { ChannelConnection } from "../../../src/channels/domain/social-account.entity.ts";
 
-const enlace = (zernioAccountId: string | null): ChannelConnection => ({
-  id: "c", tenantId: "t1", platform: "instagram", zernioAccountId, handle: null, followersCount: null, status: "awaiting",
+const enlace = (zernioAccountId: string | null, status: ChannelConnection["status"] = "connected"): ChannelConnection => ({
+  id: "c", tenantId: "t1", platform: "instagram", zernioAccountId, handle: null, followersCount: null, status,
   isPrimary: true, isPaused: false, autoPublishAllowed: false, createdAt: "", updatedAt: "",
 });
 const cuenta = (id: string, platform = "instagram"): ZernioAccount => ({ zernioAccountId: id, platform, handle: null, followersCount: null, status: "connected" });
@@ -16,6 +16,12 @@ test("G-08 filtrarPorTenant: Zernio devuelve 3 cuentas, el tenant tiene 1 enlaza
   const r = filtrarPorTenant([cuenta("a"), cuenta("b", "facebook"), cuenta("c")], [enlace("b")]);
   expect(r.map((x) => x.zernioAccountId)).toEqual(["b"]);
   expect(Object.isFrozen(r)).toBe(true);
+});
+
+test("toggle: enlace DISCONNECTED -> excluido (HUB no usa el canal desconectado) aunque Zernio lo tenga", () => {
+  expect(filtrarPorTenant([cuenta("b")], [enlace("b", "disconnected")])).toEqual([]);
+  expect(filtrarPorTenant([cuenta("b")], [enlace("b", "awaiting")])).toEqual([]); // solo 'connected' cuenta como usable
+  expect(filtrarPorTenant([cuenta("b")], [enlace("b", "connected")]).map((x) => x.zernioAccountId)).toEqual(["b"]);
 });
 
 test("G-09 filtrarPorTenant: sin enlaces (o enlaces con id null) -> [] aunque Zernio tenga cuentas", () => {
