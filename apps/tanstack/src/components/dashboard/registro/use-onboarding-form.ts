@@ -23,15 +23,18 @@ export function useOnboardingForm(opts: {
   const [err, setErr] = useState<string | null>(null);
   const setField = (k: keyof OnboardingForm, v: string): void => setForm((f) => ({ ...f, [k]: v }));
 
+  // Z-2: 4 campos obligatorios (nombre + email + teléfono + país). email viene del auth (precargado).
+  const e164 = normTel(form.phone);
+  const valido = form.name.trim() !== "" && E164.test(e164) && form.country_code !== "" && opts.email !== "";
+
   async function submit(): Promise<boolean> {
     const name = form.name.trim();
-    if (!name) { setErr("onboarding.nameRequired"); return false; } // S-9: solo name obligatorio
-    // phone OPCIONAL: se envia solo si es E.164 valido (el prefijo precargado +1 787 se descarta
-    // hasta completarlo). Evita el telefono_invalido del backend sin bloquear "solo nombre".
-    const e164 = normTel(form.phone);
+    if (!name) { setErr("onboarding.nameRequired"); return false; }
+    if (!E164.test(e164)) { setErr("onboarding.phoneRequired"); return false; } // Z-2: teléfono ya obligatorio
+    if (form.country_code === "") { setErr("onboarding.countryRequired"); return false; }
     setBusy(true); setErr(null);
     try {
-      const payload = { ...form, name, phone: E164.test(e164) ? e164 : "" };
+      const payload = { ...form, name, phone: e164 };
       if (opts.mode === "create") await createTenant({ ...payload, email: opts.email });
       else {
         const r = await actualizarPerfilTenant(opts.tenantId ?? "", payload);
@@ -42,5 +45,5 @@ export function useOnboardingForm(opts: {
     } catch (e) { setErr(String(e)); return false; } finally { setBusy(false); }
   }
 
-  return { form, setField, submit, busy, err };
+  return { form, setField, submit, busy, err, valido };
 }

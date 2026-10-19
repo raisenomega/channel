@@ -14,7 +14,7 @@ export function OnboardingMainFields({ form, setField, language, email }: {
 }) {
   const L = (k: string): string => t(language, k);
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
       <OnbField label={L("onboarding.f.name")} value={form.name} onChange={(v) => setField("name", v)} testId="onb-name" />
       <OnbField label={L("onboarding.f.email")} value={email} readOnly testId="onb-email" />
       <OnbField label={L("onboarding.f.phone")} kind="tel" value={form.phone} onChange={(v) => setField("phone", v)} testId="onb-phone" />
