@@ -39,6 +39,14 @@ describe("RegistroWhatsApp (SOT)", () => {
     expect((screen.getByTestId("onb-name") as HTMLInputElement).value).toBe("Raisen.dev");
   });
 
+  it("click [X] cierra el overlay y NO reabre (sin burbujeo a la barra)", () => {
+    render(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
+    fireEvent.click(screen.getByTestId("registro-whatsapp"));
+    expect(screen.getByTestId("onboarding-overlay")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("onb-close"));
+    expect(screen.queryByTestId("onboarding-overlay")).toBeNull();
+  });
+
   it("muestra tenant.name en la barra", () => {
     render(<RegistroWhatsApp language="en" tenant={{ id: "t9", name: "Zafacones Ramos", plan: "pro" }} onDone={() => {}} />);
     expect(screen.getByTestId("registro-whatsapp").textContent).toContain("Zafacones Ramos");

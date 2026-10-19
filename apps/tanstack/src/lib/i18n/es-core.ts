@@ -22,6 +22,7 @@ export const esCore: Dict = {
   "common.back": "Atrás",
   "common.next": "Siguiente →",
   "kpi.tenant": "Tenant",
+  "kpi.balance": "Balance",
   "kpi.wasCorrect": "IA Was Correct",
   "kpi.salesChat": "Ventas desde chat",
   "kpi.autonomy": "Autonomía",

@@ -4,6 +4,7 @@
  * (der). Cuerpo scrollable (barra principal + 3 cards). Footer: "Crear/Guardar" habilitado solo con
  * los 4 campos obligatorios (nombre+email+teléfono+país) + Cancelar. Al guardar OK -> onDone. C4 <=75.
  */
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 import type { Idioma } from "@/lib/i18n";
@@ -31,8 +32,12 @@ export function OnboardingOverlay({ language, mode, email, plan, tenantId, initi
 }) {
   const { form, setField, submit, busy, err, valido } = useOnboardingForm({ mode, tenantId, email, initial, onDone });
   const titulo = form.name.trim() || t(language, mode === "create" ? "onboarding.title" : "onboarding.editTitle");
-  return (
-    <div data-testid="onboarding-overlay" className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur">
+  // Portal a document.body: el overlay NO queda anidado en la barra (.glass-card con backdrop-filter
+  // crea un containing-block que ancla mal el `fixed` y además el click burbujeaba reabriendo). Así
+  // es full-screen real y el [X] cierra sin re-disparar la barra.
+  return createPortal(
+    <div data-testid="onboarding-overlay" className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur"
+      onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
       <div className="flex items-center justify-between border-b border-border/40 px-5 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <WhatsAppIcon size={20} />
@@ -49,11 +54,11 @@ export function OnboardingOverlay({ language, mode, email, plan, tenantId, initi
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-5 py-4">
-        <div className="space-y-4">
-          <div data-testid="onb-recommend" className="flex items-start gap-2 rounded-xl glass-card p-3 text-xs leading-relaxed text-muted-foreground">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div data-testid="onb-recommend" className="flex items-start gap-2 rounded-xl glass-card p-3 text-xs leading-relaxed text-muted-foreground lg:col-span-2">
             <Bulb />{t(language, "onboarding.recommend")}
           </div>
-          {err ? <p data-testid="onb-error" className="text-xs text-critical">{t(language, err)}</p> : null}
+          {err ? <p data-testid="onb-error" className="text-xs text-critical lg:col-span-2">{t(language, err)}</p> : null}
           <OnboardingMainFields form={form} setField={setField} language={language} email={email} />
           <OnboardingCards form={form} setField={setField} language={language} />
         </div>
@@ -64,6 +69,7 @@ export function OnboardingOverlay({ language, mode, email, plan, tenantId, initi
           {busy ? t(language, "onboarding.saving") : t(language, mode === "create" ? "onboarding.create" : "registro.save")}
         </Button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
