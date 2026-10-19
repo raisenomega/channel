@@ -6,11 +6,18 @@ import { BottomNav } from "./bottom-nav";
 import { LINKS } from "./nav-items";
 import { LogoutButton } from "./logout-button";
 
+// Z-3: el nav del header es PERMANENTE en toda ruta de app. Solo se oculta en /login y en las
+// paginas-popup de OAuth (return/callback). NO depende de la sesion (useSession es reactivo y flaky:
+// onAuthStateChange podia emitir null en un refresh de token/offline -> el nav desaparecia = "header
+// blanco, user atrapado"). La ruta es estable y siempre existe -> chips nunca desaparecen.
+const SIN_NAV = ["/login", "/zernio/return", "/channels/zernio/callback"];
+
 export function Shell() {
   const { language, theme, toggleTheme, setLanguage } = usePreferences();
   const { pathname } = useLocation();
   const nextLang = language === "es" ? "en" : "es";
-  const loggedIn = useSession() !== null; // M-2 + D-51: reactivo (onAuthStateChange), no one-shot
+  useSession(); // D-51: efecto lateral — mantiene hub.session sincronizada (mirror onAuthStateChange) para apiFetch
+  const showChrome = !SIN_NAV.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
   return (
     <div id="shell">
@@ -23,7 +30,7 @@ export function Shell() {
           </strong>
         </div>
 
-        {loggedIn ? (
+        {showChrome ? (
           <>
             <nav className="nav-links" aria-label="Principal">
               {LINKS.map((l) => (
@@ -51,7 +58,7 @@ export function Shell() {
         <Outlet />
       </main>
 
-      {loggedIn ? <BottomNav items={LINKS} /> : null}
+      {showChrome ? <BottomNav items={LINKS} /> : null}
     </div>
   );
 }

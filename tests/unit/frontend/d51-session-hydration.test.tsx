@@ -35,8 +35,10 @@ test("A-D-51 signup persiste hub.session (nav + apiFetch token)", async () => {
   expect(localStorage.getItem("hub.session")).toContain("jwt-x");
 });
 
-test("A-D-51 regresion: shell deriva loggedIn de useSession (no one-shot readLocalSession)", () => {
+test("A-Z-3: el shell NO gatea el nav por la sesion (chips permanentes por ruta); useSession se mantiene por su efecto lateral (mirror hub.session)", () => {
   const SRC = readFileSync("apps/tanstack/src/components/layout/shell.tsx", "utf8");
-  expect(SRC).toContain("useSession()");
-  expect(SRC).not.toContain("readLocalSession() !== null");
+  expect(SRC).toContain("useSession()");                      // D-51: efecto lateral (espeja hub.session para apiFetch) intacto
+  expect(SRC).not.toContain("readLocalSession() !== null");   // no vuelve a la lectura one-shot vieja
+  expect(SRC).not.toMatch(/loggedIn\s*=\s*useSession/);       // Z-3: el nav ya NO depende del estado de sesion (flaky)
+  expect(SRC).toContain("showChrome");                        // Z-3: visibilidad del nav por ruta -> chips permanentes
 });
