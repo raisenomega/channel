@@ -7,6 +7,8 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 vi.hoisted(() => {
   (globalThis as Record<string, unknown>).__HUB_CONFIG__ = { supabaseUrl: "https://x.supabase.co", anonKey: "anon", hubApiUrl: "https://hub.test.railway.app/" };
 });
+const { mockGetSession } = vi.hoisted(() => ({ mockGetSession: vi.fn(async () => ({ data: { session: null as unknown } })) }));
+vi.mock("../../../apps/tanstack/src/lib/supabase", () => ({ getSupabase: () => ({ auth: { getSession: mockGetSession } }) }));
 import { apiFetch, rememberTenantId, resolveTenantId } from "../../../apps/tanstack/src/lib/api-client";
 
 const SESSION_KEY = "hub.session";
@@ -15,7 +17,7 @@ function conSesion(accessToken: string, appMetadata?: Record<string, unknown>): 
 }
 const ORIGINAL_FETCH = globalThis.fetch;
 
-beforeEach(() => { window.localStorage.clear(); });
+beforeEach(() => { window.localStorage.clear(); mockGetSession.mockResolvedValue({ data: { session: null } }); });
 afterEach(() => { globalThis.fetch = ORIGINAL_FETCH; window.localStorage.clear(); });
 
 test("G-13 apiFetch sin sesion -> Error no_session y fetch NO se llama (jamas token inventado)", async () => {
@@ -43,6 +45,15 @@ test("G-14b apiFetch no pisa un content-type explicito ni filtra el token a la U
   const [url, init] = fn.mock.calls[0] as [string, RequestInit];
   expect((init.headers as Headers).get("content-type")).toBe("application/x-www-form-urlencoded");
   expect(url).not.toContain("tok");
+});
+
+test("G-16 sin hub.session pero con sesion viva en el SDK -> usa ese token (no no_session) + re-persiste", async () => {
+  mockGetSession.mockResolvedValueOnce({ data: { session: { access_token: "tok-sdk", refresh_token: "r", user: { id: "u1", app_metadata: {} } } } });
+  const fn = vi.fn().mockResolvedValue(new Response("{}", { status: 200 })); globalThis.fetch = fn;
+  await apiFetch("/tenants");
+  expect((fn.mock.calls[0][1] as RequestInit).headers as Headers).toBeDefined();
+  expect(((fn.mock.calls[0][1] as RequestInit).headers as Headers).get("authorization")).toBe("Bearer tok-sdk");
+  expect(JSON.parse(window.localStorage.getItem(SESSION_KEY)!).access_token).toBe("tok-sdk"); // re-sincronizada
 });
 
 test("G-15 resolveTenantId: app_metadata.tenant_id del JWT > hub.tenant_id recordado > null", () => {
