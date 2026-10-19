@@ -30,7 +30,7 @@ export function OnboardingOverlay({ language, mode, email, plan, tenantId, initi
   onClose: () => void;
   onDone: () => void;
 }) {
-  const { form, setField, submit, busy, err, valido } = useOnboardingForm({ mode, tenantId, email, initial, onDone });
+  const { form, setField, submit, busy, err, email: correo, setEmail } = useOnboardingForm({ mode, tenantId, email, initial, onDone });
   const titulo = form.name.trim() || t(language, mode === "create" ? "onboarding.title" : "onboarding.editTitle");
   // Portal a document.body: el overlay NO queda anidado en la barra (.glass-card con backdrop-filter
   // crea un containing-block que ancla mal el `fixed` y además el click burbujeaba reabriendo). Así
@@ -59,13 +59,13 @@ export function OnboardingOverlay({ language, mode, email, plan, tenantId, initi
             <Bulb />{t(language, "onboarding.recommend")}
           </div>
           {err ? <p data-testid="onb-error" className="text-xs text-critical lg:col-span-2">{t(language, err)}</p> : null}
-          <OnboardingMainFields form={form} setField={setField} language={language} email={email} />
+          <OnboardingMainFields form={form} setField={setField} language={language} email={correo} onEmailChange={setEmail} />
           <OnboardingCards form={form} setField={setField} language={language} />
         </div>
       </div>
       <div className="flex items-center justify-end gap-2 border-t border-border/40 px-5 py-3">
         <Button variant="outline" onClick={onClose}>{t(language, "onboarding.cancel")}</Button>
-        <Button data-testid="onb-submit" variant="primary" disabled={busy || !valido} onClick={() => void submit()}>
+        <Button data-testid="onb-submit" variant="primary" disabled={busy} onClick={() => void submit()}>
           {busy ? t(language, "onboarding.saving") : t(language, mode === "create" ? "onboarding.create" : "registro.save")}
         </Button>
       </div>

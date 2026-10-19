@@ -7,6 +7,7 @@ import type { Dict } from "./i18n-types";
 export const esRegistro: Dict = {
   "registro.connectCta": "Conectar Canales y Redes",
   "registro.editData": "Editar datos",
+  "registro.guardado": "Guardado",
   "onboarding.title": "Registrar tu negocio",
   "onboarding.editTitle": "Editar datos del negocio",
   "onboarding.planActive": "Plan activo",
@@ -15,6 +16,7 @@ export const esRegistro: Dict = {
   "onboarding.cancel": "Cancelar",
   "onboarding.saving": "Guardando…",
   "onboarding.nameRequired": "El nombre del negocio es obligatorio",
+  "onboarding.emailRequired": "El email es obligatorio",
   "onboarding.phoneRequired": "El teléfono es obligatorio (formato +1...)",
   "onboarding.countryRequired": "El país es obligatorio",
   "onboarding.optional": "opcional",

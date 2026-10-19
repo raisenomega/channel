@@ -7,6 +7,7 @@ import type { Dict } from "./i18n-types";
 export const enRegistro: Dict = {
   "registro.connectCta": "Connect Channels & Networks",
   "registro.editData": "Edit data",
+  "registro.guardado": "Saved",
   "onboarding.title": "Register your business",
   "onboarding.editTitle": "Edit business data",
   "onboarding.planActive": "Active plan",
@@ -15,6 +16,7 @@ export const enRegistro: Dict = {
   "onboarding.cancel": "Cancel",
   "onboarding.saving": "Saving…",
   "onboarding.nameRequired": "Business name is required",
+  "onboarding.emailRequired": "Email is required",
   "onboarding.phoneRequired": "Phone is required (format +1...)",
   "onboarding.countryRequired": "Country is required",
   "onboarding.optional": "optional",
