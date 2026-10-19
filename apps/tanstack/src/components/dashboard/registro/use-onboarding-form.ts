@@ -42,7 +42,11 @@ export function useOnboardingForm(opts: {
       }
       opts.onDone();
       return true;
-    } catch (e) { setErr(String(e)); return false; } finally { setBusy(false); }
+    } catch (e) {
+      const m = String(e);
+      setErr(m.includes("no_session") ? "onboarding.sessionExpired" : m); // mensaje claro, no crudo
+      return false;
+    } finally { setBusy(false); }
   }
 
   return { form, setField, submit, busy, err, email, setEmail };
