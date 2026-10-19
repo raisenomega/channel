@@ -17,6 +17,7 @@ export const enRegistro: Dict = {
   "onboarding.saving": "Saving…",
   "onboarding.nameRequired": "Business name is required",
   "onboarding.emailRequired": "Email is required",
+  "onboarding.sessionExpired": "Your session expired. Please sign in again.",
   "onboarding.phoneRequired": "Phone is required (format +1...)",
   "onboarding.countryRequired": "Country is required",
   "onboarding.optional": "optional",
