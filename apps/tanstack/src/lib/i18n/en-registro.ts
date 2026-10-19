@@ -15,6 +15,8 @@ export const enRegistro: Dict = {
   "onboarding.cancel": "Cancel",
   "onboarding.saving": "Saving…",
   "onboarding.nameRequired": "Business name is required",
+  "onboarding.phoneRequired": "Phone is required (format +1...)",
+  "onboarding.countryRequired": "Country is required",
   "onboarding.optional": "optional",
   "onboarding.select": "Select…",
   "onboarding.card.fisicos": "Physical details",

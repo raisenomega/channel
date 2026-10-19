@@ -1,9 +1,9 @@
 /**
- * HUB by Raisen — Tests A-01..A-06.
+ * HUB by Raisen — Tests A-01..A-06 (alineados a la SOT del Panel: docs/DASHBOARD_PANEL_SOT.md).
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { BentoTenant } from "@/components/dashboard/bentobox/bento-tenant";
+import { readFileSync } from "node:fs";
 import { BentoEstadoAgentes } from "@/components/dashboard/bentobox/bento-estado-agentes";
 import { BentoActividadReciente } from "@/components/dashboard/bentobox/bento-actividad-reciente";
 import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
@@ -22,26 +22,29 @@ describe("A-01: RENAME_DASHBOARD", () => {
   });
 });
 
-describe("A-02: BENTO_NUEVO_2_CARDS (R-1: card AgregarCliente eliminada)", () => {
-  it("renders EstadoAgentes + Actividad EN (sin card Add client)", () => {
-    render(<BentoRowNueva lang={EN} events={[]} />);
+describe("A-02: BENTO L3 = 4 cards (Estado · Actividad · Peticiones · Búsqueda)", () => {
+  it("renders the 4 cards EN (sin card Add client)", () => {
+    render(<BentoRowNueva lang={EN} events={[]} items={[]} onOpen={vi.fn()} />);
     expect(screen.queryByText("Add client")).toBeNull();
     expect(screen.getByText("AI Agents status")).toBeDefined();
     expect(screen.getByText("Recent activity")).toBeDefined();
+    expect(screen.getByText("Requests")).toBeDefined();
+    expect(screen.getByText("Smart search")).toBeDefined();
   });
-  it("renders EstadoAgentes + Actividad ES", () => {
-    render(<BentoRowNueva lang={ES} events={[]} />);
+  it("renders the 4 cards ES", () => {
+    render(<BentoRowNueva lang={ES} events={[]} items={[]} onOpen={vi.fn()} />);
     expect(screen.getByText("Estado de agentes IA")).toBeDefined();
     expect(screen.getByText("Actividad reciente")).toBeDefined();
+    expect(screen.getByText("Peticiones")).toBeDefined();
+    expect(screen.getByText("Búsqueda inteligente")).toBeDefined();
   });
 });
 
-describe("A-03: CTA crear negocio ahora vive en el KPI Tenant ([+])", () => {
-  it("boton [+] del BentoTenant dispara onCreate", () => {
-    const fn = vi.fn();
-    render(<BentoTenant label="TENANT" name="Zafacones" plan="ecosystem" createLabel="Crear mi negocio" onCreate={fn} />);
-    screen.getByRole("button", { name: "Crear mi negocio" }).click();
-    expect(fn).toHaveBeenCalledOnce();
+describe("A-03 (SOT): el CTA 'Crear mi negocio' vive en la barra de WhatsApp, no en una card", () => {
+  it("registro-whatsapp tiene el CTA registro-crear con dash.createMyBusiness (no en una card del Panel)", () => {
+    const SRC = readFileSync("apps/tanstack/src/components/dashboard/registro/registro-whatsapp.tsx", "utf8");
+    expect(SRC).toContain('"registro-crear"'); // testid dinámico: tenant ? registro-editar : registro-crear
+    expect(SRC).toContain("dash.createMyBusiness");
   });
 });
 
@@ -69,11 +72,10 @@ describe("A-05: CARD3_5_EVENTOS", () => {
   });
 });
 
-describe("A-06: CLICK [+] KPI navega a onboarding", () => {
-  it("triggers navigation callback", () => {
-    const fn = vi.fn();
-    render(<BentoTenant label="TENANT" name="X" plan="p" createLabel="Crear mi negocio" onCreate={fn} />);
-    screen.getByRole("button", { name: "Crear mi negocio" }).click();
-    expect(fn).toHaveBeenCalled();
+describe("A-06 (SOT): el Panel (L3) no tiene tarjeta de crear negocio", () => {
+  it("BentoRowNueva no muestra 'Agregar cliente' ni 'Crear mi negocio'", () => {
+    render(<BentoRowNueva lang={ES} events={[]} items={[]} onOpen={vi.fn()} />);
+    expect(screen.queryByText("Agregar cliente")).toBeNull();
+    expect(screen.queryByText("Crear mi negocio")).toBeNull();
   });
 });

@@ -1,19 +1,27 @@
 /**
- * HUB by Raisen — Bento Row Nueva: EstadoAgentes + Actividad.
- * R-1: la card AgregarCliente se elimino; el CTA [+] vive ahora en el KPI Tenant.
+ * HUB by Raisen — Bento Row (L3) del Panel: 4 cards en una línea (col-3 c/u):
+ * Estado de agentes · Actividad reciente · Peticiones · Búsqueda inteligente.
+ * SOT: docs/DASHBOARD_PANEL_SOT.md. El alta de negocio NO vive aquí (va en la barra WhatsApp).
  */
 import type { Idioma } from "@/lib/i18n";
+import type { InboxItem } from "@/lib/types";
 import { BentoEstadoAgentes } from "./bento-estado-agentes";
 import { BentoActividadReciente, type ActivityEvent } from "./bento-actividad-reciente";
+import { BentoPeticiones } from "./bento-peticiones";
+import { BentoBusquedaInteligente } from "./bento-busqueda-inteligente";
 
-export function BentoRowNueva({ lang, events }: {
+export function BentoRowNueva({ lang, events, items, onOpen }: {
   lang: Idioma;
   events: readonly ActivityEvent[];
+  items: readonly InboxItem[];
+  onOpen: (conversationId: string) => void;
 }) {
   return (
     <div className="bento mt-4">
       <BentoEstadoAgentes lang={lang} />
       <BentoActividadReciente lang={lang} events={events} />
+      <BentoPeticiones lang={lang} />
+      <BentoBusquedaInteligente lang={lang} items={items} onOpen={onOpen} />
     </div>
   );
 }

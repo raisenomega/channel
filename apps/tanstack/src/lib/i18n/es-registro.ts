@@ -15,6 +15,8 @@ export const esRegistro: Dict = {
   "onboarding.cancel": "Cancelar",
   "onboarding.saving": "Guardando…",
   "onboarding.nameRequired": "El nombre del negocio es obligatorio",
+  "onboarding.phoneRequired": "El teléfono es obligatorio (formato +1...)",
+  "onboarding.countryRequired": "El país es obligatorio",
   "onboarding.optional": "opcional",
   "onboarding.select": "Selecciona…",
   "onboarding.card.fisicos": "Datos físicos",

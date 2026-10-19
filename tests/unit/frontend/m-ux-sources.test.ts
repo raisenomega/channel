@@ -28,9 +28,9 @@ test("A-M-1 register llama signUp (registerUser), login llama login", () => {
   expect(LP).toMatch(/mode === "login" \? await login/);
 });
 
-test("A-M-2 Shell condiciona nav de usuario a sesion (loggedIn gate)", () => {
-  expect(SHELL).toContain("useSession"); // D-51: fuente reactiva (antes readLocalSession one-shot)
-  expect(SHELL).toMatch(/loggedIn\s*\?/);
+test("A-M-2 / Z-3 Shell: nav por ruta (chips permanentes), useSession solo por su efecto lateral", () => {
+  expect(SHELL).toContain("useSession"); // D-51: efecto lateral (espeja hub.session para apiFetch) intacto
+  expect(SHELL).toMatch(/showChrome\s*\?/); // Z-3: visibilidad del nav por ruta, no por estado de sesion (flaky)
 });
 
 test("A-M-8 / R-1 CTA 'Crear mi negocio' vive en el KPI Tenant (no en card aparte)", () => {
