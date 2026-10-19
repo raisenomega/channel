@@ -54,3 +54,10 @@ export async function toggleCanal(platform: string, connected: boolean): Promise
     return { ok: true, value: undefined };
   } catch (e) { return { ok: false, error: { kind: "red", cause: String(e) } }; }
 }
+// Reconcilia channel_connections con las cuentas REALES del tenant en Zernio (POST /reconcile).
+// Sostiene el chip verde sin depender del redirect del callback. Best-effort (silencioso).
+export async function reconciliarCanales(): Promise<void> {
+  const tenantId = await ensureTenantId();
+  if (!tenantId) return;
+  try { await apiFetch(`/tenants/${tenantId}/channels/reconcile`, { method: "POST" }); } catch { /* best-effort */ }
+}
