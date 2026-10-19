@@ -11,6 +11,7 @@ import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 import { readLocalSession } from "@/lib/auth";
 import type { OnboardingForm } from "@/lib/tenant-client/onboarding-fields";
 import { fetchTenantPerfil } from "@/lib/tenant-client/tenant-profile";
+import { Toast } from "@/components/ui/toast";
 import { OnboardingOverlay } from "./onboarding-overlay";
 
 export function RegistroWhatsApp({ language, tenant, onDone }: {
@@ -20,6 +21,7 @@ export function RegistroWhatsApp({ language, tenant, onDone }: {
 }) {
   const [overlay, setOverlay] = useState<null | "create" | "edit">(null);
   const [initial, setInitial] = useState<Partial<OnboardingForm> | undefined>();
+  const [guardado, setGuardado] = useState(false);
   const email = readLocalSession()?.user?.email ?? "";
   const abrir = async (): Promise<void> => {
     if (!tenant) { setInitial(undefined); setOverlay("create"); return; }
@@ -46,8 +48,9 @@ export function RegistroWhatsApp({ language, tenant, onDone }: {
       {overlay ? (
         <OnboardingOverlay language={language} mode={overlay} email={email} plan={tenant?.plan ?? "esencial"}
           tenantId={tenant?.id} initial={initial}
-          onClose={() => setOverlay(null)} onDone={() => { setOverlay(null); onDone(); }} />
+          onClose={() => setOverlay(null)} onDone={() => { setOverlay(null); setGuardado(true); onDone(); }} />
       ) : null}
+      {guardado ? <Toast message={t(language, "registro.guardado")} onHide={() => setGuardado(false)} /> : null}
     </div>
   );
 }

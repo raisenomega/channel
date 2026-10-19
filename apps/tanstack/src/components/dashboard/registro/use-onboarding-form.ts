@@ -1,7 +1,8 @@
 /**
- * HUB by Raisen — S-2/S-8/S-9: estado + submit del onboarding completo. Solo `name` obligatorio
- * (#102). phone se normaliza a E.164 si viene (opcional). create -> POST /tenants (refresca sesion);
- * edit -> PATCH /tenants/:id (scope intacto, S-10). err = clave i18n (el overlay la traduce). C4 <=75.
+ * HUB by Raisen — S-2/S-8/S-9 + Z-2: estado + submit del onboarding. email EDITABLE (default = email
+ * del auth; el backend usa el del JWT como owner, body.email solo fallback → editable es seguro).
+ * 4 obligatorios: nombre + email + teléfono E.164 + país. El botón queda habilitado y submit muestra
+ * el error del campo que falte (así "guardar" nunca es un no-op silencioso). C4 <=75.
  */
 import { useState } from "react";
 import { ONBOARDING_DEFAULTS, type OnboardingForm } from "@/lib/tenant-client/onboarding-fields";
@@ -19,23 +20,22 @@ export function useOnboardingForm(opts: {
   onDone: () => void;
 }) {
   const [form, setForm] = useState<OnboardingForm>({ ...ONBOARDING_DEFAULTS, ...opts.initial });
+  const [email, setEmail] = useState(opts.email); // Z-2: email editable (default = auth)
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const setField = (k: keyof OnboardingForm, v: string): void => setForm((f) => ({ ...f, [k]: v }));
 
-  // Z-2: 4 campos obligatorios (nombre + email + teléfono + país). email viene del auth (precargado).
-  const e164 = normTel(form.phone);
-  const valido = form.name.trim() !== "" && E164.test(e164) && form.country_code !== "" && opts.email !== "";
-
   async function submit(): Promise<boolean> {
     const name = form.name.trim();
+    const e164 = normTel(form.phone);
     if (!name) { setErr("onboarding.nameRequired"); return false; }
-    if (!E164.test(e164)) { setErr("onboarding.phoneRequired"); return false; } // Z-2: teléfono ya obligatorio
+    if (!email.trim()) { setErr("onboarding.emailRequired"); return false; }
+    if (!E164.test(e164)) { setErr("onboarding.phoneRequired"); return false; }
     if (form.country_code === "") { setErr("onboarding.countryRequired"); return false; }
     setBusy(true); setErr(null);
     try {
       const payload = { ...form, name, phone: e164 };
-      if (opts.mode === "create") await createTenant({ ...payload, email: opts.email });
+      if (opts.mode === "create") await createTenant({ ...payload, email: email.trim() });
       else {
         const r = await actualizarPerfilTenant(opts.tenantId ?? "", payload);
         if (!r.ok) throw new Error(r.error);
@@ -45,5 +45,5 @@ export function useOnboardingForm(opts: {
     } catch (e) { setErr(String(e)); return false; } finally { setBusy(false); }
   }
 
-  return { form, setField, submit, busy, err, valido };
+  return { form, setField, submit, busy, err, email, setEmail };
 }

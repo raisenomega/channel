@@ -9,6 +9,8 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 vi.mock("@/lib/auth", () => ({ readLocalSession: () => ({ user: { email: "owner@raisen.dev" } }) }));
 const { fetchPerfil } = vi.hoisted(() => ({ fetchPerfil: vi.fn(async () => null as Record<string, string> | null) }));
 vi.mock("@/lib/tenant-client/tenant-profile", () => ({ fetchTenantPerfil: fetchPerfil }));
+const { createTenant } = vi.hoisted(() => ({ createTenant: vi.fn(async () => ({ id: "t1", name: "Raisen.dev" })) }));
+vi.mock("@/lib/tenant-client/create-tenant", () => ({ createTenant }));
 
 import { RegistroWhatsApp } from "@/components/dashboard/registro/registro-whatsapp";
 
@@ -44,6 +46,17 @@ describe("RegistroWhatsApp (SOT)", () => {
     fireEvent.click(screen.getByTestId("registro-whatsapp"));
     expect(screen.getByTestId("onboarding-overlay")).toBeTruthy();
     fireEvent.click(screen.getByTestId("onb-close"));
+    expect(screen.queryByTestId("onboarding-overlay")).toBeNull();
+  });
+
+  it("guardar con exito -> toast 'Guardado' + cierra el overlay", async () => {
+    createTenant.mockClear();
+    render(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
+    fireEvent.click(screen.getByTestId("registro-whatsapp"));
+    fireEvent.change(screen.getByTestId("onb-name"), { target: { value: "Raisen.dev" } });
+    fireEvent.change(screen.getByTestId("onb-phone"), { target: { value: "+17875551234" } });
+    fireEvent.click(screen.getByTestId("onb-submit"));
+    await waitFor(() => expect(screen.getByTestId("toast").textContent).toBe("Guardado"));
     expect(screen.queryByTestId("onboarding-overlay")).toBeNull();
   });
 

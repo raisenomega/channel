@@ -36,11 +36,13 @@ describe("OnboardingOverlay (Z-2)", () => {
     expect(screen.getByTestId("onb-plan").textContent).toContain("esencial");
   });
 
-  it("A-S-3: email readonly + precargado del auth", () => {
+  it("A-Z-2-email: email EDITABLE y precargado del auth (ya no readonly)", () => {
     renderCreate();
     const email = screen.getByTestId("onb-email") as HTMLInputElement;
     expect(email.value).toBe("owner@raisen.dev");
-    expect(email.readOnly).toBe(true);
+    expect(email.readOnly).toBe(false);
+    fireEvent.change(email, { target: { value: "contacto@negocio.com" } });
+    expect((screen.getByTestId("onb-email") as HTMLInputElement).value).toBe("contacto@negocio.com");
   });
 
   it("A-S-9-3: el texto de recomendación es visible", () => {
@@ -48,13 +50,13 @@ describe("OnboardingOverlay (Z-2)", () => {
     expect(screen.getByTestId("onb-recommend").textContent).toMatch(/mejor trabajará tu asistente IA/);
   });
 
-  it("A-Z-2-val: submit DESHABILITADO sin los 4 campos; habilitado con nombre + teléfono válido", () => {
+  it("A-Z-2-val: botón HABILITADO; submit con teléfono inválido -> muestra error y NO crea", async () => {
     renderCreate();
-    expect((screen.getByTestId("onb-submit") as HTMLButtonElement).disabled).toBe(true); // falta nombre+teléfono
+    expect((screen.getByTestId("onb-submit") as HTMLButtonElement).disabled).toBe(false); // ya no bloquea silencioso
     fireEvent.change(screen.getByTestId("onb-name"), { target: { value: "Raisen.dev" } });
-    expect((screen.getByTestId("onb-submit") as HTMLButtonElement).disabled).toBe(true); // falta teléfono válido
-    setPhone();
-    expect((screen.getByTestId("onb-submit") as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(screen.getByTestId("onb-submit")); // phone default "+1 787 " no es E.164
+    await waitFor(() => expect(screen.getByTestId("onb-error")).toBeTruthy());
+    expect(createTenant).not.toHaveBeenCalled();
   });
 
   it("A-Z-2-submit: con los 4 campos -> createTenant(name + phone + email), onDone", async () => {

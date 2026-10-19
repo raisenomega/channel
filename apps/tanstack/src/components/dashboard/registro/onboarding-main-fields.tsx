@@ -9,8 +9,8 @@ import { OnbField } from "./onboarding-field";
 
 type Set = (k: keyof OnboardingForm, v: string) => void;
 
-export function OnboardingMainFields({ form, setField, language, email }: {
-  form: OnboardingForm; setField: Set; language: Idioma; email: string;
+export function OnboardingMainFields({ form, setField, language, email, onEmailChange }: {
+  form: OnboardingForm; setField: Set; language: Idioma; email: string; onEmailChange: (v: string) => void;
 }) {
   const L = (k: string): string => t(language, k);
   return (
@@ -18,7 +18,7 @@ export function OnboardingMainFields({ form, setField, language, email }: {
       <h3 className="mb-3 text-sm font-bold text-foreground">{L("onboard.subchips.basicos")}</h3>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <OnbField label={L("onboarding.f.name")} value={form.name} onChange={(v) => setField("name", v)} testId="onb-name" />
-        <OnbField label={L("onboarding.f.email")} value={email} readOnly testId="onb-email" />
+        <OnbField label={L("onboarding.f.email")} value={email} onChange={onEmailChange} testId="onb-email" />
         <OnbField label={L("onboarding.f.phone")} kind="tel" value={form.phone} onChange={(v) => setField("phone", v)} testId="onb-phone" />
         <OnbField label={L("onboarding.f.country")} kind="select" value={form.country_code} onChange={(v) => setField("country_code", v)}
           options={[{ value: "PR", label: "Puerto Rico" }, { value: "US", label: "Estados Unidos" }, { value: "DO", label: "Rep. Dominicana" }]} />
