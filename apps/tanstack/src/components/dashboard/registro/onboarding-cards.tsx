@@ -17,7 +17,7 @@ function Card({ title, testId, children }: { title: string; testId: string; chil
   return (
     <div data-testid={testId} className="rounded-2xl glass-card p-4">
       <h3 className="mb-3 text-sm font-bold text-foreground">{title}</h3>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">{children}</div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{children}</div>
     </div>
   );
 }
