@@ -42,6 +42,15 @@ export async function obtenerConnectUrl(platform: string): Promise<Result<string
   } catch (e) { return { ok: false, error: { kind: "red", cause: String(e) } }; }
 }
 
-export async function toggleCanal(_channelId: string, _active: boolean): Promise<Result<void, ChannelError>> {
-  return { ok: false, error: { kind: "not_implemented" } };
+// Toggle conectado/desconectado por plataforma. PATCH /tenants/:id/channels/:platform {connected}.
+// Apagar -> disconnected (chip gris); encender -> connected (sin re-OAuth; el enlace Zernio persiste).
+export async function toggleCanal(platform: string, connected: boolean): Promise<Result<void, ChannelError>> {
+  const tenantId = await ensureTenantId();
+  if (!tenantId) return { ok: false, error: errorSinTenant() };
+  try {
+    const res = await apiFetch(`/tenants/${tenantId}/channels/${encodeURIComponent(platform)}`, { method: "PATCH", body: JSON.stringify({ connected }) });
+    if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };
+    if (!res.ok) return { ok: false, error: { kind: "red", cause: `status ${res.status}` } };
+    return { ok: true, value: undefined };
+  } catch (e) { return { ok: false, error: { kind: "red", cause: String(e) } }; }
 }

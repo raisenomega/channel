@@ -50,7 +50,9 @@ export async function listarCuentasZernio(apiKey: string, platform?: string): Pr
   } catch { return err("zernio_error"); }
 }
 
-/** R20: solo cuentas enlazadas al tenant (channel_connections.zernio_account_id). */
+/** R20: solo cuentas enlazadas al tenant (channel_connections.zernio_account_id). El filtro por
+ * status (desconectado = no usable) lo aplica el CALLER (connected-accounts), NO aqui: zernio-sync
+ * necesita ver TODAS las enlazadas para reconciliar su status real desde Zernio. */
 export function filtrarPorTenant(cuentas: readonly ZernioAccount[], enlaces: readonly ChannelConnection[]): readonly ZernioAccount[] {
   const propias = new Set(enlaces.map((c) => c.zernioAccountId).filter((x): x is string => !!x));
   return Object.freeze(cuentas.filter((c) => propias.has(c.zernioAccountId)));

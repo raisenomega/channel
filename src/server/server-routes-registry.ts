@@ -17,6 +17,7 @@ import { rutaAthCharge } from "../pay/presentation/routes/charge-ath.routes.ts";
 import { rutaAthPoll } from "../pay/presentation/routes/ath-poll.routes.ts";
 import { rutaPagoSuccess, rutaPagoFailed } from "../pay/presentation/routes/pago-result.routes.ts";
 import { rutaConnectUrl, rutaZernioSync, rutaConnectedAccounts, rutaListChannels } from "../channels/presentation/channels.routes.ts";
+import { rutaToggleCanal } from "../channels/presentation/routes/channel-toggle.routes.ts";
 import { registrarOAuthChannelsRutas } from "./oauth-channels-wrapper.ts";
 import { handleZernioWebhook } from "../channels/presentation/webhooks.zernio.routes.ts";
 import { rutaCrearTenant } from "../identity/presentation/tenants.routes.ts";
@@ -52,10 +53,9 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     rutaAthPoll(h.pay.poll),
     rutaPagoSuccess(h.pay.result),
     rutaPagoFailed(h.pay.result),
-    rutaConnectUrl(h.channels),
-    rutaZernioSync(h.channels),
-    rutaConnectedAccounts(h.channels),
-    rutaListChannels(h.channels),
+    rutaConnectUrl(h.channels), rutaZernioSync(h.channels),
+    rutaConnectedAccounts(h.channels), rutaListChannels(h.channels),
+    rutaToggleCanal(h.channels.repo),
     ...registrarOAuthChannelsRutas(),
     handleZernioWebhook(h),
     rutaCrearTenant(),
