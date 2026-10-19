@@ -51,7 +51,9 @@ export function rutaConnectedAccounts(deps: ChannelsDeps): RouteDefinition {
       if (!enlaces.ok) return { ok: false, error: { kind: "persistence_error" } };
       const cuentas = await listarCuentasZernio(deps.zernioApiKey);
       if (!cuentas.ok) return { ok: false, error: { kind: "zernio_error" } };
-      const items = filtrarPorTenant(cuentas.value, enlaces.value).map((a) => ({
+      // Toggle: un canal desconectado (status != connected) NO es usable -> fuera de connected-accounts.
+      const usables = enlaces.value.filter((e) => e.status === "connected");
+      const items = filtrarPorTenant(cuentas.value, usables).map((a) => ({
         platform: a.platform, handle: a.handle, zernio_account_id: a.zernioAccountId, followers_count: a.followersCount,
       }));
       return { ok: true, items };
