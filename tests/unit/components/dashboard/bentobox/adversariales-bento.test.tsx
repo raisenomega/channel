@@ -41,9 +41,9 @@ describe("A-02: BENTO L3 = 4 cards (Estado · Actividad · Peticiones · Búsque
 });
 
 describe("A-03 (SOT): el CTA 'Crear mi negocio' vive en la barra de WhatsApp, no en una card", () => {
-  it("registro-whatsapp tiene el boton registro-crear con dash.createMyBusiness", () => {
+  it("registro-whatsapp tiene el CTA registro-crear con dash.createMyBusiness (no en una card del Panel)", () => {
     const SRC = readFileSync("apps/tanstack/src/components/dashboard/registro/registro-whatsapp.tsx", "utf8");
-    expect(SRC).toContain('data-testid="registro-crear"');
+    expect(SRC).toContain('"registro-crear"'); // testid dinámico: tenant ? registro-editar : registro-crear
     expect(SRC).toContain("dash.createMyBusiness");
   });
 });
