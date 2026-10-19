@@ -39,7 +39,8 @@ export function useCanales() {
   return { ...query, errKind, err: errKind !== null };
 }
 
-export function onToggleCanal(canal: Channel | undefined, v: boolean) {
+// El Switch pasa `connected` (on/off). Devuelve promesa para que la card refetchee y refleje el chip.
+export async function onToggleCanal(canal: Channel | undefined, connected: boolean): Promise<void> {
   if (!canal) return;
-  void toggleCanal(canal.id, v);
+  await toggleCanal(canal.kind, connected);
 }

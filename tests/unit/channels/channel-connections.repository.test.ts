@@ -50,6 +50,7 @@ test("A-11 RLS_AISLAMIENTO: listar filtra tenant_id en URL", async () => {
   await repo.listar("tenant-B" as never);
   const url = spy.mock.calls[0]?.[0] as string;
   expect(url).toContain("tenant_id=eq.tenant-B");
+  expect(url).toContain("/rest/v1/channel_connections"); // bug raiz: PostgREST exige /rest/v1 (sin esto 404)
   restoreFetch(); vi.unstubAllEnvs();
 });
 

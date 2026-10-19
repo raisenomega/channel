@@ -29,7 +29,7 @@ function navigateCard(e: React.KeyboardEvent, navigate: ReturnType<typeof useNav
 }
 
 export function ChannelCard({
-  language, kind, canal, esAbierto, onToggleExpand, disabled = false,
+  language, kind, canal, esAbierto, onToggleExpand, disabled = false, onToggled,
 }: {
   language: Idioma;
   kind: ChannelKind;
@@ -38,6 +38,7 @@ export function ChannelCard({
   onToggleExpand: () => void;
   /** L-2: sin tenant la card se ve pero no navega al detalle (nada que configurar aun). */
   disabled?: boolean;
+  onToggled?: () => void; // tras togglear, refetch de la lista para reflejar el chip
 }) {
   const navigate = useNavigate();
   const state = canal?.state ?? "desconectado";
@@ -62,7 +63,7 @@ export function ChannelCard({
       <div className="mt-2 flex items-center justify-between">
         <Badge tone={TONE[state]} dot>{t(language, "channels.state." + state)}</Badge>
         <span aria-label={t(language, "channels.active")} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-          <Switch checked={canal?.active ?? false} disabled={!canal} onChange={(v) => onToggleCanal(canal, v)} />
+          <Switch checked={state === "conectado"} disabled={!canal} onChange={(v) => { void onToggleCanal(canal, v).then(() => onToggled?.()); }} />
         </span>
       </div>
       {!disabled && state === "desconectado" ? (

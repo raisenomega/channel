@@ -34,6 +34,18 @@ export class ChannelConnectionsRepo {
     } catch (e) { return err(String(e)); }
   }
 
+  // Toggle conectado/desconectado por (tenant, platform). Conserva el zernio_account_id (el enlace a
+  // Zernio persiste): re-activar NO exige re-OAuth. Solo cambia el status (el chip lo refleja).
+  async actualizarEstado(tenantId: TenantId, platform: string, status: ConnectionStatus): Promise<Result<void, string>> {
+    const u = supabaseBase(); const h = supabaseHdrs();
+    if (!u || !h) return err("config_incompleta");
+    try {
+      const q = `?tenant_id=eq.${encodeURIComponent(String(tenantId))}&platform=eq.${encodeURIComponent(platform)}`;
+      const r = await fetch(`${u}/channel_connections${q}`, { method: "PATCH", headers: { ...h, Prefer: "return=minimal" }, body: JSON.stringify({ status, updated_at: new Date().toISOString() }) });
+      return r.ok ? ok(undefined) : err(`http_${r.status}`);
+    } catch (e) { return err(String(e)); }
+  }
+
   private toEntity(r: Row): ChannelConnection {
     return { id: r.id, tenantId: r.tenant_id, platform: r.platform as SocialPlatform, zernioAccountId: r.zernio_account_id, handle: r.handle, followersCount: r.followers_count, status: r.status as ConnectionStatus, isPrimary: r.is_primary, isPaused: r.is_paused, autoPublishAllowed: r.auto_publish_allowed, createdAt: r.created_at, updatedAt: r.updated_at };
   }

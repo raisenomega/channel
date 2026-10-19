@@ -59,6 +59,7 @@ function ChannelsPage() {
             esAbierto={abierto === kind}
             onToggleExpand={() => setAbierto(abierto === kind ? null : kind)}
             disabled={sinTenant}
+            onToggled={() => void refetch()}
           />
         ))}
       </div>
