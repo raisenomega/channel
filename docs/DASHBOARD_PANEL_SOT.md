@@ -14,6 +14,8 @@
 
 2. **Barra de WhatsApp** (registro/edición de negocio) — **SE QUEDA** justo debajo del header.
    Es el acceso de alta/edición del negocio (abre el overlay de onboarding). NO se elimina.
+   El CTA **"Crear mi negocio"** vive en el **lado DERECHO de la barra** (sin tenant → "Crear mi
+   negocio"; con tenant → "Editar datos"). El alta de negocio NO vive en ninguna tarjeta del Panel.
 
 3. **Línea 1 · 4 tarjetas** (una sola fila): **Tenant** (con Plan) · **Conversaciones abiertas** ·
    **Sin asignar** · **Total**.
