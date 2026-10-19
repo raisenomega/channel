@@ -9,9 +9,9 @@ import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
 import { CANALES, calcularStats, fetchInbox } from "./inbox/inbox-mappers";
 import { FiltersBar } from "./inbox/inbox-sections";
-import { ConversationList } from "./inbox/inbox-list";
 import { KpiRow, WidgetsRow } from "./inbox/inbox-widgets";
 import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
+import { GraficasPanel } from "@/components/dashboard/charts/graficas-panel";
 import { useRecentActivity } from "@/hooks/useRecentActivity";
 import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
 import { RegistroWhatsApp } from "@/components/dashboard/registro/registro-whatsapp";
@@ -56,18 +56,17 @@ function InboxPage() {
       <RegistroWhatsApp language={language} tenant={miTenant ? { id: miTenant.tenantId, name: miTenant.name, plan: miTenant.plan } : null} channelsConectados={canalesActivos.length} onDone={() => void refetchTenant()} />
       <KpiRow language={language} stats={stats} total={items?.length ?? 0} tenantName={miTenant?.name} tenantPlan={miTenant?.plan} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={items === undefined || items.length === 0} />
-      <BentoRowNueva lang={language} events={events} />
+      <BentoRowNueva
+        lang={language} events={events} items={itemsFiltrados}
+        onOpen={(id) => void navigate({ to: "/inbox/" + encodeURIComponent(id) })}
+      />
       <FiltersBar
         language={language} canalesActivos={canalesActivos}
         filtroEstado={filtroEstado} filtroSLA={filtroSLA}
         onEstado={toggleEstado} onSLA={toggleSLA} onClean={cleanFilters}
         onCanalNav={(c) => void navigate({ to: "/channels/$channelId", params: { channelId: c } })}
       />
-      <ConversationList
-        language={language} items={itemsFiltrados}
-        onOpen={(id) => void navigate({ to: "/inbox/" + encodeURIComponent(id) })}
-        onGoChannels={() => void navigate({ to: "/channels" })}
-      />
+      <GraficasPanel lang={language} porCanal={stats.porCanal} />
     </div>
   );
 }

@@ -35,7 +35,13 @@ export function RegistroWhatsApp({ language, tenant, channelsConectados = 0, onD
           <p className="text-xs text-muted-foreground">{t(language, tenant ? "registro.registered" : "registro.ctaHint")}</p>
         </div>
       </div>
-      {necesitaCanales ? (
+      {tenant === null ? (
+        <button type="button" data-testid="registro-crear"
+          onClick={(e) => { e.stopPropagation(); abrir(); }}
+          className="shrink-0 rounded-lg border border-primary/60 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20">
+          {t(language, "dash.createMyBusiness")}
+        </button>
+      ) : necesitaCanales ? (
         <button type="button" data-testid="registro-connect"
           onClick={(e) => { e.stopPropagation(); void navigate({ to: "/channels" }); }}
           className="shrink-0 rounded-lg border border-border/50 px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary/60">
@@ -43,7 +49,7 @@ export function RegistroWhatsApp({ language, tenant, channelsConectados = 0, onD
         </button>
       ) : (
         <span data-testid="registro-hint" className="shrink-0 text-xs font-semibold text-primary">
-          {t(language, tenant ? "registro.editData" : "registro.ctaBtn")}
+          {t(language, "registro.editData")}
         </span>
       )}
       {overlay ? (

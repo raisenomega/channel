@@ -16,7 +16,7 @@ export function BentoActividadReciente({ lang, events }: {
   events: readonly ActivityEvent[];
 }) {
   return (
-    <div className="bento-card bento-col-6">
+    <div className="bento-card bento-col-3">
       <div className="bento-title">
         <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
           <circle cx="10" cy="10" r="7" /><polyline points="10,5 10,10 14,12" />
