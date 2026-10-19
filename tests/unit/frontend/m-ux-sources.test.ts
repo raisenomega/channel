@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 const LF = readFileSync("apps/tanstack/src/routes/login/login-form.tsx", "utf8");
 const LP = readFileSync("apps/tanstack/src/routes/login/login-page.tsx", "utf8");
 const SHELL = readFileSync("apps/tanstack/src/components/layout/shell.tsx", "utf8");
-const WIDG = readFileSync("apps/tanstack/src/routes/inbox/inbox-widgets.tsx", "utf8");
+const REG = readFileSync("apps/tanstack/src/components/dashboard/registro/registro-whatsapp.tsx", "utf8");
 const ESD = readFileSync("apps/tanstack/src/lib/i18n/es-dash.ts", "utf8");
 
 test("A-M-5 'FORTRESS' ausente en /login (login-form + login-page)", () => {
@@ -33,8 +33,7 @@ test("A-M-2 / Z-3 Shell: nav por ruta (chips permanentes), useSession solo por s
   expect(SHELL).toMatch(/showChrome\s*\?/); // Z-3: visibilidad del nav por ruta, no por estado de sesion (flaky)
 });
 
-test("A-M-8 / R-1 CTA 'Crear mi negocio' vive en el KPI Tenant (no en card aparte)", () => {
-  expect(WIDG).toContain("dash.createMyBusiness");
-  expect(WIDG).toContain("onCreateTenant");
+test("A-M-8 / SOT CTA Crear mi negocio vive en la barra WhatsApp (no en el KPI)", () => {
+  expect(REG).toContain("dash.createMyBusiness"); // SOT: el CTA vive en la barra WhatsApp, no en el KPI
   expect(ESD).toContain("Crear mi negocio");
 });

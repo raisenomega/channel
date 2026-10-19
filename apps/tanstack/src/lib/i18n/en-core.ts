@@ -22,7 +22,7 @@ export const enCore: Dict = {
   "common.back": "Back",
   "common.next": "Next →",
 
-  "kpi.tenant": "Tenant",
+  "kpi.tenant": "Tenant", "kpi.balance": "Balance",
   "kpi.wasCorrect": "AI Was Correct",
   "kpi.salesChat": "Chat sales",
   "kpi.autonomy": "Autonomy",

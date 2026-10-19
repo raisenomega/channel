@@ -54,7 +54,7 @@ function InboxPage() {
   return (
     <div className="view">
       <RegistroWhatsApp language={language} tenant={miTenant ? { id: miTenant.tenantId, name: miTenant.name, plan: miTenant.plan } : null} onDone={() => void refetchTenant()} />
-      <KpiRow language={language} stats={stats} total={items?.length ?? 0} tenantName={miTenant?.name} tenantPlan={miTenant?.plan} />
+      <KpiRow language={language} stats={stats} total={items?.length ?? 0} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={items === undefined || items.length === 0} />
       <BentoRowNueva
         lang={language} events={events} items={itemsFiltrados}
