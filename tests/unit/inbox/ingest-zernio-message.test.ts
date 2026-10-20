@@ -13,8 +13,8 @@ const PAYLOAD = {
     id: "6ad6cfc1b4beafdb004c9417", platform: "instagram", direction: "incoming", text: "Saludos Zafacones Ramos",
     sender: { id: "1774346600215945", name: "Johanny | Community Manager", username: "johannylizpr" },
   },
-  conversation: { id: "6a3dcaa29d9472faaeea9423" },
-  account: { id: "6a3cc51a9d9472faaedda18c", profileId: "6a3cc50bc079e49d88f08656", platform: "instagram" },
+  conversation: { id: "6a3dcaa29d9472faaeea9423", participantId: "1774346600215945", participantName: "Johanny | Community Manager" },
+  account: { id: "6ad59c380f7c39ef909f2f2b", profileId: "6ad59b1c685fd27eccca02cb", platform: "instagram" },
 };
 
 function build(over: Partial<IngestDeps> = {}) {
@@ -70,7 +70,7 @@ test("Issue C: profileId NO matchea pero accountId SI (channel_connections) -> r
 
 test("P-2 shape ajeno (otro event) -> shape_ignorado, no toca DB", async () => {
   const { d, contacts } = build();
-  const r = await new IngestZernioMessageHandler(d).ejecutar({ event: "message.sent" });
+  const r = await new IngestZernioMessageHandler(d).ejecutar({ event: "message.deleted" });
   expect(r.ok).toBe(false);
   expect(contacts.guardar).not.toHaveBeenCalled();
 });
@@ -96,12 +96,22 @@ test("Issue A: migracion 054 crea trigger que incrementa total_messages + last_m
   expect(sql).toMatch(/last_message_at = NEW\.created_at/);
 });
 
-test("Issue B: content extrae de body si text ausente (parser defensivo)", async () => {
+test("Issue B media: text=null + ig_reel -> content '[Reel]' + has_attachments=true", async () => {
   const { d, msgs } = build();
-  const payloadBody = { ...PAYLOAD, message: { ...PAYLOAD.message, text: undefined, body: "desde body" } };
-  await new IngestZernioMessageHandler(d).ejecutar(payloadBody);
+  const mediaPayload = { ...PAYLOAD, message: { ...PAYLOAD.message, text: null, attachments: [{ type: "video", originalType: "ig_reel", url: "https://ig/reel/x" }] } };
+  await new IngestZernioMessageHandler(d).ejecutar(mediaPayload);
   const msg = (msgs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
-  expect(msg.content.body).toBe("desde body");
+  expect(msg.content.body).toBe("[Reel]");
+  expect(msg.hasAttachments).toBe(true);
+});
+
+test("Bloque 4 outbound: message.sent -> direction outbound + senderType human_agent + status sent", async () => {
+  const { d, msgs } = build();
+  const out = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: "outgoing", text: "respuesta" } };
+  const r = await new IngestZernioMessageHandler(d).ejecutar(out);
+  expect(r).toEqual({ ok: true, value: { persisted: true } });
+  const msg = (msgs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
+  expect(msg).toMatchObject({ direction: "outbound", senderType: "human_agent", status: "sent", content: { body: "respuesta" } });
 });
 
 test("P-3 insert falla -> propaga el error REAL del repo (diagnosticable, no 'mensaje' generico)", async () => {
