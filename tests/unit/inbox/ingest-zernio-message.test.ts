@@ -4,6 +4,7 @@
  * resolución de tenant por profileId (#157) y rechazo de shapes ajenos. Deps mockeadas.
  */
 import { expect, test, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { IngestZernioMessageHandler, type IngestDeps } from "../../../src/inbox/application/ingest-zernio-message.use-case.ts";
 
 const PAYLOAD = {
@@ -63,4 +64,17 @@ test("P-2 shape ajeno (otro event) -> shape_ignorado, no toca DB", async () => {
   const r = await new IngestZernioMessageHandler(d).ejecutar({ event: "message.sent" });
   expect(r.ok).toBe(false);
   expect(contacts.guardar).not.toHaveBeenCalled();
+});
+
+test("P-3 CAUSA RAIZ: migracion 053 crea la particion DEFAULT de messages (sin ella TODO insert falla)", () => {
+  const sql = readFileSync("supabase/migrations/053_messages_default_partition.sql", "utf8");
+  expect(sql).toMatch(/PARTITION OF public\.messages DEFAULT/);
+});
+
+test("P-3 insert falla -> propaga el error REAL del repo (diagnosticable, no 'mensaje' generico)", async () => {
+  const msgs = { guardar: vi.fn(async () => ({ ok: false as const, error: { kind: "persistence_failure", cause: 'no partition of relation "messages" found for row' } })) } as unknown as IngestDeps["msgs"];
+  const { d } = build({ msgs });
+  const r = await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
+  expect(r.ok).toBe(false);
+  expect((r as { error: { cause: string } }).error.cause).toContain("no partition");
 });

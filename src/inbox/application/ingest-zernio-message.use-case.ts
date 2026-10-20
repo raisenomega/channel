@@ -49,7 +49,8 @@ export class IngestZernioMessageHandler {
       hasAttachments: false, status: "received", aiMeta: { interactionId: null, confidence: null, mode: null, editedByHuman: false },
       createdAt: new Date(),
     };
-    if (!(await this.d.msgs.guardar(msg)).ok) return fail("mensaje");
+    const mr = await this.d.msgs.guardar(msg);
+    if (!mr.ok) return fail(mr.error.cause ?? "mensaje"); // #171: propaga el error REAL de Postgres (diagnosticable)
     return ok({ persisted: true });
   }
 }
