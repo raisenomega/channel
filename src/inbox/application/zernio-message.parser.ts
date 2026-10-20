@@ -37,6 +37,10 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
   if (!providerMessageId || !profileId) return null;
   const atts = Array.isArray(m["attachments"]) ? (m["attachments"] as Record<string, unknown>[]) : [];
   const text = m["text"] != null ? String(m["text"]) : "";
+  const direction = String(m["direction"]) === "outgoing" ? "outbound" : "inbound";
+  // #3: el contacto es el participante. En SALIENTE el sender es el NEGOCIO -> jamás usarlo como nombre
+  // del contacto; solo en entrante el sender es la persona. Sin nombre -> neutral "Cliente" (no el negocio).
+  const senderName = direction === "inbound" ? (sender["name"] ?? sender["username"]) : null;
   return {
     profileId,
     accountId: String(acct["id"] ?? acct["accountId"] ?? ""),
@@ -44,8 +48,8 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
     content: text || describirMedia(atts),
     hasAttachments: atts.length > 0,
     providerMessageId,
-    direction: String(m["direction"]) === "outgoing" ? "outbound" : "inbound",
+    direction,
     contactExternalId: String(conv["participantId"] ?? sender["id"] ?? providerMessageId),
-    contactName: String(conv["participantName"] ?? sender["name"] ?? sender["username"] ?? "Contacto"),
+    contactName: String(conv["participantName"] ?? senderName ?? "Cliente"),
   };
 }
