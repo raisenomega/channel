@@ -11,6 +11,7 @@ import { ZernioProfileService } from "../channels/application/zernio-profile.ser
 import { rutaChannelConnectUrl } from "../channels/presentation/routes/connect-url.routes.ts";
 import { rutaZernioCallback } from "../channels/presentation/routes/zernio-callback.routes.ts";
 import { rutaPendingPages, rutaSelectPage } from "../channels/presentation/routes/fb-pages.routes.ts";
+import { rutaChannelReconcile } from "../channels/presentation/routes/channel-reconcile.routes.ts";
 import { listOwnAccounts } from "../channels/infrastructure/zernio-connect.client.ts";
 
 function getEnv(n: string): string {
@@ -31,5 +32,6 @@ export function registrarOAuthChannelsRutas(): RouteDefinition[] {
     rutaZernioCallback({ noncesRepo, tenantRepo, connRepo, listOwnAccounts: (pid) => listOwnAccounts(apiKey, pid) }),
     rutaPendingPages({ apiKey, tenantRepo, connRepo }),
     rutaSelectPage({ apiKey, tenantRepo, connRepo }),
+    rutaChannelReconcile({ profileService, connRepo, listOwnAccounts: (pid) => listOwnAccounts(apiKey, pid) }),
   ];
 }
