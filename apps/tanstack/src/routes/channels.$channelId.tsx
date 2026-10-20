@@ -28,7 +28,7 @@ function CanalViewPage() {
   const { language } = usePreferences();
   const kind = channelId as ChannelKind;
   const meta = CHANNEL_META[kind] ?? CHANNEL_META.webchat;
-  const { activeId, setActiveId, chats, activeChat, threadContactId, activeMsgs, activeContact, contactInfo } =
+  const { activeId, setActiveId, chats, activeChat, threadContactId, activeMsgs, loadOlder, hasMore, loadingOlder, activeContact, contactInfo } =
     useCanalData(channelId, language, meta);
 
   const [contactBarOpen, setContactBarOpen] = useState(false);
@@ -55,7 +55,7 @@ function CanalViewPage() {
         composerContent={
           activeTab
             ? <TabContent lang={language} activeTab={activeTab} accent={meta.hsl} contactId={threadContactId} contactInfo={contactInfo} />
-            : <AmplifiedChat lang={language} chat={activeChat} contact={activeContact} msgs={msgs} meta={meta} onOpenContact={openContact} />
+            : <AmplifiedChat lang={language} chat={activeChat} contact={activeContact} msgs={msgs} meta={meta} onOpenContact={openContact} onLoadOlder={loadOlder} hasMore={hasMore} loadingOlder={loadingOlder} />
         }
       >
         <BrandPhone kind={meta.brand}>
