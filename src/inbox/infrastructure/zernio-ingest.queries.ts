@@ -31,3 +31,10 @@ export async function tenantPorZernioAccount(accountId: string): Promise<TenantI
   const row = Array.isArray(data) ? data[0] as { tenant_id?: string } : null;
   return (row?.tenant_id as TenantId) ?? null;
 }
+
+// 3o-b: rellena el id del destinatario en convs ya existentes (solo si está NULL -> idempotente,
+// no toca otras columnas -> no reabre Issue A). Habilita la entrega saliente a Zernio.
+export async function setConvParticipant(convId: string, externalId: string): Promise<void> {
+  if (!convId || !externalId) return;
+  await supabase.from("conversations").update({ participant_external_id: externalId }).eq("id", convId).is("participant_external_id", null);
+}

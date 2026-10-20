@@ -28,6 +28,7 @@ function build(over: Partial<IngestDeps> = {}) {
     tenantPorAccount: vi.fn(async () => null),
     mensajeExiste: vi.fn(async () => false),
     convExiste: vi.fn(async () => false),
+    setParticipant: vi.fn(async () => {}),
     detId: (s: string) => `det-${s}`,
     ...over,
   };
@@ -87,6 +88,13 @@ test("Issue A: conversacion YA existe -> NO re-crea contacto/conv (no resetea), 
   expect(contacts.guardar).not.toHaveBeenCalled();
   expect(convs.guardar).not.toHaveBeenCalled();
   expect(msgs.guardar).toHaveBeenCalledOnce();
+});
+
+test("3o-b: conv YA existe -> backfill del id destino (setParticipant) con el participantId del webhook", async () => {
+  const setParticipant = vi.fn(async () => {});
+  const { d } = build({ convExiste: vi.fn(async () => true), setParticipant });
+  await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
+  expect(setParticipant).toHaveBeenCalledWith(expect.any(String), "1774346600215945");
 });
 
 test("Issue A: migracion 054 crea trigger que incrementa total_messages + last_message_at", () => {

@@ -10,6 +10,7 @@ export class ConversationRepositorySupabase implements ConversationRepository {
     try {
       const { error } = await supabase.from("conversations").upsert({
         id: conv.id, tenant_id: conv.tenantId, contact_id: conv.contactId,
+        participant_external_id: conv.participantExternalId,
         primary_channel: conv.primaryChannel, status: conv.status,
         operation_mode: conv.operationMode,
         assigned_agent_id: conv.assignedAgentId,

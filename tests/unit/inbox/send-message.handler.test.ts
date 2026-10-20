@@ -1,6 +1,6 @@
 ﻿import { expect, test } from "vitest";
 import { ok, err } from "../../../src/shared/domain/result.ts";
-import { SendMessageHandler, SendMessageCommand } from "../../../src/inbox/application/send-message.handler.ts";
+import { SendMessageHandler, SendMessageCommand, OutboundDispatcher } from "../../../src/inbox/application/send-message.handler.ts";
 import { ConversationRepository, MessageRepository } from "../../../src/inbox/domain/inbox.repository.ts";
 import { ConversationState } from "../../../src/inbox/domain/conversation.entity.ts";
 
@@ -12,6 +12,7 @@ const convActiva: ConversationState = Object.freeze({
   id: COID,
   tenantId: TID,
   contactId: CID,
+  participantExternalId: "1774346600215945",
   primaryChannel: "whatsapp",
   primaryInboxId: null,
   status: "open",
@@ -211,4 +212,23 @@ test("SendMessageHandler â€” debe fallar con persistence_failure si msgRepo
   expect(!result.ok).toBe(true);
   expect(result.error.kind).toBe("persistence_failure");
   expect(result.error.cause).toBe("db_timeout");
+});
+
+test("3o-b: con dispatcher + participantExternalId -> despacha el saliente con el to correcto", async () => {
+  const convRepo: ConversationRepository = {
+    buscar: async (_id) => ok(convActiva), guardar: async (_c) => ok(undefined),
+    buscarPorContacto: async (_t, _c) => ok([]), buscarActivos: async (_t) => ok([]),
+  };
+  const msgRepo: MessageRepository = {
+    guardar: async (_m) => ok(undefined), buscar: async (_id) => ok(null), buscarPorConversacion: async (_c, _l) => ok([]),
+  };
+  const enviados: Array<{ to: string; content: string }> = [];
+  const dispatcher: OutboundDispatcher = { enviar: async (m) => { enviados.push({ to: m.to, content: m.content }); return ok(undefined); } };
+  const handler = new SendMessageHandler(convRepo, msgRepo, dispatcher);
+  const r = await handler.ejecutar({
+    tenantId: TID, conversationId: COID, contactId: CID, channel: "whatsapp",
+    provider: "zernio", content: { type: "text", body: "hola" }, senderType: "human_agent",
+  });
+  expect(r.ok).toBe(true);
+  expect(enviados).toEqual([{ to: "1774346600215945", content: "hola" }]);
 });

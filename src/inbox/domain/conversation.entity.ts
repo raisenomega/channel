@@ -26,6 +26,7 @@ export const crearConversacion = (
   return ok(Object.freeze({
     id: crypto.randomUUID() as ConversationId,
     tenantId, contactId,
+    participantExternalId: null, // el ingest lo sobre-escribe al crear desde Zernio
     primaryChannel: channel,
     primaryInboxId: inboxId,
     status: "open" as ConversationStatus,

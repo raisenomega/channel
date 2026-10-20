@@ -6,6 +6,7 @@ export const desdeRowConversation = (row: Record<string, unknown>): Conversation
     id: row.id as ConversationId,
     tenantId: row.tenant_id as TenantId,
     contactId: row.contact_id as ContactId,
+    participantExternalId: (row.participant_external_id as string) ?? null,
     primaryChannel: row.primary_channel as ConversationState["primaryChannel"],
     primaryInboxId: null,
     status: row.status as ConversationState["status"],

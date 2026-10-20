@@ -23,6 +23,7 @@ export interface IngestDeps {
   readonly tenantPorAccount: (accountId: string) => Promise<TenantId | null>;
   readonly mensajeExiste: (t: TenantId, pmid: string) => Promise<boolean>;
   readonly convExiste: (convId: string) => Promise<boolean>;
+  readonly setParticipant: (convId: string, externalId: string) => Promise<void>; // 3o-b: id destino Zernio
   readonly detId: (seed: string) => string;
 }
 export type IngestError = { kind: "shape_ignorado" } | { kind: "tenant_no_encontrado" } | { kind: "persistence_failure"; cause: string };
@@ -45,7 +46,9 @@ export class IngestZernioMessageHandler {
       const c = crearContacto(tenantId, z.contactName);
       if (c.ok && !(await this.d.contacts.guardar({ ...c.value, id: contactId })).ok) return fail("contacto");
       const cv = crearConversacion(tenantId, contactId, ch);
-      if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId })).ok) return fail("conversacion");
+      if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId, participantExternalId: z.contactExternalId })).ok) return fail("conversacion");
+    } else {
+      await this.d.setParticipant(convId, z.contactExternalId); // 3o-b: rellena el id destino en convs ya existentes
     }
     const msg: MessageState = {
       id: crypto.randomUUID() as MessageId, tenantId, conversationId: convId, contactId,
