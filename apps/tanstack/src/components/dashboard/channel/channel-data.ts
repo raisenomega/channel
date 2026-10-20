@@ -1,13 +1,15 @@
 /**
- * HUB by Raisen — Hooks de datos para la vista de canal (queries + derivados). C4 ≤75.
+ * HUB by Raisen — Hooks de datos para la vista de canal (queries + derivados). C4 <=75.
+ * Mensajes del hilo activo: scroll infinito keyset (useInfiniteQuery) -> carga todo el historial.
  */
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { t, type Idioma } from "@/lib/i18n";
 import type { Mensaje } from "@/lib/types";
 import { waChatFrom, type WaChat, type WaMsg, type WaContact } from "@/components/dashboard/whatsapp-phone";
 import type { ChannelMeta } from "./channel-meta";
-import { fetchChannelConversations, fetchMessagesForConversation, fetchContact, type ActiveContactInfo } from "./channel-fetchers";
+import { fetchChannelConversations, fetchContact, type ActiveContactInfo } from "./channel-fetchers";
+import { fetchMessagesPage, MSG_PAGE } from "./channel-msg-fetch";
 import { toWaMsg } from "./channel-phone-app";
 import { contactNameFor } from "./channel-amplified-chat";
 
@@ -18,6 +20,9 @@ export interface CanalData {
   activeChat: WaChat | null;
   threadContactId: string | null;
   activeMsgs: WaMsg[];
+  loadOlder: () => void;
+  hasMore: boolean;
+  loadingOlder: boolean;
   activeContact: WaContact;
   contactInfo: ActiveContactInfo | null;
 }
@@ -25,13 +30,11 @@ export interface CanalData {
 export function useCanalData(channelId: string, lang: Idioma, meta: ChannelMeta): CanalData {
   const [activeId, setActiveId] = useState<string | null>(null);
   const { data: conversations } = useQuery({ queryKey: ["channel-convs", channelId], queryFn: () => fetchChannelConversations(channelId), staleTime: 20_000 });
-  const { data: msgMap } = useQuery({
+  const msgs = useInfiniteQuery({
     queryKey: ["channel-msgs", channelId, activeId],
-    queryFn: async () => {
-      if (!activeId) return {} as Record<string, Mensaje[]>;
-      const msgs = await fetchMessagesForConversation(activeId);
-      return { [activeId]: msgs } as Record<string, Mensaje[]>;
-    },
+    queryFn: ({ pageParam }) => (activeId ? fetchMessagesPage(activeId, pageParam) : Promise.resolve([] as Mensaje[])),
+    initialPageParam: null as string | null,
+    getNextPageParam: (last) => (last.length === MSG_PAGE ? last[last.length - 1]!.createdAt : undefined),
     enabled: !!activeId, staleTime: 10_000,
   });
   const { data: contactInfo } = useQuery({
@@ -54,17 +57,18 @@ export function useCanalData(channelId: string, lang: Idioma, meta: ChannelMeta)
   })), [conversations, channelId]);
 
   const activeChat = useMemo(() => chats.find((c) => c.id === activeId) ?? null, [chats, activeId]);
-  const threadContactId = useMemo(() => {
-    if (!activeId) return null;
-    return (conversations ?? []).find((c) => c.id === activeId)?.contact_id ?? null;
-  }, [conversations, activeId]);
-  const activeMsgs: WaMsg[] = useMemo(() => (activeId && msgMap?.[activeId] ? msgMap[activeId].map(toWaMsg) : []), [msgMap, activeId]);
+  const threadContactId = useMemo(() => (activeId ? (conversations ?? []).find((c) => c.id === activeId)?.contact_id ?? null : null), [conversations, activeId]);
+  // páginas DESC (nuevos->viejos) -> aplanar y revertir a cronológico (viejos arriba, nuevos abajo)
+  const activeMsgs: WaMsg[] = useMemo(() => [...(msgs.data?.pages.flat() ?? [])].reverse().map(toWaMsg), [msgs.data]);
   const activeContact: WaContact = {
-    name: contactInfo?.display_name ?? activeChat?.name ?? "",
-    phone: contactInfo?.primary_phone ?? "",
-    avatarColor: meta.hex,
-    lastSeen: t(lang, "canal.enLinea"),
+    name: contactInfo?.display_name ?? activeChat?.name ?? "", phone: contactInfo?.primary_phone ?? "",
+    avatarColor: meta.hex, lastSeen: t(lang, "canal.enLinea"),
   };
 
-  return { activeId, setActiveId, chats, activeChat, threadContactId, activeMsgs, activeContact, contactInfo: contactInfo ?? null };
+  return {
+    activeId, setActiveId, chats, activeChat, threadContactId, activeMsgs,
+    loadOlder: () => { if (msgs.hasNextPage && !msgs.isFetchingNextPage) void msgs.fetchNextPage(); },
+    hasMore: !!msgs.hasNextPage, loadingOlder: msgs.isFetchingNextPage,
+    activeContact, contactInfo: contactInfo ?? null,
+  };
 }
