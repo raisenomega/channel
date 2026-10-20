@@ -50,7 +50,7 @@ export function useCanalData(channelId: string, lang: Idioma, meta: ChannelMeta)
   const chats: WaChat[] = useMemo(() => (conversations ?? []).map((c) => waChatFrom({
     conversationId: c.id,
     contactName: (Array.isArray(c.contacts) ? c.contacts[0]?.display_name : c.contacts?.display_name) || contactNameFor(c.contact_id), // Bug 1+#2: embed objeto O array
-    lastMessage: c.subject ?? "",
+    lastMessage: (c.last_message_preview ?? "").replace(/\s+/g, " ").trim(), // #3: último mensaje REAL (no placeholder)
     lastMessageAt: c.last_message_at ?? new Date().toISOString(),
     unreadCount: 0,
     channel: channelId,

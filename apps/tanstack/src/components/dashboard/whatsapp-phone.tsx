@@ -17,7 +17,7 @@ export function waChatFrom(conv: {
   return {
     id: conv.conversationId,
     name: conv.contactName === "Contacto" || !conv.contactName ? "Cliente WhatsApp" : conv.contactName,
-    preview: conv.lastMessage || "Hola, ¿tienen disponibilidad?",
+    preview: conv.lastMessage, // #3: último mensaje real (sin placeholder hardcodeado)
     time: timeLabel(conv.lastMessageAt),
     unread: conv.unreadCount,
     color: colorFor(conv.contactName),

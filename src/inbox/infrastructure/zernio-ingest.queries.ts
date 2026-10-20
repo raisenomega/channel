@@ -38,3 +38,10 @@ export async function setConvParticipant(convId: string, externalId: string): Pr
   if (!convId || !externalId) return;
   await supabase.from("conversations").update({ participant_external_id: externalId }).eq("id", convId).is("participant_external_id", null);
 }
+
+// #3: actualiza el nombre del contacto cuando llega uno real (solo si cambió). Nunca el nombre del negocio
+// (el parser ya no lo usa). Deja intactos los que ya coinciden.
+export async function refreshContactName(contactId: string, name: string): Promise<void> {
+  if (!contactId || !name) return;
+  await supabase.from("contacts").update({ display_name: name }).eq("id", contactId).neq("display_name", name);
+}

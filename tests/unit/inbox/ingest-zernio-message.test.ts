@@ -29,6 +29,7 @@ function build(over: Partial<IngestDeps> = {}) {
     mensajeExiste: vi.fn(async () => false),
     convExiste: vi.fn(async () => false),
     setParticipant: vi.fn(async () => {}),
+    refreshContactName: vi.fn(async () => {}),
     detId: (s: string) => `det-${s}`,
     ...over,
   };
@@ -95,6 +96,21 @@ test("3o-b: conv YA existe -> backfill del id destino (setParticipant) con el pa
   const { d } = build({ convExiste: vi.fn(async () => true), setParticipant });
   await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
   expect(setParticipant).toHaveBeenCalledWith(expect.any(String), "1774346600215945");
+});
+
+test("#3 nombre: SALIENTE sin participantName -> contacto 'Cliente' (NUNCA el negocio/remitente)", async () => {
+  const { d, contacts } = build();
+  const out = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: "outgoing", sender: { id: "biz", name: "Zafacones Ramos" } }, conversation: { id: "cv" } };
+  await new IngestZernioMessageHandler(d).ejecutar(out);
+  const c = (contacts.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
+  expect(c.displayName).toBe("Cliente");
+});
+
+test("#3 auto-update: conv existe + llega nombre real -> refreshContactName con ese nombre", async () => {
+  const refreshContactName = vi.fn(async () => {});
+  const { d } = build({ convExiste: vi.fn(async () => true), refreshContactName });
+  await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
+  expect(refreshContactName).toHaveBeenCalledWith(expect.any(String), "Johanny | Community Manager");
 });
 
 test("Issue A: migracion 054 crea trigger que incrementa total_messages + last_message_at", () => {

@@ -5,7 +5,7 @@
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 
 // Bug 1 (Hotfix P): embed del contacto -> nombre REAL en la lista (no "Cliente <id>").
-const CONV_COLS = ["id", "contact_id", "primary_channel", "subject", "last_message_at", "contacts(display_name)"];
+const CONV_COLS = ["id", "contact_id", "primary_channel", "subject", "last_message_preview", "last_message_at", "contacts(display_name)"];
 const CONTACT_COLS = [
   "id", "display_name", "primary_phone", "primary_email",
   "segment", "ltv_usd", "total_orders", "preferred_channel",
@@ -24,7 +24,7 @@ export async function fetchChannelConversations(channelId: string) {
     if (!res.ok) return [];
     return (await res.json()) as Array<{
       id: string; contact_id: string | null; primary_channel: string | null;
-      subject: string | null; last_message_at: string | null;
+      subject: string | null; last_message_preview: string | null; last_message_at: string | null;
       contacts: { display_name: string | null } | { display_name: string | null }[] | null; // PostgREST puede embeber objeto O array
     }>;
   } catch { return []; }
