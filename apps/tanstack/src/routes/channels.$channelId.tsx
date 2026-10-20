@@ -39,7 +39,7 @@ function CanalViewPage() {
   const openContact = () => setContactBarOpen(true);
 
   return (
-    <div className="view">
+    <div className="channel-view">
       <ChannelBar lang={language} kind={kind} to="/channels/$channelId" />
       <ChannelFrame
         lang={language}
@@ -56,8 +56,7 @@ function CanalViewPage() {
         }
       >
         <BrandPhone kind={meta.brand}>
-          <PhoneApp lang={language} meta={meta} chats={chats} activeId={activeId} msgs={activeMsgs}
-            onSelect={onSelect} onOpenContact={openContact} contact={activeChat ? activeContact : undefined} />
+          <PhoneApp lang={language} meta={meta} chats={chats} activeId={activeId} onSelect={onSelect} />
         </BrandPhone>
       </ChannelFrame>
       <WaContactBar open={contactBarOpen} contact={activeChat ? activeContact : null} onClose={() => setContactBarOpen(false)} />
