@@ -69,11 +69,11 @@ test("A-07 ACK_RAPIDO: response time < 500ms", async () => {
   expect(performance.now() - start).toBeLessThan(500);
 });
 
-test("A-08 HANDLER_ERROR_NO_500: handler falla no-firma -> 200", async () => {
+test("A-08 HANDLER_ERROR_500 (Hotfix P #170/#172): fallo no-firma -> 500 (nunca 200 silencioso)", async () => {
   const spy = { ejecutar: async () => err({ kind: "invalid_webhook_payload", cause: "x" }) };
   const r2 = handleZernioWebhook({ processWebhook: spy } as never);
   const res = await r2.handler(ctx({}, "sha256=abc"));
-  expect((res as { status: number }).status).toBe(200);
+  expect((res as { status: number }).status).toBe(500); // propaga el error -> Zernio reintenta, no se pierde
 });
 
 test("A-09 R20_NO_CROSS_DB: zero refs cross-DB en el archivo", () => {
