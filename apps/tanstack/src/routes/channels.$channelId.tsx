@@ -12,6 +12,7 @@ import { BrandPhone } from "@/components/dashboard/brand-phone";
 import { CHANNEL_META } from "@/components/dashboard/channel/channel-meta";
 import { ChannelBar } from "@/components/dashboard/channel/channel-bar";
 import { useCanalData } from "@/components/dashboard/channel/channel-data";
+import { useChannelSend } from "@/components/dashboard/channel/channel-send";
 import { PhoneApp } from "@/components/dashboard/channel/channel-phone-app";
 import { TabContent } from "@/components/dashboard/channel/channel-tab-content";
 import { AmplifiedChat } from "@/components/dashboard/channel/channel-amplified-chat";
@@ -34,8 +35,10 @@ function CanalViewPage() {
   const [composer, setComposer] = useState("");
   const [activeTab, setActiveTab] = useState<ChannelTab | undefined>(undefined);
 
+  const { send, pending } = useChannelSend(channelId, activeId, threadContactId);
   const onSelect = (id: string) => setActiveId(id || null);
-  const onSend = () => { if (activeId && composer.trim()) setComposer(""); };
+  const onSend = () => { send(composer); setComposer(""); };
+  const msgs = [...activeMsgs, ...pending];
   const openContact = () => setContactBarOpen(true);
 
   return (
@@ -52,7 +55,7 @@ function CanalViewPage() {
         composerContent={
           activeTab
             ? <TabContent lang={language} activeTab={activeTab} accent={meta.hsl} contactId={threadContactId} contactInfo={contactInfo} />
-            : <AmplifiedChat lang={language} chat={activeChat} contact={activeContact} msgs={activeMsgs} meta={meta} onOpenContact={openContact} />
+            : <AmplifiedChat lang={language} chat={activeChat} contact={activeContact} msgs={msgs} meta={meta} onOpenContact={openContact} />
         }
       >
         <BrandPhone kind={meta.brand}>
