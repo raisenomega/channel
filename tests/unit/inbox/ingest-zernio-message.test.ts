@@ -26,6 +26,7 @@ function build(over: Partial<IngestDeps> = {}) {
     contacts, convs, msgs,
     tenantPorProfile: vi.fn(async () => "t-1" as never),
     mensajeExiste: vi.fn(async () => false),
+    convExiste: vi.fn(async () => false),
     detId: (s: string) => `det-${s}`,
     ...over,
   };
@@ -69,6 +70,30 @@ test("P-2 shape ajeno (otro event) -> shape_ignorado, no toca DB", async () => {
 test("P-3 CAUSA RAIZ: migracion 053 crea la particion DEFAULT de messages (sin ella TODO insert falla)", () => {
   const sql = readFileSync("supabase/migrations/053_messages_default_partition.sql", "utf8");
   expect(sql).toMatch(/PARTITION OF public\.messages DEFAULT/);
+});
+
+test("Issue A: conversacion YA existe -> NO re-crea contacto/conv (no resetea), solo inserta el mensaje", async () => {
+  const { d, contacts, convs, msgs } = build({ convExiste: vi.fn(async () => true) });
+  const r = await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
+  expect(r).toEqual({ ok: true, value: { persisted: true } });
+  expect(contacts.guardar).not.toHaveBeenCalled();
+  expect(convs.guardar).not.toHaveBeenCalled();
+  expect(msgs.guardar).toHaveBeenCalledOnce();
+});
+
+test("Issue A: migracion 054 crea trigger que incrementa total_messages + last_message_at", () => {
+  const sql = readFileSync("supabase/migrations/054_messages_count_trigger.sql", "utf8");
+  expect(sql).toMatch(/AFTER INSERT ON public\.messages/);
+  expect(sql).toMatch(/total_messages = total_messages \+ 1/);
+  expect(sql).toMatch(/last_message_at = NEW\.created_at/);
+});
+
+test("Issue B: content extrae de body si text ausente (parser defensivo)", async () => {
+  const { d, msgs } = build();
+  const payloadBody = { ...PAYLOAD, message: { ...PAYLOAD.message, text: undefined, body: "desde body" } };
+  await new IngestZernioMessageHandler(d).ejecutar(payloadBody);
+  const msg = (msgs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
+  expect(msg.content.body).toBe("desde body");
 });
 
 test("P-3 insert falla -> propaga el error REAL del repo (diagnosticable, no 'mensaje' generico)", async () => {

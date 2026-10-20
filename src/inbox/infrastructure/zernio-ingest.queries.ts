@@ -17,3 +17,9 @@ export async function mensajeYaExiste(tenantId: TenantId, providerMessageId: str
   const { data } = await supabase.from("messages").select("id").eq("tenant_id", tenantId).eq("provider_message_id", providerMessageId).limit(1);
   return Array.isArray(data) && data.length > 0;
 }
+
+export async function conversacionExiste(convId: string): Promise<boolean> {
+  if (!convId) return false;
+  const { data } = await supabase.from("conversations").select("id").eq("id", convId).limit(1);
+  return Array.isArray(data) && data.length > 0;
+}
