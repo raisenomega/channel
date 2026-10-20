@@ -9,7 +9,8 @@ vi.mock("@/lib/supabase", () => ({
   supabaseRestBase: () => "https://x.supabase.co/rest/v1",
   supabaseAuthHeaders: () => ({ authorization: "Bearer t" }),
 }));
-import { fetchChannelConversations, fetchMessagesForConversation } from "@/components/dashboard/channel/channel-fetchers";
+import { fetchChannelConversations } from "@/components/dashboard/channel/channel-fetchers";
+import { fetchMessagesPage } from "@/components/dashboard/channel/channel-msg-fetch";
 
 const ORIG = globalThis.fetch;
 afterEach(() => { globalThis.fetch = ORIG; });
@@ -19,10 +20,11 @@ test("Bug 2: messages pide content_type + sender_user_id (no message_type) y map
   globalThis.fetch = vi.fn(async (u: string) => { urls.push(u); return new Response(JSON.stringify([
     { id: "m1", conversation_id: "c1", sender_type: "contact", sender_user_id: null, direction: "inbound", content: "Hola", content_type: "text", created_at: "2026-01-01" },
   ]), { status: 200 }); }) as never;
-  const r = await fetchMessagesForConversation("c1");
+  const r = await fetchMessagesPage("c1", null);
   expect(urls[0]).toContain("content_type");
   expect(urls[0]).toContain("sender_user_id");
   expect(urls[0]).not.toContain("message_type");
+  expect(urls[0]).toContain("order=created_at.desc"); // keyset: más nuevos primero
   expect(r[0]).toMatchObject({ id: "m1", content: "Hola", messageType: "text" });
 });
 
