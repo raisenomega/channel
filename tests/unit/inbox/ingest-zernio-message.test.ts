@@ -114,6 +114,13 @@ test("Bloque 4 outbound: message.sent -> direction outbound + senderType human_a
   expect(msg).toMatchObject({ direction: "outbound", senderType: "human_agent", status: "sent", content: { body: "respuesta" } });
 });
 
+test("Issue #3: migracion 055 (re)crea la politica RLS por tenant de messages (sin ella RLS niega todo -> inbox 200 [])", () => {
+  const sql = readFileSync("supabase/migrations/055_messages_rls_policy_restore.sql", "utf8");
+  expect(sql).toMatch(/CREATE POLICY "tenant_isolation_messages" ON public\.messages/);
+  expect(sql).toMatch(/tenant_id = current_tenant\(\)/);
+  expect(sql).toMatch(/tenant_isolation_messages_default" ON public\.messages_default/);
+});
+
 test("P-3 insert falla -> propaga el error REAL del repo (diagnosticable, no 'mensaje' generico)", async () => {
   const msgs = { guardar: vi.fn(async () => ({ ok: false as const, error: { kind: "persistence_failure", cause: 'no partition of relation "messages" found for row' } })) } as unknown as IngestDeps["msgs"];
   const { d } = build({ msgs });
