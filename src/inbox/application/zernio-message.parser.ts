@@ -4,7 +4,8 @@
  * `sender`. Devuelve los campos ya normalizados, o null si el shape no es un mensaje entrante. C4 <=75.
  */
 export interface ZernioInbound {
-  readonly profileId: string;      // account.profileId -> tenants.zernio_profile_id
+  readonly profileId: string;      // account.profileId -> tenants.zernio_profile_id (primary)
+  readonly accountId: string;      // account.id -> channel_connections.zernio_account_id (fallback, Issue C)
   readonly channel: string;        // message.platform (instagram/facebook/...)
   readonly content: string;        // message.text
   readonly providerMessageId: string; // message.id (idempotencia)
@@ -25,6 +26,7 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
   if (!providerMessageId || !profileId) return null;
   return {
     profileId,
+    accountId: String(acct["id"] ?? acct["accountId"] ?? ""),
     channel: String(m["platform"] ?? acct["platform"] ?? ""),
     content: String(m["text"] ?? m["body"] ?? m["content"] ?? m["message"] ?? ""), // Issue B: campos alternativos de texto
     providerMessageId,

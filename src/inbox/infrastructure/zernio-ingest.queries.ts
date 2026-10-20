@@ -23,3 +23,11 @@ export async function conversacionExiste(convId: string): Promise<boolean> {
   const { data } = await supabase.from("conversations").select("id").eq("id", convId).limit(1);
   return Array.isArray(data) && data.length > 0;
 }
+
+// Issue C: fallback de tenant por la cuenta Zernio enlazada (channel_connections.zernio_account_id).
+export async function tenantPorZernioAccount(accountId: string): Promise<TenantId | null> {
+  if (!accountId) return null;
+  const { data } = await supabase.from("channel_connections").select("tenant_id").eq("zernio_account_id", accountId).limit(1);
+  const row = Array.isArray(data) ? data[0] as { tenant_id?: string } : null;
+  return (row?.tenant_id as TenantId) ?? null;
+}

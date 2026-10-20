@@ -20,6 +20,7 @@ export interface IngestDeps {
   readonly convs: ConversationRepository;
   readonly msgs: MsgPort;
   readonly tenantPorProfile: (profileId: string) => Promise<TenantId | null>;
+  readonly tenantPorAccount: (accountId: string) => Promise<TenantId | null>;
   readonly mensajeExiste: (t: TenantId, pmid: string) => Promise<boolean>;
   readonly convExiste: (convId: string) => Promise<boolean>;
   readonly detId: (seed: string) => string;
@@ -33,7 +34,8 @@ export class IngestZernioMessageHandler {
   async ejecutar(payload: unknown): Promise<Result<{ persisted: boolean }, IngestError>> {
     const z = parseZernioMessage(payload);
     if (!z) return err({ kind: "shape_ignorado" });
-    const tenantId = await this.d.tenantPorProfile(z.profileId);
+    // Issue C: primary = tenants.zernio_profile_id; fallback = channel_connections.zernio_account_id.
+    const tenantId = (await this.d.tenantPorProfile(z.profileId)) ?? (await this.d.tenantPorAccount(z.accountId));
     if (!tenantId) return err({ kind: "tenant_no_encontrado" });
     if (await this.d.mensajeExiste(tenantId, z.providerMessageId)) return ok({ persisted: false }); // idempotente
     const contactId = this.d.detId(`ct:${tenantId}:${z.senderId}`) as ContactId;
