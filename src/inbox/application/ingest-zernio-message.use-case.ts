@@ -20,6 +20,7 @@ export interface IngestDeps {
   readonly convs: ConversationRepository;
   readonly msgs: MsgPort;
   readonly tenantPorProfile: (profileId: string) => Promise<TenantId | null>;
+  readonly tenantPorAccount: (accountId: string) => Promise<TenantId | null>;
   readonly mensajeExiste: (t: TenantId, pmid: string) => Promise<boolean>;
   readonly convExiste: (convId: string) => Promise<boolean>;
   readonly detId: (seed: string) => string;
@@ -33,23 +34,24 @@ export class IngestZernioMessageHandler {
   async ejecutar(payload: unknown): Promise<Result<{ persisted: boolean }, IngestError>> {
     const z = parseZernioMessage(payload);
     if (!z) return err({ kind: "shape_ignorado" });
-    const tenantId = await this.d.tenantPorProfile(z.profileId);
+    // Issue C: primary = tenants.zernio_profile_id; fallback = channel_connections.zernio_account_id.
+    const tenantId = (await this.d.tenantPorProfile(z.profileId)) ?? (await this.d.tenantPorAccount(z.accountId));
     if (!tenantId) return err({ kind: "tenant_no_encontrado" });
     if (await this.d.mensajeExiste(tenantId, z.providerMessageId)) return ok({ persisted: false }); // idempotente
-    const contactId = this.d.detId(`ct:${tenantId}:${z.senderId}`) as ContactId;
-    const convId = this.d.detId(`cv:${tenantId}:${z.channel}:${z.senderId}`) as ConversationId;
+    const contactId = this.d.detId(`ct:${tenantId}:${z.contactExternalId}`) as ContactId;
+    const convId = this.d.detId(`cv:${tenantId}:${z.channel}:${z.contactExternalId}`) as ConversationId;
     const ch = z.channel as ChannelType;
     if (!(await this.d.convExiste(convId))) { // Issue A: crear 1 sola vez -> no resetea total_messages (lo maneja el trigger 054)
-      const c = crearContacto(tenantId, z.senderName);
+      const c = crearContacto(tenantId, z.contactName);
       if (c.ok && !(await this.d.contacts.guardar({ ...c.value, id: contactId })).ok) return fail("contacto");
       const cv = crearConversacion(tenantId, contactId, ch);
       if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId })).ok) return fail("conversacion");
     }
     const msg: MessageState = {
       id: crypto.randomUUID() as MessageId, tenantId, conversationId: convId, contactId,
-      direction: z.direction, senderType: "contact", senderUserId: null, channel: ch,
+      direction: z.direction, senderType: z.direction === "inbound" ? "contact" : "human_agent", senderUserId: null, channel: ch,
       provider: "zernio", providerMessageId: z.providerMessageId, content: { type: "text", body: z.content },
-      hasAttachments: false, status: "received", aiMeta: { interactionId: null, confidence: null, mode: null, editedByHuman: false },
+      hasAttachments: z.hasAttachments, status: z.direction === "inbound" ? "received" : "sent", aiMeta: { interactionId: null, confidence: null, mode: null, editedByHuman: false },
       createdAt: new Date(),
     };
     const mr = await this.d.msgs.guardar(msg);
