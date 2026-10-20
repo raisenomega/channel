@@ -1,12 +1,14 @@
 /**
- * HUB by Raisen — Webhook route publica para Zernio (Slide 4.2d + 4.9).
- * Soporta eventos message.inbound (original) + whatsapp.template.status_updated.
- * Ambos verifican HMAC-SHA256. C4 ≤75.
+ * HUB by Raisen — Webhook publico de Zernio (Slide 4.2d + 4.9 + Hotfix P).
+ * Eventos: message.inbound + whatsapp.template.status_updated (ambos HMAC-SHA256).
+ * Hotfix P (#171/#170/#172): logging estructurado por etapa (request_id + shape + conteo) +
+ * propagacion de error (500 en fallo real, NUNCA 200 silencioso). C4 <=75.
  */
 // PUBLIC: webhook entrante de Zernio; autenticado por HMAC-SHA256 (X-Zernio-Signature), 401 si falla.
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
 import type { ServerHandlers } from "../../server/server-routes.ts";
 import { verifyZernioHmac } from "../infrastructure/zernio.hmac.ts";
+import { nuevoReqId, logOauth } from "../infrastructure/oauth-telemetry.ts";
 
 function parseBody(ctx: RequestContext): { sig: string; bodyRaw: string; parsed: Record<string, unknown> } {
   const sig = typeof ctx.headers["x-zernio-signature"] === "string" ? ctx.headers["x-zernio-signature"] : "";
@@ -15,44 +17,39 @@ function parseBody(ctx: RequestContext): { sig: string; bodyRaw: string; parsed:
   return { sig, bodyRaw, parsed };
 }
 
+/** Resumen del payload para el log (SOLO shape, nunca contenido/secretos): keys + event + #messages. */
+function shapeOf(p: Record<string, unknown>): string {
+  const msgs = Array.isArray(p["messages"]) ? (p["messages"] as unknown[]).length : "n/a";
+  return `keys=[${Object.keys(p).join(",")}] event=${String(p["event"] ?? "-")} messages=${msgs}`;
+}
+
+async function manejarTemplate(h: ServerHandlers, reqId: string, parsed: Record<string, unknown>, bodyRaw: string, sig: string) {
+  const hmac = h.templates ? await verifyZernioHmac(bodyRaw, sig, h.templates.webhookSecret) : undefined;
+  if (!hmac?.ok) { logOauth("zernio-webhook", reqId, "template HMAC FAIL -> 401"); return { status: 401, body: JSON.stringify({ error: "signature_invalid" }) }; }
+  const data = (parsed["data"] ?? {}) as Record<string, unknown>;
+  const r = await h.templates.syncStatus.ejecutar({ nombre: String(data["name"] ?? ""), language: String(data["language"] ?? ""), status: String(data["status"] ?? "") as "APPROVED" | "REJECTED" | "PAUSED" | "DISABLED", reason: data["rejection_reason"] as string | undefined });
+  if (!r.ok && r.error.kind === "status_desconocido") return { status: 400, body: JSON.stringify({ ok: false, kind: "status_desconocido" }) };
+  return { status: 200, body: JSON.stringify({ ok: true }) };
+}
+
 export function handleZernioWebhook(h: ServerHandlers): RouteDefinition {
   return {
-    method: "POST",
-    path: "/webhooks/zernio",
+    method: "POST", path: "/webhooks/zernio",
     handler: async (ctx) => {
+      const reqId = nuevoReqId();
       const { sig, bodyRaw, parsed } = parseBody(ctx);
+      logOauth("zernio-webhook", reqId, `recibido ${shapeOf(parsed)}`);
+      if (parsed["event"] === "whatsapp.template.status_updated") return manejarTemplate(h, reqId, parsed, bodyRaw, sig);
 
-      // Slide 4.9: whatsapp.template.status_updated
-      if (parsed.event === "whatsapp.template.status_updated") {
-        const hmac = h.templates ? await verifyZernioHmac(bodyRaw, sig, h.templates.webhookSecret) : undefined;
-        if (!hmac?.ok) return { status: 401, body: JSON.stringify({ error: "signature_invalid" }) };
-        const data = (parsed.data ?? {}) as Record<string, unknown>;
-        const r = await h.templates.syncStatus.ejecutar({
-          nombre: String(data.name ?? ""),
-          language: String(data.language ?? ""),
-          status: String(data.status ?? "") as "APPROVED" | "REJECTED" | "PAUSED" | "DISABLED",
-          reason: data.rejection_reason as string | undefined,
-        });
-        if (!r.ok && r.error.kind === "template_no_encontrado") {
-          console.info(`[templates] webhook: template "${data.name}" no local — ${JSON.stringify(r.error)}`);
-          return { status: 200, body: JSON.stringify({ ok: true }) };
-        }
-        if (!r.ok && r.error.kind === "status_desconocido") {
-          return { status: 400, body: JSON.stringify({ ok: false, kind: "status_desconocido" }) };
-        }
-        return { status: 200, body: JSON.stringify({ ok: true }) };
+      const r = await h.processWebhook.ejecutar({ provider: "zernio", signature: sig, body: bodyRaw, rawPayload: ctx.body });
+      if (!r.ok) {
+        if (r.error.kind === "firma_invalida") { logOauth("zernio-webhook", reqId, "HMAC FAIL -> 401"); return { status: 401, body: JSON.stringify({ error: "signature_invalid" }) }; }
+        logOauth("zernio-webhook", reqId, `ingest ERROR ${r.error.kind} -> 500 (#170/#172: no silent 200)`);
+        return { status: 500, body: JSON.stringify({ ok: false, kind: r.error.kind }) };
       }
-
-      // Slide 4.2d: message.inbound (original)
-      const r = await h.processWebhook.ejecutar({
-        provider: "zernio", signature: sig, body: bodyRaw, rawPayload: ctx.body,
-      });
-      if (!r.ok && r.error.kind === "firma_invalida") {
-        return { status: 401, body: JSON.stringify({ error: "signature_invalid" }) };
-      }
-      return r.ok
-        ? { status: 200, body: JSON.stringify({ ok: true, events: r.value }) }
-        : { status: 200, body: JSON.stringify({ ok: false, kind: r.error.kind }) };
+      // PERSIST aun NO cableado (Bloque 2): el conteo revela si el parser matchea el shape real de Zernio.
+      logOauth("zernio-webhook", reqId, `OK parsed=${r.value.length} msg (persist pendiente bloque 2)`);
+      return { status: 200, body: JSON.stringify({ ok: true, parsed: r.value.length }) };
     },
   };
 }

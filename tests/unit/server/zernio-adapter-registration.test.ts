@@ -105,11 +105,11 @@ test("A-05 Firma invalida -> 401 signature_invalid (nunca adapter_no_registrado)
   expect(r.body).not.toContain("adapter_no_registrado");
 });
 
-test("A-06 Firma HMAC valida con el secret -> 200 ok:true events:[]", async () => {
+test("A-06 Firma HMAC valida con el secret -> 200 ok:true parsed:0 (Hotfix P: body = conteo, no echo)", async () => {
   vaultOk("vault-api-key", VAULT_SECRET);
   const r = await responder(firmar(BODY, VAULT_SECRET));
   expect(r.status).toBe(200);
-  expect(JSON.parse(r.body)).toEqual({ ok: true, events: [] });
+  expect(JSON.parse(r.body)).toEqual({ ok: true, parsed: 0 });
 });
 
 test("A-07 buildHandlers es async: retorna Promise y resuelve con processWebhook", async () => {
