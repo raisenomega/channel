@@ -26,7 +26,7 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
   return {
     profileId,
     channel: String(m["platform"] ?? acct["platform"] ?? ""),
-    content: String(m["text"] ?? ""),
+    content: String(m["text"] ?? m["body"] ?? m["content"] ?? m["message"] ?? ""), // Issue B: campos alternativos de texto
     providerMessageId,
     direction: String(m["direction"]) === "incoming" ? "inbound" : "outbound",
     senderId: String(sender["id"] ?? providerMessageId),

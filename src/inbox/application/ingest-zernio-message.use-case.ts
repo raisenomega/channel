@@ -21,6 +21,7 @@ export interface IngestDeps {
   readonly msgs: MsgPort;
   readonly tenantPorProfile: (profileId: string) => Promise<TenantId | null>;
   readonly mensajeExiste: (t: TenantId, pmid: string) => Promise<boolean>;
+  readonly convExiste: (convId: string) => Promise<boolean>;
   readonly detId: (seed: string) => string;
 }
 export type IngestError = { kind: "shape_ignorado" } | { kind: "tenant_no_encontrado" } | { kind: "persistence_failure"; cause: string };
@@ -38,10 +39,12 @@ export class IngestZernioMessageHandler {
     const contactId = this.d.detId(`ct:${tenantId}:${z.senderId}`) as ContactId;
     const convId = this.d.detId(`cv:${tenantId}:${z.channel}:${z.senderId}`) as ConversationId;
     const ch = z.channel as ChannelType;
-    const c = crearContacto(tenantId, z.senderName);
-    if (c.ok && !(await this.d.contacts.guardar({ ...c.value, id: contactId })).ok) return fail("contacto");
-    const cv = crearConversacion(tenantId, contactId, ch);
-    if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId })).ok) return fail("conversacion");
+    if (!(await this.d.convExiste(convId))) { // Issue A: crear 1 sola vez -> no resetea total_messages (lo maneja el trigger 054)
+      const c = crearContacto(tenantId, z.senderName);
+      if (c.ok && !(await this.d.contacts.guardar({ ...c.value, id: contactId })).ok) return fail("contacto");
+      const cv = crearConversacion(tenantId, contactId, ch);
+      if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId })).ok) return fail("conversacion");
+    }
     const msg: MessageState = {
       id: crypto.randomUUID() as MessageId, tenantId, conversationId: convId, contactId,
       direction: z.direction, senderType: "contact", senderUserId: null, channel: ch,
@@ -49,7 +52,8 @@ export class IngestZernioMessageHandler {
       hasAttachments: false, status: "received", aiMeta: { interactionId: null, confidence: null, mode: null, editedByHuman: false },
       createdAt: new Date(),
     };
-    if (!(await this.d.msgs.guardar(msg)).ok) return fail("mensaje");
+    const mr = await this.d.msgs.guardar(msg);
+    if (!mr.ok) return fail(mr.error.cause ?? "mensaje"); // #171: propaga el error REAL de Postgres (diagnosticable)
     return ok({ persisted: true });
   }
 }
