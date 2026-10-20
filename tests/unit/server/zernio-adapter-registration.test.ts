@@ -54,7 +54,7 @@ async function routerConWarn(): Promise<{ router: Awaited<ReturnType<typeof buil
 }
 async function responder(sig: string): Promise<{ status: number; body: string }> {
   const { router } = await routerConWarn();
-  const h = { processWebhook: new ProcessWebhookHandler(router) } as ServerHandlers;
+  const h = { processWebhook: new ProcessWebhookHandler(router), ingestZernio: { ejecutar: async () => ({ ok: true as const, value: { persisted: false } }) } } as unknown as ServerHandlers;
   const r = await handleZernioWebhook(h).handler(ctx(sig));
   return r as { status: number; body: string };
 }
@@ -105,11 +105,11 @@ test("A-05 Firma invalida -> 401 signature_invalid (nunca adapter_no_registrado)
   expect(r.body).not.toContain("adapter_no_registrado");
 });
 
-test("A-06 Firma HMAC valida con el secret -> 200 ok:true parsed:0 (Hotfix P: body = conteo, no echo)", async () => {
+test("A-06 Firma HMAC valida -> 200; Bloque 2 ingesta (dup_skip con mock)", async () => {
   vaultOk("vault-api-key", VAULT_SECRET);
   const r = await responder(firmar(BODY, VAULT_SECRET));
   expect(r.status).toBe(200);
-  expect(JSON.parse(r.body)).toEqual({ ok: true, parsed: 0 });
+  expect(JSON.parse(r.body)).toEqual({ ok: true, ingest: "dup_skip" });
 });
 
 test("A-07 buildHandlers es async: retorna Promise y resuelve con processWebhook", async () => {
