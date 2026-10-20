@@ -20,7 +20,8 @@ class MockAdapter implements ChannelAdapter {
 const router = new ChannelRouter();
 router.registrar(new MockAdapter());
 const handler = new ProcessWebhookHandler(router);
-const route = handleZernioWebhook({ processWebhook: handler } as never);
+const ING = { ejecutar: async () => ok({ persisted: false }) };
+const route = handleZernioWebhook({ processWebhook: handler, ingestZernio: ING } as never);
 
 function ctx(body: unknown, sig: string | undefined, rawBody?: string): RequestContext {
   return { method: "POST", path: "/webhooks/zernio", headers: sig ? { "x-zernio-signature": sig } : {}, body, rawBody: rawBody ?? JSON.stringify(body), jwt: null } as RequestContext;
@@ -49,7 +50,7 @@ test("A-04 BODY_VACIO_200: body vacio con firma -> 200 (no crash)", async () => 
 test("A-05 PROVIDER_HARDCODED: handler recibe provider zernio siempre", async () => {
   let provider: string | undefined;
   const spy = { ejecutar: async (cmd: { provider: string }) => { provider = cmd.provider; return ok([]); } };
-  const r2 = handleZernioWebhook({ processWebhook: spy } as never);
+  const r2 = handleZernioWebhook({ processWebhook: spy, ingestZernio: ING } as never);
   await r2.handler(ctx({}, "sha256=abc"));
   expect(provider).toBe("zernio");
 });
@@ -57,7 +58,7 @@ test("A-05 PROVIDER_HARDCODED: handler recibe provider zernio siempre", async ()
 test("A-06 RAW_BODY_PRESERVED: rawBody llega sin reserializar", async () => {
   let captured: string | undefined;
   const spy = { ejecutar: async (cmd: { body: string }) => { captured = cmd.body; return ok([]); } };
-  const r2 = handleZernioWebhook({ processWebhook: spy } as never);
+  const r2 = handleZernioWebhook({ processWebhook: spy, ingestZernio: ING } as never);
   const bodyRaw = '{"custom":"MUST PRESERVE RAW"}';
   await r2.handler(ctx({ custom: "MUST PRESERVE RAW" }, "sha256=abc", bodyRaw));
   expect(captured).toBe(bodyRaw);
@@ -71,7 +72,7 @@ test("A-07 ACK_RAPIDO: response time < 500ms", async () => {
 
 test("A-08 HANDLER_ERROR_500 (Hotfix P #170/#172): fallo no-firma -> 500 (nunca 200 silencioso)", async () => {
   const spy = { ejecutar: async () => err({ kind: "invalid_webhook_payload", cause: "x" }) };
-  const r2 = handleZernioWebhook({ processWebhook: spy } as never);
+  const r2 = handleZernioWebhook({ processWebhook: spy, ingestZernio: ING } as never);
   const res = await r2.handler(ctx({}, "sha256=abc"));
   expect((res as { status: number }).status).toBe(500); // propaga el error -> Zernio reintenta, no se pierde
 });
@@ -83,7 +84,7 @@ test("A-09 R20_NO_CROSS_DB: zero refs cross-DB en el archivo", () => {
 test("A-10 MESSAGE_NORMALIZED: body tipico llega al handler", async () => {
   let captured: unknown = null;
   const spy = { ejecutar: async (cmd: { rawPayload: unknown }) => { captured = cmd.rawPayload; return ok([]); } };
-  const r2 = handleZernioWebhook({ processWebhook: spy } as never);
+  const r2 = handleZernioWebhook({ processWebhook: spy, ingestZernio: ING } as never);
   const body = { messages: [{ id: "m1", from: "user", text: "hola" }] };
   await r2.handler(ctx(body, "sha256=abc"));
   expect(captured).toEqual(body);

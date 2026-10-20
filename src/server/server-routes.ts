@@ -23,6 +23,9 @@ import { buildDraftsDeps } from "./drafts-wrapper.ts";
 import type { DraftsDeps } from "../cognition/presentation/drafts.routes.ts";
 import { buildTemplatesDeps } from "./templates-wrapper.ts";
 import type { TemplatesDeps } from "../templates/presentation/templates.routes.ts";
+import { IngestZernioMessageHandler } from "../inbox/application/ingest-zernio-message.use-case.ts";
+import { tenantPorZernioProfile, mensajeYaExiste } from "../inbox/infrastructure/zernio-ingest.queries.ts";
+import { detUuid } from "../shared/infrastructure/det-uuid.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
 import type { ContactRepository } from "../contacts/domain/contact.repository.ts";
@@ -30,6 +33,7 @@ import { ContactRepositorySupabase } from "../contacts/infrastructure/contact.re
 export interface ServerHandlers {
   processWebhook: ProcessWebhookHandler;
   receiveMessage: ReceiveMessageHandler;
+  ingestZernio: IngestZernioMessageHandler;
   sendMessage: SendMessageHandler;
   contactsRepo: ContactRepository;
   createQuote: CreateQuoteHandler;
@@ -59,18 +63,14 @@ export async function buildHandlers(): Promise<ServerHandlers> {
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
     receiveMessage: new ReceiveMessageHandler(convRepo),
+    ingestZernio: new IngestZernioMessageHandler({ contacts: new ContactRepositorySupabase(), convs: convRepo, msgs: msgRepo, tenantPorProfile: tenantPorZernioProfile, mensajeExiste: mensajeYaExiste, detId: detUuid }),
     sendMessage: new SendMessageHandler(convRepo, msgRepo),
     contactsRepo: new ContactRepositorySupabase(),
     createQuote: new CreateQuoteHandler(quoteRepo),
     optIn: new OptInHandler(consentRepo),
     listInbox: new ListInboxHandler(convRepo),
-    notifications: {
-      getHandler: new GetNotificationsHandler(notifRepo),
-      markReadHandler: new MarkReadHandler(notifRepo),
-      updatePrefsHandler: new UpdatePreferencesHandler(notifRepo),
-    },
-    athConfirm: ath.confirm,
-    stripe: buildStripe(),
+    notifications: { getHandler: new GetNotificationsHandler(notifRepo), markReadHandler: new MarkReadHandler(notifRepo), updatePrefsHandler: new UpdatePreferencesHandler(notifRepo) },
+    athConfirm: ath.confirm, stripe: buildStripe(),
     pay, channels, drafts, templates,
   };
 }

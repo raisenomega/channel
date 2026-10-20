@@ -47,9 +47,15 @@ export function handleZernioWebhook(h: ServerHandlers): RouteDefinition {
         logOauth("zernio-webhook", reqId, `ingest ERROR ${r.error.kind} -> 500 (#170/#172: no silent 200)`);
         return { status: 500, body: JSON.stringify({ ok: false, kind: r.error.kind }) };
       }
-      // PERSIST aun NO cableado (Bloque 2): el conteo revela si el parser matchea el shape real de Zernio.
-      logOauth("zernio-webhook", reqId, `OK parsed=${r.value.length} msg (persist pendiente bloque 2)`);
-      return { status: 200, body: JSON.stringify({ ok: true, parsed: r.value.length }) };
+      // Bloque 2: HMAC OK (processWebhook ok). Persistir el mensaje real en el inbox (conversations/messages).
+      const ing = await h.ingestZernio.ejecutar(ctx.body);
+      if (!ing.ok && ing.error.kind === "persistence_failure") {
+        logOauth("zernio-webhook", reqId, `persist ERROR ${ing.error.cause} -> 500`);
+        return { status: 500, body: JSON.stringify({ ok: false, kind: "persist_failed" }) };
+      }
+      const outcome = ing.ok ? (ing.value.persisted ? "persisted" : "dup_skip") : ing.error.kind;
+      logOauth("zernio-webhook", reqId, `ingest=${outcome}`);
+      return { status: 200, body: JSON.stringify({ ok: true, ingest: outcome }) };
     },
   };
 }
