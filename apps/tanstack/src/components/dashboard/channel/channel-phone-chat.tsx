@@ -11,7 +11,7 @@ import { initials } from "./channel-meta";
 export function toWaMsg(m: { senderType: string; content: string; createdAt: string; id: string }): WaMsg {
   return {
     id: m.id,
-    out: m.senderType === "agent",
+    out: m.senderType !== "contact", // inbound=contact=izquierda; human_agent/ai_agent/system=outbound=derecha
     text: m.content,
     time: m.createdAt,
     status: m.senderType === "contact" ? "read" : "delivered",
