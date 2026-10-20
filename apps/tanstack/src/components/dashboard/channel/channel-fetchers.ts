@@ -28,7 +28,7 @@ export async function fetchChannelConversations(channelId: string) {
     return (await res.json()) as Array<{
       id: string; contact_id: string | null; primary_channel: string | null;
       subject: string | null; last_message_at: string | null;
-      contacts: { display_name: string | null } | null;
+      contacts: { display_name: string | null } | { display_name: string | null }[] | null; // PostgREST puede embeber objeto O array
     }>;
   } catch { return []; }
 }
