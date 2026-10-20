@@ -28,6 +28,7 @@ function build(over: Partial<IngestDeps> = {}) {
     tenantPorAccount: vi.fn(async () => null),
     mensajeExiste: vi.fn(async () => false),
     convExiste: vi.fn(async () => false),
+    setParticipant: vi.fn(async () => {}),
     detId: (s: string) => `det-${s}`,
     ...over,
   };
@@ -89,6 +90,13 @@ test("Issue A: conversacion YA existe -> NO re-crea contacto/conv (no resetea), 
   expect(msgs.guardar).toHaveBeenCalledOnce();
 });
 
+test("3o-b: conv YA existe -> backfill del id destino (setParticipant) con el participantId del webhook", async () => {
+  const setParticipant = vi.fn(async () => {});
+  const { d } = build({ convExiste: vi.fn(async () => true), setParticipant });
+  await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
+  expect(setParticipant).toHaveBeenCalledWith(expect.any(String), "1774346600215945");
+});
+
 test("Issue A: migracion 054 crea trigger que incrementa total_messages + last_message_at", () => {
   const sql = readFileSync("supabase/migrations/054_messages_count_trigger.sql", "utf8");
   expect(sql).toMatch(/AFTER INSERT ON public\.messages/);
@@ -112,6 +120,13 @@ test("Bloque 4 outbound: message.sent -> direction outbound + senderType human_a
   expect(r).toEqual({ ok: true, value: { persisted: true } });
   const msg = (msgs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
   expect(msg).toMatchObject({ direction: "outbound", senderType: "human_agent", status: "sent", content: { body: "respuesta" } });
+});
+
+test("Issue #3: migracion 055 (re)crea la politica RLS por tenant de messages (sin ella RLS niega todo -> inbox 200 [])", () => {
+  const sql = readFileSync("supabase/migrations/055_messages_rls_policy_restore.sql", "utf8");
+  expect(sql).toMatch(/CREATE POLICY "tenant_isolation_messages" ON public\.messages/);
+  expect(sql).toMatch(/tenant_id = current_tenant\(\)/);
+  expect(sql).toMatch(/tenant_isolation_messages_default" ON public\.messages_default/);
 });
 
 test("P-3 insert falla -> propaga el error REAL del repo (diagnosticable, no 'mensaje' generico)", async () => {

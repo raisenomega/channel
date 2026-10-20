@@ -24,7 +24,7 @@ import type { DraftsDeps } from "../cognition/presentation/drafts.routes.ts";
 import { buildTemplatesDeps } from "./templates-wrapper.ts";
 import type { TemplatesDeps } from "../templates/presentation/templates.routes.ts";
 import { IngestZernioMessageHandler } from "../inbox/application/ingest-zernio-message.use-case.ts";
-import { tenantPorZernioProfile, tenantPorZernioAccount, mensajeYaExiste, conversacionExiste } from "../inbox/infrastructure/zernio-ingest.queries.ts";
+import { tenantPorZernioProfile, tenantPorZernioAccount, mensajeYaExiste, conversacionExiste, setConvParticipant } from "../inbox/infrastructure/zernio-ingest.queries.ts";
 import { detUuid } from "../shared/infrastructure/det-uuid.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
@@ -63,8 +63,8 @@ export async function buildHandlers(): Promise<ServerHandlers> {
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
     receiveMessage: new ReceiveMessageHandler(convRepo),
-    ingestZernio: new IngestZernioMessageHandler({ contacts: new ContactRepositorySupabase(), convs: convRepo, msgs: msgRepo, tenantPorProfile: tenantPorZernioProfile, tenantPorAccount: tenantPorZernioAccount, mensajeExiste: mensajeYaExiste, convExiste: conversacionExiste, detId: detUuid }),
-    sendMessage: new SendMessageHandler(convRepo, msgRepo),
+    ingestZernio: new IngestZernioMessageHandler({ contacts: new ContactRepositorySupabase(), convs: convRepo, msgs: msgRepo, tenantPorProfile: tenantPorZernioProfile, tenantPorAccount: tenantPorZernioAccount, mensajeExiste: mensajeYaExiste, convExiste: conversacionExiste, setParticipant: setConvParticipant, detId: detUuid }),
+    sendMessage: new SendMessageHandler(convRepo, msgRepo, channelRouter),
     contactsRepo: new ContactRepositorySupabase(),
     createQuote: new CreateQuoteHandler(quoteRepo),
     optIn: new OptInHandler(consentRepo),

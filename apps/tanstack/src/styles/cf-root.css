@@ -54,3 +54,13 @@
 @media (max-width: 1080px) and (min-width: 901px) {
   .cf-root { grid-template-columns: minmax(200px, 24%) 1fr; }
 }
+
+/* Issue #4/#B: la vista de canal ocupa el alto disponible -> SOLO los mensajes scrollean
+ * (el area .cf-content ya tiene overflow-y:auto). La barra de canales, el header de pestanas,
+ * el composer y el celular quedan FIJOS; nada se mueve salvo el hilo de mensajes. */
+.channel-view { display: flex; flex-direction: column; min-height: 0; gap: 10px; padding: 4px 0 0; }
+@media (min-width: 901px) {
+  .channel-view { height: 100%; overflow: hidden; }
+  .channel-view > :first-child { flex: 0 0 auto; }
+  .channel-view .cf-root { flex: 1 1 0%; height: auto; }
+}

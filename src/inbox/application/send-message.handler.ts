@@ -23,10 +23,16 @@ export type SendMessageError =
   | { readonly kind: "contenido_vacio" }
   | { readonly kind: "persistence_failure"; readonly cause: string };
 
+// 3o-b: puerto estructural para despachar el saliente (ChannelRouter encaja sin importar la capa channels).
+export interface OutboundDispatcher {
+  enviar(msg: { to: string; content: string; channel: ChannelType }): Promise<Result<void, unknown>>;
+}
+
 export class SendMessageHandler {
   constructor(
     private readonly convRepo: ConversationRepository,
     private readonly msgRepo: MessageRepository,
+    private readonly dispatcher?: OutboundDispatcher, // 3o-b: entrega real (Zernio); opcional = solo persiste
   ) {}
 
   async ejecutar(cmd: SendMessageCommand): Promise<Result<void, SendMessageError>> {
@@ -57,6 +63,11 @@ export class SendMessageHandler {
       return err({ kind: "persistence_failure", cause });
     }
 
+    // 3o-b: entrega real al destinatario. Best-effort: si no hay `to` o falla, el mensaje queda
+    // persistido/visible y el adapter dead-letterea el fallo (no rompemos la respuesta del envío).
+    if (this.dispatcher && conv.participantExternalId && cmd.content.body) {
+      await this.dispatcher.enviar({ to: conv.participantExternalId, content: cmd.content.body, channel: cmd.channel });
+    }
     return ok(undefined);
   }
 }

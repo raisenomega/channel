@@ -3,6 +3,7 @@
  * seleccionado en el panel derecho del ChannelFrame. También define
  * helper de nombre de contacto por defecto para los chats del canal.
  */
+import { useRef, useEffect } from "react";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import type { WaChat, WaMsg, WaContact } from "@/components/dashboard/whatsapp-phone";
@@ -21,6 +22,9 @@ export function AmplifiedChat({ lang, chat, contact, msgs, meta, onOpenContact }
   meta: ChannelMeta;
   onOpenContact: () => void;
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Autoscroll al último mensaje cuando entra/envías uno (Issue #B). El scrollback manual queda intacto.
+  useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs]);
   if (!chat) {
     return (
       <div className="cf-conv-placeholder">
@@ -43,7 +47,7 @@ export function AmplifiedChat({ lang, chat, contact, msgs, meta, onOpenContact }
           <div style={{ fontSize: 11, opacity: 0.85 }}>{contact?.lastSeen ?? t(lang, "canal.enLinea")}</div>
         </div>
       </div>
-      <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 6 }}>
+      <div ref={scrollRef} style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 6 }}>
         {msgs.length === 0 ? (
           <div style={{ textAlign: "center", fontSize: 13, color: meta.muted, padding: 18 }}>{t(lang, "canal.sinMsgs")}</div>
         ) : (
