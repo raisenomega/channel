@@ -46,7 +46,7 @@ export function useCanalData(channelId: string, lang: Idioma, meta: ChannelMeta)
 
   const chats: WaChat[] = useMemo(() => (conversations ?? []).map((c) => waChatFrom({
     conversationId: c.id,
-    contactName: contactNameFor(c.contact_id),
+    contactName: c.contacts?.display_name || contactNameFor(c.contact_id), // Bug 1: nombre real, no "Cliente <id>"
     lastMessage: c.subject ?? "",
     lastMessageAt: c.last_message_at ?? new Date().toISOString(),
     unreadCount: 0,
