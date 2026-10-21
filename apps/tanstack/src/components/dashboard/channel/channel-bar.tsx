@@ -7,6 +7,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { ChannelIcon, type ChannelKind } from "@/components/ui/channel-icon";
+import { AlertBadge } from "@/components/ui/alert-badge";
 import { ALL_CHANNELS, ALL_ACCENT } from "./channel-meta";
 
 export function ChannelBar({ lang, kind, to }: {
@@ -31,6 +32,7 @@ export function ChannelBar({ lang, kind, to }: {
             >
               <ChannelIcon kind={c} className="chbar-ico" />
               <span>{t(lang, "canal." + c)}</span>
+              <AlertBadge keyName={"channel:" + c} />
             </button>
           );
         })}
