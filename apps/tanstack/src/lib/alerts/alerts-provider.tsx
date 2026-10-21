@@ -1,49 +1,51 @@
 /**
- * HUB by Raisen — Provider global de alertas: UNA suscripción Supabase Realtime a `messages` (INSERT).
- * Cada mensaje ENTRANTE sube el badge del chip de su canal y refresca las vistas (sin refresh manual).
- * RLS de `messages` (migr 055) scopea el stream al tenant vía setAuth(JWT). Fuentes nuevas (CRM, pagos,
- * facturas, estados) se enchufan aquí registrando tabla->clave; la UI ya consume por clave.
+ * HUB by Raisen — Provider global de alertas (Opción B: polling, 100% confiable, cero mocks).
+ * Hace refetch de la actividad ENTRANTE cada 8s (y al volver el foco) y deriva, por canal, cuántos
+ * mensajes entraron DESDE que abriste ese canal por última vez (baseline por-viewer en localStorage).
+ * `markRead("channel:x")` marca ese canal como visto -> su badge vuelve a 0. La UI consume por clave
+ * (useAlertCount/AlertBadge); fuentes nuevas (CRM, pagos, facturas) se suman aquí sin tocar la UI.
  */
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { getSupabase } from "@/lib/supabase";
-import { readLocalSession } from "@/lib/auth";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchInboundActivity } from "./alerts-activity";
 import { AlertsContext, type AlertsApi } from "./alerts-context";
 
-interface MsgRow { channel?: string; direction?: string; conversation_id?: string }
+const SEEN_KEY = "hub.alerts.seen"; // { <canal>: epochMs visto, __baseline: 1er arranque }
+
+function loadSeen(): Record<string, number> {
+  try {
+    const s = JSON.parse(localStorage.getItem(SEEN_KEY) ?? "{}") as Record<string, number>;
+    if (!s.__baseline) { s.__baseline = Date.now(); localStorage.setItem(SEEN_KEY, JSON.stringify(s)); }
+    return s;
+  } catch { return { __baseline: Date.now() }; }
+}
 
 export function AlertsProvider({ children }: { children: ReactNode }) {
-  const qc = useQueryClient();
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const bump = useCallback((key: string) => setCounts((c) => ({ ...c, [key]: (c[key] ?? 0) + 1 })), []);
-  const markRead = useCallback((key: string) => setCounts((c) => (c[key] ? { ...c, [key]: 0 } : c)), []);
+  const [seen, setSeen] = useState<Record<string, number>>(loadSeen);
+  const { data } = useQuery({
+    queryKey: ["alerts-activity"], queryFn: fetchInboundActivity,
+    refetchInterval: 8000, refetchOnWindowFocus: true, staleTime: 4000,
+  });
 
-  useEffect(() => {
-    const sb = getSupabase();
-    if (!sb) return;
-    // Token SOLO de readLocalSession (NO getSession: getSession puede forzar un refresh -> si falla emite
-    // SIGNED_OUT -> use-session limpia hub.session -> RLS niega TODO). use-session ya mantiene fresco ese token.
-    const token = readLocalSession()?.access_token;
-    if (token) sb.realtime.setAuth(token);
-    const ch = sb
-      .channel("hub-alerts-messages")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        const row = payload.new as MsgRow;
-        console.info("[alerts] msg", row.direction, row.channel); // diagnóstico (quitable tras confirmar)
-        if (row.direction !== "inbound") return; // solo lo que ESCRIBE el cliente
-        if (row.channel) {
-          bump(`channel:${row.channel}`);
-          void qc.invalidateQueries({ queryKey: ["channel-convs", row.channel] });
-          if (row.conversation_id) void qc.invalidateQueries({ queryKey: ["channel-msgs", row.channel, row.conversation_id] });
-        }
-        void qc.invalidateQueries({ queryKey: ["inbox"] });
-        if (row.conversation_id) void qc.invalidateQueries({ queryKey: ["messages", row.conversation_id] });
-      })
-      .subscribe((status) => console.info("[alerts] realtime:", status));
-    const auth = sb.auth.onAuthStateChange((_e, s) => { if (s?.access_token) sb.realtime.setAuth(s.access_token); });
-    return () => { auth.data.subscription.unsubscribe(); void sb.removeChannel(ch); };
-  }, [qc, bump]);
+  const markRead = useCallback((key: string) => {
+    if (!key.startsWith("channel:")) return;
+    const ch = key.slice("channel:".length);
+    setSeen((s) => {
+      const n = { ...s, [ch]: Date.now() };
+      try { localStorage.setItem(SEEN_KEY, JSON.stringify(n)); } catch { /* per-viewer; ok si falla */ }
+      return n;
+    });
+  }, []);
 
-  const api = useMemo<AlertsApi>(() => ({ counts, bump, markRead }), [counts, bump, markRead]);
+  const counts = useMemo<Record<string, number>>(() => {
+    const out: Record<string, number> = {};
+    for (const r of data ?? []) {
+      const base = seen[r.channel] ?? seen.__baseline ?? 0;
+      if (new Date(r.created_at).getTime() > base) out[`channel:${r.channel}`] = (out[`channel:${r.channel}`] ?? 0) + 1;
+    }
+    return out;
+  }, [data, seen]);
+
+  const api = useMemo<AlertsApi>(() => ({ counts, bump: () => {}, markRead }), [counts, markRead]);
   return <AlertsContext.Provider value={api}>{children}</AlertsContext.Provider>;
 }

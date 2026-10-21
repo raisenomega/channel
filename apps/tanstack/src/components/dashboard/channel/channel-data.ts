@@ -29,13 +29,13 @@ export interface CanalData {
 
 export function useCanalData(channelId: string, lang: Idioma, meta: ChannelMeta): CanalData {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const { data: conversations } = useQuery({ queryKey: ["channel-convs", channelId], queryFn: () => fetchChannelConversations(channelId), staleTime: 20_000 });
+  const { data: conversations } = useQuery({ queryKey: ["channel-convs", channelId], queryFn: () => fetchChannelConversations(channelId), staleTime: 5_000, refetchInterval: 8000, refetchOnWindowFocus: true });
   const msgs = useInfiniteQuery({
     queryKey: ["channel-msgs", channelId, activeId],
     queryFn: ({ pageParam }) => (activeId ? fetchMessagesPage(activeId, pageParam) : Promise.resolve([] as Mensaje[])),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => (last.length === MSG_PAGE ? last[last.length - 1]!.createdAt : undefined),
-    enabled: !!activeId, staleTime: 10_000,
+    enabled: !!activeId, staleTime: 5_000, refetchInterval: 8000, refetchOnWindowFocus: true,
   });
   const { data: contactInfo } = useQuery({
     queryKey: ["channel-contact", activeId],
