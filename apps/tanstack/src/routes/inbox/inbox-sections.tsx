@@ -6,9 +6,11 @@ import { t } from "@/lib/i18n";
 import { AlertBadge } from "@/components/ui/alert-badge";
 import { ESTADOS } from "./inbox-mappers";
 
-export function FiltersBar({ language, canalesActivos, filtroEstado, filtroSLA, onEstado, onSLA, onClean, onCanalNav }: {
+export function FiltersBar({ language, canalesActivos, estadoCounts, slaCount, filtroEstado, filtroSLA, onEstado, onSLA, onClean, onCanalNav }: {
   language: Idioma;
   canalesActivos: readonly string[];
+  estadoCounts: Record<string, number>;
+  slaCount: number;
   filtroEstado: string | null;
   filtroSLA: boolean | null;
   onEstado: (e: string) => void;
@@ -29,10 +31,12 @@ export function FiltersBar({ language, canalesActivos, filtroEstado, filtroSLA, 
         {ESTADOS.map((e) => (
           <button key={e} type="button" className={"chip" + (e === filtroEstado ? " active" : "")} onClick={() => onEstado(e)}>
             <span className="chip-name">{t(language, "filtro.estado." + e)}</span>
+            <AlertBadge count={estadoCounts[e] ?? 0} />
           </button>
         ))}
         <button type="button" className={"chip" + (filtroSLA === true ? " active" : "")} onClick={onSLA}>
           <span className="chip-name">{filtroSLA === true ? t(language, "filtro.sla.violated") : t(language, "inbox.filtros.sla")}</span>
+          <AlertBadge count={slaCount} />
         </button>
         <button type="button" className="chip" onClick={onClean}>
           <span className="chip-name text-muted-foreground">{t(language, "filtro.clean")}</span>

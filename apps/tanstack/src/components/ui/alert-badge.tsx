@@ -1,13 +1,15 @@
 /**
- * HUB by Raisen — Badge de notificación reutilizable: círculo rojo con el número de no-leídos de `keyName`.
- * Se oculta solo si el contador es 0. Úsalo en cualquier chip/ítem: <AlertBadge keyName="channel:whatsapp" />,
- * "status:pending", "crm:orders", etc. Alimentado por el AlertsProvider (Realtime).
+ * HUB by Raisen — Badge de notificación reutilizable: círculo rojo con un número.
+ * Dos modos (se oculta solo si es 0):
+ *  - por CLAVE: <AlertBadge keyName="channel:whatsapp" /> lee del AlertsProvider (no-leídos desde que abriste).
+ *  - directo:  <AlertBadge count={3} /> para un conteo real que ya tienes a mano (ej. estados del inbox).
  */
 import { useAlertCount } from "@/lib/alerts/alerts-context";
 import { cn } from "@/lib/utils";
 
-export function AlertBadge({ keyName, className }: { keyName: string; className?: string }) {
-  const n = useAlertCount(keyName);
+export function AlertBadge({ keyName, count, className }: { keyName?: string; count?: number; className?: string }) {
+  const fromCtx = useAlertCount(keyName ?? ""); // hook incondicional (clave vacía -> 0)
+  const n = count ?? fromCtx;
   if (n <= 0) return null;
   return (
     <span
@@ -15,7 +17,7 @@ export function AlertBadge({ keyName, className }: { keyName: string; className?
         "inline-flex min-w-[1.15rem] items-center justify-center rounded-full bg-critical px-1 text-[0.65rem] font-bold leading-none text-white",
         className,
       )}
-      aria-label={`${n} nuevos sin leer`}
+      aria-label={`${n} sin leer`}
     >
       {n > 99 ? "99+" : n}
     </span>
