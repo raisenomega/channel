@@ -18,6 +18,7 @@ export const esRegistro: Dict = {
   "onboarding.nameRequired": "El nombre del negocio es obligatorio",
   "onboarding.emailRequired": "El email es obligatorio",
   "onboarding.sessionExpired": "Tu sesión expiró. Vuelve a iniciar sesión.",
+  "onboarding.networkError": "No se pudo conectar con el servidor. Reintenta en un momento.",
   "onboarding.phoneRequired": "El teléfono es obligatorio (formato +1...)",
   "onboarding.countryRequired": "El país es obligatorio",
   "onboarding.optional": "opcional",
