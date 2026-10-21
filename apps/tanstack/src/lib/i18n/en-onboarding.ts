@@ -40,6 +40,8 @@ export const enOnboarding: Dict = {
   "dash.chart.mensajes": "Messages consumed",
   "dash.chart.agentes": "Agent performance",
   "dash.chart.usoCanal": "Channel usage",
+  "dash.consumo.mensajes": "Messages",
+  "dash.consumo.llamadas": "Calls",
   "dash.chart.sinDatos": "No data yet",
   "onboard.subchips.basicos": "Basic info",
   "onboard.subchips.canales": "Channels",
