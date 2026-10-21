@@ -23,7 +23,7 @@ interface RawAccount {
   isActive?: boolean; status?: string;
 }
 
-export const ZERNIO_ACCOUNTS_URL = "https://api.zernio.io/v1/accounts";
+export const ZERNIO_ACCOUNTS_URL = "https://zernio.com/api/v1/accounts";
 
 /** Acepta el shape real de Zernio (_id/username/isActive) y el legacy (zernio_account_id/handle/status). */
 export function normalizarCuenta(a: RawAccount): ZernioAccount | null {

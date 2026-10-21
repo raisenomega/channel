@@ -23,7 +23,7 @@ export class ConnectSocialAccountHandler {
   async ejecutar(tenantId: string, platform: string): Promise<Result<ConnectUrlResult, ConnectUrlError>> {
     if (!SOCIAL_PLATFORMS.includes(platform as SocialPlatform)) return err("platform_invalida");
     try {
-      const r = await fetch("https://api.zernio.io/v1/oauth/connect-url", {
+      const r = await fetch("https://zernio.com/api/v1/oauth/connect-url", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.zernioApiKey}` },
         body: JSON.stringify({

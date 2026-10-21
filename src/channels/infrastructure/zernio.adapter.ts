@@ -39,7 +39,7 @@ export class ZernioAdapter implements ChannelAdapter {
 
   async ping(): Promise<Result<boolean, AdapterError>> {
     const ret = await conReintentos(async () => {
-      const res = await fetch("https://api.zernio.io/v1/health");
+      const res = await fetch("https://zernio.com/api/v1/health");
       return res.ok ? ok(true) : err({ causa: `http_${res.status}` });
     }, RETRY_CFG);
     return ret.ok ? ok(true) : err({ kind: "retry_agotado", intentos: ret.error.intentos, ultimo_error: ret.error.ultimo_error });
@@ -67,7 +67,7 @@ export class ZernioAdapter implements ChannelAdapter {
 
   private async post(path: string, body: Record<string, unknown>): Promise<Result<unknown, { readonly causa: string }>> {
     try {
-      const r = await fetch(`https://api.zernio.io${path}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.apiKey}` }, body: JSON.stringify(body) });
+      const r = await fetch(`https://zernio.com/api${path}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.apiKey}` }, body: JSON.stringify(body) });
       if (!r.ok) return err({ causa: `http_${r.status}` });
       return ok(await r.json().catch(() => ({})));
     } catch (e) { return err({ causa: String(e) }); }
