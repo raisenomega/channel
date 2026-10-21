@@ -3,6 +3,7 @@
  */
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
+import { AlertBadge } from "@/components/ui/alert-badge";
 import { ESTADOS } from "./inbox-mappers";
 
 export function FiltersBar({ language, canalesActivos, filtroEstado, filtroSLA, onEstado, onSLA, onClean, onCanalNav }: {
@@ -22,6 +23,7 @@ export function FiltersBar({ language, canalesActivos, filtroEstado, filtroSLA, 
         {(canalesActivos.length ? canalesActivos : ["whatsapp", "email", "instagram"]).map((c) => (
           <button key={c} type="button" className="chip" onClick={() => onCanalNav(c)}>
             <span className="chip-name">{t(language, "canal." + c)}</span>
+            <AlertBadge keyName={"channel:" + c} />
           </button>
         ))}
         {ESTADOS.map((e) => (
