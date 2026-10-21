@@ -40,6 +40,8 @@ export const esOnboarding: Dict = {
   "dash.chart.mensajes": "Mensajes consumidos",
   "dash.chart.agentes": "Rendimiento de agentes",
   "dash.chart.usoCanal": "Uso por canal",
+  "dash.consumo.mensajes": "Mensajes",
+  "dash.consumo.llamadas": "Llamadas",
   "dash.chart.sinDatos": "Sin datos aún",
   "onboard.subchips.basicos": "Datos básicos",
   "onboard.subchips.canales": "Canales",
