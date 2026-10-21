@@ -12,14 +12,16 @@ export const ESTADOS: readonly string[] = ["open", "pending", "snoozed", "resolv
 
 export function calcularStats(items: readonly InboxItem[]): DashboardStats {
   const porCanal: Record<string, number> = {};
-  let sinAsignar = 0;
-  let abiertas = 0;
+  const porEstado: Record<string, number> = {};
+  let sinAsignar = 0; let abiertas = 0; let slaVioladas = 0;
   for (const it of items) {
     porCanal[it.channel] = (porCanal[it.channel] ?? 0) + 1;
+    porEstado[it.status] = (porEstado[it.status] ?? 0) + 1;
     if (!it.assignedTo) sinAsignar += 1;
     if (it.status === "open") abiertas += 1;
+    if (it.slaViolated) slaVioladas += 1;
   }
-  return { total: items.length, porCanal, sinAsignar, abiertas, hasChannelsConnected: items.length > 0 };
+  return { total: items.length, porCanal, porEstado, sinAsignar, abiertas, slaVioladas, hasChannelsConnected: items.length > 0 };
 }
 
 function mapearModo(m: string | null): InboxItem["mode"] {

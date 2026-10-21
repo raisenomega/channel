@@ -1,16 +1,16 @@
 /**
- * HUB by Raisen — Provider global de alertas (Opción B: polling, 100% confiable, cero mocks).
- * Hace refetch de la actividad ENTRANTE cada 8s (y al volver el foco) y deriva, por canal, cuántos
- * mensajes entraron DESDE que abriste ese canal por última vez (baseline por-viewer en localStorage).
- * `markRead("channel:x")` marca ese canal como visto -> su badge vuelve a 0. La UI consume por clave
- * (useAlertCount/AlertBadge); fuentes nuevas (CRM, pagos, facturas) se suman aquí sin tocar la UI.
+ * HUB by Raisen — Provider global de alertas (Opción B: polling, confiable, cero mocks).
+ * Hace refetch cada 8s (+ al volver el foco) de las fuentes reales (mensajes entrantes por canal + CRM)
+ * y cuenta, por CLAVE, cuántas son posteriores a la última vez que viste esa clave (baseline por-viewer
+ * en localStorage). `markRead(key)` marca visto -> badge a 0. La UI consume por clave (useAlertCount/
+ * AlertBadge). Sumar una fuente nueva = otro fetcher en alerts-activity + incluirlo aquí. Sin Realtime.
  */
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchInboundActivity } from "./alerts-activity";
+import { fetchInboundActivity, fetchCrmActivity, type ActivityRow } from "./alerts-activity";
 import { AlertsContext, type AlertsApi } from "./alerts-context";
 
-const SEEN_KEY = "hub.alerts.seen"; // { <canal>: epochMs visto, __baseline: 1er arranque }
+const SEEN_KEY = "hub.alerts.seen"; // { <clave>: epochMs visto, __baseline: 1er arranque }
 
 function loadSeen(): Record<string, number> {
   try {
@@ -22,29 +22,27 @@ function loadSeen(): Record<string, number> {
 
 export function AlertsProvider({ children }: { children: ReactNode }) {
   const [seen, setSeen] = useState<Record<string, number>>(loadSeen);
-  const { data } = useQuery({
-    queryKey: ["alerts-activity"], queryFn: fetchInboundActivity,
-    refetchInterval: 8000, refetchOnWindowFocus: true, staleTime: 4000,
-  });
+  const opts = { refetchInterval: 8000, refetchOnWindowFocus: true, staleTime: 4000 } as const;
+  const msgs = useQuery({ queryKey: ["alerts-activity"], queryFn: fetchInboundActivity, ...opts });
+  const crm = useQuery({ queryKey: ["alerts-crm"], queryFn: fetchCrmActivity, ...opts });
 
   const markRead = useCallback((key: string) => {
-    if (!key.startsWith("channel:")) return;
-    const ch = key.slice("channel:".length);
     setSeen((s) => {
-      const n = { ...s, [ch]: Date.now() };
+      const n = { ...s, [key]: Date.now() };
       try { localStorage.setItem(SEEN_KEY, JSON.stringify(n)); } catch { /* per-viewer; ok si falla */ }
       return n;
     });
   }, []);
 
   const counts = useMemo<Record<string, number>>(() => {
+    const rows: ActivityRow[] = [...(msgs.data ?? []), ...(crm.data ?? [])];
     const out: Record<string, number> = {};
-    for (const r of data ?? []) {
-      const base = seen[r.channel] ?? seen.__baseline ?? 0;
-      if (new Date(r.created_at).getTime() > base) out[`channel:${r.channel}`] = (out[`channel:${r.channel}`] ?? 0) + 1;
+    for (const r of rows) {
+      const base = seen[r.key] ?? seen.__baseline ?? 0;
+      if (r.created_at && new Date(r.created_at).getTime() > base) out[r.key] = (out[r.key] ?? 0) + 1;
     }
     return out;
-  }, [data, seen]);
+  }, [msgs.data, crm.data, seen]);
 
   const api = useMemo<AlertsApi>(() => ({ counts, bump: () => {}, markRead }), [counts, markRead]);
   return <AlertsContext.Provider value={api}>{children}</AlertsContext.Provider>;

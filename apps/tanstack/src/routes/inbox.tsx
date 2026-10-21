@@ -38,6 +38,7 @@ function InboxPage() {
 
   const stats = calcularStats(itemsFiltrados);
   const canalesActivos = CANALES.filter((c) => stats.porCanal[c] !== undefined);
+  const statsAll = calcularStats(items ?? []); // conteos REALES sobre TODOS los items (badges), no los filtrados
 
   const toggleEstado = (e: string) => setFiltroEstado(filtroEstado === e ? null : e);
   const toggleSLA = () => setFiltroSLA(filtroSLA === true ? null : true);
@@ -61,7 +62,7 @@ function InboxPage() {
         onOpen={(id) => void navigate({ to: "/inbox/" + encodeURIComponent(id) })}
       />
       <FiltersBar
-        language={language} canalesActivos={canalesActivos}
+        language={language} canalesActivos={canalesActivos} estadoCounts={statsAll.porEstado} slaCount={statsAll.slaVioladas}
         filtroEstado={filtroEstado} filtroSLA={filtroSLA}
         onEstado={toggleEstado} onSLA={toggleSLA} onClean={cleanFilters}
         onCanalNav={(c) => void navigate({ to: "/channels/$channelId", params: { channelId: c } })}
