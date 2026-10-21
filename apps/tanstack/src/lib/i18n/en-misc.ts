@@ -43,4 +43,8 @@ export const enMisc: Dict = {
   "nav.reports": "Reports",
   "nav.sla": "SLA",
   "nav.logout": "Log out",
+  "trilogia.headline": "The Raisen trilogy: take your business to enterprise level.",
+  "trilogia.body": "HUB handles and sells. Add OMEGA for complete marketing —content, calendar and ARIA in 30s— and NÚCLEO for full operations —invoicing, routes, payroll and accounting—. Three platforms that feed each other: from small business to serious enterprise.",
+  "trilogia.ctaOmega": "Power up with OMEGA",
+  "trilogia.ctaNucleo": "Operate with NÚCLEO",
 };

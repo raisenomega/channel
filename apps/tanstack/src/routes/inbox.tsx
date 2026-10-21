@@ -7,8 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
-import { CANALES, calcularStats, fetchInbox } from "./inbox/inbox-mappers";
-import { FiltersBar } from "./inbox/inbox-sections";
+import { calcularStats, fetchInbox } from "./inbox/inbox-mappers";
+import { TrilogiaBar } from "./inbox/inbox-sections";
 import { KpiRow, WidgetsRow } from "./inbox/inbox-widgets";
 import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
 import { GraficasPanel } from "@/components/dashboard/charts/graficas-panel";
@@ -35,8 +35,6 @@ function InboxPage() {
   });
 
   const stats = calcularStats(itemsFiltrados);
-  const canalesActivos = CANALES.filter((c) => stats.porCanal[c] !== undefined);
-  const statsAll = calcularStats(items ?? []); // conteos REALES sobre TODOS los items (badges), no los filtrados
 
   const toggleEstado = (e: string) => setFiltroEstado(filtroEstado === e ? null : e);
   const toggleSLA = () => setFiltroSLA(filtroSLA === true ? null : true);
@@ -61,12 +59,7 @@ function InboxPage() {
         lang={language} events={events} items={itemsFiltrados}
         onOpen={(id) => void navigate({ to: "/inbox/" + encodeURIComponent(id) })}
       />
-      <FiltersBar
-        language={language} canalesActivos={canalesActivos} estadoCounts={statsAll.porEstado} slaCount={statsAll.slaVioladas}
-        filtroEstado={filtroEstado} filtroSLA={filtroSLA}
-        onEstado={toggleEstado} onSLA={toggleSLA} onClean={cleanFilters}
-        onCanalNav={onCanalNav}
-      />
+      <TrilogiaBar language={language} />
       <GraficasPanel lang={language} porCanal={stats.porCanal} />
     </div>
   );
