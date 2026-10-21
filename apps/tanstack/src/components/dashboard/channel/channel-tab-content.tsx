@@ -17,6 +17,7 @@ import { CardGrid } from "./tab-card-grid";
 import { ContactFichaCard } from "./tab-contact-ficha";
 import { agentsToItems, templatesToItems, docsToItems, quotesToCards, ordersToCards, paymentsToCards } from "./tab-builders";
 import type { ActiveContactInfo } from "./channel-fetchers";
+import { AgendaCalendar } from "@/components/dashboard/agenda/agenda-calendar";
 
 function useTabData(contactId: string | null) {
   const agents = useQuery({ queryKey: ["channel-agents"], queryFn: fetchAgents, staleTime: 30_000 });
@@ -61,7 +62,7 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
     case "pagos":
       return hasHilo ? <CardGrid title={t(lang, "cf.pagos")} empty={t(lang, "payments.empty")} accent={accent} cards={paymentsToCards(data.payments, lang)} /> : sinHilo;
     case "agenda":
-      return <SimpleListView title={t(lang, "cf.agenda")} empty={empty} accent={accent} items={[]} />;
+      return <AgendaCalendar lang={lang} accent={accent} />;
     case "envios":
       return <SimpleListView title={t(lang, "cf.envios")} empty={empty} accent={accent} items={[]} />;
     case "documentos":

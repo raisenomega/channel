@@ -1,0 +1,32 @@
+/**
+ * HUB by Raisen — i18n ES: Agenda (calendario mensual + modal de cita).
+ */
+import type { Dict } from "./i18n-types";
+
+export const esAgenda: Dict = {
+  "agenda.today": "Hoy",
+  "agenda.prev": "Anterior",
+  "agenda.next": "Siguiente",
+  "agenda.sinCliente": "Sin cliente",
+  "agenda.humano": "Humano",
+  "agenda.st.scheduled": "Agendada",
+  "agenda.st.confirmed": "Confirmada",
+  "agenda.st.completed": "Completada",
+  "agenda.st.cancelled": "Cancelada",
+  "agenda.st.no_show": "No asistió",
+  "agenda.hs.open": "Abierta",
+  "agenda.hs.pending": "Pendiente",
+  "agenda.hs.snoozed": "Diferido",
+  "agenda.hs.resolved": "Resuelta",
+  "agenda.hs.archived": "Archivada",
+  "agenda.d.cliente": "Cliente",
+  "agenda.d.estado": "Estado",
+  "agenda.d.canal": "Canal de entrada",
+  "agenda.d.agente": "Atendió",
+  "agenda.d.conversacion": "Conversación",
+  "agenda.d.estadoHilo": "Estado del hilo",
+  "agenda.d.slaViol": "Incumplido",
+  "agenda.d.slaOk": "En regla",
+  "agenda.d.pedido": "Pedido relacionado",
+  "agenda.d.notas": "Notas de seguimiento",
+};
