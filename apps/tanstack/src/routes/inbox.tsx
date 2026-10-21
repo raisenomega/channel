@@ -13,8 +13,7 @@ import { KpiRow, WidgetsRow } from "./inbox/inbox-widgets";
 import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
 import { GraficasPanel } from "@/components/dashboard/charts/graficas-panel";
 import { useRecentActivity } from "@/hooks/useRecentActivity";
-import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
-import { RegistroWhatsApp } from "@/components/dashboard/registro/registro-whatsapp";
+import { DashboardTopRow } from "@/components/dashboard/top/dashboard-top-row";
 
 const InboxRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -28,7 +27,6 @@ function InboxPage() {
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [filtroSLA, setFiltroSLA] = useState<boolean | null>(null);
   const { data: items, isPending } = useQuery({ queryKey: ["inbox"], queryFn: fetchInbox, staleTime: 5_000, refetchInterval: 8000, refetchOnWindowFocus: true });
-  const { data: miTenant, refetch: refetchTenant } = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 60_000 });
   const { events } = useRecentActivity(); // hooks antes del early return (rules-of-hooks)
   const itemsFiltrados = (items ?? []).filter((i) => {
     if (filtroEstado && i.status !== filtroEstado) return false;
@@ -43,6 +41,7 @@ function InboxPage() {
   const toggleEstado = (e: string) => setFiltroEstado(filtroEstado === e ? null : e);
   const toggleSLA = () => setFiltroSLA(filtroSLA === true ? null : true);
   const cleanFilters = () => { setFiltroEstado(null); setFiltroSLA(null); };
+  const onCanalNav = (c: string) => void navigate({ to: "/channels/$channelId", params: { channelId: c } });
 
   if (isPending) {
     return (
@@ -54,7 +53,8 @@ function InboxPage() {
 
   return (
     <div className="view">
-      <RegistroWhatsApp language={language} tenant={miTenant ? { id: miTenant.tenantId, name: miTenant.name, plan: miTenant.plan } : null} onDone={() => void refetchTenant()} />
+      <DashboardTopRow language={language} filtroEstado={filtroEstado} filtroSLA={filtroSLA}
+        onEstado={toggleEstado} onSLA={toggleSLA} onClean={cleanFilters} onCanalNav={onCanalNav} />
       <KpiRow language={language} stats={stats} total={items?.length ?? 0} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={items === undefined || items.length === 0} />
       <BentoRowNueva
@@ -65,7 +65,7 @@ function InboxPage() {
         language={language} canalesActivos={canalesActivos} estadoCounts={statsAll.porEstado} slaCount={statsAll.slaVioladas}
         filtroEstado={filtroEstado} filtroSLA={filtroSLA}
         onEstado={toggleEstado} onSLA={toggleSLA} onClean={cleanFilters}
-        onCanalNav={(c) => void navigate({ to: "/channels/$channelId", params: { channelId: c } })}
+        onCanalNav={onCanalNav}
       />
       <GraficasPanel lang={language} porCanal={stats.porCanal} />
     </div>
