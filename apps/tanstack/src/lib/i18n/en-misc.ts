@@ -17,6 +17,8 @@ export const enMisc: Dict = {
   "cf.factura": "Invoice",
   "cf.pagos": "Payments",
   "cf.documentos": "Documents",
+  "cf.agenda": "Agenda",
+  "cf.envios": "Bulk sends",
   "cf.tabsLabel": "Business tabs",
   "cf.convTitle": "Conversation",
   "cf.convSelect": "Select a conversation",

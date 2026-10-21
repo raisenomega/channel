@@ -17,6 +17,8 @@ export const esMisc: Dict = {
   "cf.factura": "Factura",
   "cf.pagos": "Pagos",
   "cf.documentos": "Documentos",
+  "cf.agenda": "Agenda",
+  "cf.envios": "Envíos masivos",
   "cf.tabsLabel": "Pestañas de negocio",
   "cf.convTitle": "Conversación",
   "cf.convSelect": "Selecciona una conversación",
