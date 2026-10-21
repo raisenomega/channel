@@ -1,7 +1,7 @@
 /**
  * HUB by Raisen — Vista de canal individual (submódulos bajo components/dashboard/channel; C4 ≤75 líneas).
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createRoute, useParams } from "@tanstack/react-router";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
@@ -16,6 +16,7 @@ import { useChannelSend } from "@/components/dashboard/channel/channel-send";
 import { PhoneApp } from "@/components/dashboard/channel/channel-phone-app";
 import { TabContent } from "@/components/dashboard/channel/channel-tab-content";
 import { AmplifiedChat } from "@/components/dashboard/channel/channel-amplified-chat";
+import { useMarkRead } from "@/lib/alerts/alerts-context";
 
 export const CanalRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -25,6 +26,8 @@ export const CanalRoute = createRoute({
 
 function CanalViewPage() {
   const { channelId } = useParams({ from: CanalRoute.id });
+  const markRead = useMarkRead();
+  useEffect(() => { markRead("channel:" + channelId); }, [channelId, markRead]);
   const { language } = usePreferences();
   const kind = channelId as ChannelKind;
   const meta = CHANNEL_META[kind] ?? CHANNEL_META.webchat;
