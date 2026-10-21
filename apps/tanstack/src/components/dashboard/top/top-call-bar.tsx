@@ -1,7 +1,7 @@
 /**
- * HUB by Raisen — Barra de llamada encima de "Total": botón VERDE (hacer llamada) + ROJO (terminar).
- * Scaffold VISIBLE pero INERTE: aún no hay backend de llamadas; se cablean cuando llegue esa parte.
- * (No muestra datos falsos: son controles, no un dato inventado.) C4 <=75.
+ * HUB by Raisen — Barra de llamada, misma medida que "Crear negocio" (glass-card p-3.5).
+ * Botón VERDE (llamar) + ROJO (terminar), más grandes y con buena separación entre ambos.
+ * Scaffold VISIBLE pero INERTE: se cablean cuando llegue el backend de llamadas. C4 <=75.
  */
 import { t, type Idioma } from "@/lib/i18n";
 
@@ -9,7 +9,7 @@ const PHONE = "M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 
 
 function Icono({ hang }: { hang?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" width={15} height={15} fill="none" stroke="currentColor" strokeWidth={2}
+    <svg viewBox="0 0 24 24" width={17} height={17} fill="none" stroke="currentColor" strokeWidth={2}
       strokeLinecap="round" strokeLinejoin="round" className={hang ? "rotate-[135deg]" : ""}>
       <path d={PHONE} />
     </svg>
@@ -17,9 +17,9 @@ function Icono({ hang }: { hang?: boolean }) {
 }
 
 export function TopCallBar({ lang }: { lang: Idioma }) {
-  const btn = "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white";
+  const btn = "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:brightness-110";
   return (
-    <div className="bento-card bento-col-3 flex items-center justify-center gap-2 py-2">
+    <div className="bento-col-3 flex items-center justify-center gap-5 rounded-2xl glass-card p-3.5">
       <button type="button" title={t(lang, "call.start")} className={btn + " bg-success"}>
         <Icono /> {t(lang, "call.start")}
       </button>
