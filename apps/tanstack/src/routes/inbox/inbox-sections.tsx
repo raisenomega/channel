@@ -14,7 +14,7 @@ export function TrilogiaBar({ language }: { language: Idioma }) {
   const cta = "inline-flex items-center justify-center rounded-xl border border-primary/50 bg-transparent px-4 py-2 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:border-primary hover:shadow-[0_0_26px_-8px_hsl(var(--primary)/0.45)]";
   return (
     <div className="bento-card bento-col-12 mt-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-bold text-foreground">{t(language, "trilogia.headline")}</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{t(language, "trilogia.body")}</p>
       </div>
