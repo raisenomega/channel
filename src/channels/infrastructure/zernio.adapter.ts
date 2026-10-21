@@ -22,8 +22,12 @@ export class ZernioAdapter implements ChannelAdapter {
   readonly supportedChannels: readonly ChannelType[] = Object.freeze(["whatsapp", "instagram", "facebook", "telegram", "sms", "x", "linkedin"]);
 
   async sendMessage(msg: OutboundMessage): Promise<Result<void, AdapterError>> {
-    const r = await conReintentos(() => this.post("/v1/messages", { channel: msg.channel, to: msg.to, text: msg.content }), RETRY_CFG);
+    const { conversationId, accountId } = msg; // #1: Zernio exige ambos (ruta + body); consts locales para el closure
+    if (!conversationId || !accountId) return err({ kind: "invalid_payload" });
+    const r = await conReintentos(() => this.post(`/v1/inbox/conversations/${encodeURIComponent(conversationId)}/messages`, { accountId, message: msg.content }), RETRY_CFG);
     if (!r.ok) { deadLetter("zernio", msg, "retry_agotado", r.error.ultimo_error, r.error.intentos); return err({ kind: "retry_agotado", intentos: r.error.intentos, ultimo_error: r.error.ultimo_error }); }
+    const b = r.value as { success?: boolean; data?: { partialFailure?: unknown } } | null; // 200 con success:false/partialFailure = NO entregado
+    if (b && (b.success === false || b.data?.partialFailure)) { deadLetter("zernio", msg, "no_entregado", JSON.stringify(b), RETRY_CFG.maxIntentos); return err({ kind: "provider_unavailable" }); }
     return ok(undefined);
   }
 
@@ -61,10 +65,11 @@ export class ZernioAdapter implements ChannelAdapter {
 
   constructor(private readonly webhookSecret: string, private readonly apiKey: string) {}
 
-  private async post(path: string, body: Record<string, unknown>): Promise<Result<void, { readonly causa: string }>> {
+  private async post(path: string, body: Record<string, unknown>): Promise<Result<unknown, { readonly causa: string }>> {
     try {
       const r = await fetch(`https://api.zernio.io${path}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.apiKey}` }, body: JSON.stringify(body) });
-      return r.ok ? ok(undefined) : err({ causa: `http_${r.status}` });
+      if (!r.ok) return err({ causa: `http_${r.status}` });
+      return ok(await r.json().catch(() => ({})));
     } catch (e) { return err({ causa: String(e) }); }
   }
 }

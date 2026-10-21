@@ -10,6 +10,8 @@ export interface ConversationState {
   readonly tenantId: TenantId;
   readonly contactId: ContactId;
   readonly participantExternalId: string | null; // id del destinatario en la plataforma (Zernio `to`)
+  readonly providerConversationId?: string | null; // #1: id de conversación del proveedor (Zernio) -> ruta de envío
+  readonly providerAccountId?: string | null;       // #1: cuenta emisora del proveedor (zernio_account_id)
   readonly primaryChannel: ChannelType;
   readonly primaryInboxId: InboxId | null;
   readonly status: ConversationStatus;

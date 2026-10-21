@@ -14,6 +14,7 @@ export interface ZernioInbound {
   readonly direction: "inbound" | "outbound";
   readonly contactExternalId: string;    // conversation.participantId (estable, mismo hilo in/out)
   readonly contactName: string;          // conversation.participantName
+  readonly providerConversationId: string; // #1: conversation.id de Zernio -> ruta del envío real
 }
 
 function describirMedia(atts: readonly Record<string, unknown>[]): string {
@@ -51,5 +52,6 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
     direction,
     contactExternalId: String(conv["participantId"] ?? sender["id"] ?? providerMessageId),
     contactName: String(conv["participantName"] ?? senderName ?? "Cliente"),
+    providerConversationId: String(conv["id"] ?? ""),
   };
 }

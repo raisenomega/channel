@@ -23,9 +23,9 @@ export type SendMessageError =
   | { readonly kind: "contenido_vacio" }
   | { readonly kind: "persistence_failure"; readonly cause: string };
 
-// 3o-b: puerto estructural para despachar el saliente (ChannelRouter encaja sin importar la capa channels).
+// 3o-b/#1: puerto estructural para despachar el saliente (ChannelRouter encaja sin importar la capa channels).
 export interface OutboundDispatcher {
-  enviar(msg: { to: string; content: string; channel: ChannelType }): Promise<Result<void, unknown>>;
+  enviar(msg: { to: string; content: string; channel: ChannelType; conversationId?: string; accountId?: string }): Promise<Result<void, unknown>>;
 }
 
 export class SendMessageHandler {
@@ -63,10 +63,10 @@ export class SendMessageHandler {
       return err({ kind: "persistence_failure", cause });
     }
 
-    // 3o-b: entrega real al destinatario. Best-effort: si no hay `to` o falla, el mensaje queda
-    // persistido/visible y el adapter dead-letterea el fallo (no rompemos la respuesta del envío).
-    if (this.dispatcher && conv.participantExternalId && cmd.content.body) {
-      await this.dispatcher.enviar({ to: conv.participantExternalId, content: cmd.content.body, channel: cmd.channel });
+    // 3o-b/#1: entrega real por el inbox de Zernio (conversationId=ruta, accountId=body; ambos del webhook).
+    // Best-effort: si faltan (hilo viejo) o falla, el mensaje queda persistido/visible (el adapter dead-letterea).
+    if (this.dispatcher && conv.providerConversationId && conv.providerAccountId && cmd.content.body) {
+      await this.dispatcher.enviar({ to: conv.participantExternalId ?? "", content: cmd.content.body, channel: cmd.channel, conversationId: conv.providerConversationId, accountId: conv.providerAccountId });
     }
     return ok(undefined);
   }

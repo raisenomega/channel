@@ -13,6 +13,8 @@ const convActiva: ConversationState = Object.freeze({
   tenantId: TID,
   contactId: CID,
   participantExternalId: "1774346600215945",
+  providerConversationId: "6a3dcaa29d9472faaeea9423",
+  providerAccountId: "6ad59c380f7c39ef909f2f2b",
   primaryChannel: "whatsapp",
   primaryInboxId: null,
   status: "open",
@@ -222,13 +224,13 @@ test("3o-b: con dispatcher + participantExternalId -> despacha el saliente con e
   const msgRepo: MessageRepository = {
     guardar: async (_m) => ok(undefined), buscar: async (_id) => ok(null), buscarPorConversacion: async (_c, _l) => ok([]),
   };
-  const enviados: Array<{ to: string; content: string }> = [];
-  const dispatcher: OutboundDispatcher = { enviar: async (m) => { enviados.push({ to: m.to, content: m.content }); return ok(undefined); } };
+  const enviados: Array<{ to: string; content: string; conversationId?: string; accountId?: string }> = [];
+  const dispatcher: OutboundDispatcher = { enviar: async (m) => { enviados.push({ to: m.to, content: m.content, conversationId: m.conversationId, accountId: m.accountId }); return ok(undefined); } };
   const handler = new SendMessageHandler(convRepo, msgRepo, dispatcher);
   const r = await handler.ejecutar({
     tenantId: TID, conversationId: COID, contactId: CID, channel: "whatsapp",
     provider: "zernio", content: { type: "text", body: "hola" }, senderType: "human_agent",
   });
   expect(r.ok).toBe(true);
-  expect(enviados).toEqual([{ to: "1774346600215945", content: "hola" }]);
+  expect(enviados).toEqual([{ to: "1774346600215945", content: "hola", conversationId: "6a3dcaa29d9472faaeea9423", accountId: "6ad59c380f7c39ef909f2f2b" }]);
 });
