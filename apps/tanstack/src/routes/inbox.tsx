@@ -27,7 +27,7 @@ function InboxPage() {
   const navigate = useNavigate();
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [filtroSLA, setFiltroSLA] = useState<boolean | null>(null);
-  const { data: items, isPending } = useQuery({ queryKey: ["inbox"], queryFn: fetchInbox, staleTime: 30_000 });
+  const { data: items, isPending } = useQuery({ queryKey: ["inbox"], queryFn: fetchInbox, staleTime: 5_000, refetchInterval: 8000, refetchOnWindowFocus: true });
   const { data: miTenant, refetch: refetchTenant } = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 60_000 });
   const { events } = useRecentActivity(); // hooks antes del early return (rules-of-hooks)
   const itemsFiltrados = (items ?? []).filter((i) => {
