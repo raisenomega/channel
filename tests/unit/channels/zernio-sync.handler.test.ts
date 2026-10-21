@@ -27,7 +27,7 @@ test("happy: cuenta enlazada al tenant y activa -> connected + handle + follower
   const r = await new ZernioSyncHandler("apikey", repo([enlace("instagram", "acc-ig")])).ejecutar("t1", "instagram");
   expect(r.ok).toBe(true);
   if (r.ok) { expect(r.value.status).toBe("connected"); expect(r.value.handle).toBe("@miNegocio"); expect(r.value.followersCount).toBe(1200); }
-  expect(String(fn.mock.calls[0]?.[0])).toBe("https://api.zernio.io/v1/accounts?platform=instagram");
+  expect(String(fn.mock.calls[0]?.[0])).toBe("https://zernio.com/api/v1/accounts?platform=instagram");
   restoreFetch();
 });
 

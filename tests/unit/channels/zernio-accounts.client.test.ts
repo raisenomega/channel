@@ -38,11 +38,11 @@ test("listarCuentasZernio: usa GET /v1/accounts (la ruta real), filtro ?platform
   globalThis.fetch = fn;
   const r = await listarCuentasZernio("key-123", "instagram");
   expect(r.ok && r.value.map((c) => c.zernioAccountId)).toEqual(["ok1"]);
-  expect(String(fn.mock.calls[0]?.[0])).toBe("https://api.zernio.io/v1/accounts?platform=instagram");
+  expect(String(fn.mock.calls[0]?.[0])).toBe("https://zernio.com/api/v1/accounts?platform=instagram");
   expect((fn.mock.calls[0]?.[1] as { headers: Record<string, string> }).headers.Authorization).toBe("Bearer key-123");
   const sinFiltro = await listarCuentasZernio("key-123");
   expect(sinFiltro.ok).toBe(true);
-  expect(String(fn.mock.calls[1]?.[0])).toBe("https://api.zernio.io/v1/accounts");
+  expect(String(fn.mock.calls[1]?.[0])).toBe("https://zernio.com/api/v1/accounts");
   globalThis.fetch = vi.fn().mockRejectedValue(new Error("red caida"));
   const caida = await listarCuentasZernio("key-123");
   expect(!caida.ok && caida.error).toBe("zernio_error");
