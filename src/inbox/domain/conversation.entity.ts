@@ -27,6 +27,7 @@ export const crearConversacion = (
     id: crypto.randomUUID() as ConversationId,
     tenantId, contactId,
     participantExternalId: null, // el ingest lo sobre-escribe al crear desde Zernio
+    providerConversationId: null, providerAccountId: null, // #1: el ingest los setea al crear/backfill desde Zernio
     primaryChannel: channel,
     primaryInboxId: inboxId,
     status: "open" as ConversationStatus,

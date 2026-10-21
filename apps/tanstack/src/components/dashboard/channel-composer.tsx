@@ -15,6 +15,13 @@ export function ChannelComposer({ lang, value, onChange, onSend }: {
         className="cf-input"
         value={value}
         onChange={(e) => onChange(e.currentTarget.value)}
+        // #2: Enter envía (sin Shift). El botón [Enviar] sigue intacto -> ambos coexisten.
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            if (value.trim()) onSend();
+          }
+        }}
         placeholder={t(lang, "chat.placeholder")}
       />
       <button className="cf-send" type="button" onClick={() => onSend()} disabled={!value.trim()}>

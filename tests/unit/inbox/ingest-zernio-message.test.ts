@@ -28,7 +28,7 @@ function build(over: Partial<IngestDeps> = {}) {
     tenantPorAccount: vi.fn(async () => null),
     mensajeExiste: vi.fn(async () => false),
     convExiste: vi.fn(async () => false),
-    setParticipant: vi.fn(async () => {}),
+    setConvRefs: vi.fn(async () => {}),
     refreshContactName: vi.fn(async () => {}),
     detId: (s: string) => `det-${s}`,
     ...over,
@@ -91,11 +91,18 @@ test("Issue A: conversacion YA existe -> NO re-crea contacto/conv (no resetea), 
   expect(msgs.guardar).toHaveBeenCalledOnce();
 });
 
-test("3o-b: conv YA existe -> backfill del id destino (setParticipant) con el participantId del webhook", async () => {
-  const setParticipant = vi.fn(async () => {});
-  const { d } = build({ convExiste: vi.fn(async () => true), setParticipant });
+test("3o-b/#1: conv YA existe -> backfill de los 3 ids de envío (participant + conversation.id + account.id)", async () => {
+  const setConvRefs = vi.fn(async () => {});
+  const { d } = build({ convExiste: vi.fn(async () => true), setConvRefs });
   await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
-  expect(setParticipant).toHaveBeenCalledWith(expect.any(String), "1774346600215945");
+  expect(setConvRefs).toHaveBeenCalledWith(expect.any(String), "1774346600215945", "6a3dcaa29d9472faaeea9423", "6ad59c380f7c39ef909f2f2b");
+});
+
+test("#1 create: conv nueva -> guarda provider_conversation_id (conv.id) + provider_account_id (account.id) para el envío", async () => {
+  const { d, convs } = build();
+  await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
+  const cv = (convs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
+  expect(cv).toMatchObject({ providerConversationId: "6a3dcaa29d9472faaeea9423", providerAccountId: "6ad59c380f7c39ef909f2f2b" });
 });
 
 test("#3 nombre: SALIENTE sin participantName -> contacto 'Cliente' (NUNCA el negocio/remitente)", async () => {

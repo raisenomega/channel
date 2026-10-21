@@ -13,6 +13,8 @@ export interface OutboundMessage {
   readonly to: string;
   readonly content: string;
   readonly channel: ChannelType;
+  readonly conversationId?: string; // Zernio inbox: id de conversación del proveedor (va en la RUTA)
+  readonly accountId?: string;      // Zernio inbox: cuenta emisora (zernio_account_id) en el body
 }
 
 export type AdapterError =

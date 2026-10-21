@@ -32,11 +32,18 @@ export async function tenantPorZernioAccount(accountId: string): Promise<TenantI
   return (row?.tenant_id as TenantId) ?? null;
 }
 
-// 3o-b: rellena el id del destinatario en convs ya existentes (solo si está NULL -> idempotente,
-// no toca otras columnas -> no reabre Issue A). Habilita la entrega saliente a Zernio.
-export async function setConvParticipant(convId: string, externalId: string): Promise<void> {
-  if (!convId || !externalId) return;
-  await supabase.from("conversations").update({ participant_external_id: externalId }).eq("id", convId).is("participant_external_id", null);
+// 3o-b/#1: rellena en convs ya existentes los 3 ids que Zernio necesita para entregar: destinatario
+// (participant_external_id), id de conversación del proveedor (provider_conversation_id) y cuenta emisora
+// (provider_account_id). Valores estables por hilo -> escribir siempre es idempotente; backfillea también
+// los hilos que ya tenían participant pero aún no los ids de envío. No toca contadores (no reabre Issue A).
+export async function setConvRefs(convId: string, participantExternalId: string, providerConversationId: string, providerAccountId: string): Promise<void> {
+  if (!convId) return;
+  const patch: Record<string, string> = {};
+  if (participantExternalId) patch.participant_external_id = participantExternalId;
+  if (providerConversationId) patch.provider_conversation_id = providerConversationId;
+  if (providerAccountId) patch.provider_account_id = providerAccountId;
+  if (Object.keys(patch).length === 0) return;
+  await supabase.from("conversations").update(patch).eq("id", convId);
 }
 
 // #3: actualiza el nombre del contacto cuando llega uno real (solo si cambió). Nunca el nombre del negocio

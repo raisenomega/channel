@@ -23,7 +23,7 @@ export interface IngestDeps {
   readonly tenantPorAccount: (accountId: string) => Promise<TenantId | null>;
   readonly mensajeExiste: (t: TenantId, pmid: string) => Promise<boolean>;
   readonly convExiste: (convId: string) => Promise<boolean>;
-  readonly setParticipant: (convId: string, externalId: string) => Promise<void>; // 3o-b: id destino Zernio
+  readonly setConvRefs: (convId: string, participantExternalId: string, providerConversationId: string, providerAccountId: string) => Promise<void>; // 3o-b/#1: ids de envío Zernio
   readonly refreshContactName: (contactId: string, name: string) => Promise<void>; // #3: auto-update nombre real
   readonly detId: (seed: string) => string;
 }
@@ -47,9 +47,9 @@ export class IngestZernioMessageHandler {
       const c = crearContacto(tenantId, z.contactName);
       if (c.ok && !(await this.d.contacts.guardar({ ...c.value, id: contactId })).ok) return fail("contacto");
       const cv = crearConversacion(tenantId, contactId, ch);
-      if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId, participantExternalId: z.contactExternalId })).ok) return fail("conversacion");
+      if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId, participantExternalId: z.contactExternalId, providerConversationId: z.providerConversationId, providerAccountId: z.accountId })).ok) return fail("conversacion");
     } else {
-      await this.d.setParticipant(convId, z.contactExternalId); // 3o-b: rellena el id destino en convs ya existentes
+      await this.d.setConvRefs(convId, z.contactExternalId, z.providerConversationId, z.accountId); // 3o-b/#1: rellena ids de envío en convs ya existentes
       if (z.contactName !== "Cliente") await this.d.refreshContactName(contactId, z.contactName); // #3: llegó un nombre real -> actualiza
     }
     const msg: MessageState = {
