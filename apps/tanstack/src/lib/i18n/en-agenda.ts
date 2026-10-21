@@ -1,0 +1,32 @@
+/**
+ * HUB by Raisen — i18n EN: Agenda (monthly calendar + appointment modal).
+ */
+import type { Dict } from "./i18n-types";
+
+export const enAgenda: Dict = {
+  "agenda.today": "Today",
+  "agenda.prev": "Previous",
+  "agenda.next": "Next",
+  "agenda.sinCliente": "No client",
+  "agenda.humano": "Human",
+  "agenda.st.scheduled": "Scheduled",
+  "agenda.st.confirmed": "Confirmed",
+  "agenda.st.completed": "Completed",
+  "agenda.st.cancelled": "Cancelled",
+  "agenda.st.no_show": "No-show",
+  "agenda.hs.open": "Open",
+  "agenda.hs.pending": "Pending",
+  "agenda.hs.snoozed": "Snoozed",
+  "agenda.hs.resolved": "Resolved",
+  "agenda.hs.archived": "Archived",
+  "agenda.d.cliente": "Client",
+  "agenda.d.estado": "Status",
+  "agenda.d.canal": "Entry channel",
+  "agenda.d.agente": "Handled by",
+  "agenda.d.conversacion": "Conversation",
+  "agenda.d.estadoHilo": "Thread status",
+  "agenda.d.slaViol": "Breached",
+  "agenda.d.slaOk": "On track",
+  "agenda.d.pedido": "Related order",
+  "agenda.d.notas": "Follow-up notes",
+};
