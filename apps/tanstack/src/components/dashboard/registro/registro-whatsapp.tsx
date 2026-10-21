@@ -14,10 +14,11 @@ import { fetchTenantPerfil } from "@/lib/tenant-client/tenant-profile";
 import { Toast } from "@/components/ui/toast";
 import { OnboardingOverlay } from "./onboarding-overlay";
 
-export function RegistroWhatsApp({ language, tenant, onDone }: {
+export function RegistroWhatsApp({ language, tenant, onDone, logoUrl }: {
   language: Idioma;
   tenant: { id: string; name: string; plan: string } | null;
   onDone: () => void;
+  logoUrl?: string | null; // branding_config.logo_url -> se muestra circular en vez del icono WhatsApp
 }) {
   const [overlay, setOverlay] = useState<null | "create" | "edit">(null);
   const [initial, setInitial] = useState<Partial<OnboardingForm> | undefined>();
@@ -34,7 +35,9 @@ export function RegistroWhatsApp({ language, tenant, onDone }: {
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); void abrir(); } }}
       className="mb-4 flex cursor-pointer items-center justify-between rounded-2xl glass-card p-3.5 hover:border-primary/50">
       <div className="flex items-center gap-2">
-        <WhatsAppIcon size={22} />
+        {logoUrl
+          ? <img src={logoUrl} alt="" className="size-[22px] shrink-0 rounded-full object-cover" />
+          : <WhatsAppIcon size={22} />}
         <div>
           <p className="text-sm font-bold text-foreground">{tenant ? tenant.name : t(language, "registro.cta")}</p>
           <p className="text-xs text-muted-foreground">{t(language, tenant ? "registro.registered" : "registro.ctaHint")}</p>

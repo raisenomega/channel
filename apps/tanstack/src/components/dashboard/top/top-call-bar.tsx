@@ -17,7 +17,7 @@ function Icono({ hang }: { hang?: boolean }) {
 }
 
 export function TopCallBar({ lang }: { lang: Idioma }) {
-  const btn = "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:brightness-110";
+  const btn = "flex items-center gap-2 rounded-xl px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110";
   return (
     <div className="bento-col-3 flex items-center justify-center gap-5 rounded-2xl glass-card p-3.5">
       <button type="button" title={t(lang, "call.start")} className={btn + " bg-success"}>

@@ -44,7 +44,8 @@ export function useOnboardingForm(opts: {
       return true;
     } catch (e) {
       const m = String(e);
-      setErr(m.includes("no_session") ? "onboarding.sessionExpired" : m); // mensaje claro, no crudo
+      setErr(m.includes("no_session") ? "onboarding.sessionExpired"
+        : m.includes("Failed to fetch") ? "onboarding.networkError" : m); // mensaje claro, no crudo
       return false;
     } finally { setBusy(false); }
   }

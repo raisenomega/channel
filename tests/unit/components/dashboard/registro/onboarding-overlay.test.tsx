@@ -5,6 +5,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const { createTenant, actualizarPerfilTenant } = vi.hoisted(() => ({
   createTenant: vi.fn(async () => ({ id: "t1", name: "Raisen.dev" })),
@@ -17,7 +18,9 @@ import { OnboardingOverlay } from "@/components/dashboard/registro/onboarding-ov
 
 function renderCreate(over: Partial<Parameters<typeof OnboardingOverlay>[0]> = {}) {
   const onClose = vi.fn(); const onDone = vi.fn();
-  render(<OnboardingOverlay language="es" mode="create" email="owner@raisen.dev" plan="esencial" onClose={onClose} onDone={onDone} {...over} />);
+  render(<QueryClientProvider client={new QueryClient()}>
+    <OnboardingOverlay language="es" mode="create" email="owner@raisen.dev" plan="esencial" onClose={onClose} onDone={onDone} {...over} />
+  </QueryClientProvider>);
   return { onClose, onDone };
 }
 const setPhone = () => fireEvent.change(screen.getByTestId("onb-phone"), { target: { value: "+17875551234" } });
