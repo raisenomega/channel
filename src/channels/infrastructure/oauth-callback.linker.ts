@@ -28,7 +28,7 @@ export async function ejecutarOAuthLink(
 ): Promise<Result<LinkerResult, LinkerError>> {
   if (!zernioApiKey) return err({ kind: "zernio_callback_failed", cause: "api_key_no_configurada" });
   try {
-    const r = await fetch("https://api.zernio.io/v1/oauth/callback", {
+    const r = await fetch("https://zernio.com/api/v1/oauth/callback", {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${zernioApiKey}` },
       body: JSON.stringify({ code, state }),

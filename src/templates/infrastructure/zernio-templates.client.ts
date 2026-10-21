@@ -7,7 +7,7 @@ import { Result, ok, err } from "../../shared/domain/result.ts";
 import { conReintentos, RetryConfig } from "../../channels/infrastructure/zernio.retry.ts";
 
 const RETRY_CFG: RetryConfig = Object.freeze({ maxIntentos: 3, backoffBaseMs: 800 });
-const BASE = "https://api.zernio.io";
+const BASE = "https://zernio.com/api";
 
 export interface ZernioTemplatePayload {
   readonly name: string;
