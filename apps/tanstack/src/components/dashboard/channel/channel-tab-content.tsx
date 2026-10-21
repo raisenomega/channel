@@ -60,6 +60,10 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
       return hasHilo ? <CardGrid title={t(lang, "cf.factura")} empty={t(lang, "orders.empty")} accent={accent} cards={ordersToCards(data.orders, lang)} /> : sinHilo;
     case "pagos":
       return hasHilo ? <CardGrid title={t(lang, "cf.pagos")} empty={t(lang, "payments.empty")} accent={accent} cards={paymentsToCards(data.payments, lang)} /> : sinHilo;
+    case "agenda":
+      return <SimpleListView title={t(lang, "cf.agenda")} empty={empty} accent={accent} items={[]} />;
+    case "envios":
+      return <SimpleListView title={t(lang, "cf.envios")} empty={empty} accent={accent} items={[]} />;
     case "documentos":
       return <SimpleListView title={t(lang, "cf.documentos")} empty={empty} accent={accent} items={docsToItems(data.documents)} />;
     default:

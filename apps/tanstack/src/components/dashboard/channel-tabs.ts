@@ -4,19 +4,23 @@
 
 export type ChannelTab =
   | "agentes"
-  | "contactos"
-  | "plantillas"
+  | "agenda"
   | "cotizacion"
   | "factura"
   | "pagos"
+  | "plantillas"
+  | "envios"
+  | "contactos"
   | "documentos";
 
 export const TABS: readonly ChannelTab[] = [
   "agentes",
-  "contactos",
-  "plantillas",
+  "agenda",
   "cotizacion",
   "factura",
   "pagos",
+  "plantillas",
+  "envios",
+  "contactos",
   "documentos",
 ];
