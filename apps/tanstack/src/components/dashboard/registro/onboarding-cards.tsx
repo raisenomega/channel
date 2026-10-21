@@ -9,9 +9,10 @@ import { t } from "@/lib/i18n";
 import type { OnboardingForm } from "@/lib/tenant-client/onboarding-fields";
 import { BRAND_TONES, RESPONSE_SLAS } from "@/lib/tenant-client/onboarding-fields";
 import { OnbField } from "./onboarding-field";
+import { LogoUpload } from "./logo-upload";
 
 type Set = (k: keyof OnboardingForm, v: string) => void;
-interface P { form: OnboardingForm; setField: Set; language: Idioma; }
+interface P { form: OnboardingForm; setField: Set; language: Idioma; tenantId?: string; }
 
 function Card({ title, testId, children }: { title: string; testId: string; children: ReactNode }) {
   return (
@@ -22,7 +23,7 @@ function Card({ title, testId, children }: { title: string; testId: string; chil
   );
 }
 
-export function OnboardingCards({ form, setField, language }: P) {
+export function OnboardingCards({ form, setField, language, tenantId }: P) {
   const L = (k: string): string => t(language, k);
   const F = (k: keyof OnboardingForm): ((v: string) => void) => (v) => setField(k, v);
   const toneOpts = BRAND_TONES.map((v) => ({ value: v, label: L(`onboarding.tone.${v}`) }));
@@ -41,6 +42,7 @@ export function OnboardingCards({ form, setField, language }: P) {
         <OnbField label={L("onboarding.f.industry")} value={form.industry} onChange={F("industry")} />
       </Card>
       <Card title={L("onboarding.card.brand")} testId="onb-card-brand">
+        <LogoUpload lang={language} tenantId={tenantId} />
         <OnbField label={L("onboarding.f.tone")} kind="select" value={form.brand_tone} onChange={F("brand_tone")} options={toneOpts} placeholder={L("onboarding.select")} />
         <OnbField label={L("onboarding.f.sla")} kind="select" value={form.expected_response_sla} onChange={F("expected_response_sla")} options={slaOpts} placeholder={L("onboarding.select")} />
         <OnbField label={L("onboarding.f.services")} kind="textarea" maxLength={200} value={form.brand_services} onChange={F("brand_services")} />

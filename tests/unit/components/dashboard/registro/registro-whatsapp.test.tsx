@@ -5,6 +5,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 vi.mock("@/lib/auth", () => ({ readLocalSession: () => ({ user: { email: "owner@raisen.dev" } }) }));
 const { fetchPerfil } = vi.hoisted(() => ({ fetchPerfil: vi.fn(async () => null as Record<string, string> | null) }));
@@ -14,18 +15,21 @@ vi.mock("@/lib/tenant-client/create-tenant", () => ({ createTenant }));
 
 import { RegistroWhatsApp } from "@/components/dashboard/registro/registro-whatsapp";
 
+// El overlay (al abrir) usa React Query vía LogoUpload -> envolver todo render con un QueryClient.
+const renderRW = (ui: Parameters<typeof render>[0]) => render(<QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>);
+
 const TENANT = { id: "t1", name: "Raisen.dev", plan: "esencial" };
 beforeEach(() => fetchPerfil.mockReset());
 
 describe("RegistroWhatsApp (SOT)", () => {
   it("sin tenant: CTA 'Crear mi negocio' a la derecha, SIN botón Conectar Canales", () => {
-    render(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
+    renderRW(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
     expect(screen.getByTestId("registro-crear").textContent).toBe("Crear mi negocio");
     expect(screen.queryByTestId("registro-connect")).toBeNull();
   });
 
   it("click en la barra sin tenant -> overlay CREATE", () => {
-    render(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
+    renderRW(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
     expect(screen.queryByTestId("onboarding-overlay")).toBeNull();
     fireEvent.click(screen.getByTestId("registro-whatsapp"));
     expect(screen.getByTestId("onboarding-overlay").textContent).toContain("Registrar tu negocio");
@@ -33,7 +37,7 @@ describe("RegistroWhatsApp (SOT)", () => {
 
   it("con tenant: CTA 'Editar datos' + click abre overlay EDIT con prefill COMPLETO (fetchTenantPerfil)", async () => {
     fetchPerfil.mockResolvedValueOnce({ name: "Raisen.dev", city: "San Juan" });
-    render(<RegistroWhatsApp language="es" tenant={TENANT} onDone={() => {}} />);
+    renderRW(<RegistroWhatsApp language="es" tenant={TENANT} onDone={() => {}} />);
     expect(screen.getByTestId("registro-editar").textContent).toBe("Editar datos");
     fireEvent.click(screen.getByTestId("registro-whatsapp"));
     await waitFor(() => expect(screen.getByTestId("onboarding-overlay")).toBeTruthy());
@@ -42,7 +46,7 @@ describe("RegistroWhatsApp (SOT)", () => {
   });
 
   it("click [X] cierra el overlay y NO reabre (sin burbujeo a la barra)", () => {
-    render(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
+    renderRW(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
     fireEvent.click(screen.getByTestId("registro-whatsapp"));
     expect(screen.getByTestId("onboarding-overlay")).toBeTruthy();
     fireEvent.click(screen.getByTestId("onb-close"));
@@ -51,7 +55,7 @@ describe("RegistroWhatsApp (SOT)", () => {
 
   it("guardar con exito -> toast 'Guardado' + cierra el overlay", async () => {
     createTenant.mockClear();
-    render(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
+    renderRW(<RegistroWhatsApp language="es" tenant={null} onDone={() => {}} />);
     fireEvent.click(screen.getByTestId("registro-whatsapp"));
     fireEvent.change(screen.getByTestId("onb-name"), { target: { value: "Raisen.dev" } });
     fireEvent.change(screen.getByTestId("onb-phone"), { target: { value: "+17875551234" } });
@@ -61,7 +65,7 @@ describe("RegistroWhatsApp (SOT)", () => {
   });
 
   it("muestra tenant.name en la barra", () => {
-    render(<RegistroWhatsApp language="en" tenant={{ id: "t9", name: "Zafacones Ramos", plan: "pro" }} onDone={() => {}} />);
+    renderRW(<RegistroWhatsApp language="en" tenant={{ id: "t9", name: "Zafacones Ramos", plan: "pro" }} onDone={() => {}} />);
     expect(screen.getByTestId("registro-whatsapp").textContent).toContain("Zafacones Ramos");
   });
 });

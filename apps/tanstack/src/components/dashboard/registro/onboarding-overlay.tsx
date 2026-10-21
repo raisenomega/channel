@@ -60,7 +60,7 @@ export function OnboardingOverlay({ language, mode, email, plan, tenantId, initi
           </div>
           {err ? <p data-testid="onb-error" className="text-xs text-critical lg:col-span-2">{t(language, err)}</p> : null}
           <OnboardingMainFields form={form} setField={setField} language={language} email={correo} onEmailChange={setEmail} />
-          <OnboardingCards form={form} setField={setField} language={language} />
+          <OnboardingCards form={form} setField={setField} language={language} tenantId={tenantId} />
         </div>
       </div>
       <div className="flex items-center justify-end gap-2 border-t border-border/40 px-5 py-3">
