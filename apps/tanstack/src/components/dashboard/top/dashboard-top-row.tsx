@@ -22,7 +22,7 @@ export function DashboardTopRow({ language, filtroEstado, filtroSLA, onEstado, o
 }) {
   const { data: miTenant, refetch } = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 60_000 });
   return (
-    <div className="bento">
+    <div className="bento mb-4 items-stretch">
       <div className="bento-col-3">
         <RegistroWhatsApp language={language}
           tenant={miTenant ? { id: miTenant.tenantId, name: miTenant.name, plan: miTenant.plan } : null}
