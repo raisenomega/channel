@@ -43,8 +43,8 @@ export const esMisc: Dict = {
   "nav.reports": "Reportes",
   "nav.sla": "SLA",
   "nav.logout": "Salir",
-  "trilogia.headline": "La trilogía Raisen: lleva tu negocio a nivel empresa.",
-  "trilogia.body": "HUB atiende y vende. Súmale OMEGA para tu marketing completo —contenido, calendario y ARIA en 30 s— y NÚCLEO para tu operación total —facturación, rutas, nómina y contabilidad—. Tres plataformas que se alimentan entre sí: de PYME a empresa seria.",
+  "trilogia.headline": "Tres plataformas, un objetivo: lleva tu PYME a empresa seria.",
+  "trilogia.body": "HUB atiende a todos y vende a través del inbox de tus redes. Conéctalo con OMEGA y súmale marketing digital completo: generación de fotos, videos y posts que se agendan y publican automáticamente. Y con NÚCLEO obtén el control total de tus operaciones —inventario, rutas, nómina y finanzas— con un agente que te hace la contabilidad y más.",
   "trilogia.ctaOmega": "Potenciar con OMEGA",
   "trilogia.ctaNucleo": "Operar con NÚCLEO",
 };
