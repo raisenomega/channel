@@ -9,7 +9,7 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
 import { fetchBusinessInfo, type BizInfo } from "./pdf-business-info";
-import { savePdfStyle, saveTemplateConfig } from "./pdf-style-store";
+import { savePdfStyle, saveTemplateConfig, saveLogoUrl } from "./pdf-style-store";
 import { uploadLogo } from "@/lib/tenant-client/logo";
 import { styleOf } from "./pdf-styles";
 import { BusinessDocument, type DocLabels } from "./business-document";
@@ -44,7 +44,7 @@ export function TemplateEditorModal({ lang, onClose }: { lang: Idioma; onClose: 
   const totals = { subtotal: 250, tax: taxAmt, total: 250 + taxAmt, currency: form.currency };
   const headers = [t(lang, "doc.description"), t(lang, "doc.qty"), t(lang, "doc.price"), t(lang, "doc.total")];
   const labels: DocLabels = { subtotal: t(lang, "doc.subtotal"), tax: t(lang, "doc.taxTotal"), total: t(lang, "quotes.total"), client: t(lang, "quotes.contact"), terms: t(lang, "quotes.tpl.terms") };
-  const onLogo = async (f: File | undefined) => { if (!f || !tid) return; setBusy("logo"); const url = await uploadLogo(tid, f); await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); await qc.invalidateQueries({ queryKey: ["mi-logo"] }); setBusy(""); setMsg(url ? "saved" : "logoerr"); };
+  const onLogo = async (f: File | undefined) => { if (!f || !tid) return; setBusy("logo"); const url = await uploadLogo(tid, f); const ok = url ? await saveLogoUrl(tid, url) : false; await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); await qc.invalidateQueries({ queryKey: ["mi-logo"] }); setBusy(""); setMsg(ok ? "saved" : "logoerr"); };
   const onSave = async () => { if (!tid) return; setBusy("save"); const ok = await saveTemplateConfig(tid, { company: { name: form.name, address: form.address, phone: form.phone, email: form.email }, tax: { mode: form.taxMode, value: tv, currency: form.currency }, footer1: form.footer1, terms: form.terms }); await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); setBusy(""); setDirty(false); setMsg(ok ? "saved" : "saveerr"); };
   const onUse = async () => { if (tid) { await savePdfStyle(tid, style); await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); } };
   return (
