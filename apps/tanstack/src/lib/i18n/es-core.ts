@@ -7,7 +7,7 @@ export const esCore: Dict = {
   "nav.inbox": "Dashboard",
   "nav.dashboard": "Panel",
   "nav.contacts": "CRM",
-  "nav.quotes": "Cotizaciones",
+  "nav.quotes": "Cotizaciones", "nav.pdfTemplates": "Plantilla PDF",
   "nav.orders": "Pedidos",
   "nav.payments": "Pagos",
   "nav.automation": "Automatización",

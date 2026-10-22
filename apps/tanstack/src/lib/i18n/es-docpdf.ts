@@ -24,6 +24,7 @@ export const esDocPdf: Dict = {
   "quotes.tpl.terms": "Términos y condiciones",
   "quotes.tpl.save": "Guardar",
   "quotes.tpl.active": "Plantilla PDF",
+  "quotes.tpl.sectionHint": "Configura aquí la plantilla de tus PDF (cotización, factura, orden).",
   "quotes.tpl.inUse": "En uso",
   "quotes.tpl.saved": "Guardado",
   "quotes.tpl.saveerr": "No se pudo guardar",

@@ -20,6 +20,7 @@ import { ReportsRoute } from "@/routes/reports";
 import { SlaRoute } from "@/routes/settings.sla";
 import { OnboardingRoute } from "@/routes/onboarding.tenant";
 import { TemplatesRoute } from "@/routes/templates";
+import { PdfTemplatesRoute } from "@/routes/pdf-templates";
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
@@ -43,4 +44,5 @@ export const routeTree = rootRoute.addChildren([
   SlaRoute,
   OnboardingRoute,
   TemplatesRoute,
+  PdfTemplatesRoute,
 ]);
