@@ -1,0 +1,29 @@
+/**
+ * HUB by Raisen — i18n EN: extended appointment form/detail (type, reminders, media).
+ */
+import type { Dict } from "./i18n-types";
+
+export const enAgendaForm: Dict = {
+  "agenda.editar": "Edit",
+  "agenda.f.tipo": "Type",
+  "agenda.f.reason": "Reason",
+  "agenda.f.pre": "Prior agreement / conversation",
+  "agenda.f.recordatorios": "Reminders",
+  "agenda.f.media": "Attach document / image / video",
+  "agenda.mt.in_person": "In person",
+  "agenda.mt.call": "Call",
+  "agenda.mt.video": "Video call",
+  "agenda.rem.d1": "1 day before",
+  "agenda.rem.h2": "2 h before",
+  "agenda.rem.h1": "1 h before",
+  "agenda.rem.m30": "30 min before",
+  "agenda.rem.m15": "15 min before",
+  "agenda.d.tel": "Phone",
+  "agenda.d.email": "Email",
+  "agenda.d.creada": "Created",
+  "agenda.d.motivo": "Reason",
+  "agenda.d.acuerdo": "Prior agreement",
+  "agenda.d.video": "Join video call",
+  "agenda.d.recordatorios": "Reminders",
+  "agenda.d.media": "Attachments",
+};

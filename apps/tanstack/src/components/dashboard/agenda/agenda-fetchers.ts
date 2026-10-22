@@ -8,10 +8,18 @@ import type { RowAppointment } from "./agenda-types";
 const COLS = [
   "id", "contact_id", "conversation_id", "agent_id", "quote_id", "order_id",
   "title", "description", "scheduled_at", "ends_at", "status", "channel", "created_by_type", "location",
+  "reason", "pre_notes", "meeting_type", "meeting_url", "reminders", "media", "created_by_user_id",
+  "created_by_name", "attachment_id", "send_channels", "sent_at", "created_at",
 ].join(",");
 
 export function fetchAppointments(fromISO: string, toISO: string): Promise<RowAppointment[]> {
   const q = `appointments?select=${enc(COLS)}&scheduled_at=gte.${enc(fromISO)}&scheduled_at=lt.${enc(toISO)}&order=scheduled_at.asc&limit=500`;
+  return restGet<RowAppointment>(q);
+}
+
+/** Todas las citas del tenant (para la lista "Agendados" del CRM), mas recientes primero. */
+export function fetchAllAppointments(): Promise<RowAppointment[]> {
+  const q = `appointments?select=${enc(COLS)}&order=scheduled_at.desc&limit=500`;
   return restGet<RowAppointment>(q);
 }
 

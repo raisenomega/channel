@@ -1,6 +1,8 @@
 /**
  * HUB by Raisen — Tipos de la Agenda (cita + datos relacionados del modal).
  */
+export interface MediaItem { url: string; type: string; name: string; }
+
 export interface RowAppointment {
   id: string;
   contact_id: string | null;
@@ -16,6 +18,18 @@ export interface RowAppointment {
   channel: string | null;
   created_by_type: string;
   location: string | null;
+  reason: string | null;
+  pre_notes: string | null;
+  meeting_type: string;
+  meeting_url: string | null;
+  reminders: number[] | null;
+  media: MediaItem[] | null;
+  created_by_user_id: string | null;
+  created_by_name: string | null;
+  attachment_id: string | null;
+  send_channels: string[] | null;
+  sent_at: string | null;
+  created_at?: string | null;
 }
 
 export interface ApptContact {
