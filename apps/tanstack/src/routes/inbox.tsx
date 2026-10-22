@@ -13,6 +13,7 @@ import { KpiRow, WidgetsRow } from "./inbox/inbox-widgets";
 import { BentoRowNueva } from "@/components/dashboard/bentobox/bento-row-nueva";
 import { GraficasPanel } from "@/components/dashboard/charts/graficas-panel";
 import { useRecentActivity } from "@/hooks/useRecentActivity";
+import { useQuoteResponses } from "@/hooks/useQuoteResponses";
 import { DashboardTopRow } from "@/components/dashboard/top/dashboard-top-row";
 
 const InboxRoute = createRoute({
@@ -28,6 +29,7 @@ function InboxPage() {
   const [filtroSLA, setFiltroSLA] = useState<boolean | null>(null);
   const { data: items, isPending } = useQuery({ queryKey: ["inbox"], queryFn: fetchInbox, staleTime: 5_000, refetchInterval: 8000, refetchOnWindowFocus: true });
   const { events } = useRecentActivity(); // hooks antes del early return (rules-of-hooks)
+  const { peticiones } = useQuoteResponses(language);
   const itemsFiltrados = (items ?? []).filter((i) => {
     if (filtroEstado && i.status !== filtroEstado) return false;
     if (filtroSLA === true && !i.slaViolated) return false;
@@ -56,7 +58,7 @@ function InboxPage() {
       <KpiRow language={language} stats={stats} total={items?.length ?? 0} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={items === undefined || items.length === 0} />
       <BentoRowNueva
-        lang={language} events={events} items={itemsFiltrados}
+        lang={language} events={events} peticiones={peticiones} items={itemsFiltrados}
         onOpen={(id) => void navigate({ to: "/inbox/" + encodeURIComponent(id) })}
       />
       <TrilogiaBar language={language} />

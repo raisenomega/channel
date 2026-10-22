@@ -7,12 +7,13 @@ import type { Idioma } from "@/lib/i18n";
 import type { InboxItem } from "@/lib/types";
 import { BentoEstadoAgentes } from "./bento-estado-agentes";
 import { BentoActividadReciente, type ActivityEvent } from "./bento-actividad-reciente";
-import { BentoPeticiones } from "./bento-peticiones";
+import { BentoPeticiones, type Peticion } from "./bento-peticiones";
 import { BentoBusquedaInteligente } from "./bento-busqueda-inteligente";
 
-export function BentoRowNueva({ lang, events, items, onOpen }: {
+export function BentoRowNueva({ lang, events, peticiones, items, onOpen }: {
   lang: Idioma;
   events: readonly ActivityEvent[];
+  peticiones: readonly Peticion[];
   items: readonly InboxItem[];
   onOpen: (conversationId: string) => void;
 }) {
@@ -20,7 +21,7 @@ export function BentoRowNueva({ lang, events, items, onOpen }: {
     <div className="bento mt-4">
       <BentoEstadoAgentes lang={lang} />
       <BentoActividadReciente lang={lang} events={events} />
-      <BentoPeticiones lang={lang} />
+      <BentoPeticiones lang={lang} items={peticiones} />
       <BentoBusquedaInteligente lang={lang} items={items} onOpen={onOpen} />
     </div>
   );
