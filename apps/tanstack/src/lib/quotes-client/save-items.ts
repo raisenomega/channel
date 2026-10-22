@@ -1,6 +1,7 @@
 /**
- * HUB by Raisen — Guarda una cotizacion con sus lineas via RPC save_quote_with_items (atomico,
- * tenant server-side). Mapea camelCase -> snake_case. Devuelve el id de la cotizacion o null. C4 <=75.
+ * HUB by Raisen — Guarda una cotizacion con sus lineas + datos del cliente (nombre/telefono/email/
+ * direccion de entrega) y el servicio/producto general, via RPC save_quote_with_items (atomico,
+ * tenant server-side). Mapea camelCase -> snake_case. Devuelve el id o null. C4 <=75.
  */
 import { supabaseRestBase, supabaseAuthHeaders } from "../supabase";
 
@@ -19,6 +20,11 @@ export interface QuoteSave {
   subtotal: number;
   taxTotal: number;
   total: number;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string;
+  clientAddress: string;
+  service: string;
 }
 
 export async function saveQuoteWithItems(q: QuoteSave, lines: QuoteLine[]): Promise<string | null> {
@@ -28,6 +34,8 @@ export async function saveQuoteWithItems(q: QuoteSave, lines: QuoteLine[]): Prom
   const p_quote = {
     id: q.id ?? "", contact_id: q.contactId, currency: q.currency, status: "draft",
     subtotal: q.subtotal, tax_total: q.taxTotal, total: q.total,
+    client_name: q.clientName, client_phone: q.clientPhone, client_email: q.clientEmail,
+    client_address: q.clientAddress, service: q.service,
   };
   const p_items = lines.map((l) => ({
     description: l.description, quantity: l.quantity, unit_price: l.unitPrice,

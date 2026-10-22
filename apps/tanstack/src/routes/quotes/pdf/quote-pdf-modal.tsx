@@ -8,6 +8,7 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { fetchBusinessInfo, type BizInfo } from "./pdf-business-info";
 import { fetchQuoteItems, computeTotals } from "./quote-items";
+import { fetchQuoteDoc } from "./quote-doc";
 import { styleOf } from "./pdf-styles";
 import { BusinessDocument, type DocLabels } from "./business-document";
 import { printHtml } from "./pdf-print";
@@ -22,8 +23,10 @@ export function QuotePdfModal({ lang, quote, contactName, onClose }: {
   const ref = useRef<HTMLDivElement>(null);
   const bizQ = useQuery({ queryKey: ["pdf-biz", "row"], queryFn: () => fetchBusinessInfo("row") });
   const itemsQ = useQuery({ queryKey: ["quote-items", quote.id], queryFn: () => fetchQuoteItems(quote.id), staleTime: 15_000 });
+  const docQ = useQuery({ queryKey: ["quote-doc", quote.id], queryFn: () => fetchQuoteDoc(quote.id), staleTime: 15_000 });
   const biz = bizQ.data ?? EMPTY;
   const items = itemsQ.data ?? [];
+  const clientLines = [docQ.data?.service, docQ.data?.phone, docQ.data?.email, docQ.data?.address].filter(Boolean) as string[];
   const totals = computeTotals(items, quote.totalAmount, biz.tax);
   const title = t(lang, "quotes.pdf.title");
   const headers = [t(lang, "doc.description"), t(lang, "doc.qty"), t(lang, "doc.price"), t(lang, "doc.total")];
@@ -39,7 +42,7 @@ export function QuotePdfModal({ lang, quote, contactName, onClose }: {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto bg-neutral-300 p-4">
-          <div ref={ref}><BusinessDocument title={title} style={styleOf(biz.style)} biz={biz} refId={quote.id.slice(0, 8)} client={{ name: contactName, lines: [] }} items={items} totals={totals} headers={headers} labels={labels} watermark={WM[quote.status]} /></div>
+          <div ref={ref}><BusinessDocument title={title} style={styleOf(biz.style)} biz={biz} refId={quote.id.slice(0, 8)} client={{ name: contactName, lines: clientLines }} items={items} totals={totals} headers={headers} labels={labels} watermark={WM[quote.status]} /></div>
         </div>
       </div>
     </div>
