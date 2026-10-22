@@ -8,6 +8,7 @@ export interface ChatMsg {
   id: string;
   senderType: string; // "contact" | "agent" | "system"
   content: string;
+  messageType?: string;
   createdAt: string;
   status?: "sent" | "delivered" | "read";
   contactName?: string;
