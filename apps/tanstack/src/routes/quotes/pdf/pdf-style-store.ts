@@ -25,12 +25,14 @@ async function patch(tenantId: string, p: Record<string, unknown>): Promise<bool
   if (!base || !headers || !tenantId) return false;
   const b = await readBranding(tenantId);
   try {
-    const res = await fetch(`${base}/tenants?id=eq.${encodeURIComponent(tenantId)}`, {
+    const res = await fetch(`${base}/tenants?id=eq.${encodeURIComponent(tenantId)}&select=id`, {
       method: "PATCH",
-      headers: { ...headers, "content-type": "application/json", prefer: "return=minimal" },
+      headers: { ...headers, "content-type": "application/json", prefer: "return=representation" },
       body: JSON.stringify({ branding_config: { ...b, ...p } }),
     });
-    return res.ok;
+    if (!res.ok) return false;
+    const rows = (await res.json()) as unknown[];
+    return Array.isArray(rows) && rows.length > 0; // false si RLS no actualizo ninguna fila
   } catch {
     return false;
   }

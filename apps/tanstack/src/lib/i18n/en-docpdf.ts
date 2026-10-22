@@ -23,4 +23,7 @@ export const enDocPdf: Dict = {
   "quotes.tpl.footer1": "Footer message",
   "quotes.tpl.terms": "Terms & conditions",
   "quotes.tpl.save": "Save",
+  "quotes.tpl.saved": "Saved",
+  "quotes.tpl.saveerr": "Could not save",
+  "quotes.tpl.logoerr": "Could not upload logo",
 };

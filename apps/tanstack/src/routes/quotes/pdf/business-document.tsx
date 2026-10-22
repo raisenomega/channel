@@ -1,7 +1,8 @@
 /**
- * HUB by Raisen — Documento comercial generico (cotizacion/factura/orden), estilo Nucleo: marca
- * (logo + compañia) + caja cliente + tabla de lineas + Subtotal/Tax/TOTAL + marca de agua + pie corto
- * + Terminos y condiciones. Mismo render para todo el ciclo (solo cambia el titulo). 3 estilos. C4 <=75.
+ * HUB by Raisen — Documento comercial generico (cotizacion/factura/orden): LOGO arriba-izquierda +
+ * compañia arriba-derecha; el titulo (COTIZACION/FACTURA/...) va en la caja gris de contacto, a la
+ * derecha, y solo esa palabra cambia por etapa. Tabla de lineas + totales + marca de agua + pie +
+ * terminos. 3 estilos. Estilos INLINE (preview = PDF). C4 <=75.
  */
 import type { CSSProperties } from "react";
 import type { PdfStyleDef } from "./pdf-styles";
@@ -24,13 +25,9 @@ export function BusinessDocument({ title, style, biz, refId, client, items, tota
   return (
     <div style={{ position: "relative", overflow: "hidden", background: "#fff", color: "#1a1a1a", width: "100%", maxWidth: 720, margin: "0 auto", padding: 40, fontFamily: "Arial, Helvetica, sans-serif" }}>
       {watermark ? <div style={{ position: "absolute", top: "42%", left: 0, right: 0, textAlign: "center", transform: "rotate(-24deg)", fontSize: 76, fontWeight: 700, color: "rgba(0,0,0,0.06)", letterSpacing: 4 }}>{watermark}</div> : null}
-      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <div style={{ fontSize: minimal ? 16 : 24, fontWeight: 700, letterSpacing: minimal ? 2 : 0, textTransform: minimal ? "uppercase" : "none", color: accent }}>{title}</div>
-          <div style={{ color: "#888", marginTop: 2, fontSize: 12 }}>#{refId}</div>
-        </div>
+      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start", minHeight: 52 }}>
+        <div>{biz.logoUrl ? <img src={biz.logoUrl} alt="" style={{ height: 54, maxWidth: 200, objectFit: "contain", display: "block" }} /> : null}</div>
         <div style={{ textAlign: "right" }}>
-          {biz.logoUrl ? <img src={biz.logoUrl} alt="" style={{ height: 40, objectFit: "contain", marginLeft: "auto", marginBottom: 6, display: "block" }} /> : null}
           <div style={{ fontSize: 15, fontWeight: 700 }}>{biz.name}</div>
           {biz.address ? <div style={muted}>{biz.address}</div> : null}
           {biz.phone ? <div style={muted}>{biz.phone}</div> : null}
@@ -38,10 +35,16 @@ export function BusinessDocument({ title, style, biz, refId, client, items, tota
         </div>
       </div>
       {style.id === "moderno" ? <div style={{ height: 3, background: a, margin: "16px 0 0" }} /> : null}
-      <div style={{ position: "relative", marginTop: 20, background: "#fafafa", padding: "10px 12px", borderRadius: 6 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: "#888", textTransform: "uppercase" }}>{labels.client}</div>
-        <div style={{ fontWeight: 700 }}>{client.name}</div>
-        {client.lines.filter(Boolean).map((l, i) => <div key={i} style={muted}>{l}</div>)}
+      <div style={{ position: "relative", marginTop: 20, background: "#fafafa", padding: "12px 14px", borderRadius: 6, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#888", textTransform: "uppercase" }}>{labels.client}</div>
+          <div style={{ fontWeight: 700 }}>{client.name}</div>
+          {client.lines.filter(Boolean).map((l, i) => <div key={i} style={muted}>{l}</div>)}
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: minimal ? 16 : 22, fontWeight: 700, letterSpacing: minimal ? 2 : 0, textTransform: minimal ? "uppercase" : "none", color: accent }}>{title}</div>
+          <div style={{ color: "#888", fontSize: 11, marginTop: 1 }}>#{refId}</div>
+        </div>
       </div>
       <div style={{ position: "relative" }}>
         <DocTable accent={accent} headers={headers} items={items} money={money} />
