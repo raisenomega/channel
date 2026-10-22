@@ -22,6 +22,7 @@ import { OnboardingRoute } from "@/routes/onboarding.tenant";
 import { TemplatesRoute } from "@/routes/templates";
 import { PdfTemplatesRoute } from "@/routes/pdf-templates";
 import { PublicQuoteRoute } from "@/routes/q.$token";
+import { PublicInvoiceRoute } from "@/routes/i.$token";
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
@@ -47,4 +48,5 @@ export const routeTree = rootRoute.addChildren([
   TemplatesRoute,
   PdfTemplatesRoute,
   PublicQuoteRoute,
+  PublicInvoiceRoute,
 ]);

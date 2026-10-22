@@ -31,6 +31,8 @@ export const enDocPdf: Dict = {
   "invoices.empty": "No invoices",
   "invoices.editTitle": "Edit invoice",
   "invoices.pdfTitle": "INVOICE",
+  "invoices.send": "Send", "invoices.sendTitle": "Send invoice",
+  "public.pay": "Pay", "public.payThanks": "Thanks! We notified the business you will pay; they will confirm it.", "public.payPending": "You already requested payment. The business will confirm it.",
   "public.accept": "Accept", "public.reject": "Reject", "public.note": "Note (optional)",
   "public.accepted": "Thanks! Quote accepted.", "public.rejected": "Quote rejected. Thank you.",
   "public.expired": "This link expired.", "public.used": "This quote was already answered.",

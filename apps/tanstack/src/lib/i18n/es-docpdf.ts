@@ -31,6 +31,8 @@ export const esDocPdf: Dict = {
   "invoices.empty": "Sin facturas",
   "invoices.editTitle": "Editar factura",
   "invoices.pdfTitle": "FACTURA",
+  "invoices.send": "Enviar", "invoices.sendTitle": "Enviar factura",
+  "public.pay": "Pagar", "public.payThanks": "¡Gracias! Avisamos al negocio que vas a pagar; confirmará tu pago.", "public.payPending": "Ya solicitaste el pago. El negocio lo confirmará.",
   "public.accept": "Aceptar", "public.reject": "Rechazar", "public.note": "Nota (opcional)",
   "public.accepted": "¡Gracias! Cotización aceptada.", "public.rejected": "Cotización rechazada. Gracias.",
   "public.expired": "Este enlace expiró.", "public.used": "Esta cotización ya fue respondida.",

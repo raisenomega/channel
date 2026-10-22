@@ -30,7 +30,7 @@ export const enOnboarding: Dict = {
   "dash.actividadReciente": "Recent activity",
   "dash.verTodos": "See all",
   "dash.sinActividad": "No recent activity",
-  "dash.cotAceptada": "Quote accepted", "dash.cotRechazada": "Quote rejected",
+  "dash.cotAceptada": "Quote accepted", "dash.cotRechazada": "Quote rejected", "dash.facturaPago": "Invoice: payment requested",
   "dash.peticiones": "Requests",
   "dash.sinPeticiones": "No requests yet",
   "dash.busquedaInteligente": "Smart search",
