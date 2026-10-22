@@ -6,7 +6,6 @@ import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
-import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
 import { fetchBusinessInfo, type BizInfo } from "./pdf-business-info";
 import { fetchQuoteItems, computeTotals } from "./quote-items";
 import { styleOf } from "./pdf-styles";
@@ -21,9 +20,7 @@ export function QuotePdfModal({ lang, quote, contactName, onClose }: {
   lang: Idioma; quote: QuoteListItem; contactName: string; onClose: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const mi = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 300_000 });
-  const tid = mi.data?.tenantId ?? "";
-  const bizQ = useQuery({ queryKey: ["pdf-biz", tid], queryFn: () => fetchBusinessInfo(tid), enabled: !!tid });
+  const bizQ = useQuery({ queryKey: ["pdf-biz", "row"], queryFn: () => fetchBusinessInfo("row") });
   const itemsQ = useQuery({ queryKey: ["quote-items", quote.id], queryFn: () => fetchQuoteItems(quote.id), staleTime: 15_000 });
   const biz = bizQ.data ?? EMPTY;
   const items = itemsQ.data ?? [];
