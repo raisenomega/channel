@@ -26,4 +26,10 @@ export const esAgendaForm: Dict = {
   "agenda.d.video": "Unirse a la videollamada",
   "agenda.d.recordatorios": "Recordatorios",
   "agenda.d.media": "Adjuntos",
+  "agenda.enviar": "Enviar",
+  "agenda.enviarPor": "Enviar por",
+  "agenda.enCola": "En cola",
+  "agenda.agendados": "Agendados",
+  "agenda.sinAgendados": "Sin citas agendadas",
+  "agenda.previa": "Vista previa del mensaje (editable)",
 };

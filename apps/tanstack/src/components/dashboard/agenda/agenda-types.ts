@@ -28,6 +28,7 @@ export interface RowAppointment {
   created_by_name: string | null;
   attachment_id: string | null;
   send_channels: string[] | null;
+  send_message: string | null;
   sent_at: string | null;
   created_at?: string | null;
 }

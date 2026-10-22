@@ -9,7 +9,7 @@ const COLS = [
   "id", "contact_id", "conversation_id", "agent_id", "quote_id", "order_id",
   "title", "description", "scheduled_at", "ends_at", "status", "channel", "created_by_type", "location",
   "reason", "pre_notes", "meeting_type", "meeting_url", "reminders", "media", "created_by_user_id",
-  "created_by_name", "attachment_id", "send_channels", "sent_at", "created_at",
+  "created_by_name", "attachment_id", "send_channels", "send_message", "sent_at", "created_at",
 ].join(",");
 
 export function fetchAppointments(fromISO: string, toISO: string): Promise<RowAppointment[]> {
