@@ -10,6 +10,7 @@ import { LoadingState, EmptyState } from "./quotes-states";
 import { CreateQuoteModal } from "./quotes-modal";
 import { QuotesHeader } from "./quotes-header";
 import { QuotePdfModal } from "./pdf/quote-pdf-modal";
+import { TemplateDesignerModal } from "./pdf/template-designer-modal";
 
 export function QuotesPage() {
   const { language } = usePreferences();
@@ -18,6 +19,7 @@ export function QuotesPage() {
   const [formAmount, setFormAmount] = useState("");
   const [formCurrency, setFormCurrency] = useState("USD");
   const [pdfQuote, setPdfQuote] = useState<QuoteListItem | null>(null);
+  const [showTemplate, setShowTemplate] = useState(false);
 
   const { quotes, isPending, contacts, refetch } = useQuotesData();
 
@@ -41,7 +43,7 @@ export function QuotesPage() {
 
   return (
     <div className="view space-y-4">
-      <QuotesHeader language={language} onCreate={() => setShowCreate(true)} />
+      <QuotesHeader language={language} onCreate={() => setShowCreate(true)} onTemplate={() => setShowTemplate(true)} />
 
       {isPending ? (
         <LoadingState language={language} />
@@ -67,9 +69,8 @@ export function QuotesPage() {
         />
       ) : null}
 
-      {pdfQuote ? (
-        <QuotePdfModal lang={language} quote={pdfQuote} contactName={contacts?.find((c) => c.id === pdfQuote.contactId)?.displayName ?? "-"} onClose={() => setPdfQuote(null)} />
-      ) : null}
+      {showTemplate && <TemplateDesignerModal lang={language} onClose={() => setShowTemplate(false)} />}
+      {pdfQuote && <QuotePdfModal lang={language} quote={pdfQuote} contactName={contacts?.find((c) => c.id === pdfQuote.contactId)?.displayName ?? "-"} onClose={() => setPdfQuote(null)} />}
     </div>
   );
 }
