@@ -33,4 +33,12 @@ export const esAgenda: Dict = {
   "agenda.view.week": "Semana",
   "agenda.view.day": "Día",
   "agenda.sinDia": "Sin citas ese día",
+  "agenda.nueva": "Nueva cita",
+  "agenda.guardar": "Guardar cita",
+  "agenda.err": "No se pudo guardar",
+  "agenda.f.title": "Título",
+  "agenda.f.date": "Fecha",
+  "agenda.f.time": "Hora",
+  "agenda.f.desc": "Descripción / nota",
+  "agenda.f.creadaPor": "Creada por",
 };

@@ -33,4 +33,12 @@ export const enAgenda: Dict = {
   "agenda.view.week": "Week",
   "agenda.view.day": "Day",
   "agenda.sinDia": "No appointments that day",
+  "agenda.nueva": "New appointment",
+  "agenda.guardar": "Save appointment",
+  "agenda.err": "Could not save",
+  "agenda.f.title": "Title",
+  "agenda.f.date": "Date",
+  "agenda.f.time": "Time",
+  "agenda.f.desc": "Description / note",
+  "agenda.f.creadaPor": "Created by",
 };

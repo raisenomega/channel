@@ -1,5 +1,6 @@
 /**
- * HUB by Raisen — Datos relacionados de una cita para el modal (oro puro).
+ * HUB by Raisen — Datos relacionados de una cita para el modal (oro puro) +
+ * conversaciones de un contacto para el selector del formulario de nueva cita.
  */
 import { restGet, enc } from "./agenda-rest";
 import type { ApptContact, ApptConversation, ApptAgent, ApptNote, ApptDoc } from "./agenda-types";
@@ -18,4 +19,8 @@ export function fetchApptNotes(contactId: string): Promise<ApptNote[]> {
 }
 export function fetchApptDocs(conversationId: string): Promise<ApptDoc[]> {
   return restGet(`attachments?conversation_id=eq.${enc(conversationId)}&select=id,file_name,file_type,created_at&order=created_at.desc&limit=20`);
+}
+export function fetchConvsForContact(contactId: string): Promise<{ id: string; subject: string | null; primary_channel: string | null }[]> {
+  if (!contactId) return Promise.resolve([]);
+  return restGet(`conversations?contact_id=eq.${enc(contactId)}&select=id,subject,primary_channel&order=created_at.desc&limit=30`);
 }
