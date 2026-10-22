@@ -37,4 +37,6 @@ export const enAgendaForm: Dict = {
   "agenda.ca.completado": "Completed",
   "agenda.ca.noAsistio": "No-show",
   "agenda.ca.cancelar": "Cancel",
+  "agenda.enviadoA": "Sent to",
+  "agenda.noEnviado": "Not sent (no thread)",
 };
