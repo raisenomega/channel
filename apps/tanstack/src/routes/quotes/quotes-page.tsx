@@ -3,13 +3,13 @@
  */
 import { useState } from "react";
 import { usePreferences } from "@/app/preferences";
-import { t } from "@/lib/i18n";
 import { crearQuote, type QuoteListItem } from "@/lib/quotes-client";
 import { useQuotesData } from "./quotes-fetchers";
 import { QuoteCard } from "./quotes-card";
 import { LoadingState, EmptyState } from "./quotes-states";
 import { CreateQuoteModal } from "./quotes-modal";
 import { QuotesHeader } from "./quotes-header";
+import { QuotePdfModal } from "./pdf/quote-pdf-modal";
 
 export function QuotesPage() {
   const { language } = usePreferences();
@@ -17,6 +17,7 @@ export function QuotesPage() {
   const [formContact, setFormContact] = useState("");
   const [formAmount, setFormAmount] = useState("");
   const [formCurrency, setFormCurrency] = useState("USD");
+  const [pdfQuote, setPdfQuote] = useState<QuoteListItem | null>(null);
 
   const { quotes, isPending, contacts, refetch } = useQuotesData();
 
@@ -36,9 +37,7 @@ export function QuotesPage() {
     }
   }
 
-  function handlePdf(quote: QuoteListItem) {
-    alert(`PDF (P1) — ${t(language, "quotes.pdfPlaceholder")}: ${quote.id}`);
-  }
+  const handlePdf = (quote: QuoteListItem) => setPdfQuote(quote);
 
   return (
     <div className="view space-y-4">
@@ -66,6 +65,10 @@ export function QuotesPage() {
           onSave={handleCreate}
           onClose={() => setShowCreate(false)}
         />
+      ) : null}
+
+      {pdfQuote ? (
+        <QuotePdfModal lang={language} quote={pdfQuote} contactName={contacts?.find((c) => c.id === pdfQuote.contactId)?.displayName ?? "-"} onClose={() => setPdfQuote(null)} />
       ) : null}
     </div>
   );
