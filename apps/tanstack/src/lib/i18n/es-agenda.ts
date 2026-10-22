@@ -29,4 +29,8 @@ export const esAgenda: Dict = {
   "agenda.d.slaOk": "En regla",
   "agenda.d.pedido": "Pedido relacionado",
   "agenda.d.notas": "Notas de seguimiento",
+  "agenda.view.month": "Mes",
+  "agenda.view.week": "Semana",
+  "agenda.view.day": "Día",
+  "agenda.sinDia": "Sin citas ese día",
 };

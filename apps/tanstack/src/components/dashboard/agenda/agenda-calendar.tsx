@@ -1,35 +1,40 @@
 /**
- * HUB by Raisen — Agenda: calendario mensual con navegacion + modal de detalle. C4 <=75.
+ * HUB by Raisen — Agenda: vistas Mes / Semana / Dia + modal de detalle de cita. C4 <=75.
+ * Clic en un dia -> vista Dia; clic en una cita -> modal (dato crudo relacionado).
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Idioma } from "@/lib/i18n";
-import { t } from "@/lib/i18n";
-import { fetchAppointments } from "./agenda-fetchers";
-import { AgendaGrid } from "./agenda-grid";
+import { fetchAppointments, groupByDay } from "./agenda-fetchers";
+import { AgendaViewChips, type AgendaView } from "./agenda-view-chips";
+import { AgendaMonth } from "./agenda-grid";
+import { AgendaWeekView } from "./agenda-week-view";
+import { AgendaDayView } from "./agenda-day-view";
 import { AgendaDetailModal } from "./agenda-detail-modal";
-import { monthRange, monthLabel } from "./agenda-dates";
+import { monthRange, dayKey } from "./agenda-dates";
 import type { RowAppointment } from "./agenda-types";
 
-const nowCursor = () => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; };
+const nowCur = () => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; };
 
 export function AgendaCalendar({ lang, accent }: { lang: Idioma; accent: string }) {
-  const [cursor, setCursor] = useState(nowCursor);
+  const [cur, setCur] = useState(nowCur);
+  const [selected, setSelected] = useState<Date | null>(null);
+  const [view, setView] = useState<AgendaView>("month");
   const [open, setOpen] = useState<RowAppointment | null>(null);
-  const { from, to, gridStart } = monthRange(cursor.y, cursor.m);
+  const { from, to } = monthRange(cur.y, cur.m);
   const { data } = useQuery({ queryKey: ["agenda", from, to], queryFn: () => fetchAppointments(from, to), staleTime: 15_000 });
-  const move = (delta: number) => setCursor((c) => { const d = new Date(c.y, c.m + delta, 1); return { y: d.getFullYear(), m: d.getMonth() }; });
+  const grouped = useMemo(() => groupByDay(data ?? []), [data]);
+  const viewDay = selected ?? new Date();
+  const openDay = (d: Date) => { setSelected(d); if (d.getFullYear() !== cur.y || d.getMonth() !== cur.m) setCur({ y: d.getFullYear(), m: d.getMonth() }); setView("day"); };
+  const toMonthOf = (d: Date) => setCur({ y: d.getFullYear(), m: d.getMonth() });
+  const goToday = () => { const d = new Date(); setSelected(d); setCur({ y: d.getFullYear(), m: d.getMonth() }); };
+  const move = (delta: number) => setCur((c) => { const d = new Date(c.y, c.m + delta, 1); return { y: d.getFullYear(), m: d.getMonth() }; });
   return (
     <div className="space-y-3">
-      <header className="flex items-center justify-between gap-2">
-        <h4 className="text-[15px] font-bold capitalize" style={{ color: `hsl(${accent})` }}>{monthLabel(lang, cursor.y, cursor.m)}</h4>
-        <div className="flex items-center gap-1.5">
-          <button type="button" className="chip" onClick={() => move(-1)}>{t(lang, "agenda.prev")}</button>
-          <button type="button" className="chip" onClick={() => setCursor(nowCursor())}>{t(lang, "agenda.today")}</button>
-          <button type="button" className="chip" onClick={() => move(1)}>{t(lang, "agenda.next")}</button>
-        </div>
-      </header>
-      <AgendaGrid lang={lang} accent={accent} gridStart={gridStart} month={cursor.m} items={data ?? []} onPick={setOpen} />
+      <AgendaViewChips lang={lang} accent={accent} view={view} onView={setView} onToday={goToday} />
+      {view === "month" && <AgendaMonth lang={lang} accent={accent} year={cur.y} month={cur.m} grouped={grouped} onDay={openDay} onPick={setOpen} onMove={move} />}
+      {view === "week" && <AgendaWeekView lang={lang} accent={accent} anchor={viewDay} cursorMonth={cur.m} grouped={grouped} onOpenDay={openDay} onPick={setOpen} onCrossMonth={toMonthOf} />}
+      {view === "day" && <AgendaDayView lang={lang} accent={accent} day={viewDay} items={grouped.get(dayKey(viewDay)) ?? []} onChangeDay={openDay} onPick={setOpen} />}
       {open && <AgendaDetailModal lang={lang} accent={accent} appt={open} onClose={() => setOpen(null)} />}
     </div>
   );

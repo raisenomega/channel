@@ -29,4 +29,8 @@ export const enAgenda: Dict = {
   "agenda.d.slaOk": "On track",
   "agenda.d.pedido": "Related order",
   "agenda.d.notas": "Follow-up notes",
+  "agenda.view.month": "Month",
+  "agenda.view.week": "Week",
+  "agenda.view.day": "Day",
+  "agenda.sinDia": "No appointments that day",
 };
