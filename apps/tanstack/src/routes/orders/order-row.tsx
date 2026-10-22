@@ -19,6 +19,9 @@ export function OrderRow({ lang, order, onStatus, onOpen }: {
           <button key={s} type="button" className={"chip text-[11px]" + (order.status === s ? " active" : "")} onClick={(e) => { e.stopPropagation(); onStatus(order.id, s); }}>{t(lang, "orders.status." + s)}</button>
         ))}
       </div>
+      <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(order); }} className="shrink-0 text-muted-foreground hover:text-foreground" aria-label={t(lang, "quotes.download")}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+      </button>
     </div>
   );
 }
