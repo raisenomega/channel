@@ -1,25 +1,28 @@
 /**
- * HUB by Raisen — Modal "Vista previa PDF" de la Cotizacion. Usa el estilo de plantilla elegido
- * (branding_config.pdf_style) + el documento generico; imprime -> "Guardar como PDF". C4 <=75.
+ * HUB by Raisen — Modal "Vista previa PDF" de la Cotizacion. Jala datos del negocio (logo, nombre,
+ * direccion, tax) + estilo + mensaje de pie elegidos, y imprime -> "Guardar como PDF". C4 <=75.
  */
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
-import { fetchPdfStyle } from "./pdf-style-store";
+import { fetchBusinessInfo, type BizInfo } from "./pdf-business-info";
 import { styleOf } from "./pdf-styles";
 import { BusinessDocument, type DocRow } from "./business-document";
 import { printHtml } from "./pdf-print";
 import type { QuoteListItem } from "@/lib/quotes-client";
+
+const EMPTY: BizInfo = { name: "HUB by Raisen", phone: "", address: "", legalName: "", taxId: "", logoUrl: null, footer: "", style: "clasico" };
 
 export function QuotePdfModal({ lang, quote, contactName, onClose }: {
   lang: Idioma; quote: QuoteListItem; contactName: string; onClose: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mi = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 300_000 });
-  const styleQ = useQuery({ queryKey: ["pdf-style", mi.data?.tenantId], queryFn: () => fetchPdfStyle(mi.data?.tenantId ?? ""), enabled: !!mi.data?.tenantId });
-  const bizName = mi.data?.name || "HUB by Raisen";
+  const tid = mi.data?.tenantId ?? "";
+  const bizQ = useQuery({ queryKey: ["pdf-biz", tid], queryFn: () => fetchBusinessInfo(tid), enabled: !!tid });
+  const biz = bizQ.data ?? EMPTY;
   const title = t(lang, "quotes.pdf.title");
   const rows: DocRow[] = [
     { label: t(lang, "quotes.contact"), value: contactName },
@@ -39,7 +42,7 @@ export function QuotePdfModal({ lang, quote, contactName, onClose }: {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto bg-neutral-300 p-4">
-          <div ref={ref}><BusinessDocument title={title} style={styleOf(styleQ.data)} bizName={bizName} refId={quote.id.slice(0, 8)} rows={rows} total={total} /></div>
+          <div ref={ref}><BusinessDocument title={title} style={styleOf(biz.style)} biz={biz} refId={quote.id.slice(0, 8)} rows={rows} total={total} /></div>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 /**
- * HUB by Raisen — Guarda/lee el estilo de plantilla PDF elegido en tenants.branding_config.pdf_style
- * (jsonb ya existente, sin migracion). RLS tenants_update_own. C4 <=75.
+ * HUB by Raisen — Guarda la configuracion de plantilla en tenants.branding_config (jsonb, sin
+ * migracion): pdf_style (estilo elegido) y pdf_footer (mensaje de pie). RLS tenants_update_own. C4 <=75.
  */
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 
@@ -18,12 +18,7 @@ async function readBranding(tenantId: string): Promise<Record<string, unknown>> 
   }
 }
 
-export async function fetchPdfStyle(tenantId: string): Promise<string> {
-  const b = await readBranding(tenantId);
-  return typeof b.pdf_style === "string" ? b.pdf_style : "clasico";
-}
-
-export async function savePdfStyle(tenantId: string, style: string): Promise<boolean> {
+async function patchBranding(tenantId: string, patch: Record<string, unknown>): Promise<boolean> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers || !tenantId) return false;
@@ -32,10 +27,18 @@ export async function savePdfStyle(tenantId: string, style: string): Promise<boo
     const res = await fetch(`${base}/tenants?id=eq.${encodeURIComponent(tenantId)}`, {
       method: "PATCH",
       headers: { ...headers, "content-type": "application/json", prefer: "return=minimal" },
-      body: JSON.stringify({ branding_config: { ...b, pdf_style: style } }),
+      body: JSON.stringify({ branding_config: { ...b, ...patch } }),
     });
     return res.ok;
   } catch {
     return false;
   }
+}
+
+export function savePdfStyle(tenantId: string, style: string): Promise<boolean> {
+  return patchBranding(tenantId, { pdf_style: style });
+}
+
+export function savePdfFooter(tenantId: string, footer: string): Promise<boolean> {
+  return patchBranding(tenantId, { pdf_footer: footer });
 }
