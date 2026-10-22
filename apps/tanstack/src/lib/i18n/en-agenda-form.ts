@@ -31,4 +31,5 @@ export const enAgendaForm: Dict = {
   "agenda.enCola": "Queued",
   "agenda.agendados": "Scheduled",
   "agenda.sinAgendados": "No scheduled appointments",
+  "agenda.previa": "Message preview (editable)",
 };

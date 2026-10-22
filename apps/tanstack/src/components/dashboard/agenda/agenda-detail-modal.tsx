@@ -62,7 +62,7 @@ export function AgendaDetailModal({ lang, accent, appt, onClose, onEdit }: {
               {appt.media.map((mm) => <a key={mm.url} href={mm.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs" style={{ color: `hsl(${accent})` }}>{mm.type} - {mm.name}</a>)}
             </div>
           )}
-          <AgendaSendBar lang={lang} accent={accent} appt={appt} />
+          <AgendaSendBar lang={lang} accent={accent} appt={appt} contactName={d.contact?.display_name || nombre || ""} />
           <AgendaDetailSections lang={lang} d={d} />
         </div>
       </div>
