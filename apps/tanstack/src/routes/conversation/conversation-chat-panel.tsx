@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ChatThread, type ChatMsg } from "@/components/dashboard/chat-bubbles";
 
 export function ChatPanel({
-  conversationId, messages, language, onBack, composerText, setComposerText, onSend, sending,
+  conversationId, messages, language, onBack, composerText, setComposerText, onSend, sending, contactName, contactPhone,
 }: {
   conversationId: string;
   messages: readonly Mensaje[];
@@ -19,15 +19,17 @@ export function ChatPanel({
   setComposerText: (v: string) => void;
   onSend: () => void;
   sending: boolean;
+  contactName?: string;
+  contactPhone?: string | null;
 }) {
   return (
     <div className="rounded-2xl glass-card" data-chat-thread>
       <div className="flex items-center justify-between gap-3 border-b border-border/30 p-3">
         <div className="flex items-center gap-3">
-          <Avatar name="Conversacion" size="sm" />
+          <Avatar name={contactName || "Contacto"} size="sm" />
           <div className="nm">
-            <p className="text-sm font-semibold text-foreground">#{conversationId.length > 8 ? conversationId.slice(0, 8) + "..." : conversationId}</p>
-            <p className="text-xs text-muted-foreground">{t(language, "dash.conversaciones")}</p>
+            <p className="text-sm font-semibold text-foreground">{contactName || ("#" + (conversationId.length > 8 ? conversationId.slice(0, 8) + "..." : conversationId))}</p>
+            <p className="text-xs text-muted-foreground">{contactPhone || t(language, "dash.conversaciones")}</p>
           </div>
         </div>
         <Button variant="ghost" size="sm" onClick={onBack}>{t(language, "inbox.filtros")}</Button>

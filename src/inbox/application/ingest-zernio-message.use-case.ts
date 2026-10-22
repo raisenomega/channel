@@ -44,7 +44,8 @@ export class IngestZernioMessageHandler {
     const convId = this.d.detId(`cv:${tenantId}:${z.channel}:${z.contactExternalId}`) as ConversationId;
     const ch = z.channel as ChannelType;
     if (!(await this.d.convExiste(convId))) { // Issue A: crear 1 sola vez -> no resetea total_messages (lo maneja el trigger 054)
-      const c = crearContacto(tenantId, z.contactName);
+      let c = crearContacto(tenantId, z.contactName, undefined, z.contactPhone || undefined);
+      if (!c.ok) c = crearContacto(tenantId, z.contactName); // telefono invalido (ej. id de IG) -> sin telefono; nunca rompe el ingest
       if (c.ok && !(await this.d.contacts.guardar({ ...c.value, id: contactId })).ok) return fail("contacto");
       const cv = crearConversacion(tenantId, contactId, ch);
       if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId, participantExternalId: z.contactExternalId, providerConversationId: z.providerConversationId, providerAccountId: z.accountId })).ok) return fail("conversacion");
