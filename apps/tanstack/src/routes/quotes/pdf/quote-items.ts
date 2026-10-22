@@ -12,7 +12,7 @@ export async function fetchQuoteItems(quoteId: string): Promise<DocItem[]> {
   const headers = supabaseAuthHeaders();
   if (!base || !headers || !quoteId) return [];
   try {
-    const res = await fetch(`${base}/quote_line_items?quote_id=eq.${encodeURIComponent(quoteId)}&select=description,quantity,unit_price,discount_pct&order=sort.asc`, { headers });
+    const res = await fetch(`${base}/rpc/get_quote_items`, { method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify({ p_quote_id: quoteId }) });
     if (!res.ok) return [];
     const rows = (await res.json()) as Row[];
     return rows.map((r) => ({ description: r.description, quantity: Number(r.quantity), unitPrice: Number(r.unit_price), lineTotal: Number(r.quantity) * Number(r.unit_price) * (1 - Number(r.discount_pct ?? 0) / 100) }));
