@@ -51,10 +51,13 @@ function ConversationPage() {
     setSending(false);
   }
 
+  const c360 = contact360 !== "loading" && contact360 ? contact360 : null;
   return (
     <div className="dash-grid grid gap-4 mt-4">
       <ChatPanel
         conversationId={conversationId}
+        contactName={c360?.displayName}
+        contactPhone={c360?.primaryPhone}
         messages={messages ?? []}
         language={language}
         onBack={() => void navigate({ to: "/inbox" })}

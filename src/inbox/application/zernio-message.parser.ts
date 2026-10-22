@@ -14,6 +14,7 @@ export interface ZernioInbound {
   readonly direction: "inbound" | "outbound";
   readonly contactExternalId: string;    // conversation.participantId (estable, mismo hilo in/out)
   readonly contactName: string;          // conversation.participantName
+  readonly contactPhone: string;         // WhatsApp: el participantId ES el telefono; otros canales: vacio
   readonly providerConversationId: string; // #1: conversation.id de Zernio -> ruta del envío real
 }
 
@@ -52,6 +53,7 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
     direction,
     contactExternalId: String(conv["participantId"] ?? sender["id"] ?? providerMessageId),
     contactName: String(conv["participantName"] ?? senderName ?? "Cliente"),
+    contactPhone: String(m["platform"] ?? acct["platform"] ?? "") === "whatsapp" ? String(conv["participantId"] ?? sender["id"] ?? providerMessageId).replace(/[^\d+]/g, "") : "",
     providerConversationId: String(conv["id"] ?? ""),
   };
 }
