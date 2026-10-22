@@ -12,7 +12,7 @@ export interface RawQuote {
   total_amount: number;
   currency: string;
   created_at: string;
-  expires_at: string | null;
+  expired_at: string | null;
 }
 
 export interface QuoteListItem {
