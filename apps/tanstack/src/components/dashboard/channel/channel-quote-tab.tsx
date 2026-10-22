@@ -13,7 +13,7 @@ export function ChannelQuoteTab({ lang, accent, contactId, contactName, cards }:
 }) {
   return (
     <div className="space-y-3">
-      <ContactQuoteCreate lang={lang} accent={accent} contactId={contactId} contactName={contactName} />
+      <div className="flex justify-end"><ContactQuoteCreate lang={lang} accent={accent} contactId={contactId} contactName={contactName} /></div>
       {cards.length > 0 && <CardGrid title={t(lang, "cf.cotizacion")} empty={t(lang, "quotes.empty")} accent={accent} cards={cards} />}
     </div>
   );
