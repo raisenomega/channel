@@ -1,45 +1,34 @@
 /**
- * HUB by Raisen — Pagina de Cotizaciones (componente principal).
+ * HUB by Raisen — Pagina de Cotizaciones (componente principal). Solo cotizaciones reales a clientes.
  */
 import { useState } from "react";
 import { usePreferences } from "@/app/preferences";
-import { crearQuote, type QuoteListItem } from "@/lib/quotes-client";
+import type { QuoteListItem } from "@/lib/quotes-client";
 import { useQuotesData } from "./quotes-fetchers";
 import { QuoteCard } from "./quotes-card";
 import { LoadingState, EmptyState } from "./quotes-states";
-import { CreateQuoteModal } from "./quotes-modal";
+import { QuoteEditorModal } from "./quote-editor-modal";
 import { QuotesHeader } from "./quotes-header";
 import { QuotePdfModal } from "./pdf/quote-pdf-modal";
+import { QuotesTemplateBanner } from "./quotes-template-banner";
 
 export function QuotesPage() {
   const { language } = usePreferences();
   const [showCreate, setShowCreate] = useState(false);
-  const [formContact, setFormContact] = useState("");
-  const [formAmount, setFormAmount] = useState("");
-  const [formCurrency, setFormCurrency] = useState("USD");
   const [pdfQuote, setPdfQuote] = useState<QuoteListItem | null>(null);
-
   const { quotes, isPending, contacts, refetch } = useQuotesData();
 
-  async function handleCreate() {
-    if (!formContact || !formAmount) return;
-    const r = await crearQuote({
-      contact_id: formContact,
-      total_amount: parseFloat(formAmount),
-      currency: formCurrency,
-    });
-    if (r.ok) {
-      setShowCreate(false);
-      setFormContact(""); setFormAmount(""); setFormCurrency("USD");
-      void refetch();
-    }
-  }
-
+  const onSaved = (id: string, preview: boolean, contactId: string, currency: string, total: number) => {
+    setShowCreate(false);
+    void refetch();
+    if (preview) setPdfQuote({ id, contactId, status: "draft", totalAmount: total, currency, createdAt: new Date().toISOString(), expiresAt: null });
+  };
   const handlePdf = (quote: QuoteListItem) => setPdfQuote(quote);
 
   return (
     <div className="view space-y-4">
       <QuotesHeader language={language} onCreate={() => setShowCreate(true)} />
+      <QuotesTemplateBanner lang={language} />
 
       {isPending ? (
         <LoadingState language={language} />
@@ -53,18 +42,7 @@ export function QuotesPage() {
         </div>
       )}
 
-      {showCreate ? (
-        <CreateQuoteModal
-          language={language}
-          contacts={contacts ?? []}
-          formContact={formContact} setFormContact={setFormContact}
-          formAmount={formAmount} setFormAmount={setFormAmount}
-          formCurrency={formCurrency} setFormCurrency={setFormCurrency}
-          onSave={handleCreate}
-          onClose={() => setShowCreate(false)}
-        />
-      ) : null}
-
+      {showCreate && <QuoteEditorModal lang={language} contacts={contacts ?? []} onClose={() => setShowCreate(false)} onSaved={onSaved} />}
       {pdfQuote && <QuotePdfModal lang={language} quote={pdfQuote} contactName={contacts?.find((c) => c.id === pdfQuote.contactId)?.displayName ?? "-"} onClose={() => setPdfQuote(null)} />}
     </div>
   );
