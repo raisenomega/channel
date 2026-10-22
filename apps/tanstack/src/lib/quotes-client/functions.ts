@@ -14,6 +14,7 @@ function mapear(r: RawQuote): QuoteListItem {
     currency: r.currency ?? "USD",
     createdAt: r.created_at,
     expiresAt: r.expired_at,
+    respondedAt: r.responded_at,
   };
 }
 
@@ -21,7 +22,7 @@ export async function listarQuotes(): Promise<Result<QuoteListItem[]>> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
-  const cols = ["id", "contact_id", "status", "total_amount", "currency", "created_at", "expired_at"];
+  const cols = ["id", "contact_id", "status", "total_amount", "currency", "created_at", "expired_at", "responded_at"];
   const url = `${base}/quotes?select=${encodeURIComponent(cols.join(","))}&order=created_at.desc`;
   try {
     const res = await fetch(url, { headers });

@@ -22,7 +22,7 @@ export function ContactQuoteCreate({ lang, accent, contactId, contactName }: {
   const nameFor = (id: string): string => (id === contactId ? contactName : contacts.find((c) => c.id === id)?.displayName ?? "");
   const onSaved = (id: string, preview: boolean, cid: string, currency: string, total: number) => {
     setShow(false);
-    if (preview) setPdf({ id, contactId: cid, status: "draft", totalAmount: total, currency, createdAt: new Date().toISOString(), expiresAt: null });
+    if (preview) setPdf({ id, contactId: cid, status: "draft", totalAmount: total, currency, createdAt: new Date().toISOString(), expiresAt: null, respondedAt: null });
   };
   return (
     <>

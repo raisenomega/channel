@@ -64,6 +64,7 @@ export const esBiz: Dict = {
   "quotes.status.draft": "Borrador",
   "quotes.status.sent": "Enviada",
   "quotes.status.accepted": "Aprobada",
+  "quotes.status.converted": "Convertida", "quotes.clientAccepted": "Aceptada por el cliente", "quotes.clientRejected": "Rechazada por el cliente",
   "quotes.status.rejected": "Rechazada",
   "quotes.status.expired": "Expirada",
   "quotes.createTitle": "Crear cotizacion",

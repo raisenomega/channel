@@ -48,7 +48,7 @@ export function QuotesPage() {
       )}
 
       {pdfQuote && <QuotePdfModal lang={language} quote={pdfQuote} contactName={nameOf(pdfQuote.contactId)} onClose={() => setPdfQuote(null)} />}
-      {edit && <QuoteEditorModal lang={language} contactId={edit.contactId} contactName={nameOf(edit.contactId)} contacts={contacts ?? []} editId={edit.id} initialClient={edit.client} initialLines={edit.lines} onConverted={() => { setEdit(null); void refetch(); }} onClose={() => setEdit(null)} onSaved={(id, preview, cid, currency, total) => { setEdit(null); void refetch(); if (preview) setPdfQuote({ id, contactId: cid, status: "draft", totalAmount: total, currency, createdAt: new Date().toISOString(), expiresAt: null }); }} />}
+      {edit && <QuoteEditorModal lang={language} contactId={edit.contactId} contactName={nameOf(edit.contactId)} contacts={contacts ?? []} editId={edit.id} initialClient={edit.client} initialLines={edit.lines} onConverted={() => { setEdit(null); void refetch(); }} onClose={() => setEdit(null)} onSaved={(id, preview, cid, currency, total) => { setEdit(null); void refetch(); if (preview) setPdfQuote({ id, contactId: cid, status: "draft", totalAmount: total, currency, createdAt: new Date().toISOString(), expiresAt: null, respondedAt: null }); }} />}
     </div>
   );
 }
