@@ -16,7 +16,7 @@ const CRM_KEY: Record<string, string> = { "/orders": "crm:orders", "/payments": 
 // paginas-popup de OAuth (return/callback). NO depende de la sesion (useSession es reactivo y flaky:
 // onAuthStateChange podia emitir null en un refresh de token/offline -> el nav desaparecia = "header
 // blanco, user atrapado"). La ruta es estable y siempre existe -> chips nunca desaparecen.
-const SIN_NAV = ["/login", "/zernio/return", "/channels/zernio/callback"];
+const SIN_NAV = ["/login", "/zernio/return", "/channels/zernio/callback", "/q"];
 
 export function Shell() {
   const { language, theme, toggleTheme, setLanguage } = usePreferences();
