@@ -1,6 +1,6 @@
 /**
  * HUB by Raisen — Pagina de Cotizaciones: 4 KPIs (espejo de Reportes) + filas aterrizadas con
- * Descargar. Solo cotizaciones reales a clientes.
+ * Descargar. Solo cotizaciones reales a clientes; crear se hace desde la conversacion.
  */
 import { useState } from "react";
 import { usePreferences } from "@/app/preferences";
@@ -9,27 +9,19 @@ import { useQuotesData } from "./quotes-fetchers";
 import { QuoteRow } from "./quote-row";
 import { QuotesStats } from "./quotes-stats";
 import { LoadingState, EmptyState } from "./quotes-states";
-import { QuoteEditorModal } from "./quote-editor-modal";
 import { QuotesHeader } from "./quotes-header";
 import { QuotePdfModal } from "./pdf/quote-pdf-modal";
 import { QuotesTemplateBanner } from "./quotes-template-banner";
 
 export function QuotesPage() {
   const { language } = usePreferences();
-  const [showCreate, setShowCreate] = useState(false);
   const [pdfQuote, setPdfQuote] = useState<QuoteListItem | null>(null);
-  const { quotes, isPending, contacts, refetch } = useQuotesData();
+  const { quotes, isPending, contacts } = useQuotesData();
   const nameOf = (id: string | null): string => contacts?.find((c) => c.id === id)?.displayName ?? "—";
-
-  const onSaved = (id: string, preview: boolean, contactId: string, currency: string, total: number) => {
-    setShowCreate(false);
-    void refetch();
-    if (preview) setPdfQuote({ id, contactId, status: "draft", totalAmount: total, currency, createdAt: new Date().toISOString(), expiresAt: null });
-  };
 
   return (
     <div className="view space-y-4">
-      <QuotesHeader language={language} onCreate={() => setShowCreate(true)} />
+      <QuotesHeader language={language} />
       <QuotesTemplateBanner lang={language} />
 
       {isPending ? (
@@ -45,7 +37,6 @@ export function QuotesPage() {
         </>
       )}
 
-      {showCreate && <QuoteEditorModal lang={language} contacts={contacts ?? []} onClose={() => setShowCreate(false)} onSaved={onSaved} />}
       {pdfQuote && <QuotePdfModal lang={language} quote={pdfQuote} contactName={nameOf(pdfQuote.contactId)} onClose={() => setPdfQuote(null)} />}
     </div>
   );
