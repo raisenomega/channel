@@ -5,7 +5,6 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import type { Contact360 } from "@/lib/types";
 import { currency, dateStr, initial } from "./conversation-format";
-import { ContactQuoteCreate } from "./contact-quote-create";
 
 export function ContactPanel({ contact, language }: { contact: Contact360 | null | "loading"; language: Idioma }) {
   if (contact === "loading") {
@@ -54,7 +53,6 @@ export function ContactPanel({ contact, language }: { contact: Contact360 | null
       {fila(t(language, "dash.prefCanal"), canal)}
       {fila(t(language, "dash.consent"), consent)}
       {sec(t(language, "dash.seccCotizaciones"))}
-      <ContactQuoteCreate lang={language} contactId={c.contactId} contactName={c.displayName} />
       {cotizaciones}
       {sec(t(language, "dash.seccOrdenes"))}
       {ordenes}

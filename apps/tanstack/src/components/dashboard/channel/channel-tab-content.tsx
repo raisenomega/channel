@@ -18,6 +18,7 @@ import { ContactFichaCard } from "./tab-contact-ficha";
 import { agentsToItems, templatesToItems, docsToItems, quotesToCards, ordersToCards, paymentsToCards } from "./tab-builders";
 import type { ActiveContactInfo } from "./channel-fetchers";
 import { AgendaCalendar } from "@/components/dashboard/agenda/agenda-calendar";
+import { ChannelQuoteTab } from "./channel-quote-tab";
 
 function useTabData(contactId: string | null) {
   const agents = useQuery({ queryKey: ["channel-agents"], queryFn: fetchAgents, staleTime: 30_000 });
@@ -56,7 +57,7 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
     case "plantillas":
       return <SimpleListView title={t(lang, "cf.plantillas")} empty={empty} accent={accent} items={templatesToItems(data.templates)} />;
     case "cotizacion":
-      return hasHilo ? <CardGrid title={t(lang, "cf.cotizacion")} empty={t(lang, "quotes.empty")} accent={accent} cards={quotesToCards(data.quotes, lang)} /> : sinHilo;
+      return hasHilo && contactId ? <ChannelQuoteTab lang={lang} accent={accent} contactId={contactId} contactName={contactInfo?.display_name ?? ""} cards={quotesToCards(data.quotes, lang)} /> : sinHilo;
     case "factura":
       return hasHilo ? <CardGrid title={t(lang, "cf.factura")} empty={t(lang, "orders.empty")} accent={accent} cards={ordersToCards(data.orders, lang)} /> : sinHilo;
     case "pagos":
