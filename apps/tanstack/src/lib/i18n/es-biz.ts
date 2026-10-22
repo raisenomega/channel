@@ -52,6 +52,8 @@ export const esBiz: Dict = {
   "quotes.style.use": "Usar este estilo",
   "quotes.style.current": "En uso",
   "quotes.template.footer": "Mensaje de pie / notas",
+  "quotes.template.logo": "Logo del negocio",
+  "quotes.template.logoBtn": "Cambiar logo",
   "quotes.template.footerPh": "Gracias por su patrocinio. Validez 30 días.",
   "quotes.template.saveFooter": "Guardar mensaje",
   "quotes.pdf.save": "Guardar en Storage",
