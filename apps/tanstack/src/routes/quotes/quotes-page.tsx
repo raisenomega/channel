@@ -11,6 +11,7 @@ import { CreateQuoteModal } from "./quotes-modal";
 import { QuotesHeader } from "./quotes-header";
 import { QuotePdfModal } from "./pdf/quote-pdf-modal";
 import { TemplateEditorModal } from "./pdf/template-editor-modal";
+import { TemplateRow } from "./quotes-template-row";
 
 export function QuotesPage() {
   const { language } = usePreferences();
@@ -32,9 +33,7 @@ export function QuotesPage() {
     });
     if (r.ok) {
       setShowCreate(false);
-      setFormContact("");
-      setFormAmount("");
-      setFormCurrency("USD");
+      setFormContact(""); setFormAmount(""); setFormCurrency("USD");
       void refetch();
     }
   }
@@ -44,6 +43,7 @@ export function QuotesPage() {
   return (
     <div className="view space-y-4">
       <QuotesHeader language={language} onCreate={() => setShowCreate(true)} onTemplate={() => setShowTemplate(true)} />
+      <TemplateRow lang={language} onOpen={() => setShowTemplate(true)} />
 
       {isPending ? (
         <LoadingState language={language} />
