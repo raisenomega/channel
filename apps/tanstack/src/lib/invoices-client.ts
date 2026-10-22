@@ -39,3 +39,20 @@ export async function fetchInvoicesForContact(contactId: string): Promise<Invoic
     return [];
   }
 }
+
+export async function convertInvoiceToOrder(invoiceId: string): Promise<string | null> {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return null;
+  try {
+    const res = await fetch(`${base}/rpc/create_order_from_invoice`, {
+      method: "POST", headers: { ...headers, "content-type": "application/json" },
+      body: JSON.stringify({ p_invoice_id: invoiceId }),
+    });
+    if (!res.ok) return null;
+    const id = (await res.json()) as unknown;
+    return typeof id === "string" ? id : null;
+  } catch {
+    return null;
+  }
+}

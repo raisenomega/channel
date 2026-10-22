@@ -10,6 +10,7 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import type { QuoteLine } from "@/lib/quotes-client";
 import { saveInvoiceWithItems } from "@/lib/invoices-edit-client";
+import { convertInvoiceToOrder } from "@/lib/invoices-client";
 import { fetchBusinessInfo } from "./pdf/pdf-business-info";
 import { QuoteLineEditor } from "./quote-line-editor";
 import { QuoteClientFields, type ClientData } from "./quote-client-fields";
@@ -34,6 +35,12 @@ export function InvoiceEditorModal({ lang, invoiceId, clientName, initialClient,
     setBusy(false);
     return !!id;
   };
+  const toOrder = async () => {
+    setBusy(true);
+    const ord = await convertInvoiceToOrder(invoiceId);
+    setBusy(false);
+    if (ord) onClose();
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <Card className="max-h-[92vh] w-full max-w-6xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -49,6 +56,7 @@ export function InvoiceEditorModal({ lang, invoiceId, clientName, initialClient,
           <div className="flex flex-wrap gap-2 pt-1">
             <Button variant="primary" onClick={() => void save().then((ok) => ok && onSaved())} disabled={busy || lines.length === 0}>{t(lang, "quotes.save")}</Button>
             <Button variant="outline" onClick={() => void save().then((ok) => ok && onPreview())} disabled={busy || lines.length === 0}>{t(lang, "quotes.pdf.preview")}</Button>
+            <Button variant="outline" onClick={() => void toOrder()} disabled={busy}>{t(lang, "quotes.convertOrder")}</Button>
             <Button variant="ghost" onClick={onClose}>{t(lang, "quotes.cancel")}</Button>
           </div>
         </CardBody>

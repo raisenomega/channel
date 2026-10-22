@@ -58,3 +58,17 @@ export async function listarOrdenes(): Promise<Result<OrderListItem[]>> {
     return { ok: false, error: { kind: "red", cause: String(e) } };
   }
 }
+export async function setOrderStatus(orderId: string, status: string): Promise<boolean> {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers) return false;
+  try {
+    const res = await fetch(`${base}/rpc/set_order_status`, {
+      method: "POST", headers: { ...headers, "content-type": "application/json" },
+      body: JSON.stringify({ p_order_id: orderId, p_status: status }),
+    });
+    return res.ok ? (await res.json()) === true : false;
+  } catch {
+    return false;
+  }
+}
