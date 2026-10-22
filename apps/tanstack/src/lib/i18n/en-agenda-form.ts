@@ -32,4 +32,9 @@ export const enAgendaForm: Dict = {
   "agenda.agendados": "Scheduled",
   "agenda.sinAgendados": "No scheduled appointments",
   "agenda.previa": "Message preview (editable)",
+  "agenda.eliminar": "Remove",
+  "agenda.reagendar": "Reschedule",
+  "agenda.ca.completado": "Completed",
+  "agenda.ca.noAsistio": "No-show",
+  "agenda.ca.cancelar": "Cancel",
 };

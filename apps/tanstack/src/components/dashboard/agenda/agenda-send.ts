@@ -1,13 +1,12 @@
 /**
- * HUB by Raisen — Poner una cita en cola de envio: guarda los canales (send_channels) y el
- * mensaje editable (send_message) que recibira el cliente. El disparo real por WA/IG/FB lo hara
- * el backend al volver Railway. Tambien compone el mensaje por defecto desde la cita. C4 <=75.
+ * HUB by Raisen — Cola de envio (canales + mensaje editable), mensaje por defecto, y cambio de
+ * status para el cierre honesto. Todo PATCH directo a Supabase, RLS por tenant. C4 <=75.
  */
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import type { Idioma } from "@/lib/i18n";
 import type { RowAppointment } from "./agenda-types";
 
-export async function queueSend(id: string, channels: string[], message: string): Promise<{ ok: boolean }> {
+async function patchAppt(id: string, fields: Record<string, unknown>): Promise<{ ok: boolean }> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false };
@@ -15,12 +14,20 @@ export async function queueSend(id: string, channels: string[], message: string)
     const res = await fetch(`${base}/appointments?id=eq.${encodeURIComponent(id)}`, {
       method: "PATCH",
       headers: { ...headers, "content-type": "application/json", prefer: "return=minimal" },
-      body: JSON.stringify({ send_channels: channels, send_message: message.trim() || null }),
+      body: JSON.stringify(fields),
     });
     return { ok: res.ok };
   } catch {
     return { ok: false };
   }
+}
+
+export function queueSend(id: string, channels: string[], message: string): Promise<{ ok: boolean }> {
+  return patchAppt(id, { send_channels: channels, send_message: message.trim() || null });
+}
+
+export function setApptStatus(id: string, status: string): Promise<{ ok: boolean }> {
+  return patchAppt(id, { status });
 }
 
 export function defaultSendMessage(lang: Idioma, appt: RowAppointment, name: string): string {

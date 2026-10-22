@@ -1,6 +1,6 @@
 /**
  * HUB by Raisen — Subida de media de la cita (documento/imagen/video) al bucket appointment-media.
- * Devuelve {url,type,name}; la URL publica se guarda en appointments.media. C4 <=75.
+ * Devuelve el item o un error visible (para diagnosticar bucket/policy). C4 <=75.
  */
 import { supabaseAuthHeaders, getSupabaseUrl } from "@/lib/supabase";
 import type { MediaItem } from "./agenda-types";
@@ -13,10 +13,12 @@ function kind(mime: string): string {
   return "document";
 }
 
-export async function uploadApptMedia(tenantId: string, file: File): Promise<MediaItem | null> {
+export type UploadResult = { ok: true; item: MediaItem } | { ok: false; error: string };
+
+export async function uploadApptMedia(tenantId: string, file: File): Promise<UploadResult> {
   const headers = supabaseAuthHeaders();
   const url = getSupabaseUrl();
-  if (!headers || !url || !tenantId) return null;
+  if (!headers || !url || !tenantId) return { ok: false, error: "config" };
   const ext = (file.name.split(".").pop() || "bin").toLowerCase();
   const path = `${encodeURIComponent(tenantId)}/${crypto.randomUUID()}.${ext}`;
   try {
@@ -25,9 +27,9 @@ export async function uploadApptMedia(tenantId: string, file: File): Promise<Med
       headers: { ...headers, "content-type": file.type || "application/octet-stream" },
       body: file,
     });
-    if (!up.ok) return null;
-    return { url: `${url}/storage/v1/object/public/${BUCKET}/${path}`, type: kind(file.type), name: file.name };
-  } catch {
-    return null;
+    if (!up.ok) return { ok: false, error: `storage ${up.status}` };
+    return { ok: true, item: { url: `${url}/storage/v1/object/public/${BUCKET}/${path}`, type: kind(file.type), name: file.name } };
+  } catch (e) {
+    return { ok: false, error: String(e) };
   }
 }

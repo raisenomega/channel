@@ -32,4 +32,9 @@ export const esAgendaForm: Dict = {
   "agenda.agendados": "Agendados",
   "agenda.sinAgendados": "Sin citas agendadas",
   "agenda.previa": "Vista previa del mensaje (editable)",
+  "agenda.eliminar": "Eliminar",
+  "agenda.reagendar": "Reagendar",
+  "agenda.ca.completado": "Completado",
+  "agenda.ca.noAsistio": "No atendió",
+  "agenda.ca.cancelar": "Cancelar",
 };
