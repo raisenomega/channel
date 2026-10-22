@@ -10,6 +10,7 @@ export interface Peticion {
   readonly id: string;
   readonly label: string;
   readonly timestamp: string;
+  readonly tone?: "accepted" | "rejected";
 }
 
 export function BentoPeticiones({ lang, items = [] }: {
@@ -30,7 +31,7 @@ export function BentoPeticiones({ lang, items = [] }: {
         <ul className="flex flex-col">
           {items.slice(0, 5).map((p) => (
             <li key={p.id} className="flex items-start gap-2 border-b border-border/20 py-1.5 last:border-0">
-              <span className="inline-block mt-1 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "hsl(var(--high))" }} />
+              <span className="inline-block mt-1 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: `hsl(${p.tone === "accepted" ? "var(--success)" : "var(--high)"})` }} />
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-foreground truncate">{p.label}</p>
                 <p className="text-[10px] text-dim">{p.timestamp}</p>
