@@ -26,6 +26,7 @@ export const enDocPdf: Dict = {
   "quotes.tpl.active": "PDF template",
   "quotes.tpl.sectionHint": "Set up your PDF template here (quote, invoice, order).",
   "quotes.tpl.inUse": "In use",
+  "quotes.newContact": "New contact",
   "quotes.serviceLabel": "Service / Product",
   "quotes.deliveryAddr": "Delivery address",
   "quotes.newQuote": "New quote",

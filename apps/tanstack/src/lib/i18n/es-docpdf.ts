@@ -26,6 +26,7 @@ export const esDocPdf: Dict = {
   "quotes.tpl.active": "Plantilla PDF",
   "quotes.tpl.sectionHint": "Configura aquí la plantilla de tus PDF (cotización, factura, orden).",
   "quotes.tpl.inUse": "En uso",
+  "quotes.newContact": "Nuevo Contacto",
   "quotes.serviceLabel": "Servicio / Producto",
   "quotes.deliveryAddr": "Dirección de entrega",
   "quotes.newQuote": "Nueva cotización",

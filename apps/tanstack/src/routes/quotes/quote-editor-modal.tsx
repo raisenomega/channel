@@ -14,6 +14,7 @@ import { saveQuoteWithItems, type QuoteLine } from "@/lib/quotes-client";
 import { fetchBusinessInfo } from "./pdf/pdf-business-info";
 import { QuoteLineEditor } from "./quote-line-editor";
 import { QuoteClientFields, type ClientData } from "./quote-client-fields";
+import { QuoteNewContact } from "./quote-new-contact";
 
 const BLANK: ClientData = { cid: "", name: "", service: "", phone: "", email: "", address: "" };
 
@@ -25,6 +26,8 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, onClo
   const tax = bizQ.data?.tax ?? { mode: "pct" as const, value: 0, currency: "USD" };
   const currency = tax.currency;
   const [client, setClient] = useState<ClientData>(BLANK);
+  const [newContact, setNewContact] = useState(false);
+  const [preselect, setPreselect] = useState("");
   const [lines, setLines] = useState<QuoteLine[]>([]);
   const [busy, setBusy] = useState(false);
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
@@ -40,10 +43,10 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, onClo
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <Card className="max-h-[92vh] w-full max-w-2xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <CardHeader><CardTitle>{t(lang, "quotes.createTitle")}</CardTitle></CardHeader>
+      <Card className="max-h-[92vh] w-full max-w-6xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <CardHeader><CardTitle>{t(lang, "quotes.createTitle")}</CardTitle><button type="button" className="chip text-xs font-semibold" onClick={() => setNewContact(true)}>+ {t(lang, "quotes.newContact")}</button></CardHeader>
         <CardBody className="space-y-3">
-          <QuoteClientFields lang={lang} contactId={contactId} contactName={contactName} contacts={contacts} onChange={setClient} />
+          <QuoteClientFields lang={lang} contactId={contactId} contactName={contactName} contacts={contacts} preselect={preselect} onChange={setClient} />
           <QuoteLineEditor lang={lang} items={lines} currency={currency} onChange={setLines} />
           <div className="space-y-1 border-t border-border/40 pt-2 text-sm">
             <div className="flex justify-between text-muted-foreground"><span>{t(lang, "doc.subtotal")}</span><span>{money(subtotal)}</span></div>
@@ -57,6 +60,7 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, onClo
           </div>
         </CardBody>
       </Card>
+      {newContact && <QuoteNewContact lang={lang} onClose={() => setNewContact(false)} onCreated={(id) => { setNewContact(false); setPreselect(id); }} />}
     </div>
   );
 }
