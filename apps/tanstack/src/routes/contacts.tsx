@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 import { useContactos } from "./contacts-ui/contacts-fetchers";
 import { useContactsFilter, useCreateFormState } from "./contacts-ui/contacts-hooks";
 import { ContactsFilter } from "./contacts-ui/contacts-filter";
-import { ContactCard } from "./contacts-ui/contact-card";
+import { ContactRow } from "./contacts-ui/contact-row";
+import { RowList } from "@/components/ui/row-list";
 import { CreateModal } from "./contacts-ui/create-modal";
 import { AgendadosList } from "./contacts-ui/agendados-list";
 
@@ -54,7 +55,7 @@ function ContactsPage() {
       ) : filtrados.length === 0 ? (
         <Card><CardBody className="py-8 text-center"><p className="text-sm text-muted-foreground">{t(language, "contacts.empty")}</p></CardBody></Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">{filtrados.map((c) => <ContactCard key={c.id} contact={c} language={language} />)}</div>
+        <RowList items={filtrados} renderRow={(c) => <ContactRow key={c.id} lang={language} contact={c} />} />
       )}
       {create.showCreate ? <CreateModal language={language} formName={create.formName} setFormName={create.setFormName} formPhone={create.formPhone} setFormPhone={create.setFormPhone} formEmail={create.formEmail} setFormEmail={create.setFormEmail} formAddress={create.formAddress} setFormAddress={create.setFormAddress} formSegment={create.formSegment} setFormSegment={create.setFormSegment} onSave={handleCreate} onClose={() => create.setShowCreate(false)} /> : null}
     </div>
