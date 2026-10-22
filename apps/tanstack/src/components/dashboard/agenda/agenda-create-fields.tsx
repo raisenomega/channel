@@ -15,8 +15,8 @@ export function AgendaCreateFields({ lang, f, set }: {
   set: <K extends keyof ApptForm>(k: K, v: ApptForm[K]) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="col-span-2"><L label={t(lang, "agenda.f.title")}><input className={INP} value={f.title} onChange={(e) => set("title", e.target.value)} /></L></div>
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="col-span-2 sm:col-span-3"><L label={t(lang, "agenda.f.title")}><input className={INP} value={f.title} onChange={(e) => set("title", e.target.value)} /></L></div>
       <L label={t(lang, "agenda.f.date")}><input type="date" className={INP} value={f.date} onChange={(e) => set("date", e.target.value)} /></L>
       <L label={t(lang, "agenda.f.time")}><input type="time" className={INP} value={f.time} onChange={(e) => set("time", e.target.value)} /></L>
       <L label={t(lang, "agenda.d.estado")}><select className={INP} value={f.status} onChange={(e) => set("status", e.target.value)}>{STATUS.map((s) => <option key={s} value={s}>{t(lang, "agenda.st." + s)}</option>)}</select></L>
