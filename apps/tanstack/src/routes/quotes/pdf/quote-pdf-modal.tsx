@@ -1,6 +1,6 @@
 /**
  * HUB by Raisen — Modal "Vista previa PDF" de la Cotizacion (estilo Nucleo): caja cliente + tabla de
- * lineas + totales + marca de agua por estado. Jala logo/datos del negocio + estilo + pie. C4 <=75.
+ * lineas + totales (tax a nivel documento) + marca de agua. Usa la plantilla configurada. C4 <=75.
  */
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -14,7 +14,7 @@ import { BusinessDocument, type DocLabels } from "./business-document";
 import { printHtml } from "./pdf-print";
 import type { QuoteListItem } from "@/lib/quotes-client";
 
-const EMPTY: BizInfo = { name: "HUB by Raisen", phone: "", address: "", legalName: "", taxId: "", logoUrl: null, footer: "", style: "clasico" };
+const EMPTY: BizInfo = { name: "HUB by Raisen", phone: "", email: "", address: "", logoUrl: null, style: "clasico", tax: { mode: "pct", value: 0, currency: "USD" }, footer1: "", terms: "" };
 const WM: Record<string, string> = { draft: "BORRADOR", rejected: "RECHAZADA", expired: "VENCIDA", converted: "CONVERTIDA" };
 
 export function QuotePdfModal({ lang, quote, contactName, onClose }: {
@@ -27,10 +27,10 @@ export function QuotePdfModal({ lang, quote, contactName, onClose }: {
   const itemsQ = useQuery({ queryKey: ["quote-items", quote.id], queryFn: () => fetchQuoteItems(quote.id), staleTime: 15_000 });
   const biz = bizQ.data ?? EMPTY;
   const items = itemsQ.data ?? [];
-  const totals = computeTotals(items, quote.totalAmount, quote.currency);
+  const totals = computeTotals(items, quote.totalAmount, biz.tax);
   const title = t(lang, "quotes.pdf.title");
-  const headers = [t(lang, "doc.description"), t(lang, "doc.qty"), t(lang, "doc.price"), t(lang, "doc.disc"), t(lang, "doc.tax"), t(lang, "doc.total")];
-  const labels: DocLabels = { subtotal: t(lang, "doc.subtotal"), tax: t(lang, "doc.taxTotal"), total: t(lang, "quotes.total"), client: t(lang, "quotes.contact") };
+  const headers = [t(lang, "doc.description"), t(lang, "doc.qty"), t(lang, "doc.price"), t(lang, "doc.total")];
+  const labels: DocLabels = { subtotal: t(lang, "doc.subtotal"), tax: t(lang, "doc.taxTotal"), total: t(lang, "quotes.total"), client: t(lang, "quotes.contact"), terms: t(lang, "quotes.tpl.terms") };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4" onClick={onClose}>
       <div className="glass-card flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
