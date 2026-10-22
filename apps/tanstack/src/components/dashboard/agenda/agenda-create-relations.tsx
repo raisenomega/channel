@@ -17,7 +17,7 @@ export function AgendaCreateRelations({ lang, f, set, onContact, contacts, convs
   const opts = (arr: Opt[]) => arr.map((o) => <option key={o.id} value={o.id}>{o.label}</option>);
   const noC = !f.contactId;
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       <L label={t(lang, "agenda.d.cliente")}><select className={INP} value={f.contactId} onChange={(e) => onContact(e.target.value)}><option value="">-</option>{opts(contacts)}</select></L>
       <L label={t(lang, "agenda.d.agente")}><select className={INP} value={f.agentId} onChange={(e) => set("agentId", e.target.value)}><option value="">-</option>{opts(agents)}</select></L>
       <L label={t(lang, "agenda.d.conversacion")}><select className={INP} value={f.conversationId} disabled={noC} onChange={(e) => set("conversationId", e.target.value)}><option value="">-</option>{opts(convs)}</select></L>
