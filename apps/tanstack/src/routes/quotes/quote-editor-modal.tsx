@@ -42,7 +42,7 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, onClo
     if (id) onSaved(id, preview, client.cid, currency, total);
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <Card className="max-h-[92vh] w-full max-w-6xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <CardHeader><CardTitle>{t(lang, "quotes.createTitle")}</CardTitle><button type="button" className="chip text-xs font-semibold" onClick={() => setNewContact(true)}>+ {t(lang, "quotes.newContact")}</button></CardHeader>
         <CardBody className="space-y-3">

@@ -21,7 +21,7 @@ export async function listarContactos(): Promise<Result<ContactListItem[]>> {
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
   const cols = ["id", "display_name", "primary_phone", "primary_email", "segment", "ltv_usd", "total_orders"];
-  const url = `${base}/contacts?select=${encodeURIComponent(cols.join(","))}&order=display_name.asc`;
+  const url = `${base}/contacts?select=${encodeURIComponent(cols.join(","))}&order=created_at.desc`;
   try {
     const res = await fetch(url, { headers });
     if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };
