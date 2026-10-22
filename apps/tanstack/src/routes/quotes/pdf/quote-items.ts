@@ -5,24 +5,24 @@
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import type { DocItem, DocTotals, TaxConfig } from "./doc-types";
 
-interface Row { description: string; quantity: number; unit_price: number; }
+interface Row { description: string; quantity: number; unit_price: number; discount_pct?: number; }
 
 export async function fetchQuoteItems(quoteId: string): Promise<DocItem[]> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers || !quoteId) return [];
   try {
-    const res = await fetch(`${base}/quote_line_items?quote_id=eq.${encodeURIComponent(quoteId)}&select=description,quantity,unit_price&order=sort.asc`, { headers });
+    const res = await fetch(`${base}/quote_line_items?quote_id=eq.${encodeURIComponent(quoteId)}&select=description,quantity,unit_price,discount_pct&order=sort.asc`, { headers });
     if (!res.ok) return [];
     const rows = (await res.json()) as Row[];
-    return rows.map((r) => ({ description: r.description, quantity: Number(r.quantity), unitPrice: Number(r.unit_price), lineTotal: Number(r.quantity) * Number(r.unit_price) }));
+    return rows.map((r) => ({ description: r.description, quantity: Number(r.quantity), unitPrice: Number(r.unit_price), lineTotal: Number(r.quantity) * Number(r.unit_price) * (1 - Number(r.discount_pct ?? 0) / 100) }));
   } catch {
     return [];
   }
 }
 
 export function computeTotals(items: DocItem[], fallbackSubtotal: number, tax: TaxConfig): DocTotals {
-  const subtotal = items.length > 0 ? items.reduce((s, it) => s + it.quantity * it.unitPrice, 0) : fallbackSubtotal;
+  const subtotal = items.length > 0 ? items.reduce((s, it) => s + it.lineTotal, 0) : fallbackSubtotal;
   const taxAmt = tax.mode === "pct" ? subtotal * tax.value / 100 : tax.value;
   return { subtotal, tax: taxAmt, total: subtotal + taxAmt, currency: tax.currency };
 }
