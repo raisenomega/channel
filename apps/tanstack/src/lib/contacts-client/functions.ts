@@ -2,7 +2,6 @@
  * HUB by Raisen — Funciones del cliente de contactos.
  */
 import { supabaseRestBase, supabaseAuthHeaders } from "../supabase";
-import type { RowContact } from "../types";
 import type { Result, RawContact, ContactListItem } from "./types";
 
 function mapear(r: RawContact): ContactListItem {
@@ -39,20 +38,22 @@ export async function crearContacto(data: {
   primary_phone?: string;
   primary_email?: string;
   segment?: string;
-}): Promise<Result<RowContact>> {
+  address?: string;
+}): Promise<Result<{ id: string }>> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
   try {
-    const res = await fetch(`${base}/contacts`, {
+    const res = await fetch(`${base}/rpc/create_contact`, {
       method: "POST",
-      headers: { ...headers, "content-type": "application/json", prefer: "return=representation" },
-      body: JSON.stringify(data),
+      headers: { ...headers, "content-type": "application/json" },
+      body: JSON.stringify({ p_name: data.display_name, p_phone: data.primary_phone ?? "", p_email: data.primary_email ?? "", p_segment: data.segment ?? "nuevo", p_address: data.address ?? "" }),
     });
     if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };
     if (!res.ok) return { ok: false, error: { kind: "red", cause: `status ${res.status}` } };
-    const created = (await res.json()) as RowContact;
-    return { ok: true, value: created };
+    const id = (await res.json()) as unknown;
+    if (typeof id !== "string") return { ok: false, error: { kind: "red", cause: "no_id" } };
+    return { ok: true, value: { id } };
   } catch (e) {
     return { ok: false, error: { kind: "red", cause: String(e) } };
   }

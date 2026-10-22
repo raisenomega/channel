@@ -25,6 +25,7 @@ export const enBiz: Dict = {
   "contacts.createName": "Full name",
   "contacts.createPhone": "Phone",
   "contacts.createEmail": "Email",
+  "contacts.createAddress": "Physical address",
   "contacts.createSegment": "Segment",
   "contacts.createNotes": "Notes",
   "contacts.createSuccess": "Contact created",

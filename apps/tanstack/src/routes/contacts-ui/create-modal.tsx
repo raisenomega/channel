@@ -15,13 +15,14 @@ import { SEGMENTOS } from "./contacts-data";
 const E164 = /^\+[1-9]\d{6,14}$/;
 
 export function CreateModal({
-  language, formName, setFormName, formPhone, setFormPhone,
-  formEmail, setFormEmail, formSegment, setFormSegment, onSave, onClose,
+  language, formName, setFormName, formPhone, setFormPhone, formEmail, setFormEmail,
+  formAddress, setFormAddress, formSegment, setFormSegment, onSave, onClose,
 }: {
   language: "es" | "en";
   formName: string; setFormName: (v: string) => void;
   formPhone: string; setFormPhone: (v: string) => void;
   formEmail: string; setFormEmail: (v: string) => void;
+  formAddress: string; setFormAddress: (v: string) => void;
   formSegment: string; setFormSegment: (v: string) => void;
   onSave: () => void; onClose: () => void;
 }) {
@@ -38,6 +39,7 @@ export function CreateModal({
               <Input label={t(language, "contacts.createName")} value={formName} onChange={(e) => setFormName(e.target.value)} />
               <Input label={t(language, "contacts.createPhone")} value={formPhone} onChange={(e) => setFormPhone(e.target.value)} />
               <Input label={t(language, "contacts.createEmail")} type="email" value={formEmail} onChange={(e) => setFormEmail(e.target.value)} />
+              <Input label={t(language, "contacts.createAddress")} value={formAddress} onChange={(e) => setFormAddress(e.target.value)} />
               <div>
                 <label className="text-xs font-semibold text-muted-foreground">{t(language, "contacts.createSegment")}</label>
                 <div className="mt-1 flex gap-2 flex-wrap">

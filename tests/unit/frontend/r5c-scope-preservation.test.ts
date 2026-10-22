@@ -1,10 +1,11 @@
 /**
  * HUB by Raisen — R-5c (Compuerta #66): crear un cliente/contacto JAMAS muta el scope de sesion.
- * Arquitectura real: en HUB los contactos se crean via Supabase REST (POST {base}/contacts) + RLS
- * por tenant — NO hay endpoint Node, asi que el test ejerce el cliente real (crearContacto) y valida:
+ * Arquitectura real: en HUB los contactos se crean via RPC Supabase (POST {base}/rpc/create_contact,
+ * SECURITY DEFINER que pone el tenant del usuario) + Bearer existente — NO re-emite sesion. El test
+ * ejerce el cliente real (crearContacto) y valida:
  *   (1) hub.session queda intacta (el scope vive en el claim tenant_id del JWT, no en 'hub.tenant'),
  *   (2) la respuesta no trae token/session/tenant (crear cliente no re-emite sesion),
- *   (3) se reusa el Bearer existente (POST /contacts, sin nueva auth ni Set-Cookie).
+ *   (3) se reusa el Bearer existente (POST /rpc/create_contact, sin nueva auth ni Set-Cookie).
  */
 import { expect, test, vi, beforeEach, afterEach } from "vitest";
 
@@ -29,7 +30,7 @@ async function crear() {
 }
 
 test("A-R-5c-1: crear cliente NO muta hub.session (scope de sesion intacto)", async () => {
-  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ id: "c1", display_name: "Cliente Test", primary_phone: "+17875551234" }), { status: 201 })));
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify("c1"), { status: 200 })));
   const before = window.localStorage.getItem("hub.session");
   const r = await crear();
   expect(r.ok).toBe(true);
@@ -37,7 +38,7 @@ test("A-R-5c-1: crear cliente NO muta hub.session (scope de sesion intacto)", as
 });
 
 test("A-R-5c-2: la respuesta NO trae token/session/tenant (crear cliente no re-emite sesion)", async () => {
-  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ id: "c1", display_name: "Cliente Test" }), { status: 201 })));
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify("c1"), { status: 200 })));
   const r = await crear();
   expect(r.ok).toBe(true);
   if (r.ok) {
@@ -47,12 +48,12 @@ test("A-R-5c-2: la respuesta NO trae token/session/tenant (crear cliente no re-e
   }
 });
 
-test("A-R-5c-3: reusa el Bearer existente — POST /contacts, sin nueva auth", async () => {
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify({ id: "c1" }), { status: 201 }));
+test("A-R-5c-3: reusa el Bearer existente — POST /rpc/create_contact, sin nueva auth", async () => {
+  const fetchMock = vi.fn(async () => new Response(JSON.stringify("c1"), { status: 200 }));
   vi.stubGlobal("fetch", fetchMock);
   await crear();
   const [u, opts] = fetchMock.mock.calls[0] as unknown as [string, { method: string; headers: Record<string, string> }];
-  expect(String(u)).toContain("/rest/v1/contacts");
+  expect(String(u)).toContain("/rest/v1/rpc/create_contact");
   expect(opts.method).toBe("POST");
   expect(opts.headers.authorization).toBe(`Bearer ${TOKEN}`);
 });

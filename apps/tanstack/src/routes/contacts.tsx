@@ -33,7 +33,7 @@ function ContactsPage() {
 
   async function handleCreate() {
     if (!create.formName.trim()) return;
-    const r = await crearContacto({ display_name: create.formName.trim(), primary_phone: create.formPhone.trim() || undefined, primary_email: create.formEmail.trim() || undefined, segment: create.formSegment });
+    const r = await crearContacto({ display_name: create.formName.trim(), primary_phone: create.formPhone.trim() || undefined, primary_email: create.formEmail.trim() || undefined, segment: create.formSegment, address: create.formAddress.trim() || undefined });
     if (r.ok) { create.setShowCreate(false); create.reset(); void refetch(); }
   }
 
@@ -56,7 +56,7 @@ function ContactsPage() {
       ) : (
         <div className="grid gap-3 md:grid-cols-2">{filtrados.map((c) => <ContactCard key={c.id} contact={c} language={language} />)}</div>
       )}
-      {create.showCreate ? <CreateModal language={language} formName={create.formName} setFormName={create.setFormName} formPhone={create.formPhone} setFormPhone={create.setFormPhone} formEmail={create.formEmail} setFormEmail={create.setFormEmail} formSegment={create.formSegment} setFormSegment={create.setFormSegment} onSave={handleCreate} onClose={() => create.setShowCreate(false)} /> : null}
+      {create.showCreate ? <CreateModal language={language} formName={create.formName} setFormName={create.setFormName} formPhone={create.formPhone} setFormPhone={create.setFormPhone} formEmail={create.formEmail} setFormEmail={create.setFormEmail} formAddress={create.formAddress} setFormAddress={create.setFormAddress} formSegment={create.formSegment} setFormSegment={create.setFormSegment} onSave={handleCreate} onClose={() => create.setShowCreate(false)} /> : null}
     </div>
   );
 }
