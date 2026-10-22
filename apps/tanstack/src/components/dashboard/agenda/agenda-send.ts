@@ -22,8 +22,10 @@ async function patchAppt(id: string, fields: Record<string, unknown>): Promise<{
   }
 }
 
-export function queueSend(id: string, channels: string[], message: string): Promise<{ ok: boolean }> {
-  return patchAppt(id, { send_channels: channels, send_message: message.trim() || null });
+export function queueSend(id: string, channels: string[], message: string, sent = false): Promise<{ ok: boolean }> {
+  const fields: Record<string, unknown> = { send_channels: channels, send_message: message.trim() || null };
+  if (sent) fields.sent_at = new Date().toISOString();
+  return patchAppt(id, fields);
 }
 
 export function setApptStatus(id: string, status: string): Promise<{ ok: boolean }> {
