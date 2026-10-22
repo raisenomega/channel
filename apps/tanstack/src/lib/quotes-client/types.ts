@@ -13,6 +13,7 @@ export interface RawQuote {
   currency: string;
   created_at: string;
   expired_at: string | null;
+  responded_at: string | null;
 }
 
 export interface QuoteListItem {
@@ -23,4 +24,5 @@ export interface QuoteListItem {
   currency: string;
   createdAt: string;
   expiresAt: string | null;
+  respondedAt: string | null;
 }

@@ -64,6 +64,7 @@ export const enBiz: Dict = {
   "quotes.status.draft": "Draft",
   "quotes.status.sent": "Sent",
   "quotes.status.accepted": "Accepted",
+  "quotes.status.converted": "Converted", "quotes.clientAccepted": "Accepted by client", "quotes.clientRejected": "Rejected by client",
   "quotes.status.rejected": "Rejected",
   "quotes.status.expired": "Expired",
   "quotes.createTitle": "Create quote",
