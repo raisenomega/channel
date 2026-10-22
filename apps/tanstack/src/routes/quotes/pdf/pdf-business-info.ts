@@ -19,16 +19,15 @@ interface Branding {
 }
 interface Row { name?: string | null; phone?: string | null; street?: string | null; city?: string | null; region?: string | null; postal_code?: string | null; branding_config?: Branding | null; }
 
-const COLS = "name,phone,street,city,region,postal_code,branding_config";
 const DEF_TAX: TaxConfig = { mode: "pct", value: 0, currency: "USD" };
 const EMPTY: BizInfo = { name: "", phone: "", email: "", address: "", logoUrl: null, style: "clasico", tax: DEF_TAX, footer1: "", terms: "" };
 
-export async function fetchBusinessInfo(tenantId: string): Promise<BizInfo> {
+export async function fetchBusinessInfo(_tenantId: string): Promise<BizInfo> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
-  if (!base || !headers || !tenantId) return EMPTY;
+  if (!base || !headers) return EMPTY;
   try {
-    const res = await fetch(`${base}/tenants?id=eq.${encodeURIComponent(tenantId)}&select=${COLS}`, { headers });
+    const res = await fetch(`${base}/rpc/get_branding`, { method: "POST", headers: { ...headers, "content-type": "application/json" }, body: "{}" });
     if (!res.ok) return EMPTY;
     const rows = (await res.json()) as Row[];
     const r = rows[0];
