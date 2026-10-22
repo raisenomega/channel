@@ -8,6 +8,7 @@ export const LINKS: NavItem[] = [
   { to: "/inbox", label: "nav.dashboard" },
   { to: "/contacts", label: "nav.contacts" },
   { to: "/quotes", label: "nav.quotes" },
+  { to: "/pdf-templates", label: "nav.pdfTemplates" },
   { to: "/orders", label: "nav.orders" },
   { to: "/payments", label: "nav.payments" },
   { to: "/automation", label: "nav.automation" },
