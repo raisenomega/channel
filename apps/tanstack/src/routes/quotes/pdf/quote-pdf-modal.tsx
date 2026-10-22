@@ -1,6 +1,6 @@
 /**
- * HUB by Raisen — Modal "Vista previa PDF" de la Cotizacion. Jala datos del negocio (logo, nombre,
- * direccion, tax) + estilo + mensaje de pie elegidos, y imprime -> "Guardar como PDF". C4 <=75.
+ * HUB by Raisen — Modal "Vista previa PDF" de la Cotizacion (estilo Nucleo): caja cliente + tabla de
+ * lineas + totales + marca de agua por estado. Jala logo/datos del negocio + estilo + pie. C4 <=75.
  */
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -8,12 +8,14 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { fetchMiTenantInfo } from "@/lib/tenant-client/mi-tenant-info";
 import { fetchBusinessInfo, type BizInfo } from "./pdf-business-info";
+import { fetchQuoteItems, computeTotals } from "./quote-items";
 import { styleOf } from "./pdf-styles";
-import { BusinessDocument, type DocRow } from "./business-document";
+import { BusinessDocument, type DocLabels } from "./business-document";
 import { printHtml } from "./pdf-print";
 import type { QuoteListItem } from "@/lib/quotes-client";
 
 const EMPTY: BizInfo = { name: "HUB by Raisen", phone: "", address: "", legalName: "", taxId: "", logoUrl: null, footer: "", style: "clasico" };
+const WM: Record<string, string> = { draft: "BORRADOR", rejected: "RECHAZADA", expired: "VENCIDA", converted: "CONVERTIDA" };
 
 export function QuotePdfModal({ lang, quote, contactName, onClose }: {
   lang: Idioma; quote: QuoteListItem; contactName: string; onClose: () => void;
@@ -22,15 +24,13 @@ export function QuotePdfModal({ lang, quote, contactName, onClose }: {
   const mi = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 300_000 });
   const tid = mi.data?.tenantId ?? "";
   const bizQ = useQuery({ queryKey: ["pdf-biz", tid], queryFn: () => fetchBusinessInfo(tid), enabled: !!tid });
+  const itemsQ = useQuery({ queryKey: ["quote-items", quote.id], queryFn: () => fetchQuoteItems(quote.id), staleTime: 15_000 });
   const biz = bizQ.data ?? EMPTY;
+  const items = itemsQ.data ?? [];
+  const totals = computeTotals(items, quote.totalAmount, quote.currency);
   const title = t(lang, "quotes.pdf.title");
-  const rows: DocRow[] = [
-    { label: t(lang, "quotes.contact"), value: contactName },
-    { label: t(lang, "quotes.date"), value: new Date(quote.createdAt).toLocaleDateString() },
-    { label: t(lang, "quotes.statusLabel"), value: t(lang, "quotes.status." + quote.status) },
-    ...(quote.expiresAt ? [{ label: t(lang, "quotes.pdf.expires"), value: new Date(quote.expiresAt).toLocaleDateString() }] : []),
-  ];
-  const total: DocRow = { label: t(lang, "quotes.total"), value: `${quote.currency} ${quote.totalAmount.toFixed(2)}` };
+  const headers = [t(lang, "doc.description"), t(lang, "doc.qty"), t(lang, "doc.price"), t(lang, "doc.disc"), t(lang, "doc.tax"), t(lang, "doc.total")];
+  const labels: DocLabels = { subtotal: t(lang, "doc.subtotal"), tax: t(lang, "doc.taxTotal"), total: t(lang, "quotes.total"), client: t(lang, "quotes.contact") };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4" onClick={onClose}>
       <div className="glass-card flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
@@ -42,7 +42,7 @@ export function QuotePdfModal({ lang, quote, contactName, onClose }: {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto bg-neutral-300 p-4">
-          <div ref={ref}><BusinessDocument title={title} style={styleOf(biz.style)} biz={biz} refId={quote.id.slice(0, 8)} rows={rows} total={total} /></div>
+          <div ref={ref}><BusinessDocument title={title} style={styleOf(biz.style)} biz={biz} refId={quote.id.slice(0, 8)} client={{ name: contactName, lines: [] }} items={items} totals={totals} headers={headers} labels={labels} watermark={WM[quote.status]} /></div>
         </div>
       </div>
     </div>

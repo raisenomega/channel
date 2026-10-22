@@ -13,6 +13,7 @@ import { esTemplates } from "./i18n/es-templates";
 import { esRegistro } from "./i18n/es-registro";
 import { esAgenda } from "./i18n/es-agenda";
 import { esAgendaForm } from "./i18n/es-agenda-form";
+import { esDocPdf } from "./i18n/es-docpdf";
 import { enCore } from "./i18n/en-core";
 import { enDash } from "./i18n/en-dash";
 import { enChannels } from "./i18n/en-channels";
@@ -27,39 +28,16 @@ import { enTemplates } from "./i18n/en-templates";
 import { enRegistro } from "./i18n/en-registro";
 import { enAgenda } from "./i18n/en-agenda";
 import { enAgendaForm } from "./i18n/en-agenda-form";
+import { enDocPdf } from "./i18n/en-docpdf";
 
 const ES: Dict = {
-  ...esCore,
-  ...esDash,
-  ...esChannels,
-  ...esSettings,
-  ...esMisc,
-  ...esAgent,
-  ...esBiz,
-  ...esBizOrders,
-  ...esBizOps,
-  ...esOnboarding,
-  ...esTemplates,
-  ...esRegistro,
-  ...esAgenda,
-  ...esAgendaForm,
+  ...esCore, ...esDash, ...esChannels, ...esSettings, ...esMisc, ...esAgent, ...esBiz, ...esBizOrders,
+  ...esBizOps, ...esOnboarding, ...esTemplates, ...esRegistro, ...esAgenda, ...esAgendaForm, ...esDocPdf,
 };
 
 const EN: Dict = {
-  ...enCore,
-  ...enDash,
-  ...enChannels,
-  ...enSettings,
-  ...enMisc,
-  ...enAgent,
-  ...enBiz,
-  ...enBizOrders,
-  ...enBizOps,
-  ...enOnboarding,
-  ...enTemplates,
-  ...enRegistro,
-  ...enAgenda,
-  ...enAgendaForm,
+  ...enCore, ...enDash, ...enChannels, ...enSettings, ...enMisc, ...enAgent, ...enBiz, ...enBizOrders,
+  ...enBizOps, ...enOnboarding, ...enTemplates, ...enRegistro, ...enAgenda, ...enAgendaForm, ...enDocPdf,
 };
 
 const TABLAS: Record<Idioma, Dict> = { es: ES, en: EN };
