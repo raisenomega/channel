@@ -23,4 +23,7 @@ export const esDocPdf: Dict = {
   "quotes.tpl.footer1": "Mensaje de pie",
   "quotes.tpl.terms": "Términos y condiciones",
   "quotes.tpl.save": "Guardar",
+  "quotes.tpl.saved": "Guardado",
+  "quotes.tpl.saveerr": "No se pudo guardar",
+  "quotes.tpl.logoerr": "No se pudo subir el logo",
 };

@@ -27,7 +27,15 @@ export function TemplateEditorModal({ lang, onClose }: { lang: Idioma; onClose: 
   const [style, setStyle] = useState("clasico");
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState("");
-  useEffect(() => { if (bizQ.data && !form) { setForm(fromBiz(bizQ.data)); setStyle(bizQ.data.style); } }, [bizQ.data, form]);
+  const [msg, setMsg] = useState("");
+  const [ready, setReady] = useState(false);
+  // Sync desde el servidor: el estilo se fija una vez; el formulario se RE-LEE cada vez que
+  // llegan datos nuevos (tras Guardar / reabrir) mientras no estes editando -> persiste honesto.
+  useEffect(() => {
+    if (!bizQ.data) return;
+    if (!ready) { setStyle(bizQ.data.style); setReady(true); }
+    if (!dirty) setForm(fromBiz(bizQ.data));
+  }, [bizQ.data, dirty, ready]);
   if (!form) return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 text-sm text-white">{t(lang, "common.loading")}…</div>;
   const set = <K extends keyof TplForm>(k: K, v: TplForm[K]) => { setForm((p) => (p ? { ...p, [k]: v } : p)); setDirty(true); };
   const tv = Number(form.taxValue) || 0;
@@ -36,8 +44,8 @@ export function TemplateEditorModal({ lang, onClose }: { lang: Idioma; onClose: 
   const totals = { subtotal: 250, tax: taxAmt, total: 250 + taxAmt, currency: form.currency };
   const headers = [t(lang, "doc.description"), t(lang, "doc.qty"), t(lang, "doc.price"), t(lang, "doc.total")];
   const labels: DocLabels = { subtotal: t(lang, "doc.subtotal"), tax: t(lang, "doc.taxTotal"), total: t(lang, "quotes.total"), client: t(lang, "quotes.contact"), terms: t(lang, "quotes.tpl.terms") };
-  const onLogo = async (f: File | undefined) => { if (!f || !tid) return; setBusy("logo"); await uploadLogo(tid, f); await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); await qc.invalidateQueries({ queryKey: ["mi-logo"] }); setBusy(""); };
-  const onSave = async () => { if (!tid) return; setBusy("save"); await saveTemplateConfig(tid, { company: { name: form.name, address: form.address, phone: form.phone, email: form.email }, tax: { mode: form.taxMode, value: tv, currency: form.currency }, footer1: form.footer1, terms: form.terms }); await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); setBusy(""); setDirty(false); };
+  const onLogo = async (f: File | undefined) => { if (!f || !tid) return; setBusy("logo"); const url = await uploadLogo(tid, f); await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); await qc.invalidateQueries({ queryKey: ["mi-logo"] }); setBusy(""); setMsg(url ? "saved" : "logoerr"); };
+  const onSave = async () => { if (!tid) return; setBusy("save"); const ok = await saveTemplateConfig(tid, { company: { name: form.name, address: form.address, phone: form.phone, email: form.email }, tax: { mode: form.taxMode, value: tv, currency: form.currency }, footer1: form.footer1, terms: form.terms }); await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); setBusy(""); setDirty(false); setMsg(ok ? "saved" : "saveerr"); };
   const onUse = async () => { if (tid) { await savePdfStyle(tid, style); await qc.invalidateQueries({ queryKey: ["pdf-biz"] }); } };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-3" onClick={onClose}>
@@ -51,7 +59,7 @@ export function TemplateEditorModal({ lang, onClose }: { lang: Idioma; onClose: 
             <button type="button" className="chip" onClick={onClose} aria-label={t(lang, "common.back")}>X</button>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
-            <TemplateEditPanel lang={lang} accent="var(--primary)" form={form} set={set} style={style} onStyle={(s) => { setStyle(s); setDirty(true); }} logoUrl={bizQ.data?.logoUrl ?? null} onLogo={(f) => void onLogo(f)} onSave={() => void onSave()} onUse={() => void onUse()} dirty={dirty} busy={busy} />
+            <TemplateEditPanel lang={lang} accent="var(--primary)" form={form} set={set} style={style} onStyle={(s) => { setStyle(s); setDirty(true); }} logoUrl={bizQ.data?.logoUrl ?? null} onLogo={(f) => void onLogo(f)} onSave={() => void onSave()} onUse={() => void onUse()} dirty={dirty} busy={busy} msg={msg} />
           </div>
         </div>
       </div>

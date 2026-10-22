@@ -17,10 +17,10 @@ function L({ label, children }: { label: string; children: ReactNode }) {
   return <label className="block text-xs"><span className="mb-0.5 block text-muted-foreground">{label}</span>{children}</label>;
 }
 
-export function TemplateEditPanel({ lang, accent, form, set, style, onStyle, logoUrl, onLogo, onSave, onUse, dirty, busy }: {
+export function TemplateEditPanel({ lang, accent, form, set, style, onStyle, logoUrl, onLogo, onSave, onUse, dirty, busy, msg }: {
   lang: Idioma; accent: string; form: TplForm; set: <K extends keyof TplForm>(k: K, v: TplForm[K]) => void;
   style: string; onStyle: (s: string) => void; logoUrl: string | null; onLogo: (f: File | undefined) => void;
-  onSave: () => void; onUse: () => void; dirty: boolean; busy: string;
+  onSave: () => void; onUse: () => void; dirty: boolean; busy: string; msg: string;
 }) {
   return (
     <div className="space-y-3">
@@ -42,9 +42,10 @@ export function TemplateEditPanel({ lang, accent, form, set, style, onStyle, log
       </div>
       <L label={`${t(lang, "quotes.tpl.footer1")} (${form.footer1.length}/100)`}><input maxLength={100} className={INP} value={form.footer1} onChange={(e) => set("footer1", e.target.value)} /></L>
       <L label={`${t(lang, "quotes.tpl.terms")} (${form.terms.length}/2500)`}><textarea maxLength={2500} rows={3} className={INP} value={form.terms} onChange={(e) => set("terms", e.target.value)} /></L>
-      <div className="flex gap-2 pt-1">
+      <div className="flex items-center gap-2 pt-1">
         <button type="button" className="chip font-bold text-white" style={{ background: `hsl(${accent})` }} onClick={onSave}>{busy === "save" ? t(lang, "onboarding.saving") : t(lang, "quotes.tpl.save")}</button>
         <button type="button" className="chip font-bold" disabled={dirty} onClick={onUse} style={!dirty ? { color: `hsl(${accent})`, borderColor: `hsl(${accent})` } : undefined}>{t(lang, "quotes.style.use")}</button>
+        {msg ? <span className={"text-[11px] font-semibold " + (msg === "saved" ? "text-green-500" : "text-red-400")}>{t(lang, "quotes.tpl." + msg)}</span> : null}
       </div>
     </div>
   );
