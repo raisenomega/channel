@@ -10,7 +10,6 @@ export type Result<T> = { ok: true; value: T } | { ok: false; error: PaymentErro
 interface RawPayment {
   id: string;
   order_id: string | null;
-  quote_id: string | null;
   status: string;
   amount: number;
   currency: string;
@@ -21,7 +20,6 @@ interface RawPayment {
 export interface PaymentListItem {
   id: string;
   orderId: string | null;
-  quoteId: string | null;
   status: string;
   amount: number;
   currency: string;
@@ -33,7 +31,6 @@ function mapear(r: RawPayment): PaymentListItem {
   return {
     id: r.id,
     orderId: r.order_id,
-    quoteId: r.quote_id,
     status: r.status,
     amount: r.amount,
     currency: r.currency ?? "USD",
@@ -46,7 +43,7 @@ export async function listarPagos(): Promise<Result<PaymentListItem[]>> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
-  const cols = ["id", "order_id", "quote_id", "status", "amount", "currency", "provider", "created_at"];
+  const cols = ["id", "order_id", "status", "amount", "currency", "provider", "created_at"];
   const url = `${base}/payments?select=${encodeURIComponent(cols.join(","))}&order=created_at.desc`;
   try {
     const res = await fetch(url, { headers });

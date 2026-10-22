@@ -31,6 +31,8 @@ export const esDocPdf: Dict = {
   "invoices.empty": "Sin facturas",
   "invoices.editTitle": "Editar factura",
   "invoices.pdfTitle": "FACTURA",
+  "orders.pdfTitle": "ORDEN",
+  "payments.pdfTitle": "PAGO",
   "invoices.status.draft": "Borrador",
   "invoices.status.sent": "Enviada",
   "invoices.status.paid": "Pagada",

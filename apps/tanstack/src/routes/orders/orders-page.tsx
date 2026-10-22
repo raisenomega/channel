@@ -1,16 +1,20 @@
 /**
- * HUB by Raisen — Pagina de Ordenes: pedidos como filas (RowList global) con estado editable.
+ * HUB by Raisen — Pagina de Ordenes: pedidos como filas (RowList global) con estado editable; clic en
+ * la fila abre el PDF "ORDEN".
  */
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
-import { listarOrdenes, setOrderStatus } from "@/lib/orders-client";
+import { listarOrdenes, setOrderStatus, type OrderListItem } from "@/lib/orders-client";
 import { Card, CardBody } from "@/components/ui/card";
 import { RowList } from "@/components/ui/row-list";
 import { OrderRow } from "./order-row";
+import { OrderPdfModal } from "@/routes/quotes/pdf/order-pdf-modal";
 
 export function OrdersPage() {
   const { language } = usePreferences();
+  const [pdf, setPdf] = useState<OrderListItem | null>(null);
   const { data, isPending, refetch } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => { const r = await listarOrdenes(); return r.ok ? r.value : []; },
@@ -27,8 +31,10 @@ export function OrdersPage() {
       ) : !data || data.length === 0 ? (
         <Card><CardBody className="py-8 text-center"><p className="text-sm text-muted-foreground">{t(language, "orders.empty")}</p></CardBody></Card>
       ) : (
-        <RowList items={data} renderRow={(o) => <OrderRow key={o.id} lang={language} order={o} onStatus={(id, s) => void setStatus(id, s)} />} />
+        <RowList items={data} renderRow={(o) => <OrderRow key={o.id} lang={language} order={o} onStatus={(id, s) => void setStatus(id, s)} onOpen={setPdf} />} />
       )}
+
+      {pdf && <OrderPdfModal lang={language} orderId={pdf.id} total={pdf.totalAmount} title={t(language, "orders.pdfTitle")} onClose={() => setPdf(null)} />}
     </div>
   );
 }
