@@ -1,7 +1,7 @@
 /**
- * HUB by Raisen — Documento comercial generico (cotizacion/factura/orden), estilo Nucleo: encabezado
- * de marca + caja cliente + tabla de lineas + Subtotal/Tax/TOTAL + marca de agua por estado. Mismo
- * render para todo el ciclo (solo cambia el titulo). 3 estilos. Estilos INLINE (preview = PDF). C4 <=75.
+ * HUB by Raisen — Documento comercial generico (cotizacion/factura/orden), estilo Nucleo: marca
+ * (logo + compañia) + caja cliente + tabla de lineas + Subtotal/Tax/TOTAL + marca de agua + pie corto
+ * + Terminos y condiciones. Mismo render para todo el ciclo (solo cambia el titulo). 3 estilos. C4 <=75.
  */
 import type { CSSProperties } from "react";
 import type { PdfStyleDef } from "./pdf-styles";
@@ -9,7 +9,7 @@ import type { BizInfo } from "./pdf-business-info";
 import type { DocItem, DocClient, DocTotals } from "./doc-types";
 import { DocTable } from "./doc-table";
 
-export interface DocLabels { subtotal: string; tax: string; total: string; client: string; }
+export interface DocLabels { subtotal: string; tax: string; total: string; client: string; terms: string; }
 
 export function BusinessDocument({ title, style, biz, refId, client, items, totals, headers, labels, watermark }: {
   title: string; style: PdfStyleDef; biz: BizInfo; refId: string; client: DocClient;
@@ -32,10 +32,9 @@ export function BusinessDocument({ title, style, biz, refId, client, items, tota
         <div style={{ textAlign: "right" }}>
           {biz.logoUrl ? <img src={biz.logoUrl} alt="" style={{ height: 40, objectFit: "contain", marginLeft: "auto", marginBottom: 6, display: "block" }} /> : null}
           <div style={{ fontSize: 15, fontWeight: 700 }}>{biz.name}</div>
-          {biz.legalName ? <div style={muted}>{biz.legalName}</div> : null}
-          {biz.taxId ? <div style={muted}>Tax ID: {biz.taxId}</div> : null}
           {biz.address ? <div style={muted}>{biz.address}</div> : null}
           {biz.phone ? <div style={muted}>{biz.phone}</div> : null}
+          {biz.email ? <div style={muted}>{biz.email}</div> : null}
         </div>
       </div>
       {style.id === "moderno" ? <div style={{ height: 3, background: a, margin: "16px 0 0" }} /> : null}
@@ -52,7 +51,8 @@ export function BusinessDocument({ title, style, biz, refId, client, items, tota
           <div style={{ ...tr, borderTop: "2px solid " + accent, paddingTop: 6, fontWeight: 700, fontSize: 15 }}><span>{labels.total}</span><span>{money(totals.total)}</span></div>
         </div>
       </div>
-      {biz.footer ? <div style={{ marginTop: 32, paddingTop: 10, borderTop: "1px solid #eee", fontSize: 10, color: "#777", textAlign: "center" }}>{biz.footer}</div> : null}
+      {biz.footer1 ? <div style={{ position: "relative", marginTop: 28, fontSize: 11, color: "#555", textAlign: "center" }}>{biz.footer1}</div> : null}
+      {biz.terms ? <div style={{ position: "relative", marginTop: 16, paddingTop: 8, borderTop: "1px solid #eee" }}><div style={{ fontSize: 10, fontWeight: 700, color: "#888", textTransform: "uppercase", marginBottom: 3 }}>{labels.terms}</div><div style={{ fontSize: 9, color: "#777", lineHeight: 1.5 }}>{biz.terms}</div></div> : null}
     </div>
   );
 }
