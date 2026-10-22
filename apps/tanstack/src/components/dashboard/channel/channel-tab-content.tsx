@@ -57,7 +57,7 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
     case "plantillas":
       return <SimpleListView title={t(lang, "cf.plantillas")} empty={empty} accent={accent} items={templatesToItems(data.templates)} />;
     case "cotizacion":
-      return hasHilo && contactId ? <ChannelQuoteTab lang={lang} accent={accent} contactId={contactId} contactName={contactInfo?.display_name ?? ""} cards={quotesToCards(data.quotes, lang)} /> : sinHilo;
+      return <ChannelQuoteTab lang={lang} accent={accent} contactId={contactId ?? ""} contactName={contactInfo?.display_name ?? ""} cards={quotesToCards(data.quotes, lang)} />;
     case "factura":
       return hasHilo ? <CardGrid title={t(lang, "cf.factura")} empty={t(lang, "orders.empty")} accent={accent} cards={ordersToCards(data.orders, lang)} /> : sinHilo;
     case "pagos":
