@@ -31,6 +31,8 @@ export const enDocPdf: Dict = {
   "invoices.empty": "No invoices",
   "invoices.editTitle": "Edit invoice",
   "invoices.pdfTitle": "INVOICE",
+  "orders.pdfTitle": "ORDER",
+  "payments.pdfTitle": "PAYMENT",
   "invoices.status.draft": "Draft",
   "invoices.status.sent": "Sent",
   "invoices.status.paid": "Paid",
