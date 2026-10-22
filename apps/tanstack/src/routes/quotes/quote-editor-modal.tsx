@@ -15,6 +15,7 @@ import { QuoteLineEditor } from "./quote-line-editor";
 import { QuoteClientFields, type ClientData } from "./quote-client-fields";
 import { QuoteNewContact } from "./quote-new-contact";
 import { QuoteEditorActions } from "./quote-editor-actions";
+import { QuoteSendModal } from "./quote-send-modal";
 
 const BLANK: ClientData = { cid: "", name: "", service: "", phone: "", email: "", address: "" };
 
@@ -31,6 +32,7 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, editI
   const [preselect, setPreselect] = useState("");
   const [lines, setLines] = useState<QuoteLine[]>(initialLines ?? []);
   const [busy, setBusy] = useState(false);
+  const [send, setSend] = useState(false);
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
   const taxAmt = tax.mode === "pct" ? subtotal * tax.value / 100 : tax.value;
   const total = subtotal + taxAmt;
@@ -54,9 +56,10 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, editI
             <div className="flex justify-between text-muted-foreground"><span>{t(lang, "doc.taxTotal")}</span><span>{money(taxAmt)}</span></div>
             <div className="flex justify-between font-bold text-foreground"><span>{t(lang, "quotes.total")}</span><span>{money(total)}</span></div>
           </div>
-          <QuoteEditorActions lang={lang} editId={editId} busy={busy} canSave={!busy && !!client.cid && lines.length > 0} onSave={() => void persist(false)} onPreview={() => void persist(true)} onConverted={onConverted} onClose={onClose} />
+          <QuoteEditorActions lang={lang} editId={editId} busy={busy} canSave={!busy && !!client.cid && lines.length > 0} onSave={() => void persist(false)} onPreview={() => void persist(true)} onSend={() => setSend(true)} onConverted={onConverted} onClose={onClose} />
         </CardBody>
       </Card>
+      {send && editId ? <QuoteSendModal lang={lang} quoteId={editId} contactId={client.cid} clientName={client.name} total={total} currency={currency} onClose={() => setSend(false)} /> : null}
       {newContact && <QuoteNewContact lang={lang} onClose={() => setNewContact(false)} onCreated={(id) => { setNewContact(false); setPreselect(id); }} />}
     </div>
   );

@@ -36,6 +36,7 @@ export const enDocPdf: Dict = {
   "public.expired": "This link expired.", "public.used": "This quote was already answered.",
   "public.not_found": "Link not found.", "public.error": "Could not process. Try again.",
   "quotes.copyLink": "Copy approval link", "quotes.linkCopied": "Link copied",
+  "quotes.send": "Send", "quotes.sendTitle": "Send quote",
   "orders.pdfTitle": "ORDER",
   "payments.pdfTitle": "PAYMENT",
   "invoices.status.draft": "Draft",

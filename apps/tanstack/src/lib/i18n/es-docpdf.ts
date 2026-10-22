@@ -36,6 +36,7 @@ export const esDocPdf: Dict = {
   "public.expired": "Este enlace expiró.", "public.used": "Esta cotización ya fue respondida.",
   "public.not_found": "Enlace no encontrado.", "public.error": "No se pudo procesar. Intenta de nuevo.",
   "quotes.copyLink": "Copiar link de aprobación", "quotes.linkCopied": "Link copiado",
+  "quotes.send": "Enviar", "quotes.sendTitle": "Enviar cotización",
   "orders.pdfTitle": "ORDEN",
   "payments.pdfTitle": "PAGO",
   "invoices.status.draft": "Borrador",

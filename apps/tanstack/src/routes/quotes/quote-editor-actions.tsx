@@ -8,9 +8,9 @@ import { t } from "@/lib/i18n";
 import { convertQuoteToInvoice } from "@/lib/invoices-client";
 import { createApprovalToken, approvalLink } from "@/lib/public-quote-client";
 
-export function QuoteEditorActions({ lang, editId, busy, canSave, onSave, onPreview, onConverted, onClose }: {
+export function QuoteEditorActions({ lang, editId, busy, canSave, onSave, onPreview, onSend, onConverted, onClose }: {
   lang: Idioma; editId?: string; busy: boolean; canSave: boolean;
-  onSave: () => void; onPreview: () => void; onConverted?: () => void; onClose: () => void;
+  onSave: () => void; onPreview: () => void; onSend?: () => void; onConverted?: () => void; onClose: () => void;
 }) {
   const convert = async () => { if (!editId) return; const inv = await convertQuoteToInvoice(editId); if (inv && onConverted) onConverted(); };
   const copyLink = async () => {
@@ -22,6 +22,7 @@ export function QuoteEditorActions({ lang, editId, busy, canSave, onSave, onPrev
     <div className="flex flex-wrap gap-2 pt-1">
       <Button variant="primary" onClick={onSave} disabled={!canSave}>{t(lang, "quotes.save")}</Button>
       <Button variant="outline" onClick={onPreview} disabled={!canSave}>{t(lang, "quotes.pdf.preview")}</Button>
+      {editId && onSend ? <Button variant="outline" onClick={onSend} disabled={busy}>{t(lang, "quotes.send")}</Button> : null}
       {editId ? <Button variant="outline" onClick={() => void copyLink()} disabled={busy}>{t(lang, "quotes.copyLink")}</Button> : null}
       {editId ? <Button variant="outline" onClick={() => void convert()} disabled={busy}>{t(lang, "quotes.convertInvoice")}</Button> : null}
       <Button variant="ghost" onClick={onClose}>{t(lang, "quotes.cancel")}</Button>
