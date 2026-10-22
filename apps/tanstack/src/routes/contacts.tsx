@@ -3,6 +3,7 @@
  * Lista con busqueda, filtros de segmento, creacion manual.
  * Datos reales desde tabla contacts via Supabase REST.
  */
+import { useState } from "react";
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
@@ -15,6 +16,7 @@ import { useContactsFilter, useCreateFormState } from "./contacts-ui/contacts-ho
 import { ContactsFilter } from "./contacts-ui/contacts-filter";
 import { ContactCard } from "./contacts-ui/contact-card";
 import { CreateModal } from "./contacts-ui/create-modal";
+import { AgendadosList } from "./contacts-ui/agendados-list";
 
 export const ContactsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -27,6 +29,7 @@ function ContactsPage() {
   const { data, isPending, refetch } = useContactos();
   const { busqueda, setBusqueda, filtroSegmento, setFiltroSegmento, filtrados } = useContactsFilter(data);
   const create = useCreateFormState();
+  const [agendados, setAgendados] = useState(false);
 
   async function handleCreate() {
     if (!create.formName.trim()) return;
@@ -43,8 +46,10 @@ function ContactsPage() {
           {t(language, "contacts.create")}
         </Button>
       </div>
-      <ContactsFilter language={language} busqueda={busqueda} onBusquedaChange={setBusqueda} filtroSegmento={filtroSegmento} onFiltroChange={setFiltroSegmento} />
-      {isPending ? (
+      <ContactsFilter language={language} busqueda={busqueda} onBusquedaChange={setBusqueda} filtroSegmento={filtroSegmento} onFiltroChange={setFiltroSegmento} agendados={agendados} onAgendados={() => setAgendados((v) => !v)} />
+      {agendados ? (
+        <AgendadosList language={language} />
+      ) : isPending ? (
         <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t(language, "common.loading")}</div>
       ) : filtrados.length === 0 ? (
         <Card><CardBody className="py-8 text-center"><p className="text-sm text-muted-foreground">{t(language, "contacts.empty")}</p></CardBody></Card>

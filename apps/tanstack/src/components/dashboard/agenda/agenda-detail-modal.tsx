@@ -5,6 +5,7 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { useApptDetail } from "./agenda-detail-hook";
 import { AgendaDetailSections } from "./agenda-detail-sections";
+import { AgendaSendBar } from "./agenda-send-bar";
 import { fullDate } from "./agenda-dates";
 import type { RowAppointment } from "./agenda-types";
 
@@ -61,6 +62,7 @@ export function AgendaDetailModal({ lang, accent, appt, onClose, onEdit }: {
               {appt.media.map((mm) => <a key={mm.url} href={mm.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs" style={{ color: `hsl(${accent})` }}>{mm.type} - {mm.name}</a>)}
             </div>
           )}
+          <AgendaSendBar lang={lang} accent={accent} appt={appt} />
           <AgendaDetailSections lang={lang} d={d} />
         </div>
       </div>
