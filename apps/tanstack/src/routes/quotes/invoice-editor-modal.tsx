@@ -14,9 +14,10 @@ import { convertInvoiceToOrder } from "@/lib/invoices-client";
 import { fetchBusinessInfo } from "./pdf/pdf-business-info";
 import { QuoteLineEditor } from "./quote-line-editor";
 import { QuoteClientFields, type ClientData } from "./quote-client-fields";
+import { InvoiceSendModal } from "./invoice-send-modal";
 
-export function InvoiceEditorModal({ lang, invoiceId, clientName, initialClient, initialLines, onClose, onSaved, onPreview }: {
-  lang: Idioma; invoiceId: string; clientName: string; initialClient: ClientData; initialLines: QuoteLine[];
+export function InvoiceEditorModal({ lang, invoiceId, contactId, clientName, initialClient, initialLines, onClose, onSaved, onPreview }: {
+  lang: Idioma; invoiceId: string; contactId: string; clientName: string; initialClient: ClientData; initialLines: QuoteLine[];
   onClose: () => void; onSaved: () => void; onPreview: () => void;
 }) {
   const bizQ = useQuery({ queryKey: ["pdf-biz", "row"], queryFn: () => fetchBusinessInfo("row") });
@@ -25,6 +26,7 @@ export function InvoiceEditorModal({ lang, invoiceId, clientName, initialClient,
   const [client, setClient] = useState<ClientData>(initialClient);
   const [lines, setLines] = useState<QuoteLine[]>(initialLines);
   const [busy, setBusy] = useState(false);
+  const [send, setSend] = useState(false);
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
   const taxAmt = tax.mode === "pct" ? subtotal * tax.value / 100 : tax.value;
   const total = subtotal + taxAmt;
@@ -57,10 +59,12 @@ export function InvoiceEditorModal({ lang, invoiceId, clientName, initialClient,
             <Button variant="primary" onClick={() => void save().then((ok) => ok && onSaved())} disabled={busy || lines.length === 0}>{t(lang, "quotes.save")}</Button>
             <Button variant="outline" onClick={() => void save().then((ok) => ok && onPreview())} disabled={busy || lines.length === 0}>{t(lang, "quotes.pdf.preview")}</Button>
             <Button variant="outline" onClick={() => void toOrder()} disabled={busy}>{t(lang, "quotes.convertOrder")}</Button>
+            <Button variant="outline" onClick={() => setSend(true)} disabled={busy}>{t(lang, "invoices.send")}</Button>
             <Button variant="ghost" onClick={onClose}>{t(lang, "quotes.cancel")}</Button>
           </div>
         </CardBody>
       </Card>
+      {send ? <InvoiceSendModal lang={lang} invoiceId={invoiceId} contactId={contactId} clientName={client.name || clientName} total={total} currency={currency} onClose={() => setSend(false)} /> : null}
     </div>
   );
 }

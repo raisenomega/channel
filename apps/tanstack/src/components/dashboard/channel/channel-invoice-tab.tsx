@@ -43,7 +43,7 @@ export function ChannelInvoiceTab({ lang, contactId }: { lang: Idioma; contactId
           </div>
         )} />
       )}
-      {edit && <InvoiceEditorModal lang={lang} invoiceId={edit.inv.id} clientName={edit.inv.clientName} initialClient={edit.client} initialLines={edit.lines} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); void qc.invalidateQueries({ queryKey: ["invoices-contact"] }); }} onPreview={() => { setPdf(edit.inv); setEdit(null); }} />}
+      {edit && <InvoiceEditorModal lang={lang} invoiceId={edit.inv.id} contactId={contactId} clientName={edit.inv.clientName} initialClient={edit.client} initialLines={edit.lines} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); void qc.invalidateQueries({ queryKey: ["invoices-contact"] }); }} onPreview={() => { setPdf(edit.inv); setEdit(null); }} />}
       {pdf && <InvoicePdfModal lang={lang} invoiceId={pdf.id} clientName={pdf.clientName} total={pdf.total} onClose={() => setPdf(null)} />}
     </>
   );
