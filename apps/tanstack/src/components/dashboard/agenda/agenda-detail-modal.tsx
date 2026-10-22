@@ -6,6 +6,7 @@ import { t } from "@/lib/i18n";
 import { useApptDetail } from "./agenda-detail-hook";
 import { AgendaDetailSections } from "./agenda-detail-sections";
 import { AgendaSendBar } from "./agenda-send-bar";
+import { AgendaCloseActions } from "./agenda-close-actions";
 import { fullDate } from "./agenda-dates";
 import type { RowAppointment } from "./agenda-types";
 
@@ -51,6 +52,7 @@ export function AgendaDetailModal({ lang, accent, appt, onClose, onEdit }: {
             {appt.created_at && <Field k={t(lang, "agenda.d.creada")} v={fmt(lang, appt.created_at)} />}
             <Field k={t(lang, "agenda.f.tipo")} v={t(lang, "agenda.mt." + appt.meeting_type)} />
           </dl>
+          <AgendaCloseActions lang={lang} accent={accent} appt={appt} onEdit={onEdit} onDone={onClose} />
           {appt.meeting_url && <a href={appt.meeting_url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block rounded-lg px-3 py-1.5 text-xs font-bold text-white" style={{ background: `hsl(${accent})` }}>{t(lang, "agenda.d.video")}</a>}
           {appt.reason && <Para label={t(lang, "agenda.d.motivo")} v={appt.reason} />}
           {appt.pre_notes && <Para label={t(lang, "agenda.d.acuerdo")} v={appt.pre_notes} />}

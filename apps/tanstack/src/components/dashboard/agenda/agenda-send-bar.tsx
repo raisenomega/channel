@@ -1,6 +1,6 @@
 /**
- * HUB by Raisen — Barra Enviar: canales WA/IG/FB (checkmark SVG) + vista previa editable del
- * mensaje; al enviar pone la cita en cola (canales + mensaje). Disparo real = Railway. C4 <=75.
+ * HUB by Raisen — Barra Enviar: canales (WA/IG/FB/Telegram/Email/LinkedIn, checkmark SVG) + vista
+ * previa editable del mensaje; al enviar pone la cita en cola (canales + mensaje). C4 <=75.
  */
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,7 +10,10 @@ import { INP } from "./agenda-form-ui";
 import { queueSend, defaultSendMessage } from "./agenda-send";
 import type { RowAppointment } from "./agenda-types";
 
-const CH = [{ id: "whatsapp", label: "WhatsApp" }, { id: "instagram", label: "Instagram" }, { id: "facebook", label: "Facebook" }];
+const CH = [
+  { id: "whatsapp", label: "WhatsApp" }, { id: "instagram", label: "Instagram" }, { id: "facebook", label: "Facebook" },
+  { id: "telegram", label: "Telegram" }, { id: "email", label: "Email" }, { id: "linkedin", label: "LinkedIn" },
+];
 const Check = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>;
 
 export function AgendaSendBar({ lang, accent, appt, contactName }: {
