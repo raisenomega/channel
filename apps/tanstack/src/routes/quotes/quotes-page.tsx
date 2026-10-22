@@ -12,6 +12,7 @@ import { LoadingState, EmptyState } from "./quotes-states";
 import { QuotesHeader } from "./quotes-header";
 import { QuotePdfModal } from "./pdf/quote-pdf-modal";
 import { QuotesTemplateBanner } from "./quotes-template-banner";
+import { RowList } from "@/components/ui/row-list";
 
 export function QuotesPage() {
   const { language } = usePreferences();
@@ -31,9 +32,7 @@ export function QuotesPage() {
       ) : (
         <>
           <QuotesStats lang={language} quotes={quotes} />
-          <div className="space-y-2">
-            {quotes.map((q) => <QuoteRow key={q.id} lang={language} quote={q} contactName={nameOf(q.contactId)} onDownload={setPdfQuote} />)}
-          </div>
+          <RowList items={quotes} renderRow={(q) => <QuoteRow key={q.id} lang={language} quote={q} contactName={nameOf(q.contactId)} onDownload={setPdfQuote} />} />
         </>
       )}
 
