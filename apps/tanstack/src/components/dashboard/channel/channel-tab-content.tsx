@@ -15,10 +15,11 @@ import { fetchQuotesForContact, fetchOrdersForContact, fetchPaymentsForContact }
 import { SimpleListView } from "./tab-simple-list";
 import { CardGrid } from "./tab-card-grid";
 import { ContactFichaCard } from "./tab-contact-ficha";
-import { agentsToItems, templatesToItems, docsToItems, quotesToCards, ordersToCards, paymentsToCards } from "./tab-builders";
+import { agentsToItems, templatesToItems, docsToItems, quotesToCards, paymentsToCards } from "./tab-builders";
 import type { ActiveContactInfo } from "./channel-fetchers";
 import { AgendaCalendar } from "@/components/dashboard/agenda/agenda-calendar";
 import { ChannelQuoteTab } from "./channel-quote-tab";
+import { ChannelInvoiceTab } from "./channel-invoice-tab";
 
 function useTabData(contactId: string | null) {
   const agents = useQuery({ queryKey: ["channel-agents"], queryFn: fetchAgents, staleTime: 30_000 });
@@ -59,7 +60,7 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
     case "cotizacion":
       return <ChannelQuoteTab lang={lang} accent={accent} contactId={contactId ?? ""} contactName={contactInfo?.display_name ?? ""} cards={quotesToCards(data.quotes, lang)} />;
     case "factura":
-      return hasHilo ? <CardGrid title={t(lang, "cf.factura")} empty={t(lang, "orders.empty")} accent={accent} cards={ordersToCards(data.orders, lang)} /> : sinHilo;
+      return hasHilo && contactId ? <ChannelInvoiceTab lang={lang} contactId={contactId} /> : sinHilo;
     case "pagos":
       return hasHilo ? <CardGrid title={t(lang, "cf.pagos")} empty={t(lang, "payments.empty")} accent={accent} cards={paymentsToCards(data.payments, lang)} /> : sinHilo;
     case "agenda":

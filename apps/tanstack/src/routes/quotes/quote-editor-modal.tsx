@@ -11,6 +11,7 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import type { ContactListItem } from "@/lib/contacts-client";
 import { saveQuoteWithItems, type QuoteLine } from "@/lib/quotes-client";
+import { convertQuoteToInvoice } from "@/lib/invoices-client";
 import { fetchBusinessInfo } from "./pdf/pdf-business-info";
 import { QuoteLineEditor } from "./quote-line-editor";
 import { QuoteClientFields, type ClientData } from "./quote-client-fields";
@@ -18,9 +19,9 @@ import { QuoteNewContact } from "./quote-new-contact";
 
 const BLANK: ClientData = { cid: "", name: "", service: "", phone: "", email: "", address: "" };
 
-export function QuoteEditorModal({ lang, contactId, contactName, contacts, editId, initialClient, initialLines, onClose, onSaved }: {
+export function QuoteEditorModal({ lang, contactId, contactName, contacts, editId, initialClient, initialLines, onConverted, onClose, onSaved }: {
   lang: Idioma; contactId: string; contactName: string; contacts: ContactListItem[];
-  editId?: string; initialClient?: ClientData; initialLines?: QuoteLine[];
+  editId?: string; initialClient?: ClientData; initialLines?: QuoteLine[]; onConverted?: () => void;
   onClose: () => void; onSaved: (id: string, preview: boolean, contactId: string, currency: string, total: number) => void;
 }) {
   const bizQ = useQuery({ queryKey: ["pdf-biz", "row"], queryFn: () => fetchBusinessInfo("row") });
@@ -42,6 +43,11 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, editI
     setBusy(false);
     if (id) onSaved(id, preview, client.cid, currency, total);
   };
+  const convert = async () => {
+    if (!editId) return;
+    setBusy(true); const inv = await convertQuoteToInvoice(editId); setBusy(false);
+    if (inv && onConverted) onConverted();
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <Card className="max-h-[92vh] w-full max-w-6xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -57,6 +63,7 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, editI
           <div className="flex flex-wrap gap-2 pt-1">
             <Button variant="primary" onClick={() => void persist(false)} disabled={busy || !client.cid || lines.length === 0}>{t(lang, "quotes.save")}</Button>
             <Button variant="outline" onClick={() => void persist(true)} disabled={busy || !client.cid || lines.length === 0}>{t(lang, "quotes.pdf.preview")}</Button>
+            {editId ? <Button variant="outline" onClick={() => void convert()} disabled={busy}>{t(lang, "quotes.convertInvoice")}</Button> : null}
             <Button variant="ghost" onClick={onClose}>{t(lang, "quotes.cancel")}</Button>
           </div>
         </CardBody>
