@@ -18,8 +18,9 @@ import { QuoteNewContact } from "./quote-new-contact";
 
 const BLANK: ClientData = { cid: "", name: "", service: "", phone: "", email: "", address: "" };
 
-export function QuoteEditorModal({ lang, contactId, contactName, contacts, onClose, onSaved }: {
+export function QuoteEditorModal({ lang, contactId, contactName, contacts, editId, initialClient, initialLines, onClose, onSaved }: {
   lang: Idioma; contactId: string; contactName: string; contacts: ContactListItem[];
+  editId?: string; initialClient?: ClientData; initialLines?: QuoteLine[];
   onClose: () => void; onSaved: (id: string, preview: boolean, contactId: string, currency: string, total: number) => void;
 }) {
   const bizQ = useQuery({ queryKey: ["pdf-biz", "row"], queryFn: () => fetchBusinessInfo("row") });
@@ -28,7 +29,7 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, onClo
   const [client, setClient] = useState<ClientData>(BLANK);
   const [newContact, setNewContact] = useState(false);
   const [preselect, setPreselect] = useState("");
-  const [lines, setLines] = useState<QuoteLine[]>([]);
+  const [lines, setLines] = useState<QuoteLine[]>(initialLines ?? []);
   const [busy, setBusy] = useState(false);
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
   const taxAmt = tax.mode === "pct" ? subtotal * tax.value / 100 : tax.value;
@@ -37,16 +38,16 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, onClo
   const persist = async (preview: boolean) => {
     if (!client.cid || lines.length === 0) return;
     setBusy(true);
-    const id = await saveQuoteWithItems({ contactId: client.cid, currency, subtotal, taxTotal: taxAmt, total, clientName: client.name, clientPhone: client.phone, clientEmail: client.email, clientAddress: client.address, service: client.service }, lines);
+    const id = await saveQuoteWithItems({ id: editId, contactId: client.cid, currency, subtotal, taxTotal: taxAmt, total, clientName: client.name, clientPhone: client.phone, clientEmail: client.email, clientAddress: client.address, service: client.service }, lines);
     setBusy(false);
     if (id) onSaved(id, preview, client.cid, currency, total);
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <Card className="max-h-[92vh] w-full max-w-6xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <CardHeader><CardTitle>{t(lang, "quotes.createTitle")}</CardTitle><button type="button" className="chip text-xs font-semibold" onClick={() => setNewContact(true)}>+ {t(lang, "quotes.newContact")}</button></CardHeader>
+        <CardHeader><CardTitle>{t(lang, editId ? "quotes.editTitle" : "quotes.createTitle")}</CardTitle><button type="button" className="chip text-xs font-semibold" onClick={() => setNewContact(true)}>+ {t(lang, "quotes.newContact")}</button></CardHeader>
         <CardBody className="space-y-3">
-          <QuoteClientFields lang={lang} contactId={contactId} contactName={contactName} contacts={contacts} preselect={preselect} onChange={setClient} />
+          <QuoteClientFields lang={lang} contactId={contactId} contactName={contactName} contacts={contacts} preselect={preselect} initial={initialClient} editing={!!editId} onChange={setClient} />
           <QuoteLineEditor lang={lang} items={lines} currency={currency} onChange={setLines} />
           <div className="space-y-1 border-t border-border/40 pt-2 text-sm">
             <div className="flex justify-between text-muted-foreground"><span>{t(lang, "doc.subtotal")}</span><span>{money(subtotal)}</span></div>
