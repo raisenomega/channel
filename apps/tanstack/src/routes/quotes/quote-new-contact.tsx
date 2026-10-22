@@ -15,15 +15,16 @@ export function QuoteNewContact({ lang, onClose, onCreated }: {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
   const [segment, setSegment] = useState("nuevo");
   const onSave = async () => {
     if (!name.trim()) return;
-    const r = await crearContacto({ display_name: name.trim(), primary_phone: phone.trim() || undefined, primary_email: email.trim() || undefined, segment });
+    const r = await crearContacto({ display_name: name.trim(), primary_phone: phone.trim() || undefined, primary_email: email.trim() || undefined, segment, address: address.trim() || undefined });
     if (r.ok) { await qc.invalidateQueries({ queryKey: ["contacts"] }); onCreated(r.value.id); }
   };
   return (
     <CreateModal language={lang} formName={name} setFormName={setName} formPhone={phone} setFormPhone={setPhone}
-      formEmail={email} setFormEmail={setEmail} formSegment={segment} setFormSegment={setSegment}
+      formEmail={email} setFormEmail={setEmail} formAddress={address} setFormAddress={setAddress} formSegment={segment} setFormSegment={setSegment}
       onSave={() => void onSave()} onClose={onClose} />
   );
 }
