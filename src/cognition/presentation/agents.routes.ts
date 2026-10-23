@@ -12,7 +12,7 @@ export function rutaAgentStatus(): RouteDefinition {
   return {
     method: "GET", path: "/tenants/:id/agents/status",
     handler: async (ctx: RequestContext) => {
-      const auth = await requireTenantAuth(ctx, ctx.params["id"] ?? "");
+      const auth = await requireTenantAuth(ctx); // tenant del claim, no del path
       if (!auth.ok) return auth.error;
       const { data } = await supabase
         .from("agent_drafts")
