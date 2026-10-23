@@ -13,3 +13,19 @@ export const AGENTS: readonly AgentDef[] = [
   { code: "angel", accent: "0 80% 62%" },
   { code: "kelsy", accent: "175 70% 45%" },
 ];
+
+export interface AgentSec { k: string; label: string }
+export const SECS: readonly AgentSec[] = [
+  { k: "does", label: "ag.secDoes" },
+  { k: "achieves", label: "ag.secAchieves" },
+  { k: "identifies", label: "ag.secIdentifies" },
+  { k: "metrics", label: "ag.secMetrics" },
+  { k: "improve", label: "ag.secImprove" },
+];
+
+// Cuerpo de una seccion por agente: does/improve son comerciales; el resto = vacio honesto.
+export function secBody(code: string, k: string): string {
+  if (k === "does") return `ag.${code}.does`;
+  if (k === "improve") return `ag.${code}.improve`;
+  return "ag.noData";
+}

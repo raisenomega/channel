@@ -6,23 +6,15 @@
  */
 import { useState } from "react";
 import { t, type Idioma } from "@/lib/i18n";
-import type { AgentDef } from "./agent-roster";
+import { type AgentDef, SECS, secBody } from "./agent-roster";
 import { AgentAvatar } from "./agent-avatar";
 import { VictorChat } from "./victor-chat";
-
-const SECS = [
-  { k: "does", label: "ag.secDoes", body: "ag.victor.does" },
-  { k: "achieves", label: "ag.secAchieves", body: "ag.noData" },
-  { k: "identifies", label: "ag.secIdentifies", body: "ag.noData" },
-  { k: "metrics", label: "ag.secMetrics", body: "ag.noData" },
-  { k: "improve", label: "ag.secImprove", body: "ag.victor.improve" },
-] as const;
 
 export function VictorPage({ lang, agent, online, channelAccent }: { lang: Idioma; agent: AgentDef; online: boolean; channelAccent: string }) {
   const [tab, setTab] = useState(0);
   const [chat, setChat] = useState(false);
   const name = t(lang, "agent.name.victor");
-  const sec = SECS[tab] ?? SECS[0];
+  const sec = SECS[tab] ?? SECS[0]!;
   return (
     <div className="space-y-3">
       <header className="flex items-start gap-3">
@@ -46,7 +38,7 @@ export function VictorPage({ lang, agent, online, channelAccent }: { lang: Idiom
         <>
           <div className="min-h-[160px] rounded-xl border border-border/40 bg-card-soft p-4">
             <p className="mb-1 text-[11px] font-bold uppercase text-muted-foreground">{t(lang, sec.label)}</p>
-            <p className="text-sm text-foreground">{t(lang, sec.body)}</p>
+            <p className="text-sm text-foreground">{t(lang, secBody("victor", sec.k))}</p>
           </div>
           <button type="button" onClick={() => setChat(true)} className="flex w-full items-center gap-2 rounded-xl border-2 bg-card-soft px-3 py-2.5 text-left text-sm text-muted-foreground hover:bg-muted/20" style={{ borderColor: `hsl(${channelAccent} / 0.55)` }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
