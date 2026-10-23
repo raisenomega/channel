@@ -53,10 +53,11 @@ export class IngestZernioMessageHandler {
       await this.d.setConvRefs(convId, z.contactExternalId, z.providerConversationId, z.accountId); // 3o-b/#1: rellena ids de envío en convs ya existentes
       if (z.contactName !== "Cliente") await this.d.refreshContactName(contactId, z.contactName); // #3: llegó un nombre real -> actualiza
     }
+    const ctype = (z.hasAttachments && ["image", "video", "audio", "document", "sticker"].includes(z.mediaType) ? z.mediaType : "text") as MessageState["content"]["type"];
     const msg: MessageState = {
       id: crypto.randomUUID() as MessageId, tenantId, conversationId: convId, contactId,
       direction: z.direction, senderType: z.direction === "inbound" ? "contact" : "human_agent", senderUserId: null, channel: ch,
-      provider: "zernio", providerMessageId: z.providerMessageId, content: { type: "text", body: z.content },
+      provider: "zernio", providerMessageId: z.providerMessageId, content: { type: ctype, body: z.content, mediaUrl: z.mediaUrl || undefined, mediaMime: z.mediaMime || undefined },
       hasAttachments: z.hasAttachments, status: z.direction === "inbound" ? "received" : "sent", aiMeta: { interactionId: null, confidence: null, mode: null, editedByHuman: false },
       createdAt: new Date(),
     };

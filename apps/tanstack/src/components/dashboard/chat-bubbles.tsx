@@ -7,6 +7,9 @@ import { useMemo } from "react";
 import type { Idioma } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/avatar";
 import { dayLabel, timeLabel, Ticks, type ChatMsg } from "./chat-bubbles-helpers";
+import { MediaBubble } from "./media-bubble";
+
+const MEDIA = ["image", "audio", "video", "document", "sticker"];
 
 export type { ChatMsg } from "./chat-bubbles-helpers";
 
@@ -38,7 +41,7 @@ export function ChatThread({ messages, lang, accentColor }: {
               <div key={m.id} className={"chat-row " + (isOut ? "in" : "out")}>
                 {!isOut ? <span className="chat-avatar"><Avatar name={m.contactName ?? "Contacto"} size="xs" /></span> : null}
                 <div className="chat-bubble" style={isOut && accentColor ? { background: accentColor } : undefined}>
-                  <p>{m.content}</p>
+                  {MEDIA.includes(m.messageType ?? "") ? <MediaBubble messageId={m.id} kind={m.messageType ?? ""} fallback={m.content} /> : <p>{m.content}</p>}
                   <span className="chat-meta">
                     {timeLabel(m.createdAt, lang)}
                     {isOut ? <Ticks status={status} /> : null}

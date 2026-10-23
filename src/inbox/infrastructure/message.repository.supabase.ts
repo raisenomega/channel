@@ -23,6 +23,7 @@ export class MessageRepositorySupabase implements MessageRepository {
         direction: msg.direction, sender_type: msg.senderType,
         channel: msg.channel, provider: msg.provider,
         content: msg.content.body, content_type: msg.content.type,
+        media_url: msg.content.mediaUrl ?? null, media_mime: msg.content.mediaMime ?? null,
         status: msg.status,
         ai_agent_interaction_id: msg.aiMeta.interactionId,
         ai_confidence: msg.aiMeta.confidence,

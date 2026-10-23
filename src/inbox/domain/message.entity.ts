@@ -9,6 +9,7 @@ export type ContentType =
 export interface MessageContent {
   readonly type: ContentType;
   readonly body: string;
+  readonly mediaUrl?: string | undefined; readonly mediaMime?: string | undefined;
 }
 
 export type AiMode = "assistant" | "copilot" | "autonomous";

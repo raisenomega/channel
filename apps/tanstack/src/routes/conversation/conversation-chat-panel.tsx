@@ -39,7 +39,7 @@ export function ChatPanel({
         <div className="flex h-64 items-center justify-center px-6 text-sm text-muted-foreground">{t(language, "chat.empty")}</div>
       ) : (
         <ChatThread messages={messages.map<ChatMsg>((m) => ({
-          id: m.id, senderType: m.senderType, content: m.content, createdAt: m.createdAt,
+          id: m.id, senderType: m.senderType, content: m.content, createdAt: m.createdAt, messageType: m.messageType,
           status: m.senderType === "contact" ? "read" : "delivered",
         }))} lang={language} />
       )}

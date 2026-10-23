@@ -15,6 +15,9 @@ export interface ZernioInbound {
   readonly contactExternalId: string;    // conversation.participantId (estable, mismo hilo in/out)
   readonly contactName: string;          // conversation.participantName
   readonly contactPhone: string;         // WhatsApp: el participantId ES el telefono; otros canales: vacio
+  readonly mediaUrl: string;             // url del adjunto en Zernio (exige Bearer -> proxy backend)
+  readonly mediaType: string;            // image/audio/video/document/sticker
+  readonly mediaMime: string;            // ej. audio/ogg; codecs=opus
   readonly providerConversationId: string; // #1: conversation.id de Zernio -> ruta del envío real
 }
 
@@ -38,6 +41,7 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
   const profileId = String(acct["profileId"] ?? "");
   if (!providerMessageId || !profileId) return null;
   const atts = Array.isArray(m["attachments"]) ? (m["attachments"] as Record<string, unknown>[]) : [];
+  const a0 = (atts[0] ?? {}) as Record<string, unknown>;
   const text = m["text"] != null ? String(m["text"]) : "";
   const direction = String(m["direction"]) === "outgoing" ? "outbound" : "inbound";
   // #3: el contacto es el participante. En SALIENTE el sender es el NEGOCIO -> jamás usarlo como nombre
@@ -54,6 +58,9 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
     contactExternalId: String(conv["participantId"] ?? sender["id"] ?? providerMessageId),
     contactName: String(conv["participantName"] ?? senderName ?? "Cliente"),
     contactPhone: String(m["platform"] ?? acct["platform"] ?? "") === "whatsapp" ? String(conv["participantId"] ?? sender["id"] ?? providerMessageId).replace(/[^\d+]/g, "") : "",
+    mediaUrl: String(a0["url"] ?? ""),
+    mediaType: String(a0["type"] ?? ""),
+    mediaMime: String(((a0["payload"] ?? {}) as Record<string, unknown>)["mimeType"] ?? ""),
     providerConversationId: String(conv["id"] ?? ""),
   };
 }
