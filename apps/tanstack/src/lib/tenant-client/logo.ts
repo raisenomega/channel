@@ -4,6 +4,7 @@
  * (RLS tenants_update_own). Lectura = branding_config.logo_url. Cero-mocks. C4 <=75.
  */
 import { supabaseAuthHeaders, supabaseRestBase, getSupabaseUrl } from "../supabase";
+import { validateUpload, safeExt } from "@/lib/upload-guard";
 
 const BUCKET = "tenant-logos";
 
@@ -26,7 +27,8 @@ export async function uploadLogo(tenantId: string, file: File): Promise<string |
   const headers = supabaseAuthHeaders();
   const url = getSupabaseUrl();
   if (!base || !headers || !url || !tenantId) return null;
-  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  if (!validateUpload(file, "image").ok) return null;
+  const ext = safeExt(file.type);
   const path = `${encodeURIComponent(tenantId)}/logo.${ext}`;
   try {
     const up = await fetch(`${url}/storage/v1/object/${BUCKET}/${path}`, {

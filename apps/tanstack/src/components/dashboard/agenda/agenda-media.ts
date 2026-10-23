@@ -3,6 +3,7 @@
  * Devuelve el item o un error visible (para diagnosticar bucket/policy). C4 <=75.
  */
 import { supabaseAuthHeaders, getSupabaseUrl } from "@/lib/supabase";
+import { validateUpload, safeExt } from "@/lib/upload-guard";
 import type { MediaItem } from "./agenda-types";
 
 const BUCKET = "appointment-media";
@@ -19,12 +20,14 @@ export async function uploadApptMedia(tenantId: string, file: File): Promise<Upl
   const headers = supabaseAuthHeaders();
   const url = getSupabaseUrl();
   if (!headers || !url || !tenantId) return { ok: false, error: "config" };
-  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+  const v = validateUpload(file, "media");
+  if (!v.ok) return { ok: false, error: v.error };
+  const ext = safeExt(file.type);
   const path = `${encodeURIComponent(tenantId)}/${crypto.randomUUID()}.${ext}`;
   try {
     const up = await fetch(`${url}/storage/v1/object/${BUCKET}/${path}`, {
       method: "POST",
-      headers: { ...headers, "content-type": file.type || "application/octet-stream" },
+      headers: { ...headers, "content-type": file.type },
       body: file,
     });
     if (!up.ok) return { ok: false, error: `storage ${up.status}` };
