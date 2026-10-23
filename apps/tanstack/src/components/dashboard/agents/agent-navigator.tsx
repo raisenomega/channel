@@ -9,7 +9,7 @@ import { AGENTS } from "./agent-roster";
 import { AgentPage } from "./agent-page";
 import { VictorPage } from "./victor-page";
 
-export function AgentNavigator({ lang }: { lang: Idioma }) {
+export function AgentNavigator({ lang, accent }: { lang: Idioma; accent: string }) {
   const { agents: status } = useAgentStatus();
   const [idx, setIdx] = useState(0);
   const active = AGENTS[idx];
@@ -31,7 +31,7 @@ export function AgentNavigator({ lang }: { lang: Idioma }) {
         <button type="button" onClick={() => go(1)} className="chip shrink-0 px-2 font-bold" aria-label="next">{"›"}</button>
       </div>
       {active.code === "victor"
-        ? <VictorPage lang={lang} agent={active} online={isOn(active.code)} />
+        ? <VictorPage lang={lang} agent={active} online={isOn(active.code)} channelAccent={accent} />
         : <AgentPage lang={lang} agent={active} online={isOn(active.code)} />}
     </div>
   );

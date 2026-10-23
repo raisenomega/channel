@@ -38,7 +38,7 @@ export function ChannelFrame({
         <div className="cf-content">
           {composerContent ?? <ChatAmplified lang={lang} />}
         </div>
-        <ChannelComposer lang={lang} value={composerValue ?? ""} onChange={(v) => onComposerChange?.(v)} onSend={() => onSend?.()} />
+        {active ? null : <ChannelComposer lang={lang} value={composerValue ?? ""} onChange={(v) => onComposerChange?.(v)} onSend={() => onSend?.()} />}
       </div>
     </div>
   );

@@ -47,7 +47,7 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
   const empty = t(lang, "dash.sinRegistros");
 
   switch (activeTab) {
-    case "agentes": return <AgentNavigator lang={lang} />;
+    case "agentes": return <AgentNavigator lang={lang} accent={accent} />;
     case "contactos":
       if (!hasHilo || !contactInfo) return sinHilo;
       return (
