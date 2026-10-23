@@ -16,7 +16,7 @@ export function rutaVictorChat(deps: VictorChatDeps): RouteDefinition {
   return {
     method: "POST", path: "/tenants/:id/agents/victor/chat",
     handler: async (ctx) => {
-      const auth = await requireTenantAuth(ctx, ctx.params.id);
+      const auth = await requireTenantAuth(ctx); // tenant del claim, no del path (evita mismatch de este owner)
       if (!auth.ok) return auth.error;
       const body = (ctx.body ?? {}) as { message?: string };
       const message = String(body.message ?? "").trim();

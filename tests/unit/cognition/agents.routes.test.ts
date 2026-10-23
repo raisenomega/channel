@@ -42,11 +42,13 @@ test("A-04 GET_AGENTS_SIN_JWT_401: sin token -> 401 token_ausente y sin query a 
   expect(db.filtros).toHaveLength(0);
 });
 
-test("A-05 GET_AGENTS_TENANT_MISMATCH_403: JWT de tenant-1 pidiendo tenant-2 -> 403 tenant_mismatch, sin query", async () => {
-  const r = await rutaAgentStatus().handler(ctx("tenant-2", await bearer("tenant-1"))) as HttpResponse;
-  expect(r.status).toBe(403);
-  expect(JSON.parse(r.body).error.kind).toBe("tenant_mismatch");
-  expect(db.filtros).toHaveLength(0);
+test("A-05 GET_AGENTS_CLAIM_WINS: path tenant-2 con JWT de tenant-1 -> usa el tenant del CLAIM, cero fuga", async () => {
+  // auth del CLAIM (no del path, patron FORTRESS N): el path tenant-2 se ignora; la query usa tenant-1.
+  db.rows = [{ agent_name: "thao", created_at: "2026-10-16T12:00:00Z" }];
+  const r = await rutaAgentStatus().handler(ctx("tenant-2", await bearer("tenant-1"))) as AgentsOk;
+  expect(r.ok).toBe(true);
+  // SEGURIDAD: nunca sirve datos de tenant-2; filtra por el tenant-1 del claim.
+  expect(db.filtros).toEqual([["tenant_id", "tenant-1"]]);
 });
 
 test("A-06 GET_AGENTS_TENANT_MATCH_200: match -> 7 agentes, filtro tenant_id del CLAIM, thao online", async () => {
