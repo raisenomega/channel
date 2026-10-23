@@ -54,7 +54,7 @@ export class AnthropicAdapter implements AIProvider {
         body: JSON.stringify({
           model, system: params.systemPrompt,
           messages: params.messages.map((m) => ({ role: m.role, content: m.content })),
-          max_tokens: params.maxTokens ?? 4096, temperature: params.temperature ?? 0.7,
+          max_tokens: params.maxTokens ?? 4096,
         }),
       });
       if (resp.status === 503 || resp.status === 429) return err({ kind: "provider_unavailable", cause: `http_${resp.status}` });
