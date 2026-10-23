@@ -15,12 +15,13 @@ import { fetchQuotesForContact, fetchOrdersForContact, fetchPaymentsForContact }
 import { SimpleListView } from "./tab-simple-list";
 import { CardGrid } from "./tab-card-grid";
 import { ContactFichaCard } from "./tab-contact-ficha";
-import { agentsToItems, templatesToItems, docsToItems, quotesToCards, paymentsToCards } from "./tab-builders";
+import { templatesToItems, docsToItems, quotesToCards, paymentsToCards } from "./tab-builders";
 import type { ActiveContactInfo } from "./channel-fetchers";
 import { AgendaCalendar } from "@/components/dashboard/agenda/agenda-calendar";
 import { ChannelQuoteTab } from "./channel-quote-tab";
 import { ChannelInvoiceTab } from "./channel-invoice-tab";
 import { ChannelSkuTab } from "./channel-sku-tab"; import { ChannelConfigTab } from "./channel-config-tab";
+import { AgentNavigator } from "@/components/dashboard/agents/agent-navigator";
 
 function useTabData(contactId: string | null) {
   const agents = useQuery({ queryKey: ["channel-agents"], queryFn: fetchAgents, staleTime: 30_000 });
@@ -46,8 +47,7 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
   const empty = t(lang, "dash.sinRegistros");
 
   switch (activeTab) {
-    case "agentes":
-      return <SimpleListView title={t(lang, "cf.agentes")} empty={empty} accent={accent} items={agentsToItems(data.agents)} />;
+    case "agentes": return <AgentNavigator lang={lang} />;
     case "contactos":
       if (!hasHilo || !contactInfo) return sinHilo;
       return (
