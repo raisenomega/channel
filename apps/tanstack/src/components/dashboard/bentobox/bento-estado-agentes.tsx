@@ -1,17 +1,13 @@
 /**
- * HUB by Raisen — Bento Card: Estado agentes IA (7 agentes con status).
+ * HUB by Raisen — Bento Card: Estado de agentes IA. Status REAL via useAgentStatus (polling 10s a
+ * /tenants/:id/agents/status); sin tenant/datos -> fallback honesto (todos en standby). C4 <=75.
  */
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
-
-const AGENTES = ["victor","zahra","thao","iris","eco","angel","kelsy"] as const;
-
-const STATUS: Record<string, boolean> = {
-  victor: true, zahra: true, thao: true,
-  iris: false, eco: true, angel: false, kelsy: true,
-};
+import { useAgentStatus } from "@/hooks/useAgentStatus";
 
 export function BentoEstadoAgentes({ lang }: { lang: Idioma }) {
+  const { agents } = useAgentStatus();
   return (
     <div className="bento-card bento-col-3">
       <div className="bento-title">
@@ -21,23 +17,13 @@ export function BentoEstadoAgentes({ lang }: { lang: Idioma }) {
         <span>{t(lang, "dash.estadoAgentes")}</span>
       </div>
       <div className="flex flex-col gap-1.5">
-        {AGENTES.map((a) => {
-          const online = STATUS[a];
-          return (
-            <div key={a} className="flex items-center gap-2 text-xs">
-              <span
-                className="inline-block h-2 w-2 rounded-full shrink-0"
-                style={{ background: online ? "hsl(var(--success))" : "hsl(var(--text-dim))" }}
-              />
-              <span className="font-semibold text-foreground w-14 shrink-0">
-                {t(lang, "agent.name." + a)}
-              </span>
-              <span className="text-muted-foreground truncate">
-                {online ? t(lang, "agent.status.online") : t(lang, "agent.status.standby")}
-              </span>
-            </div>
-          );
-        })}
+        {agents.map((a) => (
+          <div key={a.name} className="flex items-center gap-2 text-xs">
+            <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: a.online ? "hsl(var(--success))" : "hsl(var(--text-dim))" }} />
+            <span className="w-14 shrink-0 font-semibold text-foreground">{t(lang, "agent.name." + a.name)}</span>
+            <span className="truncate text-muted-foreground">{a.online ? t(lang, "agent.status.online") : t(lang, "agent.status.standby")}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
