@@ -28,7 +28,7 @@ export function TemplateEditPanel({ lang, accent, form, set, style, onStyle, log
       <div className="flex flex-wrap gap-1.5">{PDF_STYLES.map((s) => <button key={s.id} type="button" className={"chip text-xs" + (style === s.id ? " active" : "")} style={style === s.id ? { color: `hsl(${accent})`, borderColor: `hsl(${accent})` } : undefined} onClick={() => onStyle(s.id)}>{t(lang, "quotes.style." + s.id)}</button>)}</div>
       <div className="flex items-center gap-2">
         {logoUrl ? <img src={logoUrl} alt="" className="h-9 w-9 rounded object-contain" /> : null}
-        <label className="chip cursor-pointer text-xs">{busy === "logo" ? t(lang, "onboarding.saving") : t(lang, "quotes.template.logoBtn")}<input type="file" accept="image/*" className="hidden" onChange={(e) => onLogo(e.target.files?.[0] ?? undefined)} /></label>
+        <label className="chip cursor-pointer text-xs">{busy === "logo" ? t(lang, "onboarding.saving") : t(lang, "quotes.template.logoBtn")}<input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => onLogo(e.target.files?.[0] ?? undefined)} /></label>
         <input value={seq} onChange={(e) => onSeq(e.target.value)} placeholder={t(lang, "tpl.seqPh")} className="flex-1 rounded border border-border/55 bg-card-soft p-1.5 text-sm text-foreground" />
       </div>
       <L label={t(lang, "quotes.tpl.name")}><input className={INP} value={form.name} onChange={(e) => set("name", e.target.value)} /></L>

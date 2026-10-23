@@ -9,7 +9,7 @@ import { t, type Idioma } from "@/lib/i18n";
 import { uploadLogo } from "@/lib/tenant-client/logo";
 
 const MAX = 2 * 1024 * 1024;
-const OK = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+const OK = ["image/png", "image/jpeg", "image/webp"];
 
 export function LogoUpload({ lang, tenantId, logoUrl }: { lang: Idioma; tenantId?: string; logoUrl?: string | null }) {
   const qc = useQueryClient();
