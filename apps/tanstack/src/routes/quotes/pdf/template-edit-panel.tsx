@@ -17,9 +17,10 @@ function L({ label, children }: { label: string; children: ReactNode }) {
   return <label className="block text-xs"><span className="mb-0.5 block text-muted-foreground">{label}</span>{children}</label>;
 }
 
-export function TemplateEditPanel({ lang, accent, form, set, style, onStyle, logoUrl, onLogo, onSave, onUse, dirty, busy, msg }: {
+export function TemplateEditPanel({ lang, accent, form, set, style, onStyle, logoUrl, onLogo, seq, onSeq, onSave, onUse, dirty, busy, msg }: {
   lang: Idioma; accent: string; form: TplForm; set: <K extends keyof TplForm>(k: K, v: TplForm[K]) => void;
   style: string; onStyle: (s: string) => void; logoUrl: string | null; onLogo: (f: File | undefined) => void;
+  seq: string; onSeq: (v: string) => void;
   onSave: () => void; onUse: () => void; dirty: boolean; busy: string; msg: string;
 }) {
   return (
@@ -28,6 +29,7 @@ export function TemplateEditPanel({ lang, accent, form, set, style, onStyle, log
       <div className="flex items-center gap-2">
         {logoUrl ? <img src={logoUrl} alt="" className="h-9 w-9 rounded object-contain" /> : null}
         <label className="chip cursor-pointer text-xs">{busy === "logo" ? t(lang, "onboarding.saving") : t(lang, "quotes.template.logoBtn")}<input type="file" accept="image/*" className="hidden" onChange={(e) => onLogo(e.target.files?.[0] ?? undefined)} /></label>
+        <input value={seq} onChange={(e) => onSeq(e.target.value)} placeholder={t(lang, "tpl.seqPh")} className="flex-1 rounded border border-border/55 bg-card-soft p-1.5 text-sm text-foreground" />
       </div>
       <L label={t(lang, "quotes.tpl.name")}><input className={INP} value={form.name} onChange={(e) => set("name", e.target.value)} /></L>
       <L label={t(lang, "quotes.tpl.address")}><input className={INP} value={form.address} onChange={(e) => set("address", e.target.value)} /></L>
