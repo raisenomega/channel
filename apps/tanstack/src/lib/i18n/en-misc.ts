@@ -18,7 +18,7 @@ export const enMisc: Dict = {
   "cf.pagos": "Payments",
   "cf.documentos": "Documents",
   "cf.sku": "SKU", "cf.config": "Settings",
-  "sku.name": "Name", "sku.desc": "Description", "sku.price": "Price", "sku.service": "Service", "sku.product": "Product", "sku.add": "Add item", "sku.catName": "Category", "sku.noCat": "No category", "sku.edit": "edit", "sku.empty": "No items yet", "sku.pick": "[item] pick from catalog",
+  "sku.name": "Name", "sku.desc": "Description", "sku.price": "Price", "sku.service": "Service", "sku.product": "Product", "sku.add": "Add item", "sku.catName": "Category", "sku.noCat": "No category", "sku.edit": "edit", "sku.pickShort": "Sku", "sku.empty": "No items yet", "sku.pick": "[item] pick from catalog",
   "cf.agenda": "Agenda",
   "cf.envios": "Bulk sends",
   "cf.tabsLabel": "Business tabs",
