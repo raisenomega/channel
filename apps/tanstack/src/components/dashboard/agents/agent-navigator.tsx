@@ -7,6 +7,7 @@ import { t, type Idioma } from "@/lib/i18n";
 import { useAgentStatus } from "@/hooks/useAgentStatus";
 import { AGENTS } from "./agent-roster";
 import { AgentPage } from "./agent-page";
+import { VictorPage } from "./victor-page";
 
 export function AgentNavigator({ lang }: { lang: Idioma }) {
   const { agents: status } = useAgentStatus();
@@ -29,7 +30,9 @@ export function AgentNavigator({ lang }: { lang: Idioma }) {
         </div>
         <button type="button" onClick={() => go(1)} className="chip shrink-0 px-2 font-bold" aria-label="next">{"›"}</button>
       </div>
-      <AgentPage lang={lang} agent={active} online={isOn(active.code)} />
+      {active.code === "victor"
+        ? <VictorPage lang={lang} agent={active} online={isOn(active.code)} />
+        : <AgentPage lang={lang} agent={active} online={isOn(active.code)} />}
     </div>
   );
 }
