@@ -13,6 +13,8 @@ import { ConversationRepository } from "../domain/inbox.repository.ts";
 import { crearConversacion } from "../domain/conversation.entity.ts";
 import { MessageState } from "../domain/message.entity.ts";
 import { parseZernioMessage } from "./zernio-message.parser.ts";
+import { cerebroMessageEvent } from "./cerebro-event.ts";
+import type { CerebroEvent } from "../../integrations/domain/cerebro.types.ts";
 
 export interface MsgPort { guardar(m: MessageState): Promise<Result<void, { readonly kind: string; readonly cause?: string }>>; }
 export interface IngestDeps {
@@ -26,6 +28,7 @@ export interface IngestDeps {
   readonly setConvRefs: (convId: string, participantExternalId: string, providerConversationId: string, providerAccountId: string) => Promise<void>; // 3o-b/#1: ids de envío Zernio
   readonly refreshContactName: (contactId: string, name: string) => Promise<void>; // #3: auto-update nombre real
   readonly detId: (seed: string) => string;
+  readonly emitCerebro?: (e: CerebroEvent) => void; // CEREBRO: enriquece, no bloquea (fire-and-forget)
 }
 export type IngestError = { kind: "shape_ignorado" } | { kind: "tenant_no_encontrado" } | { kind: "persistence_failure"; cause: string };
 const fail = (cause: string): Result<never, IngestError> => err({ kind: "persistence_failure", cause });
@@ -63,6 +66,7 @@ export class IngestZernioMessageHandler {
     };
     const mr = await this.d.msgs.guardar(msg);
     if (!mr.ok) return fail(mr.error.cause ?? "mensaje"); // #171: propaga el error REAL de Postgres (diagnosticable)
+    this.d.emitCerebro?.(cerebroMessageEvent(String(tenantId), String(contactId), z)); // CEREBRO async
     return ok({ persisted: true });
   }
 }
