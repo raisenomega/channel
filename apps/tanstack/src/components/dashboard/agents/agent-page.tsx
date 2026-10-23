@@ -6,7 +6,6 @@
 import { t, type Idioma } from "@/lib/i18n";
 import type { AgentDef } from "./agent-roster";
 import { AgentAvatar } from "./agent-avatar";
-import { VictorChat } from "./victor-chat";
 
 function Section({ title, body }: { title: string; body: string }) {
   return (
@@ -41,7 +40,6 @@ export function AgentPage({ lang, agent, online }: { lang: Idioma; agent: AgentD
         <Section title={t(lang, "ag.secMetrics")} body={t(lang, "ag.noData")} />
         <Section title={t(lang, "ag.secImprove")} body={k("improve")} />
       </div>
-      {agent.code === "victor" ? <VictorChat lang={lang} accent={agent.accent} /> : null}
     </div>
   );
 }
