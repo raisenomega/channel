@@ -12,6 +12,7 @@ export const enDocPdf: Dict = {
   "doc.total": "Total",
   "doc.subtotal": "Subtotal",
   "doc.taxTotal": "Tax",
+  "tpl.seqPh": "Sequence # (e.g. ZR00250)",
   "quotes.tpl.name": "Company name",
   "quotes.tpl.address": "Physical address",
   "quotes.tpl.phone": "Phone",

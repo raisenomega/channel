@@ -42,7 +42,7 @@ export function QuotePdfModal({ lang, quote, contactName, onClose }: {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto bg-neutral-300 p-4">
-          <div ref={ref}><BusinessDocument title={title} style={styleOf(biz.style)} biz={biz} refId={quote.id.slice(0, 8)} client={{ name: contactName, lines: clientLines }} items={items} totals={totals} headers={headers} labels={labels} watermark={WM[quote.status]} /></div>
+          <div ref={ref}><BusinessDocument title={title} style={styleOf(biz.style)} biz={biz} refId={docQ.data?.quoteNumber || quote.id.slice(0, 8)} client={{ name: contactName, lines: clientLines }} items={items} totals={totals} headers={headers} labels={labels} watermark={WM[quote.status]} /></div>
         </div>
       </div>
     </div>

@@ -25,7 +25,7 @@ export function SkuCategoryBar({ lang, accent }: { lang: Idioma; accent: string 
       {adding ? (
         <input autoFocus value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void save(); if (e.key === "Escape") { setName(""); setAdding(false); } }} onBlur={() => void save()} placeholder={t(lang, "sku.catName")} className="rounded border border-border/55 bg-card-soft p-1 text-[11px] text-foreground" style={{ width: 120 }} />
       ) : (
-        <button type="button" onClick={() => setAdding(true)} className="chip text-[11px] font-bold" style={{ color: `hsl(${accent})` }}>+</button>
+        <button type="button" onClick={() => setAdding(true)} className="chip text-[11px] font-bold" style={{ color: `hsl(${accent})` }}>+ {t(lang, "sku.catName")}</button>
       )}
     </div>
   );

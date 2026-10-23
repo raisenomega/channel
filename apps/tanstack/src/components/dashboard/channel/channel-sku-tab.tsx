@@ -29,7 +29,7 @@ export function ChannelSkuTab({ lang, accent }: { lang: Idioma; accent: string }
       <SkuCategoryBar lang={lang} accent={accent} />
       <SkuFormCard key={editing?.id ?? "new"} lang={lang} cats={cats} editing={editing} onSave={save} onCancel={() => setEditing(null)} />
       {items.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">{t(lang, "sku.empty")}</p> : (
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
           {items.map((it) => <SkuItemCard key={it.id} lang={lang} item={it} accent={accent} onEdit={() => setEditing(it)} onDelete={() => void rm(it.id)} />)}
         </div>
       )}
