@@ -29,7 +29,7 @@ export function rutaAgentStatus(): RouteDefinition {
       }
       const agents = AGENT_NAMES.map((n) => ({
         name: n,
-        online: !!lastAction[n],
+        online: true, // verde = backend respondio (activo); gris solo si el backend falla (hook del front)
         lastAction: lastAction[n] ?? "",
         timestamp: lastAction[n] ?? "",
       }));

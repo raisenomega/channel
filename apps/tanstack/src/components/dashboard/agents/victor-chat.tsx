@@ -22,12 +22,11 @@ export function VictorChat({ lang, accent, onClose, full }: { lang: Idioma; acce
       const res = tid ? await apiFetch(`/tenants/${encodeURIComponent(tid)}/agents/victor/chat`, { method: "POST", body: JSON.stringify({ message: v }) }) : null;
       if (!res || !res.ok) {
         const st = res ? res.status : 0;
-        let det = "";
-        try { const b = res ? ((await res.json()) as { error?: { cause?: string; kind?: string } }) : null; det = b?.error?.cause || b?.error?.kind || ""; } catch { /* */ }
-        setMsgs((m) => [...m, { from: "victor", text: `${t(lang, "ag.victor.chatErr")} (${st}${det ? ": " + det : ""})` }]); setBusy(false); return;
+        setMsgs((m) => [...m, { from: "victor", text: `${t(lang, "ag.victor.chatErr")} (${st})` }]); setBusy(false); return;
       }
       const d = (await res.json()) as { reply?: string };
-      setMsgs((m) => [...m, { from: "victor", text: d.reply || t(lang, "ag.victor.chatErr") }]);
+      const reply = (d.reply ?? "").trim();
+      setMsgs((m) => [...m, { from: "victor", text: reply || t(lang, "ag.victor.chatErr") }]);
     } catch { setMsgs((m) => [...m, { from: "victor", text: t(lang, "ag.victor.chatErr") }]); }
     setBusy(false);
   };

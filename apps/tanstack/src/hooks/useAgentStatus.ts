@@ -24,14 +24,14 @@ export function useAgentStatus(): { agents: readonly AgentStatus[] } {
 
   const fetchStatus = useCallback(async () => {
     const tenantId = resolveTenantId();
-    if (!tenantId) return;
+    if (!tenantId) { setAgents(fallback()); return; }
     try {
       const res = await apiFetch(`/tenants/${encodeURIComponent(tenantId)}/agents/status`);
       if (res.ok) {
         const data = (await res.json()) as { agents: AgentStatus[] };
         setAgents(data.agents ?? fallback());
-      }
-    } catch { /* sin sesion o red: se mantiene el fallback */ }
+      } else { setAgents(fallback()); } // backend falla -> gris
+    } catch { setAgents(fallback()); } // sin sesion o red -> gris
   }, []);
 
   useEffect(() => {

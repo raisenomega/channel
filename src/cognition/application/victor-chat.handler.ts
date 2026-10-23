@@ -31,6 +31,8 @@ export class VictorChatHandler {
       tools: null, maxTokens: 1024, temperature: 0.6, tier: "sonnet",
     });
     if (!r.ok) return err({ kind: "llm_failure", cause: (r.error as { cause?: string }).cause ?? r.error.kind });
-    return ok({ reply: r.value.response, model: r.value.model });
+    const reply = r.value.response.trim();
+    if (!reply) return err({ kind: "llm_failure", cause: "respuesta_vacia" });
+    return ok({ reply, model: r.value.model });
   }
 }

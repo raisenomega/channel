@@ -51,12 +51,12 @@ test("A-05 GET_AGENTS_CLAIM_WINS: path tenant-2 con JWT de tenant-1 -> usa el te
   expect(db.filtros).toEqual([["tenant_id", "tenant-1"]]);
 });
 
-test("A-06 GET_AGENTS_TENANT_MATCH_200: match -> 7 agentes, filtro tenant_id del CLAIM, thao online", async () => {
+test("A-06 GET_AGENTS_200: backend sano -> 7 agentes ACTIVOS (verde), filtro tenant_id del CLAIM", async () => {
   db.rows = [{ agent_name: "thao", created_at: "2026-10-16T12:00:00Z" }];
   const r = await rutaAgentStatus().handler(ctx("tenant-1", await bearer("tenant-1"))) as AgentsOk;
   expect(r.ok).toBe(true);
   expect(r.agents).toHaveLength(7);
-  expect(r.agents.find((a) => a.name === "thao")?.online).toBe(true);
-  expect(r.agents.filter((a) => a.online)).toHaveLength(1);
+  // verde = el backend respondio; los 7 activos. Gris solo si el backend falla (lo maneja el hook del front).
+  expect(r.agents.filter((a) => a.online)).toHaveLength(7);
   expect(db.filtros).toEqual([["tenant_id", "tenant-1"]]);
 });

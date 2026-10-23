@@ -60,8 +60,10 @@ export class AnthropicAdapter implements AIProvider {
       if (resp.status === 503 || resp.status === 429) return err({ kind: "provider_unavailable", cause: `http_${resp.status}` });
       if (!resp.ok) { const b = await resp.text().catch(() => ""); return err({ kind: "provider_unavailable", cause: `http_${resp.status}:${b.slice(0, 180)}` }); }
       const data = await resp.json() as Record<string, unknown>;
+      const blocks = (data.content as Array<{ type?: string; text?: string }>) ?? [];
+      const text = blocks.filter((b) => b.type === "text" && b.text).map((b) => b.text).join("\n").trim();
       return ok(Object.freeze({
-        response: String((data.content as Record<string, unknown>[])?.[0]?.text ?? ""),
+        response: text,
         tokensInput: (data.usage as Record<string, number>)?.input_tokens ?? 0,
         tokensOutput: (data.usage as Record<string, number>)?.output_tokens ?? 0,
         latencyMs: Date.now() - startMs, costUsd: 0, model,
