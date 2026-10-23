@@ -1,11 +1,16 @@
 /**
- * HUB by Raisen — Avatar redondo del agente (Fase 0: inicial + color de marca; Fase 0.1: foto real via
- * `src`). C4 <=75.
+ * HUB by Raisen — Avatar redondo del agente: foto real (`src`) con fallback a inicial + color de marca
+ * si la imagen no carga. C4 <=75.
  */
+import { useState } from "react";
+
 export function AgentAvatar({ name, accent, src, size = 56 }: { name: string; accent: string; src?: string; size?: number }) {
-  if (src) return <img src={src} alt={name} className="rounded-full object-cover" style={{ width: size, height: size }} />;
+  const [failed, setFailed] = useState(false);
+  if (src && !failed) {
+    return <img src={src} alt={name} onError={() => setFailed(true)} className="shrink-0 rounded-full object-cover" style={{ width: size, height: size }} />;
+  }
   return (
-    <div className="flex items-center justify-center rounded-full font-bold text-white"
+    <div className="flex shrink-0 items-center justify-center rounded-full font-bold text-white"
       style={{ width: size, height: size, fontSize: size * 0.4, background: `hsl(${accent})` }}>
       {(name[0] ?? "A").toUpperCase()}
     </div>

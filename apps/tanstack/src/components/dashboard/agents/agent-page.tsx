@@ -23,7 +23,7 @@ export function AgentPage({ lang, agent, online }: { lang: Idioma; agent: AgentD
   return (
     <div className="space-y-3">
       <header className="flex items-center gap-3">
-        <AgentAvatar name={name} accent={agent.accent} />
+        <AgentAvatar name={name} accent={agent.accent} src={`/agents/${agent.code}.png`} />
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-bold text-foreground">{name}</h3>
