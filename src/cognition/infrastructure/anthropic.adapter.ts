@@ -21,14 +21,16 @@ export class AnthropicAdapter implements AIProvider {
 
   async completar(params: AICompletionParams): Promise<Result<AICompletionResult & { usedTier: ModelTier; usedModel: string }, AIError>> {
     const requestedTier = params.tier ?? "sonnet";
+    let ultimo: AIError = { kind: "provider_unavailable", cause: "sin_modelo" };
     for (const tier of DEGRADATION_CHAIN[requestedTier]) {
       const modelRes = await this.resolver.resolverModelo(tier);
       if (!modelRes.ok) continue;
       const resp = await this.callAnthropic(modelRes.value, params);
       if (resp.ok) return ok({ ...resp.value, usedTier: tier, usedModel: modelRes.value } as AICompletionResult & { usedTier: ModelTier; usedModel: string });
+      ultimo = resp.error;
       if (!this.esDeDisponibilidad(resp.error.kind)) return resp;
     }
-    return err({ kind: "provider_unavailable", cause: "todos_los_tiers_fallaron" });
+    return err(ultimo);
   }
 
   async ping(): Promise<Result<boolean, AIError>> {
