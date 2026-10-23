@@ -27,7 +27,7 @@ export class VictorChatHandler {
     const sp = systemPrompt(facts);
     const r = await provider.completar({
       systemPrompt: sp,
-      messages: [{ role: "system", content: sp }, { role: "user", content: message }],
+      messages: [{ role: "user", content: message }],
       tools: null, maxTokens: 1024, temperature: 0.6, tier: "sonnet",
     });
     if (!r.ok) return err({ kind: "llm_failure", cause: r.error.kind });
