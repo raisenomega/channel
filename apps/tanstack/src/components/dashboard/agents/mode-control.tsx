@@ -17,9 +17,14 @@ export function ModeControl({ lang }: { lang: Idioma }) {
       <button type="button" onClick={() => setOpen((o) => !o)} className="chip inline-flex items-center gap-1 text-xs font-bold" style={{ color: c ? `hsl(${c})` : undefined, borderColor: c ? `hsl(${c})` : undefined }}>
         {t(lang, "mode.label")}: {t(lang, "mode." + mode)}
       </button>
-      {open ? <div className="absolute right-0 top-full z-40 mt-1 rounded-xl border border-border/50 bg-card p-3 shadow-xl">
-        <ConfigPanel lang={lang} />
-      </div> : null}
+      {open ? (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full z-40 mt-1 rounded-xl border border-border/50 bg-card p-3 shadow-xl">
+            <ConfigPanel lang={lang} onClose={() => setOpen(false)} />
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }

@@ -13,7 +13,7 @@ const CAN = ["reply", "quote", "invoice", "order", "charge", "appointment"] as c
 const REVIEW = ["opportunities", "complaints", "newContacts"] as const;
 const CHANNELS = ["whatsapp", "instagram", "facebook"];
 
-export function ConfigPanel({ lang }: { lang: Idioma }) {
+export function ConfigPanel({ lang, onClose }: { lang: Idioma; onClose?: () => void }) {
   const { mode, config, busy, saved, save } = useAgentConfig();
   const [m, setM] = useState(mode);
   const [c, setC] = useState<AgentsConfig | null>(config);
@@ -35,7 +35,7 @@ export function ConfigPanel({ lang }: { lang: Idioma }) {
         <label className="flex items-center justify-between pt-1"><span className="text-muted-foreground">{t(lang, "cfg.cap")}</span><input type="number" min={1} value={c.dailyCap} onChange={(e) => setC({ ...c, dailyCap: Number(e.target.value) })} className="w-14 rounded border border-border/55 bg-card-soft p-0.5 text-right text-foreground" /></label>
       </div>
       <div className="flex items-center gap-2 border-t border-border/40 pt-2">
-        <button type="button" disabled={busy} onClick={() => void save(m, c)} className="chip font-bold text-white" style={{ background: "hsl(var(--success))" }}>{busy ? t(lang, "ctx.saving") : t(lang, "ctx.save")}</button>
+        <button type="button" disabled={busy} onClick={() => void save(m, c).then(() => onClose?.())} className="chip font-bold text-white" style={{ background: "hsl(var(--success))" }}>{busy ? t(lang, "ctx.saving") : t(lang, "ctx.save")}</button>
         {saved ? <span className="font-semibold" style={{ color: "hsl(var(--success))" }}>{t(lang, "ctx.saved")}</span> : null}
       </div>
     </div>
