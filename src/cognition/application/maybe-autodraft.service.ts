@@ -41,12 +41,14 @@ export class MaybeAutodraftService {
     try {
       if (!ev.content || !ev.content.trim() || !ev.from) return;
       const { mode, config } = await this.flag.leer(ev.tenantId);
+      console.error(`[autodraft] t=${ev.tenantId} ch=${ev.channel} from=${ev.from} mode=${mode}`);
       if (mode === "off") return;
       const intent = await this.classifier.clasificar(ev.content);
       const sentToday = mode === "autonomous" && this.counter ? await this.counter.contar(ev.tenantId) : 0;
       const complaint = intent.persona === "angel" || intent.kind === "queja";
       const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };
       const dec = razonAutoEnvio(mode, config, signals, new Date());
+      console.error(`[autodraft] send=${dec.send} reason=${dec.reason} conf=${intent.confidence} hasAutoSend=${!!this.autoSend}`);
       if (mode === "autonomous" && !dec.send) return; // Sistema A: en autonomo respondemos o nada; nunca dejamos borrador por mensaje (eso es Sistema B)
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };
       const draft = await this.generate.ejecutar({
@@ -57,7 +59,8 @@ export class MaybeAutodraftService {
         normalizedMessage: nm, contactLabel: ev.from, contactName: ev.contactName, contactPhone: ev.contactPhone,
         scope: intent.opportunity ? "opportunity" : "targeted", autoSendReason: dec.reason,
       });
-      if (draft.ok && dec.send && this.autoSend) await this.autoSend.enviar(draft.value, ev.from, ev.channel);
-    } catch { /* enriquece, no bloquea */ }
+      if (draft.ok && dec.send && this.autoSend) { console.error(`[autodraft] auto-enviando to=${ev.from} ch=${ev.channel}`); await this.autoSend.enviar(draft.value, ev.from, ev.channel); }
+      else console.error(`[autodraft] NO envia draftOk=${draft.ok} send=${dec.send} hasAutoSend=${!!this.autoSend}`);
+    } catch (e) { console.error(`[autodraft] ERROR`, e instanceof Error ? e.message : e); }
   }
 }
