@@ -7,7 +7,7 @@ import type { AgentsConfig, AgentsHours } from "./agents-config.ts";
 const DIA: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
 
 export function dentroDeHorario(hours: AgentsHours | null, now: Date, timeZone?: string): boolean {
-  if (!hours) return true; // 24/7
+  if (!hours || !Array.isArray(hours.days) || !hours.start || !hours.end) return true; // null o malformado -> 24/7 (nunca crashea)
   const p = new Intl.DateTimeFormat("en-US", { timeZone: timeZone || "UTC", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);
   const val = (t: string): string => p.find((x) => x.type === t)?.value ?? "";
   const day = DIA[val("weekday")] ?? 0; // 0=Lun .. 6=Dom, en la TZ del tenant
