@@ -12,12 +12,12 @@ function fillN(n: number): BusinessContext {
   return c as BusinessContext;
 }
 
-test("CTX-01 contexto vacio -> 0%, no verde, total 23", () => {
+test("CTX-01 contexto vacio -> 0%, no verde, total 24", () => {
   const r = completeness({});
   expect(r.filled).toBe(0);
   expect(r.percent).toBe(0);
   expect(r.green).toBe(false);
-  expect(r.total).toBe(23);
+  expect(r.total).toBe(24);
 });
 
 test("CTX-02 verde SOLO > 70% (17/23 = 74% verde; 16/23 = 70% gris)", () => {

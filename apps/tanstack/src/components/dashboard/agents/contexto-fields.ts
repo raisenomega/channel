@@ -25,6 +25,7 @@ export const CTX_FIELDS: readonly CtxField[] = [
   { key: "operationHours", label: "ctx.operationHours", kind: "text", part: 4 },
   { key: "responseSla", label: "ctx.responseSla", kind: "select", part: 4, options: ["<1h", "<4h", "<24h", "best_effort"] },
   { key: "policies", label: "ctx.policies", kind: "area", part: 4 },
+  { key: "faq", label: "ctx.faq", kind: "area", part: 4 },
   { key: "mainGoal", label: "ctx.mainGoal", kind: "text", part: 5 },
   { key: "quarterGoals", label: "ctx.quarterGoals", kind: "area", part: 5 },
   { key: "customInstructions", label: "ctx.customInstructions", kind: "area", part: 5 },
