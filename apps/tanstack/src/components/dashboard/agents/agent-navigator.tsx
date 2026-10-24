@@ -12,6 +12,7 @@ import { AgentPage } from "./agent-page";
 import { VictorPage } from "./victor-page";
 import { ContextoPage } from "./contexto-page";
 import { BorradoresPage } from "./borradores-page";
+import { ModeControl } from "./mode-control";
 
 const CTX_ACCENT = "45 90% 55%";
 const DR_ACCENT = "265 80% 60%";
@@ -25,7 +26,6 @@ export function AgentNavigator({ lang, accent }: { lang: Idioma; accent: string 
   const [view, setView] = useState<View>("agent");
   const active = AGENTS[idx];
   const isOn = (code: string) => status.find((s) => s.name === code)?.online ?? false;
-  const go = (d: number) => { setView("agent"); setIdx((i) => (i + d + AGENTS.length) % AGENTS.length); };
   if (!active) return null;
   const dot = (on: boolean) => ({ background: on ? "hsl(var(--success))" : "hsl(var(--text-dim))" });
   const chip = (v: View, acc: string, on: boolean, label: string) => (
@@ -35,18 +35,15 @@ export function AgentNavigator({ lang, accent }: { lang: Idioma; accent: string 
   );
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <button type="button" onClick={() => go(-1)} className="chip shrink-0 px-2 font-bold" aria-label="prev">{"‹"}</button>
-        <div className="flex flex-1 flex-wrap gap-1.5">
-          {AGENTS.map((a, i) => (
-            <button key={a.code} type="button" onClick={() => { setView("agent"); setIdx(i); }} className={"chip inline-flex items-center gap-1 text-xs" + (view === "agent" && active.code === a.code ? " active" : "")} style={view === "agent" && active.code === a.code ? { color: `hsl(${a.accent})`, borderColor: `hsl(${a.accent})` } : undefined}>
-              <span className="inline-block h-1.5 w-1.5 rounded-full" style={dot(isOn(a.code))} />{t(lang, "agent.name." + a.code)}
-            </button>
-          ))}
-          {chip("contexto", CTX_ACCENT, ctx.green, t(lang, "ctx.chip"))}
-          {chip("borradores", DR_ACCENT, count > 0, count > 0 ? `${t(lang, "dr.chip")} (${count})` : t(lang, "dr.chip"))}
-        </div>
-        <button type="button" onClick={() => go(1)} className="chip shrink-0 px-2 font-bold" aria-label="next">{"›"}</button>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {AGENTS.map((a, i) => (
+          <button key={a.code} type="button" onClick={() => { setView("agent"); setIdx(i); }} className={"chip inline-flex items-center gap-1 text-xs" + (view === "agent" && active.code === a.code ? " active" : "")} style={view === "agent" && active.code === a.code ? { color: `hsl(${a.accent})`, borderColor: `hsl(${a.accent})` } : undefined}>
+            <span className="inline-block h-1.5 w-1.5 rounded-full" style={dot(isOn(a.code))} />{t(lang, "agent.name." + a.code)}
+          </button>
+        ))}
+        {chip("contexto", CTX_ACCENT, ctx.green, t(lang, "ctx.chip"))}
+        {chip("borradores", DR_ACCENT, count > 0, count > 0 ? `${t(lang, "dr.chip")} (${count})` : t(lang, "dr.chip"))}
+        <ModeControl lang={lang} />
       </div>
       {view === "contexto" ? <ContextoPage lang={lang} accent={CTX_ACCENT} />
         : view === "borradores" ? <BorradoresPage lang={lang} />
