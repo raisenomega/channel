@@ -25,6 +25,8 @@ export interface PersistDraftCommand {
   readonly reason: string;
   readonly aiDisclosureIncluded: boolean;
   readonly traceId: string;
+  readonly to?: string;
+  readonly channel?: string;
 }
 
 export class PersistDraftHandler {
@@ -34,7 +36,7 @@ export class PersistDraftHandler {
     if (!esPersonaCanonica(cmd.personaSlug)) {
       return err({ kind: "PERSONA_INVALIDA", slug: cmd.personaSlug });
     }
-    const metadata = marcarSupervisado({});
+    const metadata = marcarSupervisado(cmd.to && cmd.channel ? { to: cmd.to, channel: cmd.channel } : {});
     const draft: AgentDraft = {
       id: crypto.randomUUID(),
       tenantId: cmd.tenantId,

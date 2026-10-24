@@ -49,10 +49,7 @@ export class AgentReasoner {
 
     const llm = await this.provider.completar({
       systemPrompt,
-      messages: [
-        { role: "system" as const, content: systemPrompt },
-        { role: "user" as const, content: message.content },
-      ],
+      messages: [{ role: "user" as const, content: message.content }],
       tools: null,
       maxTokens: 2048,
       temperature: 0.7,
