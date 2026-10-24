@@ -10,6 +10,9 @@ on:
 jobs:
   quality-gates:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -21,6 +24,8 @@ jobs:
           cache: pnpm
 
       - run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: TypeScript strict check
         run: pnpm typecheck
