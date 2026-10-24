@@ -3,6 +3,6 @@
 # Si falla, el push se aborta.
 # Para saltar en emergencia: `git push --no-verify` (CI atrapa de todas formas).
 
-set -euo pipefail
+set -eu
 
 bash scripts/sentinel.sh
