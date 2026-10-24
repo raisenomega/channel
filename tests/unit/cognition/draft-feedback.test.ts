@@ -18,12 +18,12 @@ test("WC-01 approved -> conversation.resolved + signal human_judgment + verified
   expect(e.payload.signal).toBe("human_judgment");
   expect(e.payload.verifiedOutcome).toBe(null);
   expect(e.payload.opportunity).toBe(true);
-  expect(e.identity.idValue).toBe("@juan");
+  expect(e.identity.id_value).toBe("@juan");
 });
 
 test("WC-02 whatsapp -> identity phone; rejected -> wasCorrect false", () => {
   const e = cerebroFeedbackEvent(draft({ channel: "whatsapp", contactPhone: "+1787", contactLabel: "+1787" }), false);
-  expect(e.identity.idType).toBe("phone");
+  expect(e.identity.id_type).toBe("phone");
   expect(e.payload.decision).toBe("rejected");
   expect(e.payload.wasCorrect).toBe(false);
 });

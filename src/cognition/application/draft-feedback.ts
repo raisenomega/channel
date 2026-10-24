@@ -13,10 +13,10 @@ export function cerebroFeedbackEvent(draft: AgentDraft, wasCorrect: boolean): Ce
   const idValue = (wa ? meta.contactPhone : meta.contactLabel) ?? "";
   return {
     event: "conversation.resolved",
-    sourcePlatform: "hub",
-    tenantId: String(draft.tenantId),
-    occurredAt: new Date().toISOString(),
-    identity: { idType: wa ? "phone" : "social_handle", idValue, ...(draft.contactId ? { localId: String(draft.contactId) } : {}) },
+    source_platform: "hub",
+    tenant_id: String(draft.tenantId),
+    occurred_at: new Date().toISOString(),
+    identity: { id_type: wa ? "phone" : "social_handle", id_value: idValue, ...(draft.contactId ? { local_id: String(draft.contactId) } : {}) },
     payload: {
       decision: wasCorrect ? "approved" : "rejected",
       wasCorrect, signal: "human_judgment", verifiedOutcome: null,

@@ -1,2 +1,4 @@
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - '@raisenomega/cerebro-contracts@0.1.0'
