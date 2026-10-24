@@ -4,6 +4,7 @@
  * ("enriquece, no bloquea"). Mismo camino para IG/FB (con conv/contacto) y WhatsApp (sin, null). C4 <=75.
  */
 import type { GenerateDraftHandler } from "./generate-draft.handler.ts";
+import type { IntentClassifier } from "./intent-classifier.ts";
 import type { TenantId, ConversationId, ContactId } from "../../shared/domain/ids.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
@@ -23,19 +24,21 @@ export interface AutodraftEvent {
 }
 
 export class MaybeAutodraftService {
-  constructor(private readonly flag: AutodraftFlagPort, private readonly generate: GenerateDraftHandler) {}
+  constructor(private readonly flag: AutodraftFlagPort, private readonly generate: GenerateDraftHandler, private readonly classifier: IntentClassifier) {}
 
   async ejecutar(ev: AutodraftEvent): Promise<void> {
     try {
       if (!ev.content || !ev.content.trim() || !ev.from) return;
       if ((await this.flag.leer(ev.tenantId)) !== "supervised") return;
+      const intent = await this.classifier.clasificar(ev.content); // proactivo: a quien enruta + si hay oportunidad
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };
       await this.generate.ejecutar({
         tenantId: ev.tenantId as unknown as TenantId,
         conversationId: (ev.conversationId ?? null) as ConversationId | null,
         contactId: (ev.contactId ?? null) as ContactId | null,
-        channel: ev.channel as ChannelType, personaSlug: ev.persona ?? "thao",
-        normalizedMessage: nm, contactLabel: ev.from, contactName: ev.contactName, contactPhone: ev.contactPhone, scope: "targeted",
+        channel: ev.channel as ChannelType, personaSlug: ev.persona ?? intent.persona,
+        normalizedMessage: nm, contactLabel: ev.from, contactName: ev.contactName, contactPhone: ev.contactPhone,
+        scope: intent.opportunity ? "opportunity" : "targeted",
       });
     } catch { /* enriquece, no bloquea */ }
   }

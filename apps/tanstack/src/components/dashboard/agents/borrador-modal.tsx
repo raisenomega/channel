@@ -17,6 +17,7 @@ export function BorradorModal({ lang, draft, busy, onClose, onApprove, onReject 
           </div>
           <button type="button" onClick={onClose} className="shrink-0 text-xl text-muted-foreground hover:text-foreground" aria-label="x">{"×"}</button>
         </div>
+        {draft.scope === "opportunity" ? <span className="shrink-0 self-start rounded-full px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: "hsl(45 90% 55% / 0.2)", color: "hsl(40 85% 48%)" }}>{t(lang, "dr.opportunity")}</span> : null}
         <p className="shrink-0 rounded-lg bg-muted/30 p-2 text-xs italic text-muted-foreground">{draft.inboundMessage}</p>
         <div className="flex-1 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border/40 bg-card-soft p-3 text-sm leading-relaxed text-foreground">{draft.draftContent}</div>
         <div className="flex shrink-0 gap-2">
