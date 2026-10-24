@@ -31,6 +31,7 @@ export interface PersistDraftCommand {
   readonly contactName?: string | undefined;   // nombre del contacto en la red
   readonly contactPhone?: string | undefined;  // telefono si existe
   readonly scope?: string | undefined;         // "targeted" | "generic"
+  readonly autoSendReason?: string | undefined;
 }
 
 export class PersistDraftHandler {
@@ -45,6 +46,7 @@ export class PersistDraftHandler {
     if (cmd.contactLabel) base["contactLabel"] = cmd.contactLabel;
     if (cmd.contactName) base["contactName"] = cmd.contactName;
     if (cmd.contactPhone) base["contactPhone"] = cmd.contactPhone;
+    if (cmd.autoSendReason) base["autoSendReason"] = cmd.autoSendReason;
     const metadata = marcarSupervisado(base);
     const draft: AgentDraft = {
       id: crypto.randomUUID(),
