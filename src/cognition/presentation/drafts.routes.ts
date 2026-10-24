@@ -12,6 +12,7 @@ import type { RejectDraftHandler } from "../application/reject-draft.handler.ts"
 import type { SendApprovedDraftService } from "../application/send-approved-draft.service.ts";
 import type { WasCorrectFeedbackHandler } from "../application/was-correct-feedback.handler.ts";
 import type { AgentDraftsRepository } from "../infrastructure/agent-drafts.repository.ts";
+import { aprobarYEnviar } from "./drafts-approve-send.ts";
 
 export interface DraftsDeps {
   readonly approve: ApproveDraftHandler;
@@ -37,12 +38,7 @@ export function rutaDraftsApprove(deps: DraftsDeps): RouteDefinition {
   return { method: "POST", path: "/tenants/:id/drafts/:draftId/approve", handler: async (ctx) => {
     const auth = await requireTenantAuth(ctx, pathTenant(ctx)); if (!auth.ok) return auth.error;
     const draftId = ctx.params["draftId"] ?? cp(ctx)[4] ?? "";
-    const body = (ctx.body ?? {}) as Record<string, unknown>;
-    const r = await deps.approve.ejecutar(draftId, tid(auth.value.tenantId), auth.value.userId, (body as { editedContent?: string }).editedContent);
-    if (r.ok) return { ok: true, draft: r.value };
-    if (kindOf(r.error) === "DRAFT_NOT_FOUND") return { ok: false, error: { kind: "not_found" }, status: 404 };
-    if (kindOf(r.error) === "STATUS_NOT_DRAFT") return { ok: false, error: { kind: "conflict" }, status: 409 };
-    return { ok: false, error: { kind: "persistence_error" } };
+    return aprobarYEnviar(deps.approve, deps.send, draftId, tid(auth.value.tenantId), auth.value.userId, (ctx.body ?? {}) as Record<string, unknown>);
   } };
 }
 export function rutaDraftsReject(deps: DraftsDeps): RouteDefinition {
