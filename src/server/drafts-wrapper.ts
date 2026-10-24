@@ -9,6 +9,7 @@ import { WasCorrectFeedbackHandler } from "../cognition/application/was-correct-
 import { AgentDraftsRepository } from "../cognition/infrastructure/agent-drafts.repository.ts";
 import type { ChannelRouter } from "../channels/application/channel.router.ts";
 import type { DraftsDeps } from "../cognition/presentation/drafts.routes.ts";
+import { cerebroIngest } from "../integrations/infrastructure/cerebro-client.ts";
 
 export function buildDraftsDeps(router: ChannelRouter): DraftsDeps {
   const repo = new AgentDraftsRepository();
@@ -18,5 +19,6 @@ export function buildDraftsDeps(router: ChannelRouter): DraftsDeps {
     send: new SendApprovedDraftService(repo, router),
     feedback: new WasCorrectFeedbackHandler(repo),
     repo,
+    emit: cerebroIngest, // #2: aprobar/denegar -> aprendizaje a CEREBRO
   };
 }
