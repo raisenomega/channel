@@ -13,11 +13,16 @@ export function BorradoresPage({ lang }: { lang: Idioma }) {
   const { drafts, reload } = useDraftsPending();
   const [busy, setBusy] = useState(false);
   const [sel, setSel] = useState<DraftItem | null>(null);
+  const [note, setNote] = useState("");
   const act = async (id: string, path: string, body: Record<string, unknown>) => {
     const tid = resolveTenantId();
     if (!tid || busy) return;
-    setBusy(true);
-    try { await apiFetch(`/tenants/${encodeURIComponent(tid)}/drafts/${id}/${path}`, { method: "POST", body: JSON.stringify(body) }); setSel(null); reload(); } catch { /* */ }
+    setBusy(true); setNote("");
+    try {
+      const r = await apiFetch(`/tenants/${encodeURIComponent(tid)}/drafts/${id}/${path}`, { method: "POST", body: JSON.stringify(body) });
+      if (path === "approve" && r.ok) { const j = (await r.json()) as { sent?: boolean; sendError?: string }; setNote(j.sent ? t(lang, "dr.sent") : j.sendError ? `${t(lang, "dr.sendfail")}: ${j.sendError}` : t(lang, "dr.approvednosend")); }
+      setSel(null); reload();
+    } catch { /* */ }
     setBusy(false);
   };
   const aprobar = (id: string) => void act(id, "approve", {});
@@ -28,6 +33,7 @@ export function BorradoresPage({ lang }: { lang: Idioma }) {
         <h3 className="text-lg font-bold text-foreground">{t(lang, "dr.title")}</h3>
         <p className="text-sm text-muted-foreground">{t(lang, "dr.subtitle")}</p>
       </header>
+      {note ? <p className="rounded-lg border border-border/60 bg-card-soft px-3 py-1.5 text-xs font-semibold text-foreground">{note}</p> : null}
       {drafts.length === 0
         ? <p className="rounded-xl border border-border/40 bg-card-soft p-4 text-sm text-muted-foreground">{t(lang, "dr.empty")}</p>
         : (

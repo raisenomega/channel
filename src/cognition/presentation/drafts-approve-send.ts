@@ -33,8 +33,8 @@ export async function aprobarYEnviar(
     return { ok: false, error: { kind: "persistence_error" } };
   }
   const draft = r.value;
-  const meta = draft.metadata as { to?: string; channel?: string };
-  const to = String((body["to"] as string) ?? meta.to ?? "");
+  const meta = draft.metadata as { to?: string; channel?: string; contactLabel?: string; contactPhone?: string };
+  const to = String((body["to"] as string) ?? meta.to ?? meta.contactLabel ?? meta.contactPhone ?? ""); // el autodraft guarda contactLabel (= cliente), no "to"
   const channel = String((body["channel"] as string) ?? meta.channel ?? "");
   if (!to || !channel) return { ok: true, draft, sent: false }; // aprobado; sin destino no se envia
   const s = await send.ejecutar(draftId, to, channel as ChannelType);
