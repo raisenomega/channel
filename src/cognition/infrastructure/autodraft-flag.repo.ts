@@ -8,10 +8,10 @@ import type { AgentsConfig } from "../domain/agents-config.ts";
 import { mergeConfig } from "../domain/agents-config.ts";
 
 export class AutodraftFlagSupabase implements AutodraftFlagPort {
-  async leer(tenantId: string): Promise<{ mode: string; config: AgentsConfig }> {
-    const { data } = await supabase.from("tenants").select("agents_autodraft, agents_config").eq("id", tenantId).maybeSingle();
-    const row = (data ?? {}) as { agents_autodraft?: string; agents_config?: unknown };
-    return { mode: row.agents_autodraft ?? "off", config: mergeConfig(row.agents_config) };
+  async leer(tenantId: string): Promise<{ mode: string; config: AgentsConfig; timeZone?: string | undefined }> {
+    const { data } = await supabase.from("tenants").select("agents_autodraft, agents_config, timezone").eq("id", tenantId).maybeSingle();
+    const row = (data ?? {}) as { agents_autodraft?: string; agents_config?: unknown; timezone?: string };
+    return { mode: row.agents_autodraft ?? "off", config: mergeConfig(row.agents_config), timeZone: row.timezone };
   }
 }
 
