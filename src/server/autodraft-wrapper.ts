@@ -21,15 +21,20 @@ import type { AgentDraft } from "../cognition/domain/agent-draft.entity.ts";
 import type { ChannelType } from "../shared/domain/types.ts";
 import { getEnv } from "../shared/infrastructure/supabase-rest.helper.ts";
 
+// approved_by es UUID (migr 039, sin FK); "autonomous" NO es UUID -> el PATCH daba 400 y el approve fallaba
+// en silencio -> el draft quedaba en status=draft -> el send daba STATUS_NOT_APPROVED. Nil UUID = aprobador autonomo.
+const AUTONOMOUS_APPROVER = "00000000-0000-0000-0000-000000000000";
+
 export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
   const adapter = new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "");
   const repo = new AgentDraftsRepository();
   const generate = new GenerateDraftHandler(new AgentContextService(new AgentContextSourceSupabase()), new AgentReasoner(adapter), new PersistDraftHandler(repo));
   const autoSend = router ? {
     enviar: async (d: AgentDraft, to: string, ch: string): Promise<void> => {
-      await new ApproveDraftHandler(repo).ejecutar(d.id, d.tenantId, "autonomous", undefined);
+      const ap = await new ApproveDraftHandler(repo).ejecutar(d.id, d.tenantId, AUTONOMOUS_APPROVER, undefined);
+      if (!ap.ok) { console.error(`[autodraft-send] approve FALLO draft=${d.id}`, ap.error); return; }
       const r = await new SendApprovedDraftService(repo, router, new ConversationRepositorySupabase()).ejecutar(d.id, to, ch as ChannelType);
-      if (!r.ok) console.error(`[autodraft-send] FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); else console.error(`[autodraft-send] OK draft=${d.id} to=${to}`);
+      if (!r.ok) console.error(`[autodraft-send] send FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); else console.error(`[autodraft-send] OK draft=${d.id} to=${to}`);
     },
   } : undefined;
   return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined);
