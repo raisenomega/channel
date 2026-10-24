@@ -3,14 +3,18 @@
  * POST /tenants/:id/agents/victor/chat. Modo foco (`full` + `onClose`). Aun sin memoria de clientes
  * (eso llega con CEREBRO). C4 <=75.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { t, type Idioma } from "@/lib/i18n";
 import { apiFetch, resolveTenantId } from "@/lib/api-client";
 
 interface Msg { from: "me" | "victor"; text: string }
 
 export function VictorChat({ lang, accent, onClose, full }: { lang: Idioma; accent: string; onClose?: () => void; full?: boolean }) {
-  const [msgs, setMsgs] = useState<Msg[]>([]);
+  const chatKey = `hub.victor.chat:${resolveTenantId() ?? "anon"}`; // hilo persistente por negocio (como WhatsApp)
+  const [msgs, setMsgs] = useState<Msg[]>(() => {
+    try { const r = window.localStorage.getItem(chatKey); return r ? (JSON.parse(r) as Msg[]) : []; } catch { return []; }
+  });
+  useEffect(() => { try { window.localStorage.setItem(chatKey, JSON.stringify(msgs)); } catch { /* storage bloqueado */ } }, [chatKey, msgs]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const send = async () => {
