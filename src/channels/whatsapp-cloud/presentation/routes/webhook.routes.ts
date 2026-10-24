@@ -14,7 +14,7 @@ import { SupabaseMetaSignupFacade } from "../../../meta/infrastructure/meta-sign
 
 declare const process: { env: Record<string, string | undefined> };
 
-type AdEv = { tenantId: string; conversationId?: string | null; contactId?: string | null; channel: string; from: string; content: string };
+type AdEv = { tenantId: string; conversationId?: string | null; contactId?: string | null; channel: string; from: string; content: string; contactName?: string; contactPhone?: string };
 const repo = new SupabaseMessageRepo();
 // S6: autodraft cargado dinamicamente al 1er mensaje (no al importar -> no arrastra supabase client en tests).
 let adLazy: Promise<{ ejecutar: (ev: AdEv) => Promise<void> }> | null = null;
