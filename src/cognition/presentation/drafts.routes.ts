@@ -13,6 +13,8 @@ import type { SendApprovedDraftService } from "../application/send-approved-draf
 import type { WasCorrectFeedbackHandler } from "../application/was-correct-feedback.handler.ts";
 import type { AgentDraftsRepository } from "../infrastructure/agent-drafts.repository.ts";
 import { aprobarYEnviar } from "./drafts-approve-send.ts";
+import { registrarAprendizaje } from "../application/draft-feedback.ts";
+import type { CerebroEvent } from "../../integrations/domain/cerebro.types.ts";
 
 export interface DraftsDeps {
   readonly approve: ApproveDraftHandler;
@@ -20,6 +22,7 @@ export interface DraftsDeps {
   readonly send: SendApprovedDraftService;
   readonly feedback: WasCorrectFeedbackHandler;
   readonly repo: AgentDraftsRepository;
+  readonly emit?: (e: CerebroEvent) => void; // #2: aprendizaje a CEREBRO (fire-and-forget)
 }
 
 const cp = (c: RequestContext) => c.path.split("/");
@@ -38,7 +41,9 @@ export function rutaDraftsApprove(deps: DraftsDeps): RouteDefinition {
   return { method: "POST", path: "/tenants/:id/drafts/:draftId/approve", handler: async (ctx) => {
     const auth = await requireTenantAuth(ctx, pathTenant(ctx)); if (!auth.ok) return auth.error;
     const draftId = ctx.params["draftId"] ?? cp(ctx)[4] ?? "";
-    return aprobarYEnviar(deps.approve, deps.send, draftId, tid(auth.value.tenantId), auth.value.userId, (ctx.body ?? {}) as Record<string, unknown>);
+    const r = await aprobarYEnviar(deps.approve, deps.send, draftId, tid(auth.value.tenantId), auth.value.userId, (ctx.body ?? {}) as Record<string, unknown>);
+    if (r.ok && r.draft) void registrarAprendizaje(deps.repo, deps.emit, r.draft, true); // #2 aprendizaje
+    return r;
   } };
 }
 export function rutaDraftsReject(deps: DraftsDeps): RouteDefinition {
@@ -48,7 +53,7 @@ export function rutaDraftsReject(deps: DraftsDeps): RouteDefinition {
     const reason = String(((ctx.body ?? {}) as Record<string, unknown>)["reason"] ?? "");
     if (reason.length < 10) return { ok: false, error: { kind: "reason_too_short" }, status: 400 };
     const r = await deps.reject.ejecutar(draftId, reason);
-    if (r.ok) return { ok: true, draft: r.value };
+    if (r.ok) { void registrarAprendizaje(deps.repo, deps.emit, r.value, false); return { ok: true, draft: r.value }; } // #2 aprendizaje
     if (kindOf(r.error) === "DRAFT_NOT_FOUND") return { ok: false, error: { kind: "not_found" }, status: 404 };
     if (kindOf(r.error) === "STATUS_NOT_DRAFT") return { ok: false, error: { kind: "conflict" }, status: 409 };
     return { ok: false, error: { kind: "persistence_error" } };
