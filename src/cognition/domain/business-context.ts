@@ -26,13 +26,14 @@ export interface BusinessContext {
   readonly highRiskCases?: string | undefined;       // A7 (P6)
   readonly neverAutomate?: string | undefined;       // A8 (P6)
   readonly doubtThreshold?: string | undefined;      // A9 (P6)
+  readonly faq?: string | undefined;                 // FAQ del negocio (B5)
   readonly hasProducts?: boolean | undefined;        // derivado: items > 0
 }
 
 export const CONTEXT_KEYS = [
   "businessWhat", "industry", "brandServices", "targetAudience", "differentiator",
   "brandTone", "brandMission", "brandPromise", "neverSay", "policies",
-  "operationHours", "responseSla", "mainGoal", "quarterGoals", "highValueCases",
+  "faq", "operationHours", "responseSla", "mainGoal", "quarterGoals", "highValueCases",
   "competitors", "routingCriteria", "escalationTriggers", "highRiskCases",
   "neverAutomate", "doubtThreshold", "customInstructions", "hasProducts",
 ] as const;
