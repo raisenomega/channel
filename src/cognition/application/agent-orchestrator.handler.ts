@@ -40,7 +40,7 @@ export class AgentOrchestrator {
   ): Promise<Result<AgentOrchestratorResult, OrchestratorError>> {
     const ethics = EthicsGuard.evaluar(cmd.normalizedMessage.content, "");
     if (!ethics.ok) return err({ kind: "ethics_violation" });
-    const contexto = await this.contextService.obtener(cmd.normalizedMessage);
+    const contexto = await this.contextService.obtener(cmd.normalizedMessage, cmd.tenantId);
     if (!contexto.ok) return err({ kind: "context_failed", cause: contexto.error.cause });
     const confidence: ConfidenceVO = { value: cmd.autonomyConfig.isActive ? 0.75 : 0.0 };
     const modo = decidirAccionPorConfianza(confidence.value);
