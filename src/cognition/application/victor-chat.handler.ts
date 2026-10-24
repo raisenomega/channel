@@ -34,7 +34,7 @@ export class VictorChatHandler {
     const r = await provider.completar({
       systemPrompt: sp,
       messages: [{ role: "user", content: message }],
-      tools: null, maxTokens: 1024, temperature: 0.6, tier: "sonnet",
+      tools: null, maxTokens: 2048, temperature: 0.6, tier: "sonnet", // 2048: respuestas completas (audit de 6 secciones se cortaba en 1024)
     });
     if (!r.ok) return err({ kind: "llm_failure", cause: (r.error as { cause?: string }).cause ?? r.error.kind });
     const reply = r.value.response.trim();
