@@ -27,6 +27,8 @@ export interface PersistDraftCommand {
   readonly traceId: string;
   readonly to?: string;
   readonly channel?: string;
+  readonly contactLabel?: string | undefined;  // para qué contacto (se muestra en la tarjeta)
+  readonly scope?: string | undefined;         // "targeted" (contacto) | "generic"
 }
 
 export class PersistDraftHandler {
@@ -36,7 +38,10 @@ export class PersistDraftHandler {
     if (!esPersonaCanonica(cmd.personaSlug)) {
       return err({ kind: "PERSONA_INVALIDA", slug: cmd.personaSlug });
     }
-    const metadata = marcarSupervisado(cmd.to && cmd.channel ? { to: cmd.to, channel: cmd.channel } : {});
+    const base: Record<string, unknown> = { scope: cmd.scope ?? "targeted" };
+    if (cmd.to && cmd.channel) { base["to"] = cmd.to; base["channel"] = cmd.channel; }
+    if (cmd.contactLabel) base["contactLabel"] = cmd.contactLabel;
+    const metadata = marcarSupervisado(base);
     const draft: AgentDraft = {
       id: crypto.randomUUID(),
       tenantId: cmd.tenantId,
