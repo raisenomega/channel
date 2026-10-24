@@ -13,6 +13,7 @@ export function BorradorCard({ lang, draft, busy, onOpen, onApprove, onReject }:
         <span className="shrink-0">{t(lang, "dr.from")} {t(lang, "agent.name." + draft.personaSlug)}</span>
         <span className="truncate normal-case">{draft.scope === "generic" ? t(lang, "dr.generic") : `${t(lang, "dr.to")} ${paraCorto(draft)}`}</span>
       </div>
+      {draft.scope === "opportunity" ? <span className="self-start rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: "hsl(45 90% 55% / 0.2)", color: "hsl(40 85% 48%)" }}>{t(lang, "dr.opportunity")}</span> : null}
       <p className="line-clamp-2 text-[11px] italic text-muted-foreground">{draft.inboundMessage}</p>
       <p className="line-clamp-4 flex-1 whitespace-pre-wrap text-sm text-foreground">{draft.draftContent}</p>
       <span className="text-[10px] font-semibold text-muted-foreground">{t(lang, "dr.readMore")}</span>
