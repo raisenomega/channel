@@ -12,7 +12,7 @@ import type { TenantId, ConversationId, ContactId } from "../../shared/domain/id
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
 
-export interface AutodraftFlagPort { leer(tenantId: string): Promise<{ mode: string; config: AgentsConfig }>; }
+export interface AutodraftFlagPort { leer(tenantId: string): Promise<{ mode: string; config: AgentsConfig; timeZone?: string | undefined }>; }
 export interface AutoSendPort { enviar(draft: AgentDraft, to: string, channel: string): Promise<void>; }
 export interface SentCounterPort { contar(tenantId: string): Promise<number>; }
 
@@ -40,14 +40,14 @@ export class MaybeAutodraftService {
   async ejecutar(ev: AutodraftEvent): Promise<void> {
     try {
       if (!ev.content || !ev.content.trim() || !ev.from) return;
-      const { mode, config } = await this.flag.leer(ev.tenantId);
+      const { mode, config, timeZone } = await this.flag.leer(ev.tenantId);
       console.error(`[autodraft] t=${ev.tenantId} ch=${ev.channel} from=${ev.from} mode=${mode}`);
       if (mode === "off") return;
       const intent = await this.classifier.clasificar(ev.content);
       const sentToday = mode === "autonomous" && this.counter ? await this.counter.contar(ev.tenantId) : 0;
       const complaint = intent.persona === "angel" || intent.kind === "queja";
       const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };
-      const dec = razonAutoEnvio(mode, config, signals, new Date());
+      const dec = razonAutoEnvio(mode, config, signals, new Date(), timeZone);
       console.error(`[autodraft] send=${dec.send} reason=${dec.reason} conf=${intent.confidence} hasAutoSend=${!!this.autoSend}`);
       if (mode === "autonomous" && !dec.send) return; // Sistema A: en autonomo respondemos o nada; nunca dejamos borrador por mensaje (eso es Sistema B)
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };

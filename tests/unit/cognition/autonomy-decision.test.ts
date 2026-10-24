@@ -48,3 +48,12 @@ test("AD-10 razon: con umbral 8, confianza 3 -> no envia y muestra el umbral", (
 test("AD-11 razon: todo ok -> auto-enviado", () => {
   expect(razonAutoEnvio("autonomous", DEFAULT_CONFIG, base, now).reason).toBe("auto-enviado");
 });
+
+test("AD-12 horario respeta la TZ del tenant (arregla bloqueo de tardes AST)", () => {
+  const cfg = { ...DEFAULT_CONFIG, hours: { days: [0, 1, 2, 3, 4, 5], start: "08:00", end: "18:00" } };
+  const t = new Date("2026-10-24T20:00:00Z"); // sabado 20:00 UTC = 16:00 AST
+  expect(dentroDeHorario(cfg.hours, t, "America/Puerto_Rico")).toBe(true);  // 4pm AST -> dentro
+  expect(dentroDeHorario(cfg.hours, t, "UTC")).toBe(false);                 // 20:00 UTC -> fuera (el bug viejo)
+  const noche = new Date("2026-10-24T22:15:00Z"); // 18:15 AST -> fuera (pasa 6pm)
+  expect(dentroDeHorario(cfg.hours, noche, "America/Puerto_Rico")).toBe(false);
+});

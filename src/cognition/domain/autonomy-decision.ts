@@ -1,14 +1,18 @@
 /**
- * HUB by Raisen — S7b: decision PURA de auto-envio + su RAZON (para ver por que un borrador no se envio).
- * razonAutoEnvio devuelve {send, reason}; debeAutoEnviar = .send. Cualquier duda -> no envia. C4 <=75.
+ * HUB by Raisen — S7b: decision PURA de auto-envio + su RAZON. dentroDeHorario respeta la TZ del tenant
+ * (antes comparaba contra UTC del server -> bloqueaba las tardes AST). Cualquier duda -> no envia. C4 <=75.
  */
 import type { AgentsConfig, AgentsHours } from "./agents-config.ts";
 
-export function dentroDeHorario(hours: AgentsHours | null, now: Date): boolean {
+const DIA: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
+
+export function dentroDeHorario(hours: AgentsHours | null, now: Date, timeZone?: string): boolean {
   if (!hours) return true; // 24/7
-  const day = (now.getDay() + 6) % 7; // 0=Lun .. 6=Dom
+  const p = new Intl.DateTimeFormat("en-US", { timeZone: timeZone || "UTC", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);
+  const val = (t: string): string => p.find((x) => x.type === t)?.value ?? "";
+  const day = DIA[val("weekday")] ?? 0; // 0=Lun .. 6=Dom, en la TZ del tenant
   if (!hours.days.includes(day)) return false;
-  const hm = now.toTimeString().slice(0, 5);
+  const hm = `${val("hour")}:${val("minute")}`;
   return hm >= hours.start && hm <= hours.end;
 }
 
@@ -21,7 +25,7 @@ export interface AutoSendSignals {
   readonly sentToday: number;
 }
 
-export function razonAutoEnvio(mode: string, c: AgentsConfig, s: AutoSendSignals, now: Date): { send: boolean; reason: string } {
+export function razonAutoEnvio(mode: string, c: AgentsConfig, s: AutoSendSignals, now: Date, timeZone?: string): { send: boolean; reason: string } {
   if (mode !== "autonomous") return { send: false, reason: `modo ${mode}` };
   if (!c.can.reply) return { send: false, reason: "sin firma de responder" };
   if (s.opportunity && c.review.opportunities) return { send: false, reason: "oportunidad: a tu revision" };
@@ -30,10 +34,10 @@ export function razonAutoEnvio(mode: string, c: AgentsConfig, s: AutoSendSignals
   if (s.confidence < c.confidence) return { send: false, reason: `confianza ${s.confidence} < ${c.confidence}` };
   if (!c.channels.includes(s.channel)) return { send: false, reason: "canal no autorizado" };
   if (s.sentToday >= c.dailyCap) return { send: false, reason: "tope diario alcanzado" };
-  if (!dentroDeHorario(c.hours, now)) return { send: false, reason: "fuera de horario" };
+  if (!dentroDeHorario(c.hours, now, timeZone)) return { send: false, reason: "fuera de horario" };
   return { send: true, reason: "auto-enviado" };
 }
 
-export function debeAutoEnviar(mode: string, c: AgentsConfig, s: AutoSendSignals, now: Date): boolean {
-  return razonAutoEnvio(mode, c, s, now).send;
+export function debeAutoEnviar(mode: string, c: AgentsConfig, s: AutoSendSignals, now: Date, timeZone?: string): boolean {
+  return razonAutoEnvio(mode, c, s, now, timeZone).send;
 }
