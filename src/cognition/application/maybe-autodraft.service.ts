@@ -17,6 +17,8 @@ export interface AutodraftEvent {
   readonly channel: string;
   readonly from: string;
   readonly content: string;
+  readonly contactName?: string;
+  readonly contactPhone?: string;
   readonly persona?: string;
 }
 
@@ -33,7 +35,7 @@ export class MaybeAutodraftService {
         conversationId: (ev.conversationId ?? null) as ConversationId | null,
         contactId: (ev.contactId ?? null) as ContactId | null,
         channel: ev.channel as ChannelType, personaSlug: ev.persona ?? "thao",
-        normalizedMessage: nm, contactLabel: ev.from, scope: "targeted",
+        normalizedMessage: nm, contactLabel: ev.from, contactName: ev.contactName, contactPhone: ev.contactPhone, scope: "targeted",
       });
     } catch { /* enriquece, no bloquea */ }
   }

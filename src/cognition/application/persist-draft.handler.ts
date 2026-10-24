@@ -27,8 +27,10 @@ export interface PersistDraftCommand {
   readonly traceId: string;
   readonly to?: string;
   readonly channel?: string;
-  readonly contactLabel?: string | undefined;  // para qué contacto (se muestra en la tarjeta)
-  readonly scope?: string | undefined;         // "targeted" (contacto) | "generic"
+  readonly contactLabel?: string | undefined;  // id/handle del contacto
+  readonly contactName?: string | undefined;   // nombre del contacto en la red
+  readonly contactPhone?: string | undefined;  // telefono si existe
+  readonly scope?: string | undefined;         // "targeted" | "generic"
 }
 
 export class PersistDraftHandler {
@@ -41,6 +43,8 @@ export class PersistDraftHandler {
     const base: Record<string, unknown> = { scope: cmd.scope ?? "targeted" };
     if (cmd.to && cmd.channel) { base["to"] = cmd.to; base["channel"] = cmd.channel; }
     if (cmd.contactLabel) base["contactLabel"] = cmd.contactLabel;
+    if (cmd.contactName) base["contactName"] = cmd.contactName;
+    if (cmd.contactPhone) base["contactPhone"] = cmd.contactPhone;
     const metadata = marcarSupervisado(base);
     const draft: AgentDraft = {
       id: crypto.randomUUID(),

@@ -27,8 +27,10 @@ export interface GenerateDraftCommand {
   readonly channel: ChannelType;
   readonly personaSlug: string;
   readonly normalizedMessage: NormalizedMessage;
-  readonly contactLabel?: string;  // para qué contacto (tarjeta)
-  readonly scope?: string;         // targeted | generic
+  readonly contactLabel?: string | undefined;  // id/handle del contacto
+  readonly contactName?: string | undefined;   // nombre del contacto
+  readonly contactPhone?: string | undefined;  // telefono si existe
+  readonly scope?: string | undefined;         // targeted | generic
 }
 
 export class GenerateDraftHandler {
@@ -51,7 +53,7 @@ export class GenerateDraftHandler {
       draftContent: razonado.value.response, confidence: 0.5,
       reason: "supervisado: borrador IA para revision humana", aiDisclosureIncluded: false,
       traceId: crypto.randomUUID(), to: cmd.normalizedMessage.from, channel: cmd.channel,
-      contactLabel: cmd.contactLabel, scope: cmd.scope ?? "targeted",
+      contactLabel: cmd.contactLabel, contactName: cmd.contactName, contactPhone: cmd.contactPhone, scope: cmd.scope ?? "targeted",
     });
     return d.ok ? ok(d.value) : err({ kind: "persist_failed", cause: (d.error as { causa?: string }).causa ?? (d.error as { kind: string }).kind });
   }
