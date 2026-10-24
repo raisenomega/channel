@@ -22,8 +22,8 @@ export type GenerateDraftError =
 
 export interface GenerateDraftCommand {
   readonly tenantId: TenantId;
-  readonly conversationId: ConversationId;
-  readonly contactId: ContactId;
+  readonly conversationId?: ConversationId | null;
+  readonly contactId?: ContactId | null;
   readonly channel: ChannelType;
   readonly personaSlug: string;
   readonly normalizedMessage: NormalizedMessage;
@@ -46,7 +46,7 @@ export class GenerateDraftHandler {
     const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, contexto.value);
     if (!razonado.ok) return err({ kind: "llm_failure", cause: razonado.error.cause });
     const d = await this.persist.ejecutar({
-      tenantId: cmd.tenantId, conversationId: cmd.conversationId, contactId: cmd.contactId,
+      tenantId: cmd.tenantId, conversationId: cmd.conversationId ?? null, contactId: cmd.contactId ?? null,
       personaSlug: cmd.personaSlug, inboundMessage: cmd.normalizedMessage.content,
       draftContent: razonado.value.response, confidence: 0.5,
       reason: "supervisado: borrador IA para revision humana", aiDisclosureIncluded: false,

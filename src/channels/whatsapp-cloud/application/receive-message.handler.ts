@@ -33,6 +33,7 @@ export class ReceiveMessageHandler {
   constructor(
     private readonly repo: MessagePersistenceRepo,
     private readonly notificationEmitter?: NotificationEmitterPort,
+    private readonly autodraft?: (ev: { tenantId: string; conversationId?: string | null; contactId?: string | null; channel: string; from: string; content: string }) => void, // S6 fire-and-forget
   ) {}
 
   async ejecutar(tenantId: string, inbound: InboundMessage): Promise<Result<{ processed: boolean }, ReceiveMessageError>> {
@@ -59,6 +60,9 @@ export class ReceiveMessageHandler {
         title: `Nuevo mensaje de ${inbound.fromPhone}`, body: bodyText,
         payload: { message_id: msg.id, wamid: inbound.wamid, channel: "whatsapp" },
       });
+    }
+    if (this.autodraft && inbound.content.type === "text") {
+      this.autodraft({ tenantId, channel: "whatsapp", from: inbound.fromPhone, content: (inbound.content as { body: string }).body });
     }
     return ok({ processed: true });
   }

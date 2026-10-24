@@ -16,8 +16,8 @@ export type PersistDraftError =
 
 export interface PersistDraftCommand {
   readonly tenantId: TenantId;
-  readonly conversationId: ConversationId;
-  readonly contactId: ContactId;
+  readonly conversationId?: ConversationId | null;
+  readonly contactId?: ContactId | null;
   readonly personaSlug: string;
   readonly inboundMessage: string;
   readonly draftContent: string;
@@ -45,8 +45,8 @@ export class PersistDraftHandler {
     const draft: AgentDraft = {
       id: crypto.randomUUID(),
       tenantId: cmd.tenantId,
-      conversationId: cmd.conversationId,
-      contactId: cmd.contactId,
+      conversationId: cmd.conversationId ?? null,
+      contactId: cmd.contactId ?? null,
       personaSlug: cmd.personaSlug,
       inboundMessage: cmd.inboundMessage,
       draftContent: cmd.draftContent,
