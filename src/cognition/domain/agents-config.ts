@@ -1,7 +1,8 @@
 /**
  * HUB by Raisen — Config S7 de los agentes por negocio (dominio puro). Cada capacidad en `can` = una firma
- * aprobada del dueno (autoriza al agente a hacerlo solo). review = lo que SIEMPRE va a revision aunque este
- * autonomo. hours=null -> 24/7. Defaults SEGUROS. A2 cero imports. C4 <=75.
+ * aprobada del dueno (autoriza al agente a hacerlo solo). review = tipos que el dueno fuerza a revision aun
+ * en autonomo (vacio por defecto). hours=null -> 24/7. Default AUTONOMO: responde a TODO (confidence 0, review
+ * off); el dueno sube el liston si quiere. A2 cero imports. C4 <=75.
  */
 export interface AgentsHours { readonly days: readonly number[]; readonly start: string; readonly end: string; }
 export interface AgentsCan { readonly reply: boolean; readonly quote: boolean; readonly invoice: boolean; readonly order: boolean; readonly charge: boolean; readonly appointment: boolean; }
@@ -17,11 +18,11 @@ export interface AgentsConfig {
 }
 
 export const DEFAULT_CONFIG: AgentsConfig = {
-  confidence: 8,
+  confidence: 0,
   can: { reply: true, quote: false, invoice: false, order: false, charge: false, appointment: false },
-  review: { opportunities: true, complaints: true, newContacts: false },
+  review: { opportunities: false, complaints: false, newContacts: false },
   hours: null,
-  dailyCap: 24,
+  dailyCap: 1000,
   channels: ["whatsapp", "instagram", "facebook"],
 };
 

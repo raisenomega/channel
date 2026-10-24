@@ -12,11 +12,20 @@ test("AD-01 autonomo + rutina + confianza alta -> true", () => {
   expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, base, now)).toBe(true);
 });
 test("AD-02 supervised -> false", () => { expect(debeAutoEnviar("supervised", DEFAULT_CONFIG, base, now)).toBe(false); });
-test("AD-03 oportunidad -> false (bloqueado por review)", () => { expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, opportunity: true }, now)).toBe(false); });
-test("AD-04 queja -> false", () => { expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, complaint: true }, now)).toBe(false); });
-test("AD-05 confianza < umbral -> false", () => { expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, confidence: 7 }, now)).toBe(false); });
+test("AD-03 oportunidad: por defecto RESPONDE igual (true); con review.opportunities ON -> false", () => {
+  expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, opportunity: true }, now)).toBe(true);
+  expect(debeAutoEnviar("autonomous", { ...DEFAULT_CONFIG, review: { ...DEFAULT_CONFIG.review, opportunities: true } }, { ...base, opportunity: true }, now)).toBe(false);
+});
+test("AD-04 queja: por defecto RESPONDE (true); con review.complaints ON -> false", () => {
+  expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, complaint: true }, now)).toBe(true);
+  expect(debeAutoEnviar("autonomous", { ...DEFAULT_CONFIG, review: { ...DEFAULT_CONFIG.review, complaints: true } }, { ...base, complaint: true }, now)).toBe(false);
+});
+test("AD-05 confianza: default 0 no bloquea; con umbral 8 y confianza 7 -> false", () => {
+  expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, confidence: 2 }, now)).toBe(true);
+  expect(debeAutoEnviar("autonomous", { ...DEFAULT_CONFIG, confidence: 8 }, { ...base, confidence: 7 }, now)).toBe(false);
+});
 test("AD-06 canal no autorizado -> false", () => { expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, channel: "telegram" }, now)).toBe(false); });
-test("AD-07 tope diario alcanzado -> false", () => { expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, sentToday: 24 }, now)).toBe(false); });
+test("AD-07 tope diario alcanzado -> false", () => { expect(debeAutoEnviar("autonomous", DEFAULT_CONFIG, { ...base, sentToday: 1000 }, now)).toBe(false); });
 test("AD-08 horario: fuera de dia/franja -> false", () => {
   const cfg = { ...DEFAULT_CONFIG, hours: { days: [0, 1, 2, 3, 4], start: "08:00", end: "18:00" } };
   expect(dentroDeHorario(cfg.hours, new Date("2026-10-25T14:00:00"))).toBe(false); // domingo
@@ -30,8 +39,8 @@ test("AD-09 razon: supervisado -> no envia y lo dice", () => {
   expect(r.reason).toContain("supervised");
 });
 
-test("AD-10 razon: confianza baja -> no envia y muestra el umbral", () => {
-  const r = razonAutoEnvio("autonomous", DEFAULT_CONFIG, { ...base, confidence: 3 }, now);
+test("AD-10 razon: con umbral 8, confianza 3 -> no envia y muestra el umbral", () => {
+  const r = razonAutoEnvio("autonomous", { ...DEFAULT_CONFIG, confidence: 8 }, { ...base, confidence: 3 }, now);
   expect(r.send).toBe(false);
   expect(r.reason).toContain("confianza 3");
 });
