@@ -57,3 +57,8 @@ test("AD-12 horario respeta la TZ del tenant (arregla bloqueo de tardes AST)", (
   const noche = new Date("2026-10-24T22:15:00Z"); // 18:15 AST -> fuera (pasa 6pm)
   expect(dentroDeHorario(cfg.hours, noche, "America/Puerto_Rico")).toBe(false);
 });
+
+test("AD-13 hours malformado (sin days) -> 24/7, no crashea (anti-fallo-silencioso)", () => {
+  const malformado = { start: "01:00", end: "23:00" } as unknown as import("../../../src/cognition/domain/agents-config.ts").AgentsHours;
+  expect(dentroDeHorario(malformado, new Date("2026-10-24T20:00:00Z"), "America/Puerto_Rico")).toBe(true);
+});
