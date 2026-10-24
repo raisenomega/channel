@@ -6,6 +6,8 @@ import type { RouteDefinition } from "../../server/server-types.ts";
 import { requireTenantAuth, jsonResponse } from "../../server/auth-helpers.ts";
 import type { AIProvider } from "../domain/ai-provider.ts";
 import type { VictorChatHandler } from "../application/victor-chat.handler.ts";
+import { leerContexto } from "../infrastructure/context.repo.ts";
+import { buildFacts } from "../domain/business-context.ts";
 
 export interface VictorChatDeps {
   readonly chat: VictorChatHandler;
@@ -21,7 +23,8 @@ export function rutaVictorChat(deps: VictorChatDeps): RouteDefinition {
       const body = (ctx.body ?? {}) as { message?: string };
       const message = String(body.message ?? "").trim();
       if (!message) return jsonResponse(400, { ok: false, error: { kind: "mensaje_vacio" } });
-      const r = await deps.chat.ejecutar(deps.provider, message, []);
+      const facts = buildFacts(await leerContexto(auth.value.tenantId)); // contexto real del negocio
+      const r = await deps.chat.ejecutar(deps.provider, message, facts);
       if (!r.ok) return jsonResponse(502, { ok: false, error: r.error });
       return jsonResponse(200, { ok: true, reply: r.value.reply, model: r.value.model });
     },
