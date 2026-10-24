@@ -17,7 +17,7 @@ import { extractJwt, parseBody, readBody } from "./server-helpers.ts";
 import { sendResponse } from "./server-response.ts";
 import "./tenant-fallback.supabase.ts"; // M-6: registra fallback sub->users.tenant_id en auth-helpers
 import { assertCriticalEnv } from "./fail-fast-env.ts";
-import type { RequestContext } from "./server-types.ts";
+import { startFollowupTimer } from "./followup-timer.ts"; import type { RequestContext } from "./server-types.ts";
 
 const PORT = parseInt(nodeProcess.env["PORT"] ?? "8080", 10);
 const HOST = nodeProcess.env["HOST"] ?? "0.0.0.0";
@@ -68,7 +68,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`[HUB] Server escuchando en http://${HOST}:${PORT}`);
+  console.log(`[HUB] Server escuchando en http://${HOST}:${PORT}`); startFollowupTimer();
   console.log("[HUB] Rutas registradas:");
   for (const r of routes) {
     console.log(`       ${r.method} ${r.path}`);
