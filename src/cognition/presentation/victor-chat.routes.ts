@@ -7,7 +7,7 @@ import { requireTenantAuth, jsonResponse } from "../../server/auth-helpers.ts";
 import type { AIProvider } from "../domain/ai-provider.ts";
 import type { VictorChatHandler } from "../application/victor-chat.handler.ts";
 import { leerContexto } from "../infrastructure/context.repo.ts";
-import { buildFacts } from "../domain/business-context.ts";
+import { buildFacts } from "../domain/business-facts.ts";
 
 export interface VictorChatDeps {
   readonly chat: VictorChatHandler;

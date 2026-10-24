@@ -6,17 +6,21 @@
 import { Result, err, ok } from "../../shared/domain/result.ts";
 import type { AIProvider } from "../domain/ai-provider.ts";
 import { PERSONA_VICTOR } from "../domain/personas/persona.victor.ts";
+import { buildAgentDirectory } from "../domain/agent-directory.ts";
 
 export type VictorChatError = { readonly kind: "llm_failure"; readonly cause: string };
 
 function systemPrompt(facts: readonly string[]): string {
   const p = PERSONA_VICTOR;
-  const ctx = facts.length ? `\nContexto del cliente (CEREBRO): ${facts.join(" | ")}` : "";
+  const ctx = facts.length
+    ? `\nContexto del negocio (de la pagina Contexto): ${facts.join(" | ")}`
+    : "\nContexto del negocio: aun vacio. Pide al dueno que llene la pagina Contexto; no inventes datos.";
   return [
     `Eres ${p.nombre_display}, ${p.rol}.`,
     `Mision: ${p.mision}`,
     "Hablas con el DUENO del negocio (no un cliente final): le ayudas a planificar y decidir como un CEO.",
     `Principios: ${p.principios_literales.P1_VERDAD_BRUTAL} ${p.principios_literales.P2_REPUTACION_CLIENTE_FINAL}`,
+    buildAgentDirectory(),
     "Responde claro, breve y accionable, en espanol. Si no sabes un dato, dilo; nunca lo inventes.",
     ctx,
   ].join("\n");
