@@ -34,7 +34,7 @@ export function rutaGenerateDraft(deps: GenerateDraftDeps): RouteDefinition {
       if (!inbound) return jsonResponse(409, { ok: false, error: { kind: "sin_mensaje_entrante" } });
       const persona = String(((ctx.body ?? {}) as Record<string, unknown>)["personaSlug"] ?? "thao");
       const nm = { providerMessageId: crypto.randomUUID(), from: conv.value.participantExternalId ?? "", channel: conv.value.primaryChannel, content: inbound.content.body, attachments: [] } as NormalizedMessage;
-      const r = await deps.generate.ejecutar({ tenantId: tid(auth.value.tenantId), conversationId: conv.value.id, contactId: conv.value.contactId, channel: conv.value.primaryChannel, personaSlug: persona, normalizedMessage: nm });
+      const r = await deps.generate.ejecutar({ tenantId: tid(auth.value.tenantId), conversationId: conv.value.id, contactId: conv.value.contactId, channel: conv.value.primaryChannel, personaSlug: persona, normalizedMessage: nm, contactLabel: conv.value.participantExternalId ?? "", scope: "targeted" });
       if (!r.ok) return jsonResponse(502, { ok: false, error: r.error });
       return jsonResponse(200, { ok: true, draft: r.value });
     },

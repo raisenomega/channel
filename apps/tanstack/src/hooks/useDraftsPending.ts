@@ -5,7 +5,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { apiFetch, resolveTenantId } from "@/lib/api-client";
 
-export interface DraftItem { id: string; personaSlug: string; draftContent: string; inboundMessage: string; confidence: number; }
+export interface DraftItem { id: string; personaSlug: string; draftContent: string; inboundMessage: string; confidence: number; scope?: string; contactLabel?: string; }
+type RawDraft = DraftItem & { metadata?: { scope?: string; contactLabel?: string } };
 
 export function useDraftsPending(): { drafts: readonly DraftItem[]; count: number; reload: () => void } {
   const [drafts, setDrafts] = useState<readonly DraftItem[]>([]);
@@ -14,7 +15,10 @@ export function useDraftsPending(): { drafts: readonly DraftItem[]; count: numbe
     if (!tid) { setDrafts([]); return; }
     try {
       const res = await apiFetch(`/tenants/${encodeURIComponent(tid)}/drafts/pending`);
-      if (res.ok) { const d = (await res.json()) as { drafts?: DraftItem[] }; setDrafts(d.drafts ?? []); } else { setDrafts([]); }
+      if (res.ok) {
+        const d = (await res.json()) as { drafts?: RawDraft[] };
+        setDrafts((d.drafts ?? []).map((x) => ({ ...x, scope: x.metadata?.scope, contactLabel: x.metadata?.contactLabel })));
+      } else { setDrafts([]); }
     } catch { setDrafts([]); }
   }, []);
   useEffect(() => { load(); const id = setInterval(load, 15_000); return () => clearInterval(id); }, [load]);

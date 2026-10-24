@@ -29,6 +29,7 @@ export interface IngestDeps {
   readonly refreshContactName: (contactId: string, name: string) => Promise<void>; // #3: auto-update nombre real
   readonly detId: (seed: string) => string;
   readonly emitCerebro?: (e: CerebroEvent) => void; // CEREBRO: enriquece, no bloquea (fire-and-forget)
+  readonly maybeAutodraft?: (ev: { tenantId: string; conversationId?: string | null; contactId?: string | null; channel: string; from: string; content: string }) => void; // S6: genera borrador al entrar (fire-and-forget)
 }
 export type IngestError = { kind: "shape_ignorado" } | { kind: "tenant_no_encontrado" } | { kind: "persistence_failure"; cause: string };
 const fail = (cause: string): Result<never, IngestError> => err({ kind: "persistence_failure", cause });
@@ -67,6 +68,7 @@ export class IngestZernioMessageHandler {
     const mr = await this.d.msgs.guardar(msg);
     if (!mr.ok) return fail(mr.error.cause ?? "mensaje"); // #171: propaga el error REAL de Postgres (diagnosticable)
     this.d.emitCerebro?.(cerebroMessageEvent(String(tenantId), String(contactId), z)); // CEREBRO async
+    if (z.direction === "inbound") this.d.maybeAutodraft?.({ tenantId: String(tenantId), conversationId: String(convId), contactId: String(contactId), channel: ch, from: z.contactExternalId, content: z.content }); // S6 fire-and-forget
     return ok({ persisted: true });
   }
 }

@@ -23,7 +23,7 @@ import { buildDraftsDeps } from "./drafts-wrapper.ts";
 import type { DraftsDeps } from "../cognition/presentation/drafts.routes.ts";
 import { buildTemplatesDeps } from "./templates-wrapper.ts";
 import type { TemplatesDeps } from "../templates/presentation/templates.routes.ts";
-import { IngestZernioMessageHandler } from "../inbox/application/ingest-zernio-message.use-case.ts"; import { cerebroIngest } from "../integrations/infrastructure/cerebro-client.ts";
+import { IngestZernioMessageHandler } from "../inbox/application/ingest-zernio-message.use-case.ts"; import { cerebroIngest } from "../integrations/infrastructure/cerebro-client.ts"; import { buildAutodraft } from "./autodraft-wrapper.ts";
 import { tenantPorZernioProfile, tenantPorZernioAccount, mensajeYaExiste, conversacionExiste, setConvRefs, refreshContactName } from "../inbox/infrastructure/zernio-ingest.queries.ts";
 import { detUuid } from "../shared/infrastructure/det-uuid.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
@@ -58,12 +58,12 @@ export async function buildHandlers(): Promise<ServerHandlers> {
   const ath = buildAthDeps();
   const pay = buildPayDeps();
   const channels = buildChannelsDeps();
-  const drafts = buildDraftsDeps(channelRouter);
+  const drafts = buildDraftsDeps(channelRouter); const autodraft = buildAutodraft();
   const templates = await buildTemplatesDeps();
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
     receiveMessage: new ReceiveMessageHandler(convRepo),
-    ingestZernio: new IngestZernioMessageHandler({ contacts: new ContactRepositorySupabase(), convs: convRepo, msgs: msgRepo, tenantPorProfile: tenantPorZernioProfile, tenantPorAccount: tenantPorZernioAccount, mensajeExiste: mensajeYaExiste, convExiste: conversacionExiste, setConvRefs, refreshContactName, detId: detUuid, emitCerebro: cerebroIngest }),
+    ingestZernio: new IngestZernioMessageHandler({ contacts: new ContactRepositorySupabase(), convs: convRepo, msgs: msgRepo, tenantPorProfile: tenantPorZernioProfile, tenantPorAccount: tenantPorZernioAccount, mensajeExiste: mensajeYaExiste, convExiste: conversacionExiste, setConvRefs, refreshContactName, detId: detUuid, emitCerebro: cerebroIngest, maybeAutodraft: (ev) => void autodraft.ejecutar(ev) }),
     sendMessage: new SendMessageHandler(convRepo, msgRepo, channelRouter),
     contactsRepo: new ContactRepositorySupabase(),
     createQuote: new CreateQuoteHandler(quoteRepo),

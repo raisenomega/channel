@@ -9,8 +9,8 @@ export type DraftStatus = "draft" | "approved" | "rejected" | "sent" | "expired"
 export interface AgentDraft {
   readonly id: string;
   readonly tenantId: TenantId;
-  readonly conversationId: ConversationId;
-  readonly contactId: ContactId;
+  readonly conversationId: ConversationId | null;
+  readonly contactId: ContactId | null;
   readonly personaSlug: string;
   readonly inboundMessage: string;
   readonly draftContent: string;
