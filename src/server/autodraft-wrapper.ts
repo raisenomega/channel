@@ -28,7 +28,8 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
   const autoSend = router ? {
     enviar: async (d: AgentDraft, to: string, ch: string): Promise<void> => {
       await new ApproveDraftHandler(repo).ejecutar(d.id, d.tenantId, "autonomous", undefined);
-      await new SendApprovedDraftService(repo, router, new ConversationRepositorySupabase()).ejecutar(d.id, to, ch as ChannelType);
+      const r = await new SendApprovedDraftService(repo, router, new ConversationRepositorySupabase()).ejecutar(d.id, to, ch as ChannelType);
+      if (!r.ok) console.error(`[autodraft-send] FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); else console.error(`[autodraft-send] OK draft=${d.id} to=${to}`);
     },
   } : undefined;
   return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined);
