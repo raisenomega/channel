@@ -7,6 +7,7 @@ import { Result, err, ok } from "../../shared/domain/result.ts";
 import type { AIProvider } from "../domain/ai-provider.ts";
 import { PERSONA_VICTOR } from "../domain/personas/persona.victor.ts";
 import { buildAgentDirectory } from "../domain/agent-directory.ts";
+import { buildCapabilitiesBlock } from "../domain/agent-capabilities.ts";
 
 export type VictorChatError = { readonly kind: "llm_failure"; readonly cause: string };
 
@@ -21,6 +22,7 @@ function systemPrompt(facts: readonly string[]): string {
     "Hablas con el DUENO del negocio (no un cliente final): le ayudas a planificar y decidir como un CEO.",
     `Principios: ${p.principios_literales.P1_VERDAD_BRUTAL} ${p.principios_literales.P2_REPUTACION_CLIENTE_FINAL}`,
     buildAgentDirectory(),
+    buildCapabilitiesBlock(),
     "Responde claro, breve y accionable, en espanol. Si no sabes un dato, dilo; nunca lo inventes.",
     ctx,
   ].join("\n");
