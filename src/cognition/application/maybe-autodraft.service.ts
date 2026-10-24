@@ -29,7 +29,7 @@ export class MaybeAutodraftService {
   async ejecutar(ev: AutodraftEvent): Promise<void> {
     try {
       if (!ev.content || !ev.content.trim() || !ev.from) return;
-      if ((await this.flag.leer(ev.tenantId)) !== "supervised") return;
+      if ((await this.flag.leer(ev.tenantId)) === "off") return; // supervised o autonomous generan borrador
       const intent = await this.classifier.clasificar(ev.content); // proactivo: a quien enruta + si hay oportunidad
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };
       await this.generate.ejecutar({
