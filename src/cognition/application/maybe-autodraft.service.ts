@@ -47,6 +47,7 @@ export class MaybeAutodraftService {
       const complaint = intent.persona === "angel" || intent.kind === "queja";
       const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };
       const dec = razonAutoEnvio(mode, config, signals, new Date());
+      if (mode === "autonomous" && !dec.send) return; // Sistema A: en autonomo respondemos o nada; nunca dejamos borrador por mensaje (eso es Sistema B)
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };
       const draft = await this.generate.ejecutar({
         tenantId: ev.tenantId as unknown as TenantId,

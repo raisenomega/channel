@@ -33,14 +33,20 @@ test("S7b-01 autonomo + rutina + confianza alta -> AUTO-ENVIA", async () => {
   expect(sent).toEqual(["+1787|whatsapp"]);
 });
 
-test("S7b-02 autonomo + confianza baja -> NO auto-envia (queda borrador)", async () => {
+test("S7b-02 autonomo + confianza media -> RESPONDE IGUAL (default umbral 0)", async () => {
   const calls: { personaSlug: string }[] = []; const sent: string[] = [];
   await new MaybeAutodraftService(flagOf("autonomous"), genSpy(calls), clf({ ...thao, confidence: 5 }), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1", content: "hola" });
-  expect(calls).toHaveLength(1); expect(sent).toHaveLength(0);
+  expect(sent).toHaveLength(1);
 });
 
-test("S7b-03 autonomo + OPORTUNIDAD -> NO auto-envia (a tu revision)", async () => {
+test("S7b-03 autonomo + OPORTUNIDAD -> RESPONDE en vivo (mantiene caliente; el cierre es Sistema B)", async () => {
   const sent: string[] = [];
   await new MaybeAutodraftService(flagOf("autonomous"), genSpy([]), clf({ persona: "zahra", opportunity: true, kind: "venta", confidence: 9 }), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1", content: "quiero comprar" });
-  expect(sent).toHaveLength(0);
+  expect(sent).toHaveLength(1);
+});
+
+test("S7b-04 autonomo + bloqueado (canal no autorizado) -> NO responde y NO deja borrador (anti-ruido Sistema A)", async () => {
+  const calls: { personaSlug: string }[] = []; const sent: string[] = [];
+  await new MaybeAutodraftService(flagOf("autonomous"), genSpy(calls), clf(thao), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "telegram", from: "+1", content: "hola" });
+  expect(calls).toHaveLength(0); expect(sent).toHaveLength(0);
 });
