@@ -1,24 +1,30 @@
-import { createClient } from "@supabase/supabase-js";
+/**
+ * HUB by Raisen — Cliente Supabase (service-role). LAZY: createClient se ejecuta al PRIMER uso, no al
+ * importar el modulo -> seguro de importar en Node (tests) y en Deno (prod). getEnv maneja ambos runtimes.
+ */
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getEnv } from "./supabase-rest.helper.ts";
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+let _client: SupabaseClient | undefined;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error("[HUB] ERROR: SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY son requeridas.");
-  console.error("[HUB] Crear .env.development desde .env.example y cargar con: source .env.development");
-  Deno.exit(1);
+function cliente(): SupabaseClient {
+  if (!_client) {
+    const url = getEnv("SUPABASE_URL") ?? "";
+    const key = getEnv("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    if (!url || !key) console.error("[HUB] ERROR: SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY son requeridas.");
+    _client = createClient(url, key, {
+      db: { schema: "public" },
+      global: { headers: { "x-tenant-id": "", "x-app-name": "hub-by-raisen" } },
+      auth: { persistSession: false, autoRefreshToken: true },
+    });
+  }
+  return _client;
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  db: { schema: "public" },
-  global: {
-    headers: {
-      "x-tenant-id": "",
-      "x-app-name": "hub-by-raisen",
-    },
-  },
-  auth: {
-    persistSession: false,
-    autoRefreshToken: true,
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_t, prop: string | symbol): unknown {
+    const c = cliente() as unknown as Record<string | symbol, unknown>;
+    const v = c[prop];
+    return typeof v === "function" ? (v as (...a: unknown[]) => unknown).bind(c) : v;
   },
 });
