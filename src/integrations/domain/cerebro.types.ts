@@ -1,37 +1,21 @@
 /**
- * HUB by Raisen — Tipos del contrato con CEREBRO (memoria compartida del ecosistema). Domain puro:
- * cero imports externos. El cliente (infra) y el emisor (app) usan estos tipos. C4 <=75.
+ * HUB by Raisen — Contrato con CEREBRO. Fuente UNICA: @raisenomega/cerebro-contracts (Slice 0).
+ * Reexporta los tipos del paquete para que HUB los consuma por una sola frontera. Los nombres son
+ * los del contrato compartido y el JSON del wire va en snake_case (lo que CEREBRO parsea). C4 <=75.
  */
-export type CerebroIdType = "phone" | "email" | "social_handle" | "local_id";
-
-export interface CerebroIdentity {
-  readonly idType: CerebroIdType;
-  readonly idValue: string;
-  readonly localId?: string;
-}
-
-export interface CerebroEvent {
-  readonly event: "message.received" | "conversation.resolved" | "contact.updated";
-  readonly sourcePlatform: "hub";
-  readonly tenantId: string;
-  readonly occurredAt: string;
-  readonly identity: CerebroIdentity;
-  readonly payload: Record<string, unknown>;
-}
-
-export interface CerebroRetrieveParams {
-  readonly identity: CerebroIdentity;
-  readonly query: string;
-  readonly requestingAgent: string;
-  readonly tenantId: string;
-  readonly maxChunks?: number;
-}
-
-export interface CerebroChunk { readonly kind: string; readonly content: string; readonly sourcePlatform: string; readonly score: number; }
-export interface CerebroFact { readonly text: string }
-export interface CerebroContext {
-  readonly personId: string | null;
-  readonly chunks: readonly CerebroChunk[];
-  readonly facts: readonly CerebroFact[];
-  readonly degraded: boolean;
-}
+export type {
+  IdType,
+  IdentityRef,
+  PersonId,
+  SourcePlatform,
+  EventName,
+  CerebroEvent,
+  IngestAck,
+  RequestingAgent,
+  Visibility,
+  RetrieveRequest,
+  RetrieveResponse,
+  RetrievedChunk,
+  RetrievedFact,
+} from "@raisenomega/cerebro-contracts";
+export { degradedResponse } from "@raisenomega/cerebro-contracts";
