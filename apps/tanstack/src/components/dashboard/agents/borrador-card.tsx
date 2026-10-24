@@ -16,6 +16,7 @@ export function BorradorCard({ lang, draft, busy, onOpen, onApprove, onReject }:
       {draft.scope === "opportunity" ? <span className="self-start rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: "hsl(45 90% 55% / 0.2)", color: "hsl(40 85% 48%)" }}>{t(lang, "dr.opportunity")}</span> : null}
       <p className="line-clamp-2 text-[11px] italic text-muted-foreground">{draft.inboundMessage}</p>
       <p className="line-clamp-4 flex-1 whitespace-pre-wrap text-sm text-foreground">{draft.draftContent}</p>
+      {draft.autoSendReason && draft.autoSendReason !== "auto-enviado" ? <span className="text-[9px] font-semibold" style={{ color: "hsl(35 85% 48%)" }}>{t(lang, "dr.notsent")}: {draft.autoSendReason}</span> : null}
       <span className="text-[10px] font-semibold text-muted-foreground">{t(lang, "dr.readMore")}</span>
       <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
         <button type="button" disabled={busy} onClick={() => onApprove(draft.id)} className="chip flex-1 font-bold text-white disabled:opacity-50" style={{ background: "hsl(var(--success))" }}>{t(lang, "dr.approve")}</button>

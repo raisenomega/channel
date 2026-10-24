@@ -32,3 +32,9 @@ test("S2-03 approve falla DRAFT_NOT_FOUND -> 404, no envia", async () => {
   const r = await aprobarYEnviar(approveFail("DRAFT_NOT_FOUND"), sendSpy(calls), "d1", T, "u1", {});
   expect(r.ok).toBe(false); expect(r.status).toBe(404); expect(calls).toEqual([]);
 });
+
+test("S2-04 autodraft real: contactLabel+channel (sin 'to') -> envia usando contactLabel", async () => {
+  const calls: string[] = [];
+  const r = await aprobarYEnviar(approveOK(mkDraft({ contactLabel: "ig_17842", channel: "instagram" })), sendSpy(calls), "d1", T, "u1", {});
+  expect(r.ok).toBe(true); expect(r.sent).toBe(true); expect(calls).toEqual(["d1|ig_17842|instagram"]);
+});
