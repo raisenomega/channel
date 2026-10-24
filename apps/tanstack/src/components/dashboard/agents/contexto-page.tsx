@@ -51,21 +51,23 @@ export function ContextoPage({ lang, accent }: { lang: Idioma; accent: string })
         </div>
         <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted/40"><div className="h-full rounded-full" style={{ width: `${pct}%`, background: green ? "hsl(var(--success))" : `hsl(${accent})` }} /></div>
       </header>
-      <div className="flex items-center gap-2">
-        <button type="button" onClick={() => move(-1)} disabled={step === 1} className="chip shrink-0 px-2 font-bold disabled:opacity-40" aria-label="prev">{"‹"}</button>
-        <div className="flex-1 text-center">
-          <p className="text-sm font-bold" style={{ color: `hsl(${accent})` }}>{t(lang, "ctx.part")} {step}/6 · {t(lang, part.title)}</p>
-          <div className="mt-1 flex justify-center gap-1">{CTX_PARTS.map((p) => <span key={p.n} className="h-1.5 w-1.5 rounded-full" style={{ background: p.n === step ? `hsl(${accent})` : "hsl(var(--text-dim))" }} />)}</div>
-        </div>
-        <button type="button" onClick={() => move(1)} disabled={step === 6} className="chip shrink-0 px-2 font-bold disabled:opacity-40" aria-label="next">{"›"}</button>
+      <div className="text-center">
+        <p className="text-sm font-bold" style={{ color: `hsl(${accent})` }}>{t(lang, "ctx.part")} {step}/6 · {t(lang, part.title)}</p>
+        <div className="mt-1 flex justify-center gap-1">{CTX_PARTS.map((p) => <span key={p.n} className="h-1.5 w-1.5 rounded-full" style={{ background: p.n === step ? `hsl(${accent})` : "hsl(var(--text-dim))" }} />)}</div>
       </div>
       <div className="grid min-h-[170px] grid-cols-1 gap-2 sm:grid-cols-2">
         {CTX_FIELDS.filter((f) => f.part === step).map((f) => <ContextoField key={f.key} lang={lang} field={f} value={vals[f.key] ?? ""} onChange={set} />)}
       </div>
       <div className="flex items-center gap-3">
-        <button type="button" onClick={() => void save()} disabled={busy} className="chip font-bold text-white" style={{ background: `hsl(${accent})` }}>{busy ? t(lang, "ctx.saving") : t(lang, "ctx.save")}</button>
-        {saved ? <span className="text-xs font-semibold" style={{ color: "hsl(var(--success))" }}>{t(lang, "ctx.saved")}</span> : null}
-        {step < 6 ? <button type="button" onClick={() => move(1)} className="chip ml-auto font-bold" style={{ color: `hsl(${accent})`, borderColor: `hsl(${accent})` }}>{t(lang, "ctx.next")} {"›"}</button> : null}
+        {step > 1 ? <button type="button" onClick={() => move(-1)} className="chip font-bold" style={{ color: `hsl(${accent})`, borderColor: `hsl(${accent})` }}>{"‹"} {t(lang, "ctx.back")}</button> : null}
+        {step < 6
+          ? <button type="button" onClick={() => move(1)} className="chip ml-auto font-bold" style={{ color: `hsl(${accent})`, borderColor: `hsl(${accent})` }}>{t(lang, "ctx.next")} {"›"}</button>
+          : (
+            <div className="ml-auto flex items-center gap-3">
+              <button type="button" onClick={() => void save()} disabled={busy} className="chip font-bold text-white" style={{ background: `hsl(${accent})` }}>{busy ? t(lang, "ctx.saving") : t(lang, "ctx.save")}</button>
+              {saved ? <span className="text-xs font-semibold" style={{ color: "hsl(var(--success))" }}>{t(lang, "ctx.saved")}</span> : null}
+            </div>
+          )}
       </div>
       {step === 6 ? <ContextoAgentsStrip lang={lang} /> : null}
     </div>

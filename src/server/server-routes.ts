@@ -58,7 +58,7 @@ export async function buildHandlers(): Promise<ServerHandlers> {
   const ath = buildAthDeps();
   const pay = buildPayDeps();
   const channels = buildChannelsDeps();
-  const drafts = buildDraftsDeps(channelRouter); const autodraft = buildAutodraft();
+  const drafts = buildDraftsDeps(channelRouter); const autodraft = buildAutodraft(channelRouter);
   const templates = await buildTemplatesDeps();
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
