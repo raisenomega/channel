@@ -27,11 +27,11 @@ import { rutaAgentStatus } from "../cognition/presentation/agents.routes.ts";
 import { rutaRecentActivity } from "../notifications/presentation/activity.routes.ts";
 import { rutaOAuthCallback } from "./oauth-callback.routes.ts";
 import { rutaDraftsPending, rutaDraftsApprove, rutaDraftsReject, rutaDraftsWasCorrect } from "../cognition/presentation/drafts.routes.ts";
-import { rutaCrearTemplate, rutaListarTemplates, rutaPatchTemplate, rutaImportLibrary } from "../templates/presentation/templates.routes.ts"; import { rutaMediaProxy } from "./media-proxy-route.ts"; import { rutaVictorChat } from "../cognition/presentation/victor-chat.routes.ts"; import { VictorChatHandler } from "../cognition/application/victor-chat.handler.ts"; import { AnthropicAdapter } from "../cognition/infrastructure/anthropic.adapter.ts"; import { getEnv } from "../shared/infrastructure/supabase-rest.helper.ts";
+import { rutaCrearTemplate, rutaListarTemplates, rutaPatchTemplate, rutaImportLibrary } from "../templates/presentation/templates.routes.ts"; import { rutaMediaProxy } from "./media-proxy-route.ts"; import { rutaVictorChat } from "../cognition/presentation/victor-chat.routes.ts"; import { VictorChatHandler } from "../cognition/application/victor-chat.handler.ts"; import { AnthropicAdapter } from "../cognition/infrastructure/anthropic.adapter.ts"; import { getEnv } from "../shared/infrastructure/supabase-rest.helper.ts"; import { rutaContextoGet, rutaContextoPut } from "../cognition/presentation/context.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
-    rutaMediaProxy(), rutaVictorChat({ chat: new VictorChatHandler(), provider: new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "") }), handleWebhook(h),
+    rutaMediaProxy(), rutaVictorChat({ chat: new VictorChatHandler(), provider: new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "") }), rutaContextoGet(), rutaContextoPut(), handleWebhook(h),
     handleReceive(h),
     handleSend(h),
     handleQuote(h),
