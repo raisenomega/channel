@@ -1,43 +1,46 @@
 /**
- * HUB by Raisen — S6 + proactivo: MaybeAutodraftService genera borrador SOLO si 'supervised' + hay texto.
- * El clasificador decide el agente autor y marca oportunidad (scope). off/vacio -> no genera (seguro).
+ * HUB by Raisen — S6/S7b: genera borrador si no esta 'off'; auto-envia SOLO si autonomo + guardrails pasan.
  */
 import { expect, test } from "vitest";
-import { MaybeAutodraftService, type AutodraftFlagPort } from "../../../src/cognition/application/maybe-autodraft.service.ts";
+import { MaybeAutodraftService, type AutodraftFlagPort, type AutoSendPort, type SentCounterPort } from "../../../src/cognition/application/maybe-autodraft.service.ts";
 import type { GenerateDraftHandler } from "../../../src/cognition/application/generate-draft.handler.ts";
 import type { IntentClassifier, IntentResult } from "../../../src/cognition/application/intent-classifier.ts";
+import { DEFAULT_CONFIG, type AgentsConfig } from "../../../src/cognition/domain/agents-config.ts";
 import { ok } from "../../../src/shared/domain/result.ts";
 
-interface Captured { normalizedMessage: { from: string; content: string }; contactLabel?: string; channel: string; personaSlug: string; scope?: string }
-const flagOf = (m: string): AutodraftFlagPort => ({ leer: async () => m });
-const genSpy = (calls: Captured[]): GenerateDraftHandler => ({ ejecutar: async (c: Captured) => { calls.push(c); return ok({ id: "d1" }); } } as unknown as GenerateDraftHandler);
+const flagOf = (mode: string, config: AgentsConfig = DEFAULT_CONFIG): AutodraftFlagPort => ({ leer: async () => ({ mode, config }) });
+const genSpy = (calls: { personaSlug: string; scope?: string }[]): GenerateDraftHandler => ({ ejecutar: async (c: { personaSlug: string; scope?: string }) => { calls.push(c); return ok({ id: "d1" }); } } as unknown as GenerateDraftHandler);
 const clf = (r: IntentResult): IntentClassifier => ({ clasificar: async () => r } as unknown as IntentClassifier);
-const thao: IntentResult = { persona: "thao", opportunity: false, kind: "soporte" };
+const sender = (sent: string[]): AutoSendPort => ({ enviar: async (_d, to: string, ch: string) => { sent.push(`${to}|${ch}`); } });
+const counter = (n: number): SentCounterPort => ({ contar: async () => n });
+const thao: IntentResult = { persona: "thao", opportunity: false, kind: "soporte", confidence: 9 };
 
-test("S6-01 supervised + texto -> genera draft con from/channel/contactLabel", async () => {
-  const calls: Captured[] = [];
-  await new MaybeAutodraftService(flagOf("supervised"), genSpy(calls), clf(thao)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1787", content: "cuanto cuesta" });
-  expect(calls).toHaveLength(1);
-  expect(calls[0]!.normalizedMessage.from).toBe("+1787");
-  expect(calls[0]!.contactLabel).toBe("+1787");
-  expect(calls[0]!.channel).toBe("whatsapp");
+test("S6-01 supervised -> genera draft (no auto-envia)", async () => {
+  const calls: { personaSlug: string }[] = []; const sent: string[] = [];
+  await new MaybeAutodraftService(flagOf("supervised"), genSpy(calls), clf(thao), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1", content: "hola" });
+  expect(calls).toHaveLength(1); expect(sent).toHaveLength(0);
 });
 
-test("S6-02 flag off -> NO genera (seguro)", async () => {
-  const calls: Captured[] = [];
-  await new MaybeAutodraftService(flagOf("off"), genSpy(calls), clf(thao)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1787", content: "hola" });
+test("S6-02 off -> NO genera", async () => {
+  const calls: { personaSlug: string }[] = [];
+  await new MaybeAutodraftService(flagOf("off"), genSpy(calls), clf(thao)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1", content: "hola" });
   expect(calls).toHaveLength(0);
 });
 
-test("S6-03 contenido vacio -> NO genera", async () => {
-  const calls: Captured[] = [];
-  await new MaybeAutodraftService(flagOf("supervised"), genSpy(calls), clf(thao)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1787", content: "   " });
-  expect(calls).toHaveLength(0);
+test("S7b-01 autonomo + rutina + confianza alta -> AUTO-ENVIA", async () => {
+  const calls: { personaSlug: string }[] = []; const sent: string[] = [];
+  await new MaybeAutodraftService(flagOf("autonomous"), genSpy(calls), clf(thao), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1787", content: "a que hora abren?" });
+  expect(sent).toEqual(["+1787|whatsapp"]);
 });
 
-test("S6-04 proactivo: clasifica venta -> persona zahra + scope opportunity", async () => {
-  const calls: Captured[] = [];
-  await new MaybeAutodraftService(flagOf("supervised"), genSpy(calls), clf({ persona: "zahra", opportunity: true, kind: "venta" })).ejecutar({ tenantId: "t1", channel: "instagram", from: "@juan", content: "quiero comprar 3 zafacones" });
-  expect(calls[0]!.personaSlug).toBe("zahra");
-  expect(calls[0]!.scope).toBe("opportunity");
+test("S7b-02 autonomo + confianza baja -> NO auto-envia (queda borrador)", async () => {
+  const calls: { personaSlug: string }[] = []; const sent: string[] = [];
+  await new MaybeAutodraftService(flagOf("autonomous"), genSpy(calls), clf({ ...thao, confidence: 5 }), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1", content: "hola" });
+  expect(calls).toHaveLength(1); expect(sent).toHaveLength(0);
+});
+
+test("S7b-03 autonomo + OPORTUNIDAD -> NO auto-envia (a tu revision)", async () => {
+  const sent: string[] = [];
+  await new MaybeAutodraftService(flagOf("autonomous"), genSpy([]), clf({ persona: "zahra", opportunity: true, kind: "venta", confidence: 9 }), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1", content: "quiero comprar" });
+  expect(sent).toHaveLength(0);
 });

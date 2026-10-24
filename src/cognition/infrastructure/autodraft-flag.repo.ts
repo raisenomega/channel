@@ -1,12 +1,25 @@
 /**
- * HUB by Raisen — Lee el flag agents_autodraft del negocio (tenants). 'off' por defecto. C4 <=75.
+ * HUB by Raisen — Lee modo + config S7 del negocio (tenants.agents_autodraft + agents_config) y cuenta los
+ * auto-enviados de hoy (para el tope diario). 'off' por defecto. C4 <=75.
  */
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
-import type { AutodraftFlagPort } from "../application/maybe-autodraft.service.ts";
+import type { AutodraftFlagPort, SentCounterPort } from "../application/maybe-autodraft.service.ts";
+import type { AgentsConfig } from "../domain/agents-config.ts";
+import { mergeConfig } from "../domain/agents-config.ts";
 
 export class AutodraftFlagSupabase implements AutodraftFlagPort {
-  async leer(tenantId: string): Promise<string> {
-    const { data } = await supabase.from("tenants").select("agents_autodraft").eq("id", tenantId).maybeSingle();
-    return (data as { agents_autodraft?: string } | null)?.agents_autodraft ?? "off";
+  async leer(tenantId: string): Promise<{ mode: string; config: AgentsConfig }> {
+    const { data } = await supabase.from("tenants").select("agents_autodraft, agents_config").eq("id", tenantId).maybeSingle();
+    const row = (data ?? {}) as { agents_autodraft?: string; agents_config?: unknown };
+    return { mode: row.agents_autodraft ?? "off", config: mergeConfig(row.agents_config) };
+  }
+}
+
+export class SentCounterSupabase implements SentCounterPort {
+  async contar(tenantId: string): Promise<number> {
+    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    const { count } = await supabase.from("agent_drafts").select("id", { count: "exact", head: true })
+      .eq("tenant_id", tenantId).eq("status", "sent").gte("sent_at", hoy.toISOString());
+    return count ?? 0;
   }
 }
