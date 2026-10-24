@@ -15,6 +15,7 @@ import { AnthropicAdapter } from "../cognition/infrastructure/anthropic.adapter.
 import { AutodraftFlagSupabase, SentCounterSupabase } from "../cognition/infrastructure/autodraft-flag.repo.ts";
 import { ApproveDraftHandler } from "../cognition/application/approve-draft.handler.ts";
 import { SendApprovedDraftService } from "../cognition/application/send-approved-draft.service.ts";
+import { ConversationRepositorySupabase } from "../inbox/infrastructure/conversation.repository.supabase.ts";
 import type { ChannelRouter } from "../channels/application/channel.router.ts";
 import type { AgentDraft } from "../cognition/domain/agent-draft.entity.ts";
 import type { ChannelType } from "../shared/domain/types.ts";
@@ -27,7 +28,7 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
   const autoSend = router ? {
     enviar: async (d: AgentDraft, to: string, ch: string): Promise<void> => {
       await new ApproveDraftHandler(repo).ejecutar(d.id, d.tenantId, "autonomous", undefined);
-      await new SendApprovedDraftService(repo, router).ejecutar(d.id, to, ch as ChannelType);
+      await new SendApprovedDraftService(repo, router, new ConversationRepositorySupabase()).ejecutar(d.id, to, ch as ChannelType);
     },
   } : undefined;
   return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined);

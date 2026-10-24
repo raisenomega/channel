@@ -6,7 +6,7 @@
 import type { GenerateDraftHandler } from "./generate-draft.handler.ts";
 import type { IntentClassifier } from "./intent-classifier.ts";
 import type { AgentsConfig } from "../domain/agents-config.ts";
-import { debeAutoEnviar } from "../domain/autonomy-decision.ts";
+import { razonAutoEnvio } from "../domain/autonomy-decision.ts";
 import type { AgentDraft } from "../domain/agent-draft.entity.ts";
 import type { TenantId, ConversationId, ContactId } from "../../shared/domain/ids.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
@@ -43,6 +43,10 @@ export class MaybeAutodraftService {
       const { mode, config } = await this.flag.leer(ev.tenantId);
       if (mode === "off") return;
       const intent = await this.classifier.clasificar(ev.content);
+      const sentToday = mode === "autonomous" && this.counter ? await this.counter.contar(ev.tenantId) : 0;
+      const complaint = intent.persona === "angel" || intent.kind === "queja";
+      const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };
+      const dec = razonAutoEnvio(mode, config, signals, new Date());
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };
       const draft = await this.generate.ejecutar({
         tenantId: ev.tenantId as unknown as TenantId,
@@ -50,13 +54,9 @@ export class MaybeAutodraftService {
         contactId: (ev.contactId ?? null) as ContactId | null,
         channel: ev.channel as ChannelType, personaSlug: ev.persona ?? intent.persona,
         normalizedMessage: nm, contactLabel: ev.from, contactName: ev.contactName, contactPhone: ev.contactPhone,
-        scope: intent.opportunity ? "opportunity" : "targeted",
+        scope: intent.opportunity ? "opportunity" : "targeted", autoSendReason: dec.reason,
       });
-      if (!draft.ok || mode !== "autonomous" || !this.autoSend) return;
-      const sentToday = this.counter ? await this.counter.contar(ev.tenantId) : 0;
-      const complaint = intent.persona === "angel" || intent.kind === "queja";
-      const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };
-      if (debeAutoEnviar(mode, config, signals, new Date())) await this.autoSend.enviar(draft.value, ev.from, ev.channel);
+      if (draft.ok && dec.send && this.autoSend) await this.autoSend.enviar(draft.value, ev.from, ev.channel);
     } catch { /* enriquece, no bloquea */ }
   }
 }

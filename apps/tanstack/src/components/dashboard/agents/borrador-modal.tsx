@@ -20,6 +20,7 @@ export function BorradorModal({ lang, draft, busy, onClose, onApprove, onReject 
         {draft.scope === "opportunity" ? <span className="shrink-0 self-start rounded-full px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: "hsl(45 90% 55% / 0.2)", color: "hsl(40 85% 48%)" }}>{t(lang, "dr.opportunity")}</span> : null}
         <p className="shrink-0 rounded-lg bg-muted/30 p-2 text-xs italic text-muted-foreground">{draft.inboundMessage}</p>
         <div className="flex-1 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border/40 bg-card-soft p-3 text-sm leading-relaxed text-foreground">{draft.draftContent}</div>
+        {draft.autoSendReason && draft.autoSendReason !== "auto-enviado" ? <p className="shrink-0 text-[11px] font-semibold" style={{ color: "hsl(35 85% 48%)" }}>{t(lang, "dr.notsent")}: {draft.autoSendReason}</p> : null}
         <div className="flex shrink-0 gap-2">
           <button type="button" disabled={busy} onClick={() => onApprove(draft.id)} className="chip flex-1 font-bold text-white disabled:opacity-50" style={{ background: "hsl(var(--success))" }}>{t(lang, "dr.approve")}</button>
           <button type="button" disabled={busy} onClick={() => onReject(draft.id)} className="chip flex-1 font-bold disabled:opacity-50" style={{ color: "hsl(0 72% 55%)", borderColor: "hsl(0 72% 55%)" }}>{t(lang, "dr.reject")}</button>

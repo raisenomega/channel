@@ -5,8 +5,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { apiFetch, resolveTenantId } from "@/lib/api-client";
 
-export interface DraftItem { id: string; personaSlug: string; draftContent: string; inboundMessage: string; confidence: number; scope?: string; contactLabel?: string; contactName?: string; contactPhone?: string; channel?: string; }
-type RawMeta = { scope?: string; contactLabel?: string; contactName?: string; contactPhone?: string; channel?: string };
+export interface DraftItem { id: string; personaSlug: string; draftContent: string; inboundMessage: string; confidence: number; scope?: string; contactLabel?: string; contactName?: string; contactPhone?: string; channel?: string; autoSendReason?: string; }
+type RawMeta = { scope?: string; contactLabel?: string; contactName?: string; contactPhone?: string; channel?: string; autoSendReason?: string };
 type RawDraft = DraftItem & { metadata?: RawMeta };
 
 export function useDraftsPending(): { drafts: readonly DraftItem[]; count: number; reload: () => void } {
@@ -18,7 +18,7 @@ export function useDraftsPending(): { drafts: readonly DraftItem[]; count: numbe
       const res = await apiFetch(`/tenants/${encodeURIComponent(tid)}/drafts/pending`);
       if (res.ok) {
         const d = (await res.json()) as { drafts?: RawDraft[] };
-        setDrafts((d.drafts ?? []).map((x) => ({ ...x, scope: x.metadata?.scope, contactLabel: x.metadata?.contactLabel, contactName: x.metadata?.contactName, contactPhone: x.metadata?.contactPhone, channel: x.metadata?.channel })));
+        setDrafts((d.drafts ?? []).map((x) => ({ ...x, scope: x.metadata?.scope, contactLabel: x.metadata?.contactLabel, contactName: x.metadata?.contactName, contactPhone: x.metadata?.contactPhone, channel: x.metadata?.channel, autoSendReason: x.metadata?.autoSendReason })));
       } else { setDrafts([]); }
     } catch { setDrafts([]); }
   }, []);
