@@ -45,9 +45,9 @@ export function QuoteEditorModal({ lang, contactId, contactName, contacts, editI
     if (id) onSaved(id, preview, client.cid, currency, total);
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <Card className="max-h-[92vh] w-full max-w-6xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <CardHeader><CardTitle>{t(lang, editId ? "quotes.editTitle" : "quotes.createTitle")}</CardTitle><button type="button" className="chip text-xs font-semibold" onClick={() => setNewContact(true)}>+ {t(lang, "quotes.newContact")}</button></CardHeader>
+        <CardHeader><CardTitle>{t(lang, editId ? "quotes.editTitle" : "quotes.createTitle")}</CardTitle><div className="flex items-center gap-2"><button type="button" className="chip text-xs font-semibold" onClick={() => setNewContact(true)}>+ {t(lang, "quotes.newContact")}</button><button type="button" onClick={onClose} className="text-xl leading-none text-muted-foreground hover:text-foreground" aria-label="x">{"×"}</button></div></CardHeader>
         <CardBody className="space-y-3">
           <QuoteClientFields lang={lang} contactId={contactId} contactName={contactName} contacts={contacts} preselect={preselect} initial={initialClient} editing={!!editId} onChange={setClient} />
           <QuoteLineEditor lang={lang} items={lines} currency={currency} onChange={setLines} />
