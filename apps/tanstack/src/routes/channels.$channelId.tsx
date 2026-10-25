@@ -39,7 +39,7 @@ function CanalViewPage() {
   const [activeTab, setActiveTab] = useState<ChannelTab | undefined>(undefined);
 
   const { send, pending } = useChannelSend(channelId, activeId, threadContactId);
-  const onSelect = (id: string) => setActiveId(id || null);
+  const onSelect = (id: string) => { setActiveId(id || null); setActiveTab(undefined); }; // clic en hilo -> abre la conversacion (sale del chip activo)
   const onSend = () => { send(composer); setComposer(""); };
   const msgs = [...activeMsgs, ...pending];
   const openContact = () => setContactBarOpen(true);
