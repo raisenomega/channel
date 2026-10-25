@@ -22,7 +22,7 @@ export const enBiz: Dict = {
   "contacts.createTitle": "Create contact",
   "contacts.step1": "Contact details (1/2)",
   "contacts.step2": "Confirm contact (2/2)",
-  "contacts.createType": "Type", "contacts.type.persona": "Person", "contacts.type.empresa": "Company", "contacts.createName": "Full name",
+   "contacts.agentTimeline": "What the agent has done", "contacts.noActivity": "The agent has not acted on this contact yet.", "contacts.createType": "Type", "contacts.type.persona": "Person", "contacts.type.empresa": "Company", "contacts.createName": "Full name",
   "contacts.createPhone": "Phone",
   "contacts.createEmail": "Email",
   "contacts.createAddress": "Physical address",
