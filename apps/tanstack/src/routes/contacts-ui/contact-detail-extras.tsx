@@ -44,7 +44,7 @@ export function ContactExtras({ lang, contactId, notes, temperature, onChange }:
         ))}
         {notes.length < 3 ? (
           <div className="mt-1 flex gap-2">
-            <input value={draft} maxLength={300} onChange={(e) => setDraft(e.target.value)} placeholder={t(lang, "contacts.notePlaceholder")} className="flex-1 rounded border border-border/55 bg-card-soft p-1.5 text-xs text-foreground" />
+            <input value={draft} maxLength={300} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void guardar(); } }} placeholder={t(lang, "contacts.notePlaceholder")} className="flex-1 rounded border border-border/55 bg-card-soft p-1.5 text-xs text-foreground" />
             <button type="button" disabled={busy || !draft.trim()} onClick={() => void guardar()} className="chip font-bold text-white disabled:opacity-50" style={{ background: "hsl(var(--success))" }}>{t(lang, "ctx.save")}</button>
           </div>
         ) : null}

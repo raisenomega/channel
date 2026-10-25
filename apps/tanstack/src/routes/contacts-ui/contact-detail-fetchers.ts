@@ -28,7 +28,7 @@ export async function fetchContactDetail(contactId: string): Promise<ContactDeta
 async function rpc(fn: string, body: Record<string, unknown>): Promise<boolean> {
   const base = supabaseRestBase(); const headers = supabaseAuthHeaders();
   if (!base || !headers) return false;
-  try { const r = await fetch(`${base}/rpc/${fn}`, { method: "POST", headers, body: JSON.stringify(body) }); return r.ok; } catch { return false; }
+  try { const r = await fetch(`${base}/rpc/${fn}`, { method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify(body) }); return r.ok; } catch { return false; }
 }
 
 export const agregarNota = (contactId: string, note: string): Promise<boolean> => rpc("add_contact_note", { p_contact_id: contactId, p_note: note });
