@@ -18,7 +18,16 @@ export function BorradorModal({ lang, draft, busy, onClose, onApprove, onReject 
           <button type="button" onClick={onClose} className="shrink-0 text-xl text-muted-foreground hover:text-foreground" aria-label="x">{"×"}</button>
         </div>
         {draft.scope === "opportunity" ? <span className="shrink-0 self-start rounded-full px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: "hsl(45 90% 55% / 0.2)", color: "hsl(40 85% 48%)" }}>{t(lang, "dr.opportunity")}</span> : null}
-        <p className="shrink-0 rounded-lg bg-muted/30 p-2 text-xs italic text-muted-foreground">{draft.inboundMessage}</p>
+        {draft.scope === "strategic" ? (
+          <div className="shrink-0 rounded-lg border border-border/40 p-3 text-xs" style={{ background: "hsl(265 60% 55% / 0.08)" }}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: "hsl(265 60% 55% / 0.22)", color: "hsl(265 55% 64%)" }}>{t(lang, "dr.strategic")}</span>
+              {typeof draft.closePct === "number" ? <span className="font-bold" style={{ color: "hsl(265 55% 64%)" }}>{t(lang, "dr.closePct")} {draft.closePct}%</span> : null}
+            </div>
+            {draft.identified ? <p className="mt-2 text-foreground"><span className="font-bold">{t(lang, "dr.identified")}:</span> {draft.identified}</p> : null}
+            {draft.conclusion ? <p className="mt-1 text-foreground"><span className="font-bold">{t(lang, "dr.why")}:</span> {draft.conclusion}</p> : null}
+          </div>
+        ) : <p className="shrink-0 rounded-lg bg-muted/30 p-2 text-xs italic text-muted-foreground">{draft.inboundMessage}</p>}
         <div className="flex-1 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border/40 bg-card-soft p-3 text-sm leading-relaxed text-foreground">{draft.draftContent}</div>
         {draft.autoSendReason && draft.autoSendReason !== "auto-enviado" ? <p className="shrink-0 text-[11px] font-semibold" style={{ color: "hsl(35 85% 48%)" }}>{t(lang, "dr.notsent")}: {draft.autoSendReason}</p> : null}
         <div className="flex shrink-0 gap-2">
