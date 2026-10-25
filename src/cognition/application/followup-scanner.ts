@@ -7,16 +7,18 @@ export interface QuietConv {
   readonly tenantId: string;
   readonly contactId: string | null;
   readonly lastMessageAt: string | null;
+  readonly channel?: string | undefined;
+  readonly participantExternalId?: string | null;
 }
 
 export type BuscarQuietas = (horasQuieto: number) => Promise<readonly QuietConv[]>;
 
 export class FollowupScanner {
-  constructor(private readonly buscar: BuscarQuietas) {}
+  constructor(private readonly buscar: BuscarQuietas, private readonly procesar?: (c: QuietConv) => Promise<string>) {}
 
   async escanear(horasQuieto: number): Promise<number> {
     const quietas = await this.buscar(horasQuieto);
-    for (const c of quietas) console.error(`[followup] quieta conv=${c.id} tenant=${c.tenantId} last=${c.lastMessageAt ?? "null"}`);
+    for (const c of quietas) { if (this.procesar) console.error(`[followup] conv=${c.id} -> ${await this.procesar(c)}`); else console.error(`[followup] quieta conv=${c.id} tenant=${c.tenantId}`); }
     console.error(`[followup] scan: ${quietas.length} conversaciones quietas (>=${horasQuieto}h)`);
     return quietas.length;
   }
