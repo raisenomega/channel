@@ -12,7 +12,7 @@ import { firmarCotizacion } from "./firmar-cotizacion";
 
 export function BorradoresPage({ lang }: { lang: Idioma }) {
   const { drafts: todos, reload } = useDraftsPending();
-  const drafts = todos.filter((d) => d.scope !== "quote"); // las cotizaciones viven en el chip Cotizacion del Inbox
+  const drafts = todos.filter((d) => d.scope !== "quote" || d.status === "rejected"); // pendientes no-cotizacion + cotizaciones RECHAZADAS (con etiqueta, 30 dias)
   const [busy, setBusy] = useState(false);
   const [sel, setSel] = useState<DraftItem | null>(null);
   const [note, setNote] = useState("");

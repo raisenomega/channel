@@ -35,10 +35,14 @@ export function BorradorCard({ lang, draft, busy, onOpen, onApprove, onReject }:
       <p className="line-clamp-4 flex-1 whitespace-pre-wrap text-sm text-foreground">{draft.draftContent}</p>
       {draft.autoSendReason && draft.autoSendReason !== "auto-enviado" ? <span className="text-[9px] font-semibold" style={{ color: "hsl(35 85% 48%)" }}>{t(lang, "dr.notsent")}: {draft.autoSendReason}</span> : null}
       <span className="text-[10px] font-semibold text-muted-foreground">{t(lang, "dr.readMore")}</span>
-      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-        <button type="button" disabled={busy} onClick={() => onApprove(draft.id)} className="chip flex-1 font-bold text-white disabled:opacity-50" style={{ background: "hsl(var(--success))" }}>{t(lang, draft.scope === "quote" ? "dr.sign" : "dr.approve")}</button>
-        <button type="button" disabled={busy} onClick={() => onReject(draft.id)} className="chip flex-1 font-bold disabled:opacity-50" style={{ color: "hsl(0 72% 55%)", borderColor: "hsl(0 72% 55%)" }}>{t(lang, "dr.reject")}</button>
-      </div>
+      {draft.status === "rejected"
+        ? <span className="self-start rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: "hsl(0 72% 55% / 0.18)", color: "hsl(0 72% 55%)" }}>{t(lang, "dr.quoteRejected")}</span>
+        : (
+          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+            <button type="button" disabled={busy} onClick={() => onApprove(draft.id)} className="chip flex-1 font-bold text-white disabled:opacity-50" style={{ background: "hsl(var(--success))" }}>{t(lang, draft.scope === "quote" ? "dr.sign" : "dr.approve")}</button>
+            <button type="button" disabled={busy} onClick={() => onReject(draft.id)} className="chip flex-1 font-bold disabled:opacity-50" style={{ color: "hsl(0 72% 55%)", borderColor: "hsl(0 72% 55%)" }}>{t(lang, "dr.reject")}</button>
+          </div>
+        )}
     </div>
   );
 }

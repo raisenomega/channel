@@ -14,7 +14,7 @@ export function ChannelQuoteTab({ lang, accent, contactId, contactName, cards }:
   cards: Parameters<typeof CardGrid>[0]["cards"];
 }) {
   const { drafts, reload } = useDraftsPending();
-  const propuestas = drafts.filter((d) => d.scope === "quote" && d.quoteContactId === contactId);
+  const propuestas = drafts.filter((d) => d.scope === "quote" && d.status !== "rejected" && d.quoteContactId === contactId);
   return (
     <div className="space-y-3">
       <div className="flex justify-end"><ContactQuoteCreate lang={lang} accent={accent} contactId={contactId} contactName={contactName} /></div>
