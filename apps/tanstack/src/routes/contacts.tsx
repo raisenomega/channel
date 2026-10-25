@@ -47,7 +47,7 @@ function ContactsPage() {
           {t(language, "contacts.create")}
         </Button>
       </div>
-      <ContactsFilter language={language} busqueda={busqueda} onBusquedaChange={setBusqueda} filtroSegmento={filtroSegmento} onFiltroChange={setFiltroSegmento} agendados={agendados} onAgendados={() => setAgendados((v) => !v)} />
+      <ContactsFilter language={language} busqueda={busqueda} onBusquedaChange={setBusqueda} filtroSegmento={filtroSegmento} onFiltroChange={(v) => { setFiltroSegmento(v); setAgendados(false); }} agendados={agendados} onAgendados={() => setAgendados((v) => !v)} />
       {agendados ? (
         <AgendadosList language={language} />
       ) : isPending ? (
