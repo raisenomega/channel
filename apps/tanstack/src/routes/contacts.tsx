@@ -34,7 +34,7 @@ function ContactsPage() {
 
   async function handleCreate() {
     if (!create.formName.trim()) return;
-    const r = await crearContacto({ display_name: create.formName.trim(), primary_phone: create.formPhone.trim() || undefined, primary_email: create.formEmail.trim() || undefined, segment: create.formSegment, address: create.formAddress.trim() || undefined });
+    const r = await crearContacto({ display_name: create.formName.trim(), primary_phone: create.formPhone.trim() || undefined, primary_email: create.formEmail.trim() || undefined, segment: create.formSegment, address: create.formAddress.trim() || undefined, type: create.formType });
     if (r.ok) { create.setShowCreate(false); create.reset(); void refetch(); }
   }
 
@@ -57,7 +57,7 @@ function ContactsPage() {
       ) : (
         <RowList items={filtrados} renderRow={(c) => <ContactRow key={c.id} lang={language} contact={c} />} />
       )}
-      {create.showCreate ? <CreateModal language={language} formName={create.formName} setFormName={create.setFormName} formPhone={create.formPhone} setFormPhone={create.setFormPhone} formEmail={create.formEmail} setFormEmail={create.setFormEmail} formAddress={create.formAddress} setFormAddress={create.setFormAddress} formSegment={create.formSegment} setFormSegment={create.setFormSegment} onSave={handleCreate} onClose={() => create.setShowCreate(false)} /> : null}
+      {create.showCreate ? <CreateModal language={language} formName={create.formName} setFormName={create.setFormName} formPhone={create.formPhone} setFormPhone={create.setFormPhone} formEmail={create.formEmail} setFormEmail={create.setFormEmail} formAddress={create.formAddress} setFormAddress={create.setFormAddress} formSegment={create.formSegment} setFormSegment={create.setFormSegment} formType={create.formType} setFormType={create.setFormType} onSave={handleCreate} onClose={() => create.setShowCreate(false)} /> : null}
     </div>
   );
 }

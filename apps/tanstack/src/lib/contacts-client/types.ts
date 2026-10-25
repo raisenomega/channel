@@ -14,6 +14,7 @@ export interface RawContact {
   ltv_usd: number | null;
   total_orders: number | null;
   preferred_channel: string | null;
+  contact_type: string | null;
   marketing_opt_in: boolean | null;
   do_not_contact: boolean | null;
 }
@@ -27,4 +28,5 @@ export interface ContactListItem {
   ltvUsd: number;
   totalOrders: number;
   channel: string | null;
+  type: string | null;
 }
