@@ -8,11 +8,14 @@ import { buildFacts } from "../domain/business-facts.ts";
 import type { ThreadMsg } from "../application/closing-draft.producer.ts";
 
 export async function leerHilo(convId: string): Promise<readonly ThreadMsg[]> {
-  const { data } = await supabase.from("messages").select("direction, content").eq("conversation_id", convId).order("created_at", { ascending: true }).limit(50);
+  // Los 40 mensajes MAS RECIENTES (desc + reverse). Antes era ascending+limit -> traia los MAS VIEJOS, por
+  // eso el agente "olvidaba" en hilos largos (ej. 332 msgs): nunca veia donde el cliente dio los datos.
+  const { data } = await supabase.from("messages").select("direction, content, created_at").eq("conversation_id", convId).order("created_at", { ascending: false }).limit(40);
   const rows = (data ?? []) as Array<{ direction: string; content: string | null }>;
-  return rows
+  const turnos = rows
     .map((r) => ({ from: (r.direction === "inbound" ? "cliente" : "negocio") as "cliente" | "negocio", text: (r.content ?? "").slice(0, 500) }))
-    .filter((m) => m.text.trim());
+    .filter((m) => m.text.trim() && !/^\[[^\]]+\]$/.test(m.text.trim())); // descarta vacios y placeholders [Imagen]/[Reel]
+  return turnos.reverse(); // cronologico: viejo -> nuevo
 }
 
 export async function estadoSeguimiento(convId: string): Promise<{ intentos: number; ultimoBorradorAt: string | null }> {
