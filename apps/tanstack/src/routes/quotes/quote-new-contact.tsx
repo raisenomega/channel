@@ -18,14 +18,15 @@ export function QuoteNewContact({ lang, onClose, onCreated }: {
   const [address, setAddress] = useState("");
   const [segment, setSegment] = useState("nuevo");
   const [type, setType] = useState("persona");
+  const [channel, setChannel] = useState("manual");
   const onSave = async () => {
     if (!name.trim()) return;
-    const r = await crearContacto({ display_name: name.trim(), primary_phone: phone.trim() || undefined, primary_email: email.trim() || undefined, segment, type, address: address.trim() || undefined });
+    const r = await crearContacto({ display_name: name.trim(), primary_phone: phone.trim() || undefined, primary_email: email.trim() || undefined, segment, type, address: address.trim() || undefined, channel });
     if (r.ok) { await qc.invalidateQueries({ queryKey: ["contacts"] }); onCreated(r.value.id); }
   };
   return (
     <CreateModal language={lang} formName={name} setFormName={setName} formPhone={phone} setFormPhone={setPhone}
-      formEmail={email} setFormEmail={setEmail} formAddress={address} setFormAddress={setAddress} formSegment={segment} setFormSegment={setSegment} formType={type} setFormType={setType}
+      formEmail={email} setFormEmail={setEmail} formAddress={address} setFormAddress={setAddress} formSegment={segment} setFormSegment={setSegment} formType={type} setFormType={setType} formChannel={channel} setFormChannel={setChannel}
       onSave={() => void onSave()} onClose={onClose} />
   );
 }

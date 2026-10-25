@@ -8,6 +8,7 @@ export function useCreateFormState() {
   const [formAddress, setFormAddress] = useState("");
   const [formSegment, setFormSegment] = useState("regular");
   const [formType, setFormType] = useState("persona");
+  const [formChannel, setFormChannel] = useState("manual");
 
   function reset() {
     setFormName("");
@@ -16,6 +17,7 @@ export function useCreateFormState() {
     setFormAddress("");
     setFormSegment("regular");
     setFormType("persona");
+    setFormChannel("manual");
   }
 
   return {
@@ -26,6 +28,7 @@ export function useCreateFormState() {
     formAddress, setFormAddress,
     formSegment, setFormSegment,
     formType, setFormType,
+    formChannel, setFormChannel,
     reset,
   };
 }

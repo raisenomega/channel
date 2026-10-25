@@ -35,7 +35,7 @@ export async function listarContactos(): Promise<Result<ContactListItem[]>> {
   }
 }
 
-export async function crearContacto(data: { type?: string;
+export async function crearContacto(data: { type?: string; channel?: string;
   display_name: string;
   primary_phone?: string;
   primary_email?: string;
@@ -49,7 +49,7 @@ export async function crearContacto(data: { type?: string;
     const res = await fetch(`${base}/rpc/create_contact`, {
       method: "POST",
       headers: { ...headers, "content-type": "application/json" },
-      body: JSON.stringify({ p_name: data.display_name, p_phone: data.primary_phone ?? "", p_email: data.primary_email ?? "", p_segment: data.segment ?? "nuevo", p_address: data.address ?? "", p_type: data.type ?? "persona" }),
+      body: JSON.stringify({ p_name: data.display_name, p_phone: data.primary_phone ?? "", p_email: data.primary_email ?? "", p_segment: data.segment ?? "nuevo", p_address: data.address ?? "", p_type: data.type ?? "persona", p_channel: data.channel ?? "" }),
     });
     if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };
     if (!res.ok) return { ok: false, error: { kind: "red", cause: `status ${res.status}` } };
