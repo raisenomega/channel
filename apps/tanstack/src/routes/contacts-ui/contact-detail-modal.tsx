@@ -41,7 +41,7 @@ export function ContactDetailModal({ lang, contact, onClose }: { lang: Idioma; c
         <div className="flex items-start justify-between gap-2">
           <div><h3 className="text-lg font-bold text-foreground">{contact.displayName}</h3>
             <div className="mt-0.5 flex items-center gap-1.5 text-[11px]">
-              {contact.channel && CANAL[contact.channel] ? <span className="rounded px-1.5 py-0.5 font-bold" style={{ background: CANAL[contact.channel]!.bg, color: CANAL[contact.channel]!.fg }}>{CANAL[contact.channel]!.label}</span> : null}
+              <span className="rounded px-1.5 py-0.5 font-bold" style={{ background: (contact.channel && CANAL[contact.channel] ? CANAL[contact.channel]!.bg : "hsl(var(--muted) / 0.4)"), color: (contact.channel && CANAL[contact.channel] ? CANAL[contact.channel]!.fg : "hsl(var(--muted-foreground))") }}>{contact.channel && CANAL[contact.channel] ? CANAL[contact.channel]!.label : "Manual"}</span>
               <span className="font-semibold" style={{ color: "hsl(var(--primary))" }}>{t(lang, "contacts.segment." + (contact.segment || "general"))}</span>
               {contact.type === "empresa" ? <span className="text-muted-foreground">· {t(lang, "contacts.type.empresa")}</span> : null}
             </div>

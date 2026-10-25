@@ -16,7 +16,7 @@ const E164 = /^\+[1-9]\d{6,14}$/;
 
 export function CreateModal({
   language, formName, setFormName, formPhone, setFormPhone, formEmail, setFormEmail,
-  formAddress, setFormAddress, formSegment, setFormSegment, formType, setFormType, onSave, onClose,
+  formAddress, setFormAddress, formSegment, setFormSegment, formType, setFormType, formChannel, setFormChannel, onSave, onClose,
 }: {
   language: "es" | "en";
   formName: string; setFormName: (v: string) => void;
@@ -24,7 +24,7 @@ export function CreateModal({
   formEmail: string; setFormEmail: (v: string) => void;
   formAddress: string; setFormAddress: (v: string) => void;
   formSegment: string; setFormSegment: (v: string) => void;
-  formType: string; setFormType: (v: string) => void;
+  formType: string; setFormType: (v: string) => void; formChannel: string; setFormChannel: (v: string) => void;
   onSave: () => void; onClose: () => void;
 }) {
   const [paso, setPaso] = useState<1 | 2>(1);
@@ -45,6 +45,8 @@ export function CreateModal({
                 <div className="mt-1 flex flex-wrap gap-2">{SEGMENTOS.map((s) => <Chip key={s} active={formSegment === s} onClick={() => setFormSegment(s)}>{t(language, "contacts.segment." + s)}</Chip>)}</div></div>
               <div><label className="text-xs font-semibold text-muted-foreground">{t(language, "contacts.createType")}</label>
                 <div className="mt-1 flex gap-2">{["persona", "empresa"].map((tp) => <Chip key={tp} active={formType === tp} onClick={() => setFormType(tp)}>{t(language, "contacts.type." + tp)}</Chip>)}</div></div>
+              <div><label className="text-xs font-semibold text-muted-foreground">{t(language, "contacts.createOrigin")}</label>
+                <div className="mt-1 flex flex-wrap gap-2">{["manual", "whatsapp", "instagram", "facebook"].map((o) => <Chip key={o} active={formChannel === o} onClick={() => setFormChannel(o)}>{t(language, "contacts.origin." + o)}</Chip>)}</div></div>
               {phoneBad ? <p className="text-xs text-critical">E.164: +17871234567</p> : null}
               <div className="flex gap-2 pt-2">
                 <Button variant="primary" disabled={!canNext} onClick={() => setPaso(2)}>{t(language, "common.next")}</Button>
@@ -56,7 +58,7 @@ export function CreateModal({
               <div className="rounded-xl glass-card p-3 text-sm space-y-1">
                 <div><strong>{formName}</strong></div>
                 <div className="text-muted-foreground">{formPhone || "—"} · {formEmail || "—"}</div>
-                <div className="text-muted-foreground">{t(language, "contacts.segment." + formSegment)}</div>
+                <div className="text-muted-foreground">{t(language, "contacts.segment." + formSegment)} · {t(language, "contacts.origin." + formChannel)}</div>
               </div>
               <div className="flex gap-2 pt-2">
                 <Button variant="ghost" onClick={() => setPaso(1)}>{t(language, "common.back")}</Button>

@@ -22,7 +22,7 @@ export const enBiz: Dict = {
   "contacts.createTitle": "Create contact",
   "contacts.step1": "Contact details (1/2)",
   "contacts.step2": "Confirm contact (2/2)",
-   "contacts.agentTimeline": "What the agent has done", "contacts.noActivity": "The agent has not acted on this contact yet.",  "contacts.temperature": "Temperature", "contacts.temp.frio": "Cold", "contacts.temp.tibio": "Warm", "contacts.temp.caliente": "Hot", "contacts.temp.convertido": "Converted", "contacts.notePlaceholder": "Write a note...", "contacts.createType": "Type", "contacts.type.persona": "Person", "contacts.type.empresa": "Company", "contacts.createName": "Full name",
+   "contacts.agentTimeline": "What the agent has done", "contacts.noActivity": "The agent has not acted on this contact yet.",  "contacts.temperature": "Temperature", "contacts.temp.frio": "Cold", "contacts.temp.tibio": "Warm", "contacts.temp.caliente": "Hot", "contacts.temp.convertido": "Converted", "contacts.notePlaceholder": "Write a note...",  "contacts.createOrigin": "Origin (where it came from)", "contacts.origin.manual": "Manual", "contacts.origin.whatsapp": "WhatsApp", "contacts.origin.instagram": "Instagram", "contacts.origin.facebook": "Facebook", "contacts.createType": "Type", "contacts.type.persona": "Person", "contacts.type.empresa": "Company", "contacts.createName": "Full name",
   "contacts.createPhone": "Phone",
   "contacts.createEmail": "Email",
   "contacts.createAddress": "Physical address",
