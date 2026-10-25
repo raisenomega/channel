@@ -32,6 +32,7 @@ export interface GenerateDraftCommand {
   readonly contactPhone?: string | undefined;  // telefono si existe
   readonly scope?: string | undefined;         // targeted | generic
   readonly autoSendReason?: string | undefined; // por que se auto-envio o no (observabilidad)
+  readonly contactProfile?: string | undefined; // B4: perfil del contacto para personalizar
 }
 
 export class GenerateDraftHandler {
@@ -46,7 +47,7 @@ export class GenerateDraftHandler {
     if (!ethics.ok) return err({ kind: "ethics_violation" });
     const contexto = await this.ctx.obtener(cmd.normalizedMessage, cmd.tenantId);
     if (!contexto.ok) return err({ kind: "context_failed", cause: contexto.error.cause });
-    const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, contexto.value);
+    const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, { ...contexto.value, contactProfile: cmd.contactProfile });
     if (!razonado.ok) return err({ kind: "llm_failure", cause: razonado.error.cause });
     const d = await this.persist.ejecutar({
       tenantId: cmd.tenantId, conversationId: cmd.conversationId ?? null, contactId: cmd.contactId ?? null,

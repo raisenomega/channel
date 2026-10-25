@@ -42,10 +42,11 @@ export class AgentReasoner {
       `Brand Voice: ${context.brandVoice}`,
       `Catalogo: ${context.catalogContext}`,
       `Knowledge relevante: ${knowledge}`,
+      context.contactProfile ? `Contacto: ${context.contactProfile}. Personaliza el saludo: nuevo=bienvenida calida; recurrente=reconoce que ya hablaron; VIP=trato prioritario.` : "",
       `Tools disponibles: ${tools.join(" ")}`,
       "Reglas: nunca mentir sobre ser humano; no cobrar sin confirmacion;",
       "escalar ante queja, urgencia medica o riesgo legal.",
-    ].join("\n");
+    ].filter(Boolean).join("\n");
 
     const llm = await this.provider.completar({
       systemPrompt,

@@ -13,6 +13,7 @@ export interface AgentContext {
   readonly history: readonly string[];
   readonly brandVoice: string;       // contexto real del negocio (facts) que usa el agente
   readonly catalogContext: string;   // catalogo/SKU real
+  readonly contactProfile?: string | undefined; // B4: nombre + segmento (nuevo/recurrente/VIP) del contacto
 }
 export type AgentContextError = { readonly kind: "context_unavailable"; readonly cause: string };
 export interface NegocioContext { readonly brandVoice: string; readonly catalogContext: string; }

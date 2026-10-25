@@ -13,7 +13,7 @@ export const desdeRowContact = (row: Record<string, unknown>): ContactState => {
     primaryEmail: emailVO?.ok ? emailVO.value : null,
     primaryPhone: phoneVO?.ok ? phoneVO.value : null,
     language: (row.language ?? "es") as never,
-    segment: (row.segment ?? "new_lead") as never,
+    segment: (row.segment ?? "general") as never,
     ltvUsd: (row.ltv_usd as number) ?? 0,
     totalOrders: (row.total_orders as number) ?? 0,
     preferredChannel: null,

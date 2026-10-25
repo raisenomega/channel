@@ -15,7 +15,7 @@ export const esBiz: Dict = {
   "contacts.ltv": "LTV",
   "contacts.orders": "Pedidos",
   "contacts.notes": "Notas",
-  "contacts.segment.vip": "VIP",
+  "contacts.segment.vip": "VIP", "contacts.segment.general": "General",
   "contacts.segment.regular": "Regular",
   "contacts.segment.nuevo": "Nuevo",
   "contacts.segment.empresa": "Empresa",
