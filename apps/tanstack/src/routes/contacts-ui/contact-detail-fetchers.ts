@@ -9,7 +9,7 @@ export interface ContactActivityItem {
   id: string; createdAt: string; status: string; scope: string | null;
   draftContent: string; reason: string; confidence: number; conclusion: string | null;
 }
-export interface ContactNote { text: string; at: string }
+export interface ContactNote { text: string; at: string; by?: string }
 export interface ContactDetail { activity: ContactActivityItem[]; notes: ContactNote[]; temperature: string | null }
 
 export async function fetchContactDetail(contactId: string): Promise<ContactDetail> {
@@ -33,3 +33,4 @@ async function rpc(fn: string, body: Record<string, unknown>): Promise<boolean> 
 
 export const agregarNota = (contactId: string, note: string): Promise<boolean> => rpc("add_contact_note", { p_contact_id: contactId, p_note: note });
 export const setTemperatura = (contactId: string, temp: string): Promise<boolean> => rpc("set_contact_temperature", { p_contact_id: contactId, p_temp: temp });
+export const eliminarNota = (contactId: string, index: number): Promise<boolean> => rpc("delete_contact_note", { p_contact_id: contactId, p_index: index });
