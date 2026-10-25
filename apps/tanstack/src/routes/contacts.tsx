@@ -15,6 +15,8 @@ import { useContactos } from "./contacts-ui/contacts-fetchers";
 import { useContactsFilter, useCreateFormState } from "./contacts-ui/contacts-hooks";
 import { ContactsFilter } from "./contacts-ui/contacts-filter";
 import { ContactRow } from "./contacts-ui/contact-row";
+import { ContactDetailModal } from "./contacts-ui/contact-detail-modal";
+import type { ContactListItem } from "@/lib/contacts-client";
 import { RowList } from "@/components/ui/row-list";
 import { CreateModal } from "./contacts-ui/create-modal";
 import { AgendadosList } from "./contacts-ui/agendados-list";
@@ -31,6 +33,7 @@ function ContactsPage() {
   const { busqueda, setBusqueda, filtroSegmento, setFiltroSegmento, filtrados } = useContactsFilter(data);
   const create = useCreateFormState();
   const [agendados, setAgendados] = useState(false);
+  const [detalle, setDetalle] = useState<ContactListItem | null>(null);
 
   async function handleCreate() {
     if (!create.formName.trim()) return;
@@ -55,8 +58,9 @@ function ContactsPage() {
       ) : filtrados.length === 0 ? (
         <Card><CardBody className="py-8 text-center"><p className="text-sm text-muted-foreground">{t(language, "contacts.empty")}</p></CardBody></Card>
       ) : (
-        <RowList items={filtrados} renderRow={(c) => <ContactRow key={c.id} lang={language} contact={c} />} />
+        <RowList items={filtrados} renderRow={(c) => <button key={c.id} type="button" onClick={() => setDetalle(c)} className="block w-full text-left">{<ContactRow lang={language} contact={c} />}</button>} />
       )}
+      {detalle ? <ContactDetailModal lang={language} contact={detalle} onClose={() => setDetalle(null)} /> : null}
       {create.showCreate ? <CreateModal language={language} formName={create.formName} setFormName={create.setFormName} formPhone={create.formPhone} setFormPhone={create.setFormPhone} formEmail={create.formEmail} setFormEmail={create.setFormEmail} formAddress={create.formAddress} setFormAddress={create.setFormAddress} formSegment={create.formSegment} setFormSegment={create.setFormSegment} formType={create.formType} setFormType={create.setFormType} onSave={handleCreate} onClose={() => create.setShowCreate(false)} /> : null}
     </div>
   );

@@ -26,7 +26,7 @@ import { TenantRepositorySupabase } from "../identity/infrastructure/tenant.repo
 import { rutaAgentStatus } from "../cognition/presentation/agents.routes.ts";
 import { rutaRecentActivity } from "../notifications/presentation/activity.routes.ts";
 import { rutaHealth } from "./health.routes.ts"; import { rutaOAuthCallback } from "./oauth-callback.routes.ts";
-import { rutaDraftsPending, rutaDraftsApprove, rutaDraftsReject, rutaDraftsWasCorrect } from "../cognition/presentation/drafts.routes.ts";
+import { rutaDraftsPending, rutaDraftsApprove, rutaDraftsReject, rutaDraftsWasCorrect } from "../cognition/presentation/drafts.routes.ts"; import { rutaContactActivity } from "../cognition/presentation/contact-activity.routes.ts";
 import { rutaCrearTemplate, rutaListarTemplates, rutaPatchTemplate, rutaImportLibrary } from "../templates/presentation/templates.routes.ts"; import { rutaMediaProxy } from "./media-proxy-route.ts"; import { rutaVictorChat } from "../cognition/presentation/victor-chat.routes.ts"; import { VictorChatHandler } from "../cognition/application/victor-chat.handler.ts"; import { AnthropicAdapter } from "../cognition/infrastructure/anthropic.adapter.ts"; import { getEnv } from "../shared/infrastructure/supabase-rest.helper.ts"; import { rutaContextoGet, rutaContextoPut } from "../cognition/presentation/context.routes.ts"; import { rutaGenerateDraft } from "../cognition/presentation/generate-draft.routes.ts"; import { GenerateDraftHandler } from "../cognition/application/generate-draft.handler.ts"; import { AgentContextService } from "../cognition/application/agent-context.ts"; import { AgentContextSourceSupabase } from "../cognition/infrastructure/agent-context-source.supabase.ts"; import { AgentReasoner } from "../cognition/application/agent-reasoner.ts"; import { PersistDraftHandler } from "../cognition/application/persist-draft.handler.ts"; import { AgentDraftsRepository } from "../cognition/infrastructure/agent-drafts.repository.ts"; import { ConversationRepositorySupabase } from "../inbox/infrastructure/conversation.repository.supabase.ts"; import { MessageRepositorySupabase } from "../inbox/infrastructure/message.repository.supabase.ts"; import { rutaAgentModeGet, rutaAgentModePut, rutaAgentConfigGet, rutaAgentConfigPut } from "../cognition/presentation/agents-mode.routes.ts";
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
@@ -63,7 +63,7 @@ export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
     rutaAgentStatus(),
     rutaRecentActivity(),
     rutaOAuthCallback(),
-    rutaDraftsPending(h.drafts),
+    rutaDraftsPending(h.drafts), rutaContactActivity(),
     rutaDraftsApprove(h.drafts),
     rutaDraftsReject(h.drafts),
     rutaDraftsWasCorrect(h.drafts),
