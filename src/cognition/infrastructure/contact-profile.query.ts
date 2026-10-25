@@ -5,8 +5,8 @@
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 
 const SEG: Record<string, string> = {
-  new_lead: "nuevo (primer contacto)", prospect: "prospecto", customer: "cliente", recurring: "recurrente",
-  vip: "VIP (alto valor)", at_risk: "en riesgo", churned: "inactivo", blocked: "bloqueado",
+  general: "general (sin calificar)", nuevo: "nuevo lead (mostro interes)", regular: "cliente recurrente", vip: "VIP (alto valor)",
+  new_lead: "nuevo", prospect: "prospecto", customer: "cliente", recurring: "recurrente", at_risk: "en riesgo", churned: "inactivo", blocked: "bloqueado",
 };
 
 export async function perfilContacto(contactId: string): Promise<string | null> {

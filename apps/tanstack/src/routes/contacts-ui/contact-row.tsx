@@ -11,7 +11,7 @@ export function ContactRow({ lang, contact }: { lang: Idioma; contact: ContactLi
     <div className="flex w-full items-center gap-3 border-b border-border/30 px-3 py-2">
       <span className="flex-1 truncate text-sm font-medium text-foreground">{contact.displayName}</span>
       <span className="shrink-0 text-xs text-muted-foreground">{contact.phone ?? "—"}</span>
-      <span className="shrink-0 text-xs font-semibold" style={{ color: "hsl(var(--primary))" }}>{contact.segment ? t(lang, "contacts.segment." + contact.segment) : "—"}</span>
+      <span className="shrink-0 text-xs font-semibold" style={{ color: "hsl(var(--primary))" }}>{t(lang, "contacts.segment." + (contact.segment || "general"))}</span>
     </div>
   );
 }

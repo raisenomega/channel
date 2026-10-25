@@ -18,8 +18,8 @@ export function ContactCard({ contact, language }: { contact: ContactListItem; l
     <Card>
       <CardHeader>
         <CardTitle className="text-sm">{contact.displayName}</CardTitle>
-        <Badge tone={TONE_SEGMENTO[contact.segment ?? ""] ?? "warn"}>
-          {contact.segment ? t(language, "contacts.segment." + contact.segment) : "\u2014"}
+        <Badge tone={TONE_SEGMENTO[contact.segment || "general"] ?? "warn"}>
+          {t(language, "contacts.segment." + (contact.segment || "general"))}
         </Badge>
       </CardHeader>
       <CardBody>

@@ -10,7 +10,7 @@ import { Row } from "./tab-card-grid";
 import type { ActiveContactInfo } from "./channel-fetchers";
 
 export function ContactFichaCard({ lang, contact }: { lang: Idioma; contact: ActiveContactInfo }) {
-  const segment = contact.segment ? t(lang, "contacts.segment." + contact.segment) : "—";
+  const segment = t(lang, "contacts.segment." + (contact.segment || "general"));
   return (
     <Card>
       <CardHeader>

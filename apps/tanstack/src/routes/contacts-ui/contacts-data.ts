@@ -1,5 +1,5 @@
-export const SEGMENTOS = ["vip", "regular", "nuevo", "empresa"];
+export const SEGMENTOS = ["general", "nuevo", "regular", "vip"];
 
 export const TONE_SEGMENTO: Record<string, "hub" | "success" | "warn" | "process" | "danger"> = {
-  vip: "hub", regular: "success", nuevo: "warn", empresa: "process",
+  general: "warn", nuevo: "process", regular: "success", vip: "hub", empresa: "process",
 };
