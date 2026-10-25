@@ -4,6 +4,7 @@
  * encabezado honesto (conclusion/identified/confidence 0-100). Al FIRMAR, el front crea la cotizacion real
  * (save_quote_with_items) con la sesion del dueno. NO envia nada. confidence del column = 0-1. C4 <=75.
  */
+import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 import { AgentDraftsRepository } from "./agent-drafts.repository.ts";
 import type { AgentDraft } from "../domain/agent-draft.entity.ts";
 import type { TenantId, ConversationId, ContactId } from "../../shared/domain/ids.ts";
@@ -23,8 +24,8 @@ export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuotePr
     quoteItems: p.lines.map((l) => ({ description: l.description, quantity: l.quantity, unit_price: l.unitPrice, line_total: Math.round(l.quantity * l.unitPrice * 100) / 100 })),
     subtotal, total,
   };
-  if (ref.to) meta["to"] = ref.to;
-  if (ref.channel) meta["channel"] = ref.channel;
+  // NO guardamos to/channel: firmar = aprobar + crear cotizacion (el front), NO enviar el resumen como texto.
+  if (ref.channel) meta["channel"] = ref.channel; // solo informativo (de que red vino)
   if (ref.contactId) meta["contactId"] = ref.contactId;
   const draft: AgentDraft = {
     id: crypto.randomUUID(), tenantId: ref.tenantId as unknown as TenantId, conversationId: ref.conversationId as unknown as ConversationId,
@@ -34,4 +35,11 @@ export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuotePr
     createdAt: now, updatedAt: now, approvedBy: null, approvedAt: null, rejectedReason: null, sentAt: null, providerMessageId: null, wasCorrect: null, feedbackNote: null,
   };
   await repo.insertar(draft);
+}
+
+// Dedup: ya hay una cotizacion del agente pendiente de firma en esta conversacion?
+export async function hayCotizacionPendiente(conversationId: string): Promise<boolean> {
+  const { data } = await supabase.from("agent_drafts").select("metadata").eq("conversation_id", conversationId).eq("status", "draft").limit(20);
+  const rows = (data ?? []) as Array<{ metadata?: { scope?: string } }>;
+  return rows.some((r) => r.metadata?.scope === "quote");
 }

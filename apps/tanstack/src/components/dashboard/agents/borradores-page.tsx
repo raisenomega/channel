@@ -8,6 +8,7 @@ import { apiFetch, resolveTenantId } from "@/lib/api-client";
 import { useDraftsPending, type DraftItem } from "@/hooks/useDraftsPending";
 import { BorradorCard } from "./borrador-card";
 import { BorradorModal } from "./borrador-modal";
+import { firmarCotizacion } from "./firmar-cotizacion";
 
 export function BorradoresPage({ lang }: { lang: Idioma }) {
   const { drafts, reload } = useDraftsPending();
@@ -25,7 +26,15 @@ export function BorradoresPage({ lang }: { lang: Idioma }) {
     } catch { /* */ }
     setBusy(false);
   };
-  const aprobar = (id: string) => void act(id, "approve", {});
+  const aprobar = (id: string) => void (async () => {
+    const d = drafts.find((x) => x.id === id);
+    if (d?.scope === "quote") { // FIRMA: crea la cotizacion real primero, luego marca el draft aprobado
+      if (busy) return;
+      if (!(await firmarCotizacion(d))) { setNote(t(lang, "dr.quotefail")); return; }
+      await act(id, "approve", {}); setNote(t(lang, "dr.quotedone")); return;
+    }
+    void act(id, "approve", {});
+  })();
   const denegar = (id: string) => void act(id, "reject", { reason: "Denegado por el dueno desde Borradores" });
   return (
     <div className="space-y-3">
