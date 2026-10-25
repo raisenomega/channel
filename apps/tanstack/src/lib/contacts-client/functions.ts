@@ -14,6 +14,7 @@ function mapear(r: RawContact): ContactListItem {
     ltvUsd: r.ltv_usd ?? 0,
     totalOrders: r.total_orders ?? 0,
     channel: r.preferred_channel ?? null,
+    type: r.contact_type ?? "persona",
   };
 }
 
@@ -21,7 +22,7 @@ export async function listarContactos(): Promise<Result<ContactListItem[]>> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
-  const cols = ["id", "display_name", "primary_phone", "primary_email", "segment", "ltv_usd", "total_orders", "preferred_channel"];
+  const cols = ["id", "display_name", "primary_phone", "primary_email", "segment", "ltv_usd", "total_orders", "preferred_channel", "contact_type"];
   const url = `${base}/contacts?select=${encodeURIComponent(cols.join(","))}&order=created_at.desc`;
   try {
     const res = await fetch(url, { headers });
@@ -34,7 +35,7 @@ export async function listarContactos(): Promise<Result<ContactListItem[]>> {
   }
 }
 
-export async function crearContacto(data: {
+export async function crearContacto(data: { type?: string;
   display_name: string;
   primary_phone?: string;
   primary_email?: string;
@@ -48,7 +49,7 @@ export async function crearContacto(data: {
     const res = await fetch(`${base}/rpc/create_contact`, {
       method: "POST",
       headers: { ...headers, "content-type": "application/json" },
-      body: JSON.stringify({ p_name: data.display_name, p_phone: data.primary_phone ?? "", p_email: data.primary_email ?? "", p_segment: data.segment ?? "nuevo", p_address: data.address ?? "" }),
+      body: JSON.stringify({ p_name: data.display_name, p_phone: data.primary_phone ?? "", p_email: data.primary_email ?? "", p_segment: data.segment ?? "nuevo", p_address: data.address ?? "", p_type: data.type ?? "persona" }),
     });
     if (res.status === 401 || res.status === 403) return { ok: false, error: { kind: "no_autorizado" } };
     if (!res.ok) return { ok: false, error: { kind: "red", cause: `status ${res.status}` } };
