@@ -6,7 +6,7 @@
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
 import { requireTenantAuth } from "../../server/auth-helpers.ts";
 import { tid } from "../../server/server-types.ts";
-import { draftsPorContacto } from "../infrastructure/contact-activity.query.ts";
+import { draftsPorContacto, contactMeta } from "../infrastructure/contact-activity.query.ts";
 
 const cp = (ctx: RequestContext): string[] => ctx.path.split("/");
 
@@ -16,8 +16,9 @@ export function rutaContactActivity(): RouteDefinition {
     handler: async (ctx: RequestContext) => {
       const auth = await requireTenantAuth(ctx, cp(ctx)[2] ?? ""); if (!auth.ok) return auth.error;
       const cid = ctx.params["cid"] ?? cp(ctx)[4] ?? "";
-      const activity = await draftsPorContacto(cid, String(tid(auth.value.tenantId)));
-      return { ok: true, activity };
+      const tt = String(tid(auth.value.tenantId));
+      const [activity, meta] = await Promise.all([draftsPorContacto(cid, tt), contactMeta(cid, tt)]);
+      return { ok: true, activity, notes: meta.notes, temperature: meta.temperature };
     },
   };
 }

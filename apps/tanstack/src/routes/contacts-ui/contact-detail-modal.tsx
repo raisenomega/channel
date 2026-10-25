@@ -2,12 +2,13 @@
  * HUB by Raisen — B8: ficha del contacto en modal (mismo estilo/tamano que el de Agendados). Info del
  * contacto + TIMELINE de lo que el agente ha hecho/decidido (sus borradores/respuestas/cierres). C4 <=75.
  */
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import type { ContactListItem } from "@/lib/contacts-client";
 import { CANAL } from "./contacts-data";
-import { fetchContactActivity, type ContactActivityItem } from "./contact-detail-fetchers";
+import { fetchContactDetail, type ContactActivityItem } from "./contact-detail-fetchers";
+import { ContactExtras } from "./contact-detail-extras";
 
 const ST: Record<string, string> = { draft: "Borrador", approved: "Aprobado", sent: "Enviado", rejected: "Denegado", expired: "Expirado" };
 const SC = (s: string | null): string => (s === "strategic" ? "Cierre de venta" : s === "opportunity" ? "Oportunidad" : "Respuesta");
@@ -30,8 +31,9 @@ function Evento({ a, fmt }: { a: ContactActivityItem; fmt: (s: string) => string
 }
 
 export function ContactDetailModal({ lang, contact, onClose }: { lang: Idioma; contact: ContactListItem; onClose: () => void }) {
-  const { data } = useQuery({ queryKey: ["contact-activity", contact.id], queryFn: () => fetchContactActivity(contact.id), staleTime: 15_000 });
-  const activity = data ?? [];
+  const qc = useQueryClient();
+  const { data } = useQuery({ queryKey: ["contact-activity", contact.id], queryFn: () => fetchContactDetail(contact.id), staleTime: 15_000 });
+  const activity = data?.activity ?? []; const notes = data?.notes ?? []; const temperature = data?.temperature ?? null;
   const fmt = (iso: string) => new Date(iso).toLocaleString(lang === "es" ? "es-ES" : "en-US", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
@@ -51,6 +53,7 @@ export function ContactDetailModal({ lang, contact, onClose }: { lang: Idioma; c
           <Fila label="Email" v={contact.email ?? "—"} />
           <Fila label={t(lang, "contacts.orders")} v={String(contact.totalOrders)} />
         </div>
+        <ContactExtras lang={lang} contactId={contact.id} notes={notes} temperature={temperature} onChange={() => void qc.invalidateQueries({ queryKey: ["contact-activity", contact.id] })} />
         <p className="shrink-0 text-[11px] font-bold uppercase text-muted-foreground">{t(lang, "contacts.agentTimeline")}</p>
         <div className="flex-1 space-y-2 overflow-y-auto">
           {activity.length === 0 ? <p className="text-xs text-muted-foreground">{t(lang, "contacts.noActivity")}</p> : activity.map((a) => <Evento key={a.id} a={a} fmt={fmt} />)}
