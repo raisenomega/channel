@@ -17,8 +17,8 @@ export function ChannelQuoteTab({ lang, accent, contactId, contactName, cards }:
   const propuestas = drafts.filter((d) => d.scope === "quote" && d.quoteContactId === contactId);
   return (
     <div className="space-y-3">
-      {propuestas.map((d) => <AgentQuoteProposal key={d.id} lang={lang} draft={d} onDone={reload} />)}
       <div className="flex justify-end"><ContactQuoteCreate lang={lang} accent={accent} contactId={contactId} contactName={contactName} /></div>
+      {propuestas.map((d) => <AgentQuoteProposal key={d.id} lang={lang} draft={d} onDone={reload} />)}
       {cards.length > 0 && <CardGrid title={t(lang, "cf.cotizacion")} empty={t(lang, "quotes.empty")} accent={accent} cards={cards} />}
     </div>
   );

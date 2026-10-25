@@ -6,15 +6,14 @@
 import { saveQuoteWithItems } from "@/lib/quotes-client/save-items";
 import type { DraftItem } from "@/hooks/useDraftsPending";
 
-export async function firmarCotizacion(d: DraftItem): Promise<boolean> {
+export async function firmarCotizacion(d: DraftItem): Promise<string | null> {
   const lines = (d.quoteItems ?? []).map((l) => ({
     description: l.description, quantity: l.quantity, unitPrice: l.unit_price, discountPct: 0, lineTotal: l.line_total,
   }));
-  if (lines.length === 0 || !d.quoteContactId) return false;
+  if (lines.length === 0 || !d.quoteContactId) return null;
   const total = typeof d.quoteTotal === "number" ? d.quoteTotal : lines.reduce((s, l) => s + l.lineTotal, 0);
-  const id = await saveQuoteWithItems({
+  return saveQuoteWithItems({
     contactId: d.quoteContactId, currency: "USD", subtotal: total, taxTotal: 0, total,
     clientName: d.contactName ?? "", clientPhone: d.contactPhone ?? "", clientEmail: "", clientAddress: "", service: "",
   }, lines);
-  return id !== null;
 }
