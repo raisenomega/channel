@@ -19,7 +19,7 @@ export async function persistirBorradorCierre(conv: QuietConv, d: ClosingDraft):
   const draft: AgentDraft = {
     id: crypto.randomUUID(), tenantId: conv.tenantId as unknown as TenantId, conversationId: conv.id as unknown as ConversationId,
     contactId: (conv.contactId ?? null) as unknown as ContactId | null, personaSlug: "zahra",
-    inboundMessage: "(seguimiento de conversacion quieta)", draftContent: d.message, confidence: Math.round(d.confidence / 10),
+    inboundMessage: "(seguimiento de conversacion quieta)", draftContent: d.message, confidence: Math.min(1, Math.max(0, Math.round(d.confidence) / 100)),
     reason: d.conclusion, status: "draft", aiDisclosureIncluded: false, traceId: crypto.randomUUID(), metadata: Object.freeze(meta),
     createdAt: now, updatedAt: now, approvedBy: null, approvedAt: null, rejectedReason: null, sentAt: null, providerMessageId: null, wasCorrect: null, feedbackNote: null,
   };
