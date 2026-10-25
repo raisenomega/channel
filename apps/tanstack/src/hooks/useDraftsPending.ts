@@ -1,13 +1,20 @@
 /**
- * HUB by Raisen — Hook: borradores pendientes (cola supervisada). Poll 15s. reload() tras aprobar/denegar.
- * Sin tenant/red -> vacio honesto.
+ * HUB by Raisen — Hook: borradores pendientes (cola supervisada) + cotizaciones RECHAZADAS recientes (<=30d,
+ * para mostrarlas con etiqueta en Borradores). Poll 15s. reload() tras aprobar/denegar. Vacio honesto.
  */
 import { useState, useEffect, useCallback } from "react";
 import { apiFetch, resolveTenantId } from "@/lib/api-client";
 
-export interface DraftItem { id: string; personaSlug: string; draftContent: string; inboundMessage: string; confidence: number; scope?: string; contactLabel?: string; contactName?: string; contactPhone?: string; channel?: string; autoSendReason?: string; label?: string; conclusion?: string; identified?: string; closePct?: number; quoteItems?: Array<{ description: string; quantity: number; unit_price: number; line_total: number }>; quoteTotal?: number; quoteContactId?: string; }
+export interface DraftItem { id: string; personaSlug: string; draftContent: string; inboundMessage: string; confidence: number; status?: string; scope?: string; contactLabel?: string; contactName?: string; contactPhone?: string; channel?: string; autoSendReason?: string; label?: string; conclusion?: string; identified?: string; closePct?: number; quoteItems?: Array<{ description: string; quantity: number; unit_price: number; line_total: number }>; quoteTotal?: number; quoteContactId?: string; }
 type RawMeta = { scope?: string; contactLabel?: string; contactName?: string; contactPhone?: string; channel?: string; autoSendReason?: string; label?: string; conclusion?: string; identified?: string; confidence?: number; quoteItems?: Array<{ description: string; quantity: number; unit_price: number; line_total: number }>; total?: number; contactId?: string };
 type RawDraft = DraftItem & { metadata?: RawMeta };
+
+function mapPending(x: RawDraft): DraftItem {
+  return { ...x, scope: x.metadata?.scope, contactLabel: x.metadata?.contactLabel, contactName: x.metadata?.contactName, contactPhone: x.metadata?.contactPhone, channel: x.metadata?.channel, autoSendReason: x.metadata?.autoSendReason, label: x.metadata?.label, conclusion: x.metadata?.conclusion, identified: x.metadata?.identified, closePct: x.metadata?.confidence, quoteItems: x.metadata?.quoteItems, quoteTotal: x.metadata?.total, quoteContactId: x.metadata?.contactId };
+}
+function mapRejected(x: { id: string; metadata?: RawMeta }): DraftItem {
+  return { id: x.id, status: "rejected", scope: "quote", personaSlug: "", draftContent: "", inboundMessage: "", confidence: 0, label: x.metadata?.label, conclusion: x.metadata?.conclusion, contactName: x.metadata?.contactName, quoteItems: x.metadata?.quoteItems, quoteTotal: x.metadata?.total, quoteContactId: x.metadata?.contactId };
+}
 
 export function useDraftsPending(): { drafts: readonly DraftItem[]; count: number; reload: () => void } {
   const [drafts, setDrafts] = useState<readonly DraftItem[]>([]);
@@ -15,11 +22,11 @@ export function useDraftsPending(): { drafts: readonly DraftItem[]; count: numbe
     const tid = resolveTenantId();
     if (!tid) { setDrafts([]); return; }
     try {
-      const res = await apiFetch(`/tenants/${encodeURIComponent(tid)}/drafts/pending`);
-      if (res.ok) {
-        const d = (await res.json()) as { drafts?: RawDraft[] };
-        setDrafts((d.drafts ?? []).map((x) => ({ ...x, scope: x.metadata?.scope, contactLabel: x.metadata?.contactLabel, contactName: x.metadata?.contactName, contactPhone: x.metadata?.contactPhone, channel: x.metadata?.channel, autoSendReason: x.metadata?.autoSendReason, label: x.metadata?.label, conclusion: x.metadata?.conclusion, identified: x.metadata?.identified, closePct: x.metadata?.confidence, quoteItems: x.metadata?.quoteItems, quoteTotal: x.metadata?.total, quoteContactId: x.metadata?.contactId })));
-      } else { setDrafts([]); }
+      const b = encodeURIComponent(tid);
+      const [res, rej] = await Promise.all([apiFetch(`/tenants/${b}/drafts/pending`), apiFetch(`/tenants/${b}/drafts/rejected-quotes`)]);
+      const d = res.ok ? ((await res.json()) as { drafts?: RawDraft[] }) : {};
+      const rq = rej.ok ? ((await rej.json()) as { rejectedQuotes?: Array<{ id: string; metadata?: RawMeta }> }) : {};
+      setDrafts([...(d.drafts ?? []).map(mapPending), ...(rq.rejectedQuotes ?? []).map(mapRejected)]);
     } catch { setDrafts([]); }
   }, []);
   useEffect(() => { load(); const id = setInterval(load, 15_000); return () => clearInterval(id); }, [load]);
