@@ -1,17 +1,17 @@
 /**
- * HUB by Raisen — P2: tarjeta (mismo estilo/tamano que las de Borradores) de la cotizacion que propuso el
- * agente, en grid 4/linea dentro del chip Cotizacion. Muestra el encabezado honesto + lineas. [Aceptar] abre
- * el modal real "Editar cotizacion"; [Rechazar] la deniega. Solo renderiza; la logica va en la seccion. C4<=75.
+ * HUB by Raisen — P2: tarjeta (estilo Borradores, grid 4/linea) de la cotizacion que propuso el agente.
+ * Clic en el CUERPO = abre el modal de edicion (NO acepta, la tarjeta permanece). Solo [Aceptar]/[Rechazar]
+ * hacen desaparecer la tarjeta — nunca por clic en otro sitio. C4 <=75.
  */
 import { t, type Idioma } from "@/lib/i18n";
 import type { DraftItem } from "@/hooks/useDraftsPending";
 
-export function AgentQuoteProposal({ lang, draft, busy, onAccept, onReject }: {
-  lang: Idioma; draft: DraftItem; busy: boolean; onAccept: () => void; onReject: () => void;
+export function AgentQuoteProposal({ lang, draft, busy, onOpen, onAccept, onReject }: {
+  lang: Idioma; draft: DraftItem; busy: boolean; onOpen: () => void; onAccept: () => void; onReject: () => void;
 }) {
   const green = "hsl(145 55% 42%)";
   return (
-    <div onClick={onAccept} className="flex cursor-pointer flex-col gap-2 rounded-xl border border-border/50 bg-card-soft p-3 transition-colors hover:border-border">
+    <div onClick={onOpen} className="flex cursor-pointer flex-col gap-2 rounded-xl border border-border/50 bg-card-soft p-3 transition-colors hover:border-border">
       <div className="flex items-center justify-between gap-1 text-[10px] font-bold uppercase" style={{ color: green }}>
         <span className="truncate">{t(lang, "dr.quote")} · {t(lang, "dr.quoteByAgent")}</span>
         {typeof draft.quoteTotal === "number" ? <span className="shrink-0">${draft.quoteTotal.toFixed(2)}</span> : null}
