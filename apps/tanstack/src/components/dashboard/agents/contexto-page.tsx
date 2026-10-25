@@ -8,6 +8,7 @@ import { apiFetch, resolveTenantId } from "@/lib/api-client";
 import { CTX_FIELDS, CTX_PARTS } from "./contexto-fields";
 import { ContextoField } from "./contexto-field";
 import { ContextoAgentsStrip } from "./contexto-agents-strip";
+import { ContextoFooter } from "./contexto-footer";
 
 type Vals = Record<string, string>;
 interface Resp { context?: Record<string, unknown>; completeness?: { percent: number; green: boolean } }
@@ -31,12 +32,14 @@ export function ContextoPage({ lang, accent }: { lang: Idioma; accent: string })
     try { const r = await apiFetch(`/tenants/${encodeURIComponent(tid)}/context`); if (r.ok) apply((await r.json()) as Resp); } catch { /* */ }
   }, [tid]);
   useEffect(() => { void load(); }, [load]);
-  const save = async () => {
+  const enviar = async (payload: Vals, marcar: boolean) => {
     if (!tid || busy) return;
     setBusy(true); setSaved(false);
-    try { const r = await apiFetch(`/tenants/${encodeURIComponent(tid)}/context`, { method: "PUT", body: JSON.stringify(vals) }); if (r.ok) { apply((await r.json()) as Resp); setSaved(true); } } catch { /* */ }
+    try { const r = await apiFetch(`/tenants/${encodeURIComponent(tid)}/context`, { method: "PUT", body: JSON.stringify(payload) }); if (r.ok) { apply((await r.json()) as Resp); if (marcar) setSaved(true); } } catch { /* */ }
     setBusy(false);
   };
+  const save = () => void enviar(vals, true);
+  const borrar = () => void enviar(Object.fromEntries(CTX_FIELDS.map((f) => [f.key, ""])) as Vals, false); // Borrar todo: vacia las 6 partes en BD
   const set = (k: string, v: string) => { setVals((o) => ({ ...o, [k]: v })); setSaved(false); };
   const move = (d: number) => setStep((sx) => Math.min(6, Math.max(1, sx + d)));
   const part = CTX_PARTS.find((p) => p.n === step) ?? CTX_PARTS[0]!;
@@ -60,14 +63,7 @@ export function ContextoPage({ lang, accent }: { lang: Idioma; accent: string })
       </div>
       <div className="flex items-center gap-3">
         {step > 1 ? <button type="button" onClick={() => move(-1)} className="chip font-bold" style={{ color: `hsl(${accent})`, borderColor: `hsl(${accent})` }}>{"‹"} {t(lang, "ctx.back")}</button> : null}
-        {step < 6
-          ? <button type="button" onClick={() => move(1)} className="chip ml-auto font-bold" style={{ color: `hsl(${accent})`, borderColor: `hsl(${accent})` }}>{t(lang, "ctx.next")} {"›"}</button>
-          : (
-            <div className="ml-auto flex items-center gap-3">
-              <button type="button" onClick={() => void save()} disabled={busy} className="chip font-bold text-white" style={{ background: `hsl(${accent})` }}>{busy ? t(lang, "ctx.saving") : t(lang, "ctx.save")}</button>
-              {saved ? <span className="text-xs font-semibold" style={{ color: "hsl(var(--success))" }}>{t(lang, "ctx.saved")}</span> : null}
-            </div>
-          )}
+        <ContextoFooter lang={lang} accent={accent} step={step} busy={busy} saved={saved} onNext={() => move(1)} onSave={save} onClear={borrar} />
       </div>
       {step === 6 ? <ContextoAgentsStrip lang={lang} /> : null}
     </div>

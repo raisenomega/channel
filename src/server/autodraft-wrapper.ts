@@ -27,6 +27,10 @@ import { MaybeQuoteService } from "../cognition/application/maybe-quote.service.
 import { leerCatalogoSku } from "../cognition/infrastructure/sku-catalog.query.ts";
 import { persistirPropuestaCotizacion, hayCotizacionPendiente } from "../cognition/infrastructure/quote-proposal-persist.ts";
 import type { AutodraftEvent } from "../cognition/application/maybe-autodraft.service.ts";
+import { ContactDataProducer } from "../cognition/application/contact-data.producer.ts";
+import { MaybeCaptureService } from "../cognition/application/maybe-capture.service.ts";
+import { leerHilo } from "../cognition/infrastructure/strategic-queries.ts";
+import { guardarDatosContacto } from "../cognition/infrastructure/contact-data.persist.ts";
 
 // approved_by es UUID (migr 039, sin FK); "autonomous" NO es UUID -> el PATCH daba 400 y el approve fallaba
 // en silencio -> el draft quedaba en status=draft -> el send daba STATUS_NOT_APPROVED. Nil UUID = aprobador autonomo.
@@ -44,10 +48,8 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
       if (!r.ok) console.error(`[autodraft-send] send FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); else console.error(`[autodraft-send] OK draft=${d.id} to=${to}`);
     },
   } : undefined;
-  let quoteHook: ((ev: AutodraftEvent, opportunity: boolean) => Promise<void>) | undefined;
-  if ((getEnv("QUOTE_PROPOSAL_ENABLED") ?? "") === "true") {
-    const q = new MaybeQuoteService(new QuoteProposalProducer(adapter), leerCatalogoSku, hayCotizacionPendiente, persistirPropuestaCotizacion);
-    quoteHook = (ev, opp) => q.ejecutar(ev, opp);
-  }
-  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, quoteHook);
+  const cap = (getEnv("AGENT_CAPTURE_ENABLED") ?? "") === "true" ? new MaybeCaptureService(new ContactDataProducer(adapter), leerHilo, guardarDatosContacto) : null;
+  const q = (getEnv("QUOTE_PROPOSAL_ENABLED") ?? "") === "true" ? new MaybeQuoteService(new QuoteProposalProducer(adapter), leerCatalogoSku, hayCotizacionPendiente, persistirPropuestaCotizacion) : null;
+  const postHook = (cap || q) ? async (ev: AutodraftEvent, opp: boolean): Promise<void> => { if (cap) await cap.ejecutar(ev); if (q) await q.ejecutar(ev, opp); } : undefined;
+  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, postHook);
 }
