@@ -20,3 +20,16 @@ export function calificarSegmento(actual: string | null, s: QualifySignals, vipM
   if (target <= cur) return null; // ya esta igual o mas arriba -> no cambia (nunca baja)
   return POR_RANK[target] ?? null;
 }
+
+const TEMP = ["frio", "tibio", "caliente", "convertido"] as const;
+const TRANK: Record<string, number> = { frio: 0, tibio: 1, caliente: 2, convertido: 3 };
+
+// Temperatura de venta (solo sube): hubo interaccion -> tibio; intencion -> caliente; ya compro -> convertido.
+export function calificarTemperatura(actual: string | null, s: QualifySignals): string | null {
+  let target = 1; // tibio: llego un mensaje entrante del contacto
+  if (s.opportunity) target = Math.max(target, 2);      // caliente: mostro intencion de compra
+  if (s.totalOrders >= 1) target = 3;                   // convertido: ya compro
+  const cur = TRANK[actual ?? "frio"] ?? 0;
+  if (target <= cur) return null; // ya igual o mas caliente -> no cambia
+  return TEMP[target] ?? null;
+}

@@ -37,7 +37,7 @@ export function ContactDetailModal({ lang, contact, onClose }: { lang: Idioma; c
   const fmt = (iso: string) => new Date(iso).toLocaleString(lang === "es" ? "es-ES" : "en-US", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="flex max-h-[85vh] w-full max-w-xl flex-col gap-3 overflow-hidden rounded-2xl border border-border/50 bg-card p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="flex max-h-[85vh] w-full max-w-4xl flex-col gap-3 overflow-hidden rounded-2xl border border-border/50 bg-card p-5" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-2">
           <div><h3 className="text-lg font-bold text-foreground">{contact.displayName}</h3>
             <div className="mt-0.5 flex items-center gap-1.5 text-[11px]">
