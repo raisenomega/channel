@@ -7,6 +7,7 @@ import { useState } from "react";
 import { t, type Idioma } from "@/lib/i18n";
 import { type AgentDef, SECS, secBody } from "./agent-roster";
 import { AgentAvatar } from "./agent-avatar";
+import { AgentMetrics } from "./agent-metrics";
 
 export function AgentPage({ lang, agent, online }: { lang: Idioma; agent: AgentDef; online: boolean }) {
   const [tab, setTab] = useState(0);
@@ -32,7 +33,7 @@ export function AgentPage({ lang, agent, online }: { lang: Idioma; agent: AgentD
       </header>
       <div className="min-h-[180px] rounded-xl border border-border/40 bg-card-soft p-4">
         <p className="mb-1 text-[11px] font-bold uppercase text-muted-foreground">{t(lang, sec.label)}</p>
-        <p className="text-sm text-foreground">{t(lang, secBody(agent.code, sec.k))}</p>
+        {sec.k === "metrics" ? <AgentMetrics lang={lang} code={agent.code} accent={agent.accent} /> : <p className="text-sm text-foreground">{t(lang, secBody(agent.code, sec.k))}</p>}
       </div>
     </div>
   );
