@@ -9,7 +9,6 @@ import { Result, ok, err } from "../../shared/domain/result.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
 import type { AgentAction } from "../domain/agent-executor.ts";
-import { TOOL_REGISTRY } from "../domain/tool.registry.ts";
 import type { AIProvider } from "../domain/ai-provider.ts";
 import type { AgentContext } from "./agent-context.ts";
 
@@ -34,7 +33,6 @@ export class AgentReasoner {
     channel: ChannelType,
     context: AgentContext,
   ): Promise<Result<AgentReasoningResult, AgentReasoningError>> {
-    const tools = Object.values(TOOL_REGISTRY).map((t) => `- ${t.name}: ${t.description}`);
     const knowledge = context.knowledge.map((k) => k.knowledge).join(" | ") || "(sin knowledge)";
 
     const historial = context.history.length
@@ -50,7 +48,7 @@ export class AgentReasoner {
       "Estilo: responde BREVE y directo (2-4 frases), sin parrafos largos.",
       "Saluda SOLO si es el primer mensaje del hilo; si ya hay historial, continua sin repetir 'buenos dias'.",
       "Usa los datos del cliente y del historial; continua desde donde quedaron, no reinicies la conversacion.",
-      `Tools disponibles: ${tools.join(" ")}`,
+      "No uses herramientas, funciones ni etiquetas tipo <invoke>, <function_calls> o XML: responde SOLO texto normal para el cliente. Si hace falta un humano, dilo en palabras.",
       "Reglas: nunca mentir sobre ser humano; no cobrar sin confirmacion; escalar ante queja, urgencia medica o riesgo legal.",
     ].filter(Boolean).join("\n");
 
@@ -62,10 +60,11 @@ export class AgentReasoner {
       temperature: 0.7,
     });
     if (!llm.ok) return err({ kind: "llm_failure", cause: llm.error.kind });
+    const texto = llm.value.response.replace(/<invoke[\s\S]*?<\/invoke>/gi, "").replace(/<\/?(invoke|function_calls|parameter|antml)[^>]*>/gi, "").trim();
 
     return ok(Object.freeze({
-      response: llm.value.response,
-      action: Object.freeze({ kind: "responder" as const, text: llm.value.response }),
+      response: texto,
+      action: Object.freeze({ kind: "responder" as const, text: texto }),
       model: llm.value.model,
       costUsd: llm.value.costUsd,
     }));
