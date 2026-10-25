@@ -36,6 +36,7 @@ export class MaybeAutodraftService {
     private readonly autoSend?: AutoSendPort,
     private readonly counter?: SentCounterPort,
     private readonly perfilContacto?: (contactId: string) => Promise<string | null>,
+    private readonly calificar?: (contactId: string, opportunity: boolean) => Promise<string | null>,
   ) {}
 
   async ejecutar(ev: AutodraftEvent): Promise<void> {
@@ -45,6 +46,7 @@ export class MaybeAutodraftService {
       console.error(`[autodraft] t=${ev.tenantId} ch=${ev.channel} from=${ev.from} mode=${mode}`);
       if (mode === "off") return;
       const intent = await this.classifier.clasificar(ev.content);
+      if (ev.contactId && this.calificar) { const subio = await this.calificar(String(ev.contactId), intent.opportunity); if (subio) console.error(`[qualify] contacto=${ev.contactId} -> ${subio}`); }
       const sentToday = mode === "autonomous" && this.counter ? await this.counter.contar(ev.tenantId) : 0;
       const complaint = intent.persona === "angel" || intent.kind === "queja";
       const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };

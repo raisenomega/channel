@@ -7,6 +7,7 @@ import { MaybeAutodraftService } from "../cognition/application/maybe-autodraft.
 import { IntentClassifier } from "../cognition/application/intent-classifier.ts";
 import { GenerateDraftHandler } from "../cognition/application/generate-draft.handler.ts";
 import { perfilContacto } from "../cognition/infrastructure/contact-profile.query.ts";
+import { calificarContacto } from "../cognition/infrastructure/contact-qualify.repo.ts";
 import { AgentContextService } from "../cognition/application/agent-context.ts";
 import { AgentContextSourceSupabase } from "../cognition/infrastructure/agent-context-source.supabase.ts";
 import { AgentReasoner } from "../cognition/application/agent-reasoner.ts";
@@ -38,5 +39,5 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
       if (!r.ok) console.error(`[autodraft-send] send FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); else console.error(`[autodraft-send] OK draft=${d.id} to=${to}`);
     },
   } : undefined;
-  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto);
+  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto);
 }
