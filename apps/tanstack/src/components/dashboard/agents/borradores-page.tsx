@@ -11,7 +11,8 @@ import { BorradorModal } from "./borrador-modal";
 import { firmarCotizacion } from "./firmar-cotizacion";
 
 export function BorradoresPage({ lang }: { lang: Idioma }) {
-  const { drafts, reload } = useDraftsPending();
+  const { drafts: todos, reload } = useDraftsPending();
+  const drafts = todos.filter((d) => d.scope !== "quote"); // las cotizaciones viven en el chip Cotizacion del Inbox
   const [busy, setBusy] = useState(false);
   const [sel, setSel] = useState<DraftItem | null>(null);
   const [note, setNote] = useState("");
