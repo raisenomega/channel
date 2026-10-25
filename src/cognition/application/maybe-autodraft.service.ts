@@ -35,6 +35,7 @@ export class MaybeAutodraftService {
     private readonly classifier: IntentClassifier,
     private readonly autoSend?: AutoSendPort,
     private readonly counter?: SentCounterPort,
+    private readonly perfilContacto?: (contactId: string) => Promise<string | null>,
   ) {}
 
   async ejecutar(ev: AutodraftEvent): Promise<void> {
@@ -50,6 +51,7 @@ export class MaybeAutodraftService {
       const dec = razonAutoEnvio(mode, config, signals, new Date(), timeZone);
       console.error(`[autodraft] send=${dec.send} reason=${dec.reason} conf=${intent.confidence} hasAutoSend=${!!this.autoSend}`);
       if (mode === "autonomous" && !dec.send) return; // Sistema A: en autonomo respondemos o nada; nunca dejamos borrador por mensaje (eso es Sistema B)
+      const perfil = ev.contactId && this.perfilContacto ? await this.perfilContacto(String(ev.contactId)) : null;
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };
       const draft = await this.generate.ejecutar({
         tenantId: ev.tenantId as unknown as TenantId,
@@ -57,7 +59,7 @@ export class MaybeAutodraftService {
         contactId: (ev.contactId ?? null) as ContactId | null,
         channel: ev.channel as ChannelType, personaSlug: ev.persona ?? intent.persona,
         normalizedMessage: nm, contactLabel: ev.from, contactName: ev.contactName, contactPhone: ev.contactPhone,
-        scope: intent.opportunity ? "opportunity" : "targeted", autoSendReason: dec.reason,
+        scope: intent.opportunity ? "opportunity" : "targeted", autoSendReason: dec.reason, contactProfile: perfil ?? undefined,
       });
       if (draft.ok && dec.send && this.autoSend) { console.error(`[autodraft] auto-enviando to=${ev.from} ch=${ev.channel}`); await this.autoSend.enviar(draft.value, ev.from, ev.channel); }
       else console.error(`[autodraft] NO envia draftOk=${draft.ok} send=${dec.send} hasAutoSend=${!!this.autoSend}`);
