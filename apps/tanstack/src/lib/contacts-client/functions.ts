@@ -13,6 +13,7 @@ function mapear(r: RawContact): ContactListItem {
     segment: r.segment,
     ltvUsd: r.ltv_usd ?? 0,
     totalOrders: r.total_orders ?? 0,
+    channel: r.preferred_channel ?? null,
   };
 }
 
@@ -20,7 +21,7 @@ export async function listarContactos(): Promise<Result<ContactListItem[]>> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
-  const cols = ["id", "display_name", "primary_phone", "primary_email", "segment", "ltv_usd", "total_orders"];
+  const cols = ["id", "display_name", "primary_phone", "primary_email", "segment", "ltv_usd", "total_orders", "preferred_channel"];
   const url = `${base}/contacts?select=${encodeURIComponent(cols.join(","))}&order=created_at.desc`;
   try {
     const res = await fetch(url, { headers });

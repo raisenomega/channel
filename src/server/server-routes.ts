@@ -24,7 +24,7 @@ import type { DraftsDeps } from "../cognition/presentation/drafts.routes.ts";
 import { buildTemplatesDeps } from "./templates-wrapper.ts";
 import type { TemplatesDeps } from "../templates/presentation/templates.routes.ts";
 import { IngestZernioMessageHandler } from "../inbox/application/ingest-zernio-message.use-case.ts"; import { cerebroIngest } from "../integrations/infrastructure/cerebro-client.ts"; import { buildAutodraft } from "./autodraft-wrapper.ts";
-import { tenantPorZernioProfile, tenantPorZernioAccount, mensajeYaExiste, conversacionExiste, setConvRefs, refreshContactName } from "../inbox/infrastructure/zernio-ingest.queries.ts";
+import { tenantPorZernioProfile, tenantPorZernioAccount, mensajeYaExiste, conversacionExiste, setConvRefs, refreshContactName, setPreferredChannel } from "../inbox/infrastructure/zernio-ingest.queries.ts";
 import { detUuid } from "../shared/infrastructure/det-uuid.ts";
 import type { NotificationsHandlers } from "../notifications/presentation/routes/notifications.routes.ts";
 import type { QuoteRepository } from "../commerce/domain/commerce.repository.ts";
@@ -63,7 +63,7 @@ export async function buildHandlers(): Promise<ServerHandlers> {
   return {
     processWebhook: new ProcessWebhookHandler(channelRouter),
     receiveMessage: new ReceiveMessageHandler(convRepo),
-    ingestZernio: new IngestZernioMessageHandler({ contacts: new ContactRepositorySupabase(), convs: convRepo, msgs: msgRepo, tenantPorProfile: tenantPorZernioProfile, tenantPorAccount: tenantPorZernioAccount, mensajeExiste: mensajeYaExiste, convExiste: conversacionExiste, setConvRefs, refreshContactName, detId: detUuid, emitCerebro: cerebroIngest, maybeAutodraft: (ev) => void autodraft.ejecutar(ev) }),
+    ingestZernio: new IngestZernioMessageHandler({ contacts: new ContactRepositorySupabase(), convs: convRepo, msgs: msgRepo, tenantPorProfile: tenantPorZernioProfile, tenantPorAccount: tenantPorZernioAccount, mensajeExiste: mensajeYaExiste, convExiste: conversacionExiste, setConvRefs, refreshContactName, setPreferredChannel, detId: detUuid, emitCerebro: cerebroIngest, maybeAutodraft: (ev) => void autodraft.ejecutar(ev) }),
     sendMessage: new SendMessageHandler(convRepo, msgRepo, channelRouter),
     contactsRepo: new ContactRepositorySupabase(),
     createQuote: new CreateQuoteHandler(quoteRepo),

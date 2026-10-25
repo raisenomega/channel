@@ -52,3 +52,8 @@ export async function refreshContactName(contactId: string, name: string): Promi
   if (!contactId || !name) return;
   await supabase.from("contacts").update({ display_name: name }).eq("id", contactId).neq("display_name", name);
 }
+
+export async function setPreferredChannel(contactId: string, channel: string): Promise<void> {
+  if (!contactId || !channel) return;
+  await supabase.from("contacts").update({ preferred_channel: channel }).eq("id", contactId).is("preferred_channel", null);
+}

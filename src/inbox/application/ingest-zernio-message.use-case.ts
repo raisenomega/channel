@@ -27,6 +27,7 @@ export interface IngestDeps {
   readonly convExiste: (convId: string) => Promise<boolean>;
   readonly setConvRefs: (convId: string, participantExternalId: string, providerConversationId: string, providerAccountId: string) => Promise<void>; // 3o-b/#1: ids de envío Zernio
   readonly refreshContactName: (contactId: string, name: string) => Promise<void>; // #3: auto-update nombre real
+  readonly setPreferredChannel?: (contactId: string, channel: string) => Promise<void>; // etiqueta de red social
   readonly detId: (seed: string) => string;
   readonly emitCerebro?: (e: CerebroEvent) => void; // CEREBRO: enriquece, no bloquea (fire-and-forget)
   readonly maybeAutodraft?: (ev: { tenantId: string; conversationId?: string | null; contactId?: string | null; channel: string; from: string; content: string; contactName?: string; contactPhone?: string }) => void; // S6: genera borrador al entrar (fire-and-forget)
@@ -55,7 +56,7 @@ export class IngestZernioMessageHandler {
       if (cv.ok && !(await this.d.convs.guardar({ ...cv.value, id: convId, participantExternalId: z.contactExternalId, providerConversationId: z.providerConversationId, providerAccountId: z.accountId })).ok) return fail("conversacion");
     } else {
       await this.d.setConvRefs(convId, z.contactExternalId, z.providerConversationId, z.accountId); // 3o-b/#1: rellena ids de envío en convs ya existentes
-      if (z.contactName !== "Cliente") await this.d.refreshContactName(contactId, z.contactName); // #3: llegó un nombre real -> actualiza
+      if (z.contactName !== "Cliente") await this.d.refreshContactName(contactId, z.contactName); if (this.d.setPreferredChannel) await this.d.setPreferredChannel(contactId, ch); // #3 nombre real + etiqueta de red social
     }
     const ctype = (z.hasAttachments && ["image", "video", "audio", "document", "sticker"].includes(z.mediaType) ? z.mediaType : "text") as MessageState["content"]["type"];
     const msg: MessageState = {

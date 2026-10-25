@@ -26,4 +26,5 @@ export interface ContactListItem {
   segment: string | null;
   ltvUsd: number;
   totalOrders: number;
+  channel: string | null;
 }
