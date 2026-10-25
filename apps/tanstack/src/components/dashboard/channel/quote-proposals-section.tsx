@@ -17,8 +17,9 @@ import { firmarCotizacion } from "@/components/dashboard/agents/firmar-cotizacio
 import { AgentQuoteProposal } from "./agent-quote-proposal";
 
 export function QuoteProposalsSection({ lang, propuestas, onChange }: { lang: Idioma; propuestas: DraftItem[]; onChange: () => void }) {
-  const contactsQ = useQuery({ queryKey: ["contacts"], queryFn: listarContactos });
-  const contacts = contactsQ.data?.ok ? contactsQ.data.value : [];
+  // MISMO shape/queryFn que useQuotesData (array desempaquetado) para NO chocar la cache ["contacts"] -> rompia /quotes
+  const contactsQ = useQuery({ queryKey: ["contacts"], queryFn: async () => { const r = await listarContactos(); return r.ok ? r.value : []; } });
+  const contacts = contactsQ.data ?? [];
   const [edit, setEdit] = useState<{ d: DraftItem; qid: string } | null>(null);
   const [pdf, setPdf] = useState<{ q: QuoteListItem; name: string } | null>(null);
   const [busy, setBusy] = useState(false);
