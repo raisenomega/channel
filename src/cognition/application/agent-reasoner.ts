@@ -37,15 +37,21 @@ export class AgentReasoner {
     const tools = Object.values(TOOL_REGISTRY).map((t) => `- ${t.name}: ${t.description}`);
     const knowledge = context.knowledge.map((k) => k.knowledge).join(" | ") || "(sin knowledge)";
 
+    const historial = context.history.length
+      ? "HISTORIAL del hilo (usa estos datos; NUNCA vuelvas a pedir algo que el cliente YA dio):\n" + context.history.map((m) => `${m.from === "cliente" ? "Cliente" : "Tu"}: ${m.text}`).join("\n")
+      : "(primer mensaje del hilo: puedes saludar una vez)";
     const systemPrompt = [
       `Eres el agente IA de HUB by Raisen. Canal: ${channel}.`,
       `Brand Voice: ${context.brandVoice}`,
       `Catalogo: ${context.catalogContext}`,
       `Knowledge relevante: ${knowledge}`,
-      context.contactProfile ? `Contacto: ${context.contactProfile}. Personaliza el saludo: nuevo=bienvenida calida; recurrente=reconoce que ya hablaron; VIP=trato prioritario.` : "",
+      context.contactProfile ? `Contacto: ${context.contactProfile}. Personaliza el trato (no el saludo): nuevo=bienvenida; recurrente=reconoce que ya hablaron; VIP=trato prioritario.` : "",
+      historial,
+      "Estilo: responde BREVE y directo (2-4 frases), sin parrafos largos.",
+      "Saluda SOLO si es el primer mensaje del hilo; si ya hay historial, continua sin repetir 'buenos dias'.",
+      "Usa los datos del cliente y del historial; continua desde donde quedaron, no reinicies la conversacion.",
       `Tools disponibles: ${tools.join(" ")}`,
-      "Reglas: nunca mentir sobre ser humano; no cobrar sin confirmacion;",
-      "escalar ante queja, urgencia medica o riesgo legal.",
+      "Reglas: nunca mentir sobre ser humano; no cobrar sin confirmacion; escalar ante queja, urgencia medica o riesgo legal.",
     ].filter(Boolean).join("\n");
 
     const llm = await this.provider.completar({

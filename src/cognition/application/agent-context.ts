@@ -7,10 +7,11 @@
 import { Result, ok, err } from "../../shared/domain/result.ts";
 import type { AgentKnowledgeState } from "../domain/agent.service.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
+import type { ThreadMsg } from "./closing-draft.producer.ts";
 
 export interface AgentContext {
   readonly knowledge: readonly AgentKnowledgeState[];
-  readonly history: readonly string[];
+  readonly history: readonly ThreadMsg[]; // turnos previos del hilo (memoria del agente)
   readonly brandVoice: string;       // contexto real del negocio (facts) que usa el agente
   readonly catalogContext: string;   // catalogo/SKU real
   readonly contactProfile?: string | undefined; // B4: nombre + segmento (nuevo/recurrente/VIP) del contacto
@@ -20,7 +21,7 @@ export interface NegocioContext { readonly brandVoice: string; readonly catalogC
 
 export interface AgentContextSource {
   obtenerKnowledge(): Promise<Result<readonly AgentKnowledgeState[], AgentContextError>>;
-  obtenerHistorial(conversationId: string): Promise<Result<readonly string[], AgentContextError>>;
+  obtenerHistorial(conversationId: string): Promise<Result<readonly ThreadMsg[], AgentContextError>>;
   obtenerNegocio(tenantId: string): Promise<Result<NegocioContext, AgentContextError>>;
 }
 
@@ -30,12 +31,12 @@ export class AgentContextService {
   private readonly source: AgentContextSource | null;
   constructor(source?: AgentContextSource) { this.source = source ?? null; }
 
-  async obtener(cmd: NormalizedMessage, tenantId: string): Promise<Result<AgentContext, AgentContextError>> {
+  async obtener(cmd: NormalizedMessage, tenantId: string, conversationId?: string): Promise<Result<AgentContext, AgentContextError>> {
     if (this.source === null) {
-      return ok(Object.freeze({ knowledge: Object.freeze([]), history: Object.freeze([cmd.content]), ...FALLBACK }));
+      return ok(Object.freeze({ knowledge: Object.freeze([]), history: Object.freeze([]), ...FALLBACK }));
     }
     const [k, h, n] = await Promise.all([
-      this.source.obtenerKnowledge(), this.source.obtenerHistorial("todo"), this.source.obtenerNegocio(tenantId),
+      this.source.obtenerKnowledge(), this.source.obtenerHistorial(conversationId ?? ""), this.source.obtenerNegocio(tenantId),
     ]);
     if (!k.ok) return err(k.error);
     if (!h.ok) return err(h.error);

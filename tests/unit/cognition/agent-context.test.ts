@@ -24,5 +24,5 @@ test("ACX-01 con source: usa el contexto REAL del negocio (no placeholder)", asy
 test("ACX-02 sin source: fallback honesto, no bloquea", async () => {
   const r = await new AgentContextService().obtener(cmd, "t1");
   expect(r.ok).toBe(true);
-  if (r.ok) { expect(r.value.brandVoice).toContain("Profesional"); expect(r.value.history).toEqual(["hola"]); }
+  if (r.ok) { expect(r.value.brandVoice).toContain("Profesional"); expect(r.value.history).toEqual([]); }
 });
