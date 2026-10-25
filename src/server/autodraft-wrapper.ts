@@ -22,6 +22,11 @@ import type { ChannelRouter } from "../channels/application/channel.router.ts";
 import type { AgentDraft } from "../cognition/domain/agent-draft.entity.ts";
 import type { ChannelType } from "../shared/domain/types.ts";
 import { getEnv } from "../shared/infrastructure/supabase-rest.helper.ts";
+import { QuoteProposalProducer } from "../cognition/application/quote-proposal.producer.ts";
+import { MaybeQuoteService } from "../cognition/application/maybe-quote.service.ts";
+import { leerCatalogoSku } from "../cognition/infrastructure/sku-catalog.query.ts";
+import { persistirPropuestaCotizacion, hayCotizacionPendiente } from "../cognition/infrastructure/quote-proposal-persist.ts";
+import type { AutodraftEvent } from "../cognition/application/maybe-autodraft.service.ts";
 
 // approved_by es UUID (migr 039, sin FK); "autonomous" NO es UUID -> el PATCH daba 400 y el approve fallaba
 // en silencio -> el draft quedaba en status=draft -> el send daba STATUS_NOT_APPROVED. Nil UUID = aprobador autonomo.
@@ -39,5 +44,10 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
       if (!r.ok) console.error(`[autodraft-send] send FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); else console.error(`[autodraft-send] OK draft=${d.id} to=${to}`);
     },
   } : undefined;
-  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto);
+  let quoteHook: ((ev: AutodraftEvent, opportunity: boolean) => Promise<void>) | undefined;
+  if ((getEnv("QUOTE_PROPOSAL_ENABLED") ?? "") === "true") {
+    const q = new MaybeQuoteService(new QuoteProposalProducer(adapter), leerCatalogoSku, hayCotizacionPendiente, persistirPropuestaCotizacion);
+    quoteHook = (ev, opp) => q.ejecutar(ev, opp);
+  }
+  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, quoteHook);
 }
