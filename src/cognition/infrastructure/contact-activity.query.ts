@@ -15,3 +15,9 @@ export async function draftsPorContacto(contactId: string, tenantId: string): Pr
   const rows = (data ?? []) as Array<{ id: string; created_at: string; status: string; draft_content: string; reason: string; confidence: number; metadata: Record<string, unknown> | null }>;
   return rows.map((r) => ({ id: r.id, createdAt: r.created_at, status: r.status, draftContent: r.draft_content, reason: r.reason, confidence: Number(r.confidence), scope: (r.metadata?.["scope"] as string) ?? null, conclusion: (r.metadata?.["conclusion"] as string) ?? null }));
 }
+
+export async function contactMeta(contactId: string, tenantId: string): Promise<{ notes: unknown[]; temperature: string | null }> {
+  const { data } = await supabase.from("contacts").select("notes, temperature").eq("id", contactId).eq("tenant_id", tenantId).maybeSingle();
+  const r = (data ?? {}) as { notes?: unknown[]; temperature?: string | null };
+  return { notes: Array.isArray(r.notes) ? r.notes : [], temperature: r.temperature ?? null };
+}
