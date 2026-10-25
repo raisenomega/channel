@@ -25,3 +25,10 @@ export async function contextoCorto(tenantId: string): Promise<string> {
   const ctx = await leerContexto(tenantId);
   return buildFacts(ctx).join(" | ").slice(0, 1200) || "(sin contexto)";
 }
+
+export async function bajoTopeDiario(tenantId: string, cap: number): Promise<boolean> {
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const { count } = await supabase.from("agent_drafts").select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId).eq("metadata->>scope", "strategic").gte("created_at", hoy.toISOString());
+  return (count ?? 0) < cap;
+}
