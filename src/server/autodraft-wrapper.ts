@@ -49,7 +49,7 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
     },
   } : undefined;
   const cap = (getEnv("AGENT_CAPTURE_ENABLED") ?? "") === "true" ? new MaybeCaptureService(new ContactDataProducer(adapter), leerHilo, guardarDatosContacto) : null;
-  const q = (getEnv("QUOTE_PROPOSAL_ENABLED") ?? "") === "true" ? new MaybeQuoteService(new QuoteProposalProducer(adapter), leerCatalogoSku, hayCotizacionPendiente, persistirPropuestaCotizacion) : null;
+  const q = (getEnv("QUOTE_PROPOSAL_ENABLED") ?? "") === "true" ? new MaybeQuoteService(new QuoteProposalProducer(adapter), leerCatalogoSku, hayCotizacionPendiente, persistirPropuestaCotizacion, leerHilo) : null;
   const postHook = (cap || q) ? async (ev: AutodraftEvent, opp: boolean): Promise<void> => { if (cap) await cap.ejecutar(ev); if (q) await q.ejecutar(ev, opp); } : undefined;
   return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, postHook);
 }
