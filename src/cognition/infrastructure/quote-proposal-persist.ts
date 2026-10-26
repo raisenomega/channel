@@ -27,6 +27,7 @@ export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuotePr
   // NO guardamos to/channel: firmar = aprobar + crear cotizacion (el front), NO enviar el resumen como texto.
   if (ref.channel) meta["channel"] = ref.channel; // solo informativo (de que red vino)
   if (ref.contactId) meta["contactId"] = ref.contactId;
+  meta["token"] = crypto.randomUUID(); // link publico para el cliente: /q/<token>
   const draft: AgentDraft = {
     id: crypto.randomUUID(), tenantId: ref.tenantId as unknown as TenantId, conversationId: ref.conversationId as unknown as ConversationId,
     contactId: (ref.contactId ?? null) as unknown as ContactId | null, personaSlug: "zahra",
