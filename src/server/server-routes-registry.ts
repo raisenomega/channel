@@ -12,7 +12,7 @@ import { rutaAthMovilConfirm } from "../commerce/presentation/routes/ath-movil-c
 import { rutaStripeWebhook } from "../commerce/presentation/routes/stripe-webhook.routes.ts";
 import { rutaStripeOnboarding } from "../commerce/presentation/routes/stripe-onboarding.routes.ts";
 import { rutaStripePrepare } from "../commerce/presentation/routes/stripe-prepare.routes.ts";
-import { rutaLandingPage } from "../pay/presentation/routes/landing-page.routes.ts"; import { rutaVerCotizacion, rutaDecidirCotizacion } from "../cognition/presentation/public-quote.routes.ts";
+import { rutaLandingPage } from "../pay/presentation/routes/landing-page.routes.ts";
 import { rutaAthCharge } from "../pay/presentation/routes/charge-ath.routes.ts";
 import { rutaAthPoll } from "../pay/presentation/routes/ath-poll.routes.ts";
 import { rutaPagoSuccess, rutaPagoFailed } from "../pay/presentation/routes/pago-result.routes.ts";
@@ -31,7 +31,7 @@ import { rutaCrearTemplate, rutaListarTemplates, rutaPatchTemplate, rutaImportLi
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
-    rutaHealth(), rutaVerCotizacion(), rutaDecidirCotizacion("accepted", "/q/:token/accept"), rutaDecidirCotizacion("rejected", "/q/:token/reject"), rutaMediaProxy(), rutaVictorChat({ chat: new VictorChatHandler(), provider: new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "") }), rutaContextoGet(), rutaContextoPut(), rutaAgentModeGet(), rutaAgentModePut(), rutaAgentConfigGet(), rutaAgentConfigPut(), rutaGenerateDraft({ generate: new GenerateDraftHandler(new AgentContextService(new AgentContextSourceSupabase()), new AgentReasoner(new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "")), new PersistDraftHandler(new AgentDraftsRepository())), conversations: new ConversationRepositorySupabase(), messages: new MessageRepositorySupabase() }), handleWebhook(h),
+    rutaHealth(), rutaMediaProxy(), rutaVictorChat({ chat: new VictorChatHandler(), provider: new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "") }), rutaContextoGet(), rutaContextoPut(), rutaAgentModeGet(), rutaAgentModePut(), rutaAgentConfigGet(), rutaAgentConfigPut(), rutaGenerateDraft({ generate: new GenerateDraftHandler(new AgentContextService(new AgentContextSourceSupabase()), new AgentReasoner(new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "")), new PersistDraftHandler(new AgentDraftsRepository())), conversations: new ConversationRepositorySupabase(), messages: new MessageRepositorySupabase() }), handleWebhook(h),
     handleReceive(h),
     handleSend(h),
     handleQuote(h),
