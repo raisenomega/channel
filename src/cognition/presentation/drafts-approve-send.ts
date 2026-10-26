@@ -33,6 +33,8 @@ export async function aprobarYEnviar(
     return { ok: false, error: { kind: "persistence_error" } };
   }
   const draft = r.value;
+  const qm = draft.metadata as { scope?: string; clientNotifiedAt?: string };
+  if (qm.scope === "quote" && qm.clientNotifiedAt) return { ok: true, draft, sent: true }; // ya enviada al cliente (autonomo)
   const meta = draft.metadata as { to?: string; channel?: string; contactLabel?: string; contactPhone?: string };
   const to = String((body["to"] as string) ?? meta.to ?? meta.contactLabel ?? meta.contactPhone ?? ""); // el autodraft guarda contactLabel (= cliente), no "to"
   const channel = String((body["channel"] as string) ?? meta.channel ?? "");

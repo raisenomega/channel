@@ -10,6 +10,8 @@ import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 import { getEnv } from "../../shared/infrastructure/supabase-rest.helper.ts";
 import type { AutodraftEvent } from "../application/maybe-autodraft.service.ts";
 
+export function linkCotizacion(token: string): string { return `${baseUrl()}/q/${token}`; }
+
 function baseUrl(): string {
   const b = getEnv("PUBLIC_BASE_URL"); if (b) return b.replace(/\/+$/, "");
   const d = getEnv("RAILWAY_PUBLIC_DOMAIN"); return d ? `https://${d}` : "";

@@ -45,7 +45,7 @@ export class AgentReasoner {
       `Catalogo: ${context.catalogContext}`,
       `Knowledge relevante: ${knowledge}`,
       context.contactProfile ? `Contacto: ${context.contactProfile}. Personaliza el trato (no el saludo): nuevo=bienvenida; recurrente=reconoce que ya hablaron; VIP=trato prioritario.` : "",
-      "Estilo: responde BREVE y directo (2-4 frases), sin parrafos largos.",
+      "Estilo: responde BREVE y directo (2-4 frases), sin parrafos largos. Emojis solo muy conservadores (un saludo, una afirmacion simple, un agradecimiento), nunca en parrafos tecnicos ni en exceso.",
       "Saluda SOLO si es el primer mensaje del hilo; si ya hay historial, continua sin repetir 'buenos dias'.",
       "Usa los datos del cliente y del historial; continua desde donde quedaron, no reinicies la conversacion.",
       "No uses herramientas, funciones ni etiquetas tipo <invoke>, <function_calls> o XML: responde SOLO texto normal para el cliente. Si hace falta un humano, dilo en palabras.",
