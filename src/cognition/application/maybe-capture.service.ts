@@ -11,14 +11,16 @@ import type { ExtractedData } from "../domain/contact-data.ts";
 export class MaybeCaptureService {
   constructor(
     private readonly producer: ContactDataProducer,
-    private readonly leerHilo: (conversationId: string) => Promise<readonly ThreadMsg[]>,
+    private readonly leerHilo: (conversationId: string, limite?: number) => Promise<readonly ThreadMsg[]>,
     private readonly guardar: (contactId: string, d: ExtractedData) => Promise<string[]>,
+    private readonly completos: (contactId: string) => Promise<boolean>,
   ) {}
 
   async ejecutar(ev: AutodraftEvent): Promise<void> {
     try {
       if (!ev.contactId || !ev.conversationId) return;
-      const hilo = await this.leerHilo(String(ev.conversationId));
+      if (await this.completos(String(ev.contactId))) return; // ya completo en el DB: lo recuerda, no re-escanea (barato)
+      const hilo = await this.leerHilo(String(ev.conversationId), 500); // mision: completar los 4 datos -> escanea el hilo COMPLETO
       const d = await this.producer.extraer(hilo);
       const llenados = await this.guardar(String(ev.contactId), d);
       if (llenados.length) console.error(`[capture] contacto=${ev.contactId} guardo: ${llenados.join(", ")}`);

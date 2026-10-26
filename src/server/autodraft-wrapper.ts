@@ -50,7 +50,7 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
       if (!r.ok) console.error(`[autodraft-send] send FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); else console.error(`[autodraft-send] OK draft=${d.id} to=${to}`);
     },
   } : undefined;
-  const cap = (getEnv("AGENT_CAPTURE_ENABLED") ?? "") === "true" ? new MaybeCaptureService(new ContactDataProducer(adapter), leerHilo, guardarDatosContacto) : null;
+  const cap = (getEnv("AGENT_CAPTURE_ENABLED") ?? "") === "true" ? new MaybeCaptureService(new ContactDataProducer(adapter), leerHilo, guardarDatosContacto, datosBaseCompletos) : null;
   const q = (getEnv("QUOTE_PROPOSAL_ENABLED") ?? "") === "true" ? new MaybeQuoteService(new QuoteProposalProducer(adapter), leerCatalogoSku, cotizacionPendiente, persistirPropuestaCotizacion, leerHilo, datosBaseCompletos, router ? makeEnviarCotizacion(router) : undefined) : null;
   const postHook = (cap || q) ? async (ev: AutodraftEvent, opp: boolean, mode: string): Promise<void> => { if (cap) await cap.ejecutar(ev); if (q) await q.ejecutar(ev, opp, mode); } : undefined;
   return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, postHook);

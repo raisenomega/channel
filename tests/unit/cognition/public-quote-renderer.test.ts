@@ -8,7 +8,7 @@ import type { DatosCotizacion } from "../../../src/cognition/infrastructure/publ
 const base: DatosCotizacion = {
   quote: { items: [{ description: "Zafacon soterrado", quantity: 5, unitPrice: 100, lineTotal: 500 }], total: 500, conclusion: "5 unidades", decision: null, tenantId: "t", contactId: "c", createdAt: "2026-10-26T00:00:00Z" },
   biz: { name: "Zafacones Ramos", phone: "7871234567", email: "", address: "Bayamon", logoUrl: null, terms: "Valida 30 dias" },
-  cliente: "Jorge", numero: "COT-ABC12345", fecha: "2026-10-26", token: "tok123",
+  cliente: { nombre: "Jorge", telefono: "7871234567", direccion: "Bayamon PR", email: "jorge@mail.com" }, numero: "COT-ABC12345", fecha: "2026-10-26", token: "tok123",
 };
 
 test("PQ-01 documento formal: negocio, numero, cliente, items, total, botones", () => {
@@ -16,6 +16,9 @@ test("PQ-01 documento formal: negocio, numero, cliente, items, total, botones", 
   expect(h).toContain("Zafacones Ramos");
   expect(h).toContain("COT-ABC12345");
   expect(h).toContain("Jorge");
+  expect(h).toContain("7871234567");
+  expect(h).toContain("jorge@mail.com");
+  expect(h).toContain("Bayamon PR");
   expect(h).toContain("Zafacon soterrado");
   expect(h).toContain("$500.00");
   expect(h).toContain('action="/q/tok123/accept"');
