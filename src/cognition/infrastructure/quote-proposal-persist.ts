@@ -10,12 +10,13 @@ import type { AgentDraft } from "../domain/agent-draft.entity.ts";
 import type { TenantId, ConversationId, ContactId } from "../../shared/domain/ids.ts";
 import type { QuoteProposal } from "../domain/quote-proposal.ts";
 import { totales } from "../domain/quote-proposal.ts";
+import { linkCotizacion } from "./cotizacion-sender.ts";
 
 export interface QuoteConvRef { readonly tenantId: string; readonly conversationId: string; readonly contactId: string | null; readonly to?: string; readonly channel?: string; }
 
 const repo = new AgentDraftsRepository();
 
-export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuoteProposal): Promise<void> {
+export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuoteProposal): Promise<string> {
   const now = new Date().toISOString();
   const { subtotal, total } = totales(p.lines);
   const resumen = p.lines.map((l) => `${l.quantity} x ${l.description} = $${(l.quantity * l.unitPrice).toFixed(2)}`).join("\n") + `\n\nTotal: $${total.toFixed(2)}`;
@@ -27,14 +28,18 @@ export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuotePr
   // NO guardamos to/channel: firmar = aprobar + crear cotizacion (el front), NO enviar el resumen como texto.
   if (ref.channel) meta["channel"] = ref.channel; // solo informativo (de que red vino)
   if (ref.contactId) meta["contactId"] = ref.contactId;
+  const token = crypto.randomUUID(); meta["token"] = token; // link publico para el cliente: /q/<token>
+  if (ref.to) meta["to"] = ref.to; // destino para el envio supervisado al aprobar
+  const contenido = resumen + `\n\nRevisa y acepta tu cotizacion aqui:\n${linkCotizacion(token)}`;
   const draft: AgentDraft = {
     id: crypto.randomUUID(), tenantId: ref.tenantId as unknown as TenantId, conversationId: ref.conversationId as unknown as ConversationId,
     contactId: (ref.contactId ?? null) as unknown as ContactId | null, personaSlug: "zahra",
-    inboundMessage: "(propuesta de cotizacion)", draftContent: resumen, confidence: Math.min(1, Math.max(0, Math.round(p.confidence) / 100)),
+    inboundMessage: "(propuesta de cotizacion)", draftContent: contenido, confidence: Math.min(1, Math.max(0, Math.round(p.confidence) / 100)),
     reason: p.conclusion, status: "draft", aiDisclosureIncluded: false, traceId: crypto.randomUUID(), metadata: Object.freeze(meta),
     createdAt: now, updatedAt: now, approvedBy: null, approvedAt: null, rejectedReason: null, sentAt: null, providerMessageId: null, wasCorrect: null, feedbackNote: null,
   };
   await repo.insertar(draft);
+  return token;
 }
 
 // Dedup: ya hay una cotizacion del agente pendiente de firma en esta conversacion?

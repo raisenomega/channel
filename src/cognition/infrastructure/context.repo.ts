@@ -4,6 +4,7 @@
  * del claim. C4 <=75. Sin any.
  */
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
+import { invalidarMemoria } from "./context-memory.query.ts";
 import type { BusinessContext } from "../domain/business-context.ts";
 
 const TENANT_COLS = "industry, brand_services, brand_target_audience, brand_tone, brand_mission, operation_hours, expected_response_sla";
@@ -43,4 +44,5 @@ export async function guardarContexto(tenantId: string, p: BusinessContext): Pro
     routing_criteria: p.routingCriteria ?? null, escalation_triggers: p.escalationTriggers ?? null,
     high_risk_cases: p.highRiskCases ?? null, never_automate: p.neverAutomate ?? null, doubt_threshold: p.doubtThreshold ?? null, faq: p.faq ?? null,
   }, { onConflict: "tenant_id" });
+  await invalidarMemoria(tenantId); // el agente relee el contexto actualizado en el proximo mensaje
 }
