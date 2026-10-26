@@ -6,8 +6,7 @@ import type { RouteDefinition } from "../../server/server-types.ts";
 import { requireTenantAuth, jsonResponse } from "../../server/auth-helpers.ts";
 import type { AIProvider } from "../domain/ai-provider.ts";
 import type { VictorChatHandler } from "../application/victor-chat.handler.ts";
-import { leerContexto } from "../infrastructure/context.repo.ts";
-import { buildFacts } from "../domain/business-facts.ts";
+import { contextoMemorizado } from "../infrastructure/context-reader.ts";
 import { leerPlatformContext } from "../infrastructure/platform-context.repo.ts";
 import { buildPlatformFacts } from "../domain/platform-context.ts";
 
@@ -25,8 +24,8 @@ export function rutaVictorChat(deps: VictorChatDeps): RouteDefinition {
       const body = (ctx.body ?? {}) as { message?: string };
       const message = String(body.message ?? "").trim();
       if (!message) return jsonResponse(400, { ok: false, error: { kind: "mensaje_vacio" } });
-      const [biz, plat] = await Promise.all([leerContexto(auth.value.tenantId), leerPlatformContext(auth.value.tenantId)]);
-      const facts = [...buildFacts(biz), ...buildPlatformFacts(plat)]; // negocio (B) + plataforma (B2/B3)
+      const [neg, plat] = await Promise.all([contextoMemorizado(auth.value.tenantId), leerPlatformContext(auth.value.tenantId)]);
+      const facts = [neg.brandVoice, neg.catalogContext, ...buildPlatformFacts(plat)]; // negocio MEMORIZADO + plataforma fresca (canales/humanos)
       const r = await deps.chat.ejecutar(deps.provider, message, facts);
       if (!r.ok) return jsonResponse(502, { ok: false, error: r.error });
       return jsonResponse(200, { ok: true, reply: r.value.reply, model: r.value.model });
