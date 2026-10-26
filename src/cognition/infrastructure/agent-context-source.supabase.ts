@@ -10,6 +10,7 @@ import { leerContexto } from "./context.repo.ts";
 import { buildFacts } from "../domain/business-facts.ts";
 import { leerPlatformContext } from "./platform-context.repo.ts";
 import { leerHilo } from "./strategic-queries.ts";
+import { leerMemoria, memoriaVencida, guardarMemoria } from "./context-memory.query.ts";
 import type { ThreadMsg } from "../application/closing-draft.producer.ts";
 
 export class AgentContextSourceSupabase implements AgentContextSource {
@@ -21,10 +22,13 @@ export class AgentContextSourceSupabase implements AgentContextSource {
     return ok(Object.freeze(await leerHilo(conversationId))); // hilo real: el agente recuerda lo ya dicho
   }
   async obtenerNegocio(tenantId: string): Promise<Result<NegocioContext, AgentContextError>> {
+    const mem = await leerMemoria(tenantId); // LEY: lee el contexto una vez y lo reusa (refresca a los 15 dias)
+    if (mem && !memoriaVencida(mem.refreshedAt)) return ok({ brandVoice: mem.brandVoice, catalogContext: mem.catalogContext });
     const facts = buildFacts(await leerContexto(tenantId));
     const plat = await leerPlatformContext(tenantId);
     const brandVoice = facts.length ? facts.join(" | ") : "(contexto del negocio aun vacio)"; // LEY HUB: contexto COMPLETO byte a byte (sin cap); el prompt caching lo mantiene barato
     const catalogContext = plat.catalog.length ? plat.catalog.join("; ") : "(catalogo vacio)";
+    await guardarMemoria(tenantId, brandVoice, catalogContext); // guarda en memoria byte a byte
     return ok({ brandVoice, catalogContext });
   }
 }
