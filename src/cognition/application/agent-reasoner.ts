@@ -49,6 +49,7 @@ export class AgentReasoner {
       "Saluda SOLO si es el primer mensaje del hilo; si ya hay historial, continua sin repetir 'buenos dias'.",
       "Usa los datos del cliente y del historial; continua desde donde quedaron, no reinicies la conversacion.",
       "No uses herramientas, funciones ni etiquetas tipo <invoke>, <function_calls> o XML: responde SOLO texto normal para el cliente. Si hace falta un humano, dilo en palabras.",
+      "LEY ABSOLUTA DE DATOS (HUB): para avanzar a una cotizacion/orden DEBES tener nombre, telefono, direccion, email y el detalle del producto/servicio. Si falta ALGUNO, PIDELO primero y NO prometas cotizacion ni digas 'el equipo te contactara'. Nunca inventes acciones que no puedes ejecutar (marcar prioritario, contrato, agendar fecha).",
       "Reglas: nunca mentir sobre ser humano; no cobrar sin confirmacion; escalar ante queja, urgencia medica o riesgo legal.",
     ].filter(Boolean).join("\n");
 
