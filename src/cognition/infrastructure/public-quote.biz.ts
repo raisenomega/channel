@@ -6,7 +6,8 @@ import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 import { leerCotizacionPorToken, type PublicQuote } from "./public-quote.query.ts";
 
 export interface DocNegocio { name: string; phone: string; email: string; address: string; logoUrl: string | null; terms: string; }
-export interface DatosCotizacion { quote: PublicQuote; biz: DocNegocio; cliente: string; numero: string; fecha: string; token: string; }
+export interface DatosCliente { nombre: string; telefono: string; direccion: string; email: string; }
+export interface DatosCotizacion { quote: PublicQuote; biz: DocNegocio; cliente: DatosCliente; numero: string; fecha: string; token: string; }
 
 async function negocioParaDoc(tenantId: string): Promise<DocNegocio> {
   const { data } = await supabase.from("tenants").select("name, phone, street, city, region, postal_code, branding_config").eq("id", tenantId).maybeSingle();
@@ -17,15 +18,18 @@ async function negocioParaDoc(tenantId: string): Promise<DocNegocio> {
   return { name: co.name || r.name || "Cotizacion", phone: co.phone || r.phone || "", email: co.email || "", address: co.address || addr, logoUrl: b.logo_url ?? null, terms: b.pdf_terms ?? "" };
 }
 
-async function nombreCliente(contactId: string | null): Promise<string> {
-  if (!contactId) return "";
-  const { data } = await supabase.from("contacts").select("display_name").eq("id", contactId).maybeSingle();
-  return (data as { display_name?: string } | null)?.display_name ?? "";
+async function datosCliente(contactId: string | null): Promise<DatosCliente> {
+  const vacio = { nombre: "", telefono: "", direccion: "", email: "" };
+  if (!contactId) return vacio;
+  const { data } = await supabase.from("contacts").select("display_name, primary_phone, address, primary_email").eq("id", contactId).maybeSingle();
+  if (!data) return vacio;
+  const c = data as { display_name?: string; primary_phone?: string; address?: string; primary_email?: string };
+  return { nombre: c.display_name ?? "", telefono: c.primary_phone ?? "", direccion: c.address ?? "", email: c.primary_email ?? "" };
 }
 
 export async function datosCotizacion(token: string): Promise<DatosCotizacion | null> {
   const quote = await leerCotizacionPorToken(token);
   if (!quote) return null;
-  const [biz, cliente] = await Promise.all([negocioParaDoc(quote.tenantId), nombreCliente(quote.contactId)]);
+  const [biz, cliente] = await Promise.all([negocioParaDoc(quote.tenantId), datosCliente(quote.contactId)]);
   return { quote, biz, cliente, numero: "COT-" + token.slice(0, 8).toUpperCase(), fecha: quote.createdAt.slice(0, 10), token };
 }
