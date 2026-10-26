@@ -18,6 +18,7 @@ export class MaybeQuoteService {
     private readonly hayPendiente: (conversationId: string) => Promise<boolean>,
     private readonly persistir: (ref: QuoteConvRef, p: QuoteProposal) => Promise<void>,
     private readonly leerHilo: (conversationId: string) => Promise<readonly ThreadMsg[]>,
+    private readonly datosCompletos: (contactId: string) => Promise<boolean>,
   ) {}
 
   async ejecutar(ev: AutodraftEvent, opportunity: boolean): Promise<void> {
@@ -25,6 +26,7 @@ export class MaybeQuoteService {
       if (!ev.conversationId || !ev.contactId) return;
       if (!opportunity && !QUOTE_RE.test(ev.content)) return; // compra detectada O pide cotizar (follow-ups)
       if (await this.hayPendiente(String(ev.conversationId))) return; // ya hay una pendiente de firma
+      if (!(await this.datosCompletos(String(ev.contactId)))) { console.error(`[quote] LEY ABSOLUTA: datos base incompletos conv=${ev.conversationId}, no se crea cotizacion`); return; }
       const catalogo = await this.leerCatalogo(ev.tenantId);
       if (catalogo.length === 0) return;
       const hilo = await this.leerHilo(String(ev.conversationId));

@@ -26,7 +26,7 @@ function staticPrompt(): string { // ESTATICO -> se cachea (persona/directorio/c
 
 function ctxPrompt(facts: readonly string[]): string { // dinamico (cap 4k: evita el 502/lentitud)
   return facts.length
-    ? `Contexto del negocio (de la pagina Contexto): ${facts.join(" | ").slice(0, 4000)}`
+    ? `Contexto del negocio (de la pagina Contexto): ${facts.join(" | ")}` // LEY HUB: contexto COMPLETO (sin cap); caching + aviso amable en 502 como red
     : "Contexto del negocio: aun vacio. Pide al dueno que llene la pagina Contexto; no inventes datos.";
 }
 

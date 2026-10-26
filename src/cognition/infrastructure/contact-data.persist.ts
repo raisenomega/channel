@@ -17,7 +17,7 @@ export async function guardarDatosContacto(contactId: string, d: ExtractedData):
   if (d.phone && !c.primary_phone) patch["primary_phone"] = d.phone;
   if (d.email && !c.primary_email) patch["primary_email"] = d.email;
   if (d.address && !c.address) patch["address"] = d.address;
-  if (d.product && !c.product_interest) patch["product_interest"] = d.product;
+  if (d.product && d.product.length > (c.product_interest?.length ?? 0)) patch["product_interest"] = d.product; // enriquece: "Una instalacion" -> "5 zafacones soterrados, tierra seca, Club Ramos"
   const keys = Object.keys(patch);
   if (keys.length === 0) return [];
   patch["updated_at"] = new Date().toISOString();

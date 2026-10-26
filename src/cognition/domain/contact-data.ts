@@ -24,5 +24,13 @@ export function parseExtracted(raw: string): ExtractedData {
   return out;
 }
 
-function str(x: unknown): string { return typeof x === "string" ? x.trim() : ""; }
+function str(x: unknown): string { return typeof x === "string" ? fixMojibake(x.trim()) : ""; }
+
+export function fixMojibake(s: string): string {
+  // Repara doble-codificacion UTF-8 (ej. "orquÃ­dea" -> "orquídea"). Solo si hay patron y todo es Latin-1.
+  if (!/[ÃÂ][-¿­]/.test(s)) return s;
+  if ([...s].some((ch) => ch.charCodeAt(0) > 0xff)) return s; // mezcla con unicode real: no tocar
+  try { return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from([...s], (ch) => ch.charCodeAt(0))); }
+  catch { return s; } // si no es UTF-8 valido, dejalo igual
+}
 function extractJson(s: string): string { const a = s.indexOf("{"); const b = s.lastIndexOf("}"); return a >= 0 && b > a ? s.slice(a, b + 1) : s; }
