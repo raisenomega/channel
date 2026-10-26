@@ -1,6 +1,7 @@
 /**
- * HUB by Raisen — Envia la cotizacion al cliente por su MISMO canal (resumen + link /q/<token>) y marca la
- * fila como notificada. Resuelve los refs del proveedor desde la conversacion. Fail-safe (nunca rompe). C4 <=75.
+ * HUB by Raisen — Envia la cotizacion al cliente por su MISMO canal: crea la cotizacion REAL (plantilla
+ * oficial) + mintea el token + envia el link /q/<token> del FRONTEND. Resuelve refs del proveedor.
+ * Fail-safe (nunca rompe). Link base = PUBLIC_APP_URL (default channel-one-snowy.vercel.app). C4 <=75.
  */
 import type { ChannelRouter } from "../../channels/application/channel.router.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
@@ -9,29 +10,31 @@ import { ConversationRepositorySupabase } from "../../inbox/infrastructure/conve
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 import { getEnv } from "../../shared/infrastructure/supabase-rest.helper.ts";
 import type { AutodraftEvent } from "../application/maybe-autodraft.service.ts";
+import { crearCotizacionOficial, type QuoteItem } from "./crear-cotizacion-oficial.ts";
 
-export function linkCotizacion(token: string): string { return `${baseUrl()}/q/${token}`; }
+function appUrl(): string { return (getEnv("PUBLIC_APP_URL") ?? "https://channel-one-snowy.vercel.app").replace(/\/+$/, ""); }
 
-function baseUrl(): string {
-  const b = getEnv("PUBLIC_BASE_URL"); if (b) return b.replace(/\/+$/, "");
-  const d = getEnv("RAILWAY_PUBLIC_DOMAIN"); return d ? `https://${d}` : "";
+async function datosCliente(contactId: string): Promise<{ nombre: string; telefono: string; email: string; direccion: string }> {
+  const { data } = await supabase.from("contacts").select("display_name, primary_phone, primary_email, address").eq("id", contactId).maybeSingle();
+  const c = (data ?? {}) as { display_name?: string; primary_phone?: string; primary_email?: string; address?: string };
+  return { nombre: c.display_name ?? "", telefono: c.primary_phone ?? "", email: c.primary_email ?? "", direccion: c.address ?? "" };
 }
 
-export function makeEnviarCotizacion(router: ChannelRouter): (ev: AutodraftEvent, resumen: string, token: string) => Promise<void> {
+export type EnviarCotizacion = (ev: AutodraftEvent, items: readonly QuoteItem[], subtotal: number, total: number, service: string) => Promise<void>;
+
+export function makeEnviarCotizacion(router: ChannelRouter): EnviarCotizacion {
   const convs = new ConversationRepositorySupabase();
-  return async (ev, resumen, token) => {
+  return async (ev, items, subtotal, total, service) => {
     try {
-      let cid: string | undefined; let aid: string | undefined;
-      if (ev.conversationId) {
-        const c = await convs.buscar(ev.conversationId as ConversationId);
-        if (c.ok && c.value) { cid = c.value.providerConversationId ?? undefined; aid = c.value.providerAccountId ?? undefined; }
-      }
-      const content = `${resumen}\n\nRevisa y acepta tu cotizacion aqui:\n${baseUrl()}/q/${token}`;
-      const r = await router.enviar({ to: ev.from, content, channel: ev.channel as ChannelType, ...(cid ? { conversationId: cid } : {}), ...(aid ? { accountId: aid } : {}) });
-      if (!r.ok) { console.error(`[quote-send] FALLO token=${token}`, r.error); return; }
-      const { data } = await supabase.from("agent_drafts").select("id, metadata").eq("metadata->>token", token).maybeSingle();
-      if (data) { const row = data as { id: string; metadata?: Record<string, unknown> }; await supabase.from("agent_drafts").update({ metadata: { ...(row.metadata ?? {}), clientNotifiedAt: new Date().toISOString() } }).eq("id", row.id); }
-      console.error(`[quote-send] OK token=${token} to=${ev.from} ch=${ev.channel}`);
-    } catch (e) { console.error(`[quote-send] ERROR`, e instanceof Error ? e.message : e); }
+      if (!ev.contactId) return;
+      const cli = await datosCliente(String(ev.contactId));
+      const token = await crearCotizacionOficial({ tenantId: ev.tenantId, contactId: String(ev.contactId), cliente: cli, items, subtotal, total, service });
+      if (!token) { console.error("[quote-send] no se creo la cotizacion oficial"); return; }
+      const refs: { conversationId?: string; accountId?: string } = {};
+      if (ev.conversationId) { const c = await convs.buscar(ev.conversationId as ConversationId); if (c.ok && c.value) { if (c.value.providerConversationId) refs.conversationId = c.value.providerConversationId; if (c.value.providerAccountId) refs.accountId = c.value.providerAccountId; } }
+      const content = `Tu cotizacion por $${total.toFixed(2)}. Revisa y acepta aqui:\n${appUrl()}/q/${token}`;
+      const r = await router.enviar({ to: ev.from, content, channel: ev.channel as ChannelType, ...refs });
+      if (!r.ok) console.error("[quote-send] FALLO envio", r.error); else console.error(`[quote-send] OK token=${token} to=${ev.from} ch=${ev.channel}`);
+    } catch (e) { console.error("[quote-send] ERROR", e instanceof Error ? e.message : e); }
   };
 }
