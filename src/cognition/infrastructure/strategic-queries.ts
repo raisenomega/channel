@@ -10,7 +10,7 @@ import type { ThreadMsg } from "../application/closing-draft.producer.ts";
 export async function leerHilo(convId: string): Promise<readonly ThreadMsg[]> {
   // Los 40 mensajes MAS RECIENTES (desc + reverse). Antes era ascending+limit -> traia los MAS VIEJOS, por
   // eso el agente "olvidaba" en hilos largos (ej. 332 msgs): nunca veia donde el cliente dio los datos.
-  const { data } = await supabase.from("messages").select("direction, content, created_at").eq("conversation_id", convId).order("created_at", { ascending: false }).limit(40);
+  const { data } = await supabase.from("messages").select("direction, content, created_at").eq("conversation_id", convId).order("created_at", { ascending: false }).limit(20); // 20 recientes: memoria suficiente + menos tokens de entrada
   const rows = (data ?? []) as Array<{ direction: string; content: string | null }>;
   const turnos = rows
     .map((r) => ({ from: (r.direction === "inbound" ? "cliente" : "negocio") as "cliente" | "negocio", text: (r.content ?? "").slice(0, 500) }))
