@@ -10,9 +10,9 @@ const SEG: Record<string, string> = {
 };
 
 export async function perfilContacto(contactId: string): Promise<string | null> {
-  const { data } = await supabase.from("contacts").select("display_name, segment, total_orders, primary_phone, primary_email, address").eq("id", contactId).maybeSingle();
+  const { data } = await supabase.from("contacts").select("display_name, segment, total_orders, primary_phone, primary_email, address, product_interest").eq("id", contactId).maybeSingle();
   if (!data) return null;
-  const r = data as { display_name?: string | null; segment?: string | null; total_orders?: number | null; primary_phone?: string | null; primary_email?: string | null; address?: string | null };
+  const r = data as { display_name?: string | null; segment?: string | null; total_orders?: number | null; primary_phone?: string | null; primary_email?: string | null; address?: string | null; product_interest?: string | null };
   const partes: string[] = [];
   if (r.display_name) partes.push(r.display_name);
   if (r.segment) partes.push(SEG[r.segment] ?? r.segment);
@@ -22,5 +22,12 @@ export async function perfilContacto(contactId: string): Promise<string | null> 
   if (r.primary_email) archivo.push(`email ${r.primary_email}`);
   if (r.address) archivo.push(`direccion ${r.address}`);
   if (archivo.length) partes.push(`DATOS EN ARCHIVO (ya los tienes, NO los vuelvas a pedir): ${archivo.join(", ")}`);
+  const faltan: string[] = [];
+  if (!r.display_name) faltan.push("nombre");
+  if (!r.primary_phone) faltan.push("telefono");
+  if (!r.primary_email) faltan.push("email");
+  if (!r.address) faltan.push("direccion");
+  if (!r.product_interest) faltan.push("que producto/servicio quiere");
+  if (faltan.length) partes.push(`FALTAN para cotizar (PIDELOS puntualmente uno a uno; NUNCA digas que no puedes generar la cotizacion): ${faltan.join(", ")}`);
   return partes.length ? partes.join(" | ") : null;
 }

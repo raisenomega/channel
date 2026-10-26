@@ -10,7 +10,9 @@ import { parseExtracted, detectarEmailPhone, type ExtractedData } from "../domai
 const PROMPT = [
   "Lee el HILO y extrae SOLO los datos que el CLIENTE dio EXPLICITAMENTE sobre si mismo. NO inventes, NO",
   "deduzcas, NO asumas. Si un dato no fue dado por el cliente de forma explicita, OMITE ese campo.",
-  "Campos posibles: name (su nombre), phone (telefono), email, address (direccion fisica), product (TODO el",
+  "Campos posibles: name (su nombre), phone (telefono), email, address (direccion fisica COMPLETA: calle, numero,",
+  "urbanizacion/sector, municipio, centro comercial, barrio - extrae CUALQUIER ubicacion fisica, aunque venga",
+  "junta con otros datos en el mismo mensaje), product (TODO el",
   "detalle del producto/servicio: tipo, cantidad, variante y extras que menciono, lo mas completo del hilo).",
   "Responde SOLO JSON valido, incluyendo unicamente los campos dados por el cliente:",
   '{"name":string,"phone":string,"email":string,"address":string,"product":string}',
