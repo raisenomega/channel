@@ -4,8 +4,9 @@
  */
 import type { RouteDefinition, HttpResponse, RequestContext } from "../../server/server-types.ts";
 import { RateLimiter } from "../../pay/infrastructure/rate-limit.ts";
-import { leerCotizacionPorToken, decidirCotizacion } from "../infrastructure/public-quote.query.ts";
-import { renderQuotePage, pageSimple } from "./public-quote.renderer.ts";
+import { decidirCotizacion } from "../infrastructure/public-quote.query.ts";
+import { datosCotizacion } from "../infrastructure/public-quote.biz.ts";
+import { renderQuoteDoc, pageSimple } from "./public-quote.renderer.ts";
 // PUBLIC: cotizacion por token para el cliente final (ver/aceptar/rechazar); sin JWT por diseno, el token uuid es la credencial.
 
 const CSP = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'";
@@ -21,8 +22,8 @@ async function limitado(ctx: RequestContext, path: string): Promise<boolean> {
 export function rutaVerCotizacion(): RouteDefinition {
   return { method: "GET", path: "/q/:token", handler: async (ctx) => {
     if (await limitado(ctx, "/q/view")) return html(429, pageSimple("Demasiadas solicitudes. Intenta en un minuto."));
-    const q = await leerCotizacionPorToken(tokenDe(ctx.path));
-    return q ? html(200, renderQuotePage(tokenDe(ctx.path), q)) : html(404, pageSimple("No encontramos esta cotizacion."));
+    const d = await datosCotizacion(tokenDe(ctx.path));
+    return d ? html(200, renderQuoteDoc(d)) : html(404, pageSimple("No encontramos esta cotizacion."));
   } };
 }
 
@@ -31,7 +32,7 @@ export function rutaDecidirCotizacion(decision: "accepted" | "rejected", path: s
     if (await limitado(ctx, path)) return html(429, pageSimple("Demasiadas solicitudes. Intenta en un minuto."));
     const token = tokenDe(ctx.path);
     if (!(await decidirCotizacion(token, decision))) return html(404, pageSimple("No encontramos esta cotizacion."));
-    const q = await leerCotizacionPorToken(token);
-    return q ? html(200, renderQuotePage(token, q)) : html(200, pageSimple("Listo."));
+    const d = await datosCotizacion(token);
+    return d ? html(200, renderQuoteDoc(d)) : html(200, pageSimple("Listo."));
   } };
 }
