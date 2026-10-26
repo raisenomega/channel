@@ -15,7 +15,7 @@ export interface QuoteConvRef { readonly tenantId: string; readonly conversation
 
 const repo = new AgentDraftsRepository();
 
-export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuoteProposal): Promise<void> {
+export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuoteProposal): Promise<string> {
   const now = new Date().toISOString();
   const { subtotal, total } = totales(p.lines);
   const resumen = p.lines.map((l) => `${l.quantity} x ${l.description} = $${(l.quantity * l.unitPrice).toFixed(2)}`).join("\n") + `\n\nTotal: $${total.toFixed(2)}`;
@@ -27,7 +27,7 @@ export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuotePr
   // NO guardamos to/channel: firmar = aprobar + crear cotizacion (el front), NO enviar el resumen como texto.
   if (ref.channel) meta["channel"] = ref.channel; // solo informativo (de que red vino)
   if (ref.contactId) meta["contactId"] = ref.contactId;
-  meta["token"] = crypto.randomUUID(); // link publico para el cliente: /q/<token>
+  const token = crypto.randomUUID(); meta["token"] = token; // link publico para el cliente: /q/<token>
   const draft: AgentDraft = {
     id: crypto.randomUUID(), tenantId: ref.tenantId as unknown as TenantId, conversationId: ref.conversationId as unknown as ConversationId,
     contactId: (ref.contactId ?? null) as unknown as ContactId | null, personaSlug: "zahra",
@@ -36,6 +36,7 @@ export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuotePr
     createdAt: now, updatedAt: now, approvedBy: null, approvedAt: null, rejectedReason: null, sentAt: null, providerMessageId: null, wasCorrect: null, feedbackNote: null,
   };
   await repo.insertar(draft);
+  return token;
 }
 
 // Dedup: ya hay una cotizacion del agente pendiente de firma en esta conversacion?

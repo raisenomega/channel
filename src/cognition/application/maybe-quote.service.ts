@@ -7,6 +7,7 @@ import type { AutodraftEvent } from "./maybe-autodraft.service.ts";
 import type { QuoteProposalProducer } from "./quote-proposal.producer.ts";
 import type { ThreadMsg } from "./closing-draft.producer.ts";
 import type { CatalogItem, QuoteProposal } from "../domain/quote-proposal.ts";
+import { totales } from "../domain/quote-proposal.ts";
 import type { QuoteConvRef } from "../infrastructure/quote-proposal-persist.ts";
 
 const QUOTE_RE = /cotiz|presupuest|precio|cu[aá]nto|cr[eé]a|h[aá]zla|h[aá]gala|comprar|orden|quiero/i;
@@ -16,12 +17,13 @@ export class MaybeQuoteService {
     private readonly producer: QuoteProposalProducer,
     private readonly leerCatalogo: (tenantId: string) => Promise<CatalogItem[]>,
     private readonly hayPendiente: (conversationId: string) => Promise<boolean>,
-    private readonly persistir: (ref: QuoteConvRef, p: QuoteProposal) => Promise<void>,
+    private readonly persistir: (ref: QuoteConvRef, p: QuoteProposal) => Promise<string>,
     private readonly leerHilo: (conversationId: string) => Promise<readonly ThreadMsg[]>,
     private readonly datosCompletos: (contactId: string) => Promise<boolean>,
+    private readonly enviar?: (ev: AutodraftEvent, resumen: string, token: string) => Promise<void>,
   ) {}
 
-  async ejecutar(ev: AutodraftEvent, opportunity: boolean): Promise<void> {
+  async ejecutar(ev: AutodraftEvent, opportunity: boolean, mode?: string): Promise<void> {
     try {
       if (!ev.conversationId || !ev.contactId) return;
       if (!opportunity && !QUOTE_RE.test(ev.content)) return; // compra detectada O pide cotizar (follow-ups)
@@ -33,8 +35,12 @@ export class MaybeQuoteService {
       const thread = hilo.length ? hilo : [{ from: "cliente" as const, text: ev.content }];
       const prop = await this.producer.producir(thread, catalogo, ev.contactName ?? "");
       if (!prop.ok || !prop.value.worth) { console.error(`[quote] no-worth conv=${ev.conversationId}`); return; }
-      await this.persistir({ tenantId: ev.tenantId, conversationId: String(ev.conversationId), contactId: String(ev.contactId), to: ev.from, channel: ev.channel }, prop.value);
+      const token = await this.persistir({ tenantId: ev.tenantId, conversationId: String(ev.conversationId), contactId: String(ev.contactId), to: ev.from, channel: ev.channel }, prop.value);
       console.error(`[quote] propuesta conv=${ev.conversationId} lineas=${prop.value.lines.length}`);
+      if (mode === "autonomous" && this.enviar) { // LEY: en autonomo el cliente recibe resumen + link por su canal
+        const resumen = prop.value.lines.map((l) => `${l.quantity} x ${l.description} = $${(l.quantity * l.unitPrice).toFixed(2)}`).join("\n") + `\n\nTotal: $${totales(prop.value.lines).total.toFixed(2)}`;
+        await this.enviar(ev, resumen, token);
+      }
     } catch (e) { console.error(`[quote] ERROR`, e instanceof Error ? e.message : e); }
   }
 }

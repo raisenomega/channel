@@ -37,7 +37,7 @@ export class MaybeAutodraftService {
     private readonly counter?: SentCounterPort,
     private readonly perfilContacto?: (contactId: string) => Promise<string | null>,
     private readonly calificar?: (contactId: string, opportunity: boolean) => Promise<string | null>,
-    private readonly postHook?: (ev: AutodraftEvent, opportunity: boolean) => Promise<void>, // captura datos + cotizacion
+    private readonly postHook?: (ev: AutodraftEvent, opportunity: boolean, mode: string) => Promise<void>, // captura datos + cotizacion
   ) {}
 
   async ejecutar(ev: AutodraftEvent): Promise<void> {
@@ -48,7 +48,7 @@ export class MaybeAutodraftService {
       if (mode === "off") return;
       const intent = await this.classifier.clasificar(ev.content);
       if (ev.contactId && this.calificar) { const subio = await this.calificar(String(ev.contactId), intent.opportunity); if (subio) console.error(`[qualify] contacto=${ev.contactId} -> ${subio}`); }
-      if (this.postHook) await this.postHook(ev, intent.opportunity); // captura de datos + propuesta de cotizacion (gated, no bloquea)
+      if (this.postHook) await this.postHook(ev, intent.opportunity, mode); // captura de datos + propuesta de cotizacion (gated, no bloquea)
       const sentToday = mode === "autonomous" && this.counter ? await this.counter.contar(ev.tenantId) : 0;
       const complaint = intent.persona === "angel" || intent.kind === "queja";
       const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };
