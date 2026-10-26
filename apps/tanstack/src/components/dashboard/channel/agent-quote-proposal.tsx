@@ -16,6 +16,7 @@ export function AgentQuoteProposal({ lang, draft, busy, onOpen, onAccept, onReje
         <span className="truncate">{t(lang, "dr.quote")} · {t(lang, "dr.quoteByAgent")}</span>
         {typeof draft.quoteTotal === "number" ? <span className="shrink-0">${draft.quoteTotal.toFixed(2)}</span> : null}
       </div>
+      {draft.clientDecision ? <span className="text-[10px] font-bold" style={{ color: draft.clientDecision === "accepted" ? "hsl(145 55% 42%)" : "hsl(0 72% 55%)" }}>{draft.clientDecision === "accepted" ? t(lang, "dr.clientAccepted") : t(lang, "dr.clientRejected")}</span> : null}
       {draft.conclusion ? <p className="line-clamp-2 text-[11px] text-muted-foreground">{draft.conclusion}</p> : null}
       {(draft.quoteItems ?? []).slice(0, 3).map((l, i) => <p key={i} className="truncate text-xs text-foreground">{l.quantity} x {l.description}</p>)}
       <span className="text-[10px] font-semibold text-muted-foreground">{t(lang, "dr.readMore")}</span>
