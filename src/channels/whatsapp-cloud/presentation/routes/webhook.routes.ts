@@ -11,16 +11,17 @@ import { parsearPayloadMeta } from "../../infrastructure/webhook-payload.parser.
 import { SupabaseMessageRepo } from "../../infrastructure/supabase-message.repo.ts";
 import { ReceiveMessageHandler } from "../../application/receive-message.handler.ts";
 import { SupabaseMetaSignupFacade } from "../../../meta/infrastructure/meta-signup-facade.ts";
+import { ejecutarRobusto } from "../../../../server/autodraft-robusto.ts"; import type { MaybeAutodraftService } from "../../../../cognition/application/maybe-autodraft.service.ts";
 
 declare const process: { env: Record<string, string | undefined> };
 
 type AdEv = { tenantId: string; conversationId?: string | null; contactId?: string | null; channel: string; from: string; content: string; contactName?: string; contactPhone?: string };
 const repo = new SupabaseMessageRepo();
 // S6: autodraft cargado dinamicamente al 1er mensaje (no al importar -> no arrastra supabase client en tests).
-let adLazy: Promise<{ ejecutar: (ev: AdEv) => Promise<void> }> | null = null;
+let adLazy: Promise<MaybeAutodraftService> | null = null;
 const receiveHandler = new ReceiveMessageHandler(repo, undefined, (ev: AdEv) => {
   adLazy ??= import("../../../../server/autodraft-wrapper.ts").then((m) => m.buildAutodraft());
-  void adLazy.then((a) => a.ejecutar(ev)).catch(() => undefined);
+  void adLazy.then((a) => ejecutarRobusto(a, ev)).catch(() => undefined);
 });
 const signupLookup = new SupabaseMetaSignupFacade();
 
