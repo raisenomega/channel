@@ -3,8 +3,7 @@
  * estado de seguimiento (cuantos borradores estrategicos + el ultimo) y contexto corto del negocio. C4 <=75.
  */
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
-import { leerContexto } from "./context.repo.ts";
-import { buildFacts } from "../domain/business-facts.ts";
+import { contextoMemorizado } from "./context-reader.ts";
 import type { ThreadMsg } from "../application/closing-draft.producer.ts";
 
 export async function leerHilo(convId: string): Promise<readonly ThreadMsg[]> {
@@ -25,8 +24,7 @@ export async function estadoSeguimiento(convId: string): Promise<{ intentos: num
 }
 
 export async function contextoCorto(tenantId: string): Promise<string> {
-  const ctx = await leerContexto(tenantId);
-  return buildFacts(ctx).join(" | ").slice(0, 1200) || "(sin contexto)";
+  return (await contextoMemorizado(tenantId)).brandVoice || "(sin contexto)"; // Sistema B: contexto COMPLETO byte a byte + memoria (sin tope)
 }
 
 export async function bajoTopeDiario(tenantId: string, cap: number): Promise<boolean> {
