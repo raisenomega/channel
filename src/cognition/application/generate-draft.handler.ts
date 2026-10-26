@@ -13,6 +13,7 @@ import type { AgentDraft } from "../domain/agent-draft.entity.ts";
 import type { TenantId, ConversationId, ContactId } from "../../shared/domain/ids.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
+import { RESPONSE_TIER } from "../domain/routing-table.ts";
 
 export type GenerateDraftError =
   | { readonly kind: "ethics_violation" }
@@ -47,7 +48,7 @@ export class GenerateDraftHandler {
     if (!ethics.ok) return err({ kind: "ethics_violation" });
     const contexto = await this.ctx.obtener(cmd.normalizedMessage, cmd.tenantId, cmd.conversationId ? String(cmd.conversationId) : undefined);
     if (!contexto.ok) return err({ kind: "context_failed", cause: contexto.error.cause });
-    const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, { ...contexto.value, contactProfile: cmd.contactProfile });
+    const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, { ...contexto.value, contactProfile: cmd.contactProfile, tier: RESPONSE_TIER[cmd.personaSlug] ?? "sonnet" });
     if (!razonado.ok) return err({ kind: "llm_failure", cause: razonado.error.cause });
     const d = await this.persist.ejecutar({
       tenantId: cmd.tenantId, conversationId: cmd.conversationId ?? null, contactId: cmd.contactId ?? null,

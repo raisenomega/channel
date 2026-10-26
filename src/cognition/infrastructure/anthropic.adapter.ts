@@ -50,9 +50,11 @@ export class AnthropicAdapter implements AIProvider {
       const apiKey = this.apiKeyValue;
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
+        headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" }, // caching GA: cache_control basta, sin header beta (evita 400 por beta retirado)
         body: JSON.stringify({
-          model, system: params.systemPrompt,
+          model, system: params.cachedSystem
+            ? [{ type: "text", text: params.cachedSystem, cache_control: { type: "ephemeral" } }, { type: "text", text: params.systemPrompt }]
+            : params.systemPrompt,
           messages: params.messages.map((m) => ({ role: m.role, content: m.content })),
           max_tokens: params.maxTokens ?? 4096,
         }),

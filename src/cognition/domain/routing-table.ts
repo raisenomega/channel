@@ -27,6 +27,12 @@ export const PERSONA_ROUTING: Readonly<Record<string, ModelTier>> = Object.freez
   eco: "sonnet",
 });
 
+// Tier de la RESPUESTA al cliente por persona (flujo generate-draft): rutina/feedback/patrones = haiku
+// (barato ~3x), venta/riesgo/estrategia = sonnet (default). NUNCA opus en runtime (Opus = 0 uso real).
+export const RESPONSE_TIER: Readonly<Record<string, ModelTier>> = Object.freeze({
+  thao: "haiku", eco: "haiku", iris: "haiku",
+});
+
 export type Task = keyof typeof ROUTING;
 
 export const DEGRADATION_CHAIN: Readonly<Record<ModelTier, readonly ModelTier[]>> = Object.freeze({

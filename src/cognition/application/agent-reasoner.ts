@@ -38,13 +38,12 @@ export class AgentReasoner {
     const historial = context.history.length
       ? "HISTORIAL del hilo (usa estos datos; NUNCA vuelvas a pedir algo que el cliente YA dio):\n" + context.history.map((m) => `${m.from === "cliente" ? "Cliente" : "Tu"}: ${m.text}`).join("\n")
       : "(primer mensaje del hilo: puedes saludar una vez)";
-    const systemPrompt = [
+    const estatico = [
       `Eres el agente IA de HUB by Raisen. Canal: ${channel}.`,
       `Brand Voice: ${context.brandVoice}`,
       `Catalogo: ${context.catalogContext}`,
       `Knowledge relevante: ${knowledge}`,
       context.contactProfile ? `Contacto: ${context.contactProfile}. Personaliza el trato (no el saludo): nuevo=bienvenida; recurrente=reconoce que ya hablaron; VIP=trato prioritario.` : "",
-      historial,
       "Estilo: responde BREVE y directo (2-4 frases), sin parrafos largos.",
       "Saluda SOLO si es el primer mensaje del hilo; si ya hay historial, continua sin repetir 'buenos dias'.",
       "Usa los datos del cliente y del historial; continua desde donde quedaron, no reinicies la conversacion.",
@@ -53,11 +52,13 @@ export class AgentReasoner {
     ].filter(Boolean).join("\n");
 
     const llm = await this.provider.completar({
-      systemPrompt,
+      systemPrompt: historial, // dinamico (cambia por turno)
+      cachedSystem: estatico,  // ESTATICO -> prompt caching (~90% mas barato en relecturas)
       messages: [{ role: "user" as const, content: message.content }],
       tools: null,
       maxTokens: 2048,
       temperature: 0.7,
+      tier: context.tier ?? "sonnet",
     });
     if (!llm.ok) return err({ kind: "llm_failure", cause: llm.error.kind });
     const texto = llm.value.response.replace(/<invoke[\s\S]*?<\/invoke>/gi, "").replace(/<\/?(invoke|function_calls|parameter|antml)[^>]*>/gi, "").trim();

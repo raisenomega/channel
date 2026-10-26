@@ -8,7 +8,7 @@ import type { AgentContext } from "../../../src/cognition/application/agent-cont
 import type { NormalizedMessage } from "../../../src/channels/domain/channel.adapter.ts";
 import { ok } from "../../../src/shared/domain/result.ts";
 
-const spyAI = (sink: { p: string }): AIProvider => ({ completar: (q: { systemPrompt: string }) => { sink.p = q.systemPrompt; return Promise.resolve(ok({ response: "hola", usedModel: "m", usedTier: "haiku", costUsd: 0 })); } } as unknown as AIProvider);
+const spyAI = (sink: { p: string }): AIProvider => ({ completar: (q: { systemPrompt: string; cachedSystem?: string }) => { sink.p = (q.cachedSystem ?? "") + " " + q.systemPrompt; return Promise.resolve(ok({ response: "hola", usedModel: "m", usedTier: "haiku", costUsd: 0 })); } } as unknown as AIProvider);
 const msg = { providerMessageId: "m1", from: "+1", channel: "whatsapp", content: "hola", attachments: [] } as unknown as NormalizedMessage;
 
 test("B4-01 con perfil -> el prompt lo incluye y pide personalizar", async () => {
