@@ -43,11 +43,12 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
   const repo = new AgentDraftsRepository();
   const generate = new GenerateDraftHandler(new AgentContextService(new AgentContextSourceSupabase()), new AgentReasoner(adapter), new PersistDraftHandler(repo));
   const autoSend = router ? {
-    enviar: async (d: AgentDraft, to: string, ch: string): Promise<void> => {
+    enviar: async (d: AgentDraft, to: string, ch: string): Promise<boolean> => {
       const ap = await new ApproveDraftHandler(repo).ejecutar(d.id, d.tenantId, AUTONOMOUS_APPROVER, undefined);
-      if (!ap.ok) { console.error(`[autodraft-send] approve FALLO draft=${d.id}`, ap.error); return; }
+      if (!ap.ok) { console.error(`[autodraft-send] approve FALLO draft=${d.id}`, ap.error); return false; }
       const r = await new SendApprovedDraftService(repo, router, new ConversationRepositorySupabase()).ejecutar(d.id, to, ch as ChannelType);
-      if (!r.ok) console.error(`[autodraft-send] send FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); else console.error(`[autodraft-send] OK draft=${d.id} to=${to}`);
+      if (!r.ok) { console.error(`[autodraft-send] send FALLO draft=${d.id} to=${to} ch=${ch}`, r.error); return false; }
+      console.error(`[autodraft-send] OK draft=${d.id} to=${to}`); return true;
     },
   } : undefined;
   const cap = (getEnv("AGENT_CAPTURE_ENABLED") ?? "") === "true" ? new MaybeCaptureService(new ContactDataProducer(adapter), leerHilo, guardarDatosContacto, datosBaseCompletos) : null;
