@@ -21,6 +21,8 @@ export interface AICompletionResult {
   readonly response: string;
   readonly tokensInput: number;
   readonly tokensOutput: number;
+  readonly cacheRead?: number;
+  readonly cacheCreation?: number;
   readonly latencyMs: number;
   readonly costUsd: number;
   readonly model: string;

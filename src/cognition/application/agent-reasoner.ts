@@ -19,6 +19,7 @@ export interface AgentReasoningResult {
   readonly action: AgentAction;
   readonly model: string;
   readonly costUsd: number;
+  readonly tokens: { readonly input: number; readonly output: number; readonly cacheRead: number; readonly cacheCreation: number };
 }
 
 export class AgentReasoner {
@@ -68,6 +69,7 @@ export class AgentReasoner {
       action: Object.freeze({ kind: "responder" as const, text: texto }),
       model: llm.value.model,
       costUsd: llm.value.costUsd,
+      tokens: { input: llm.value.tokensInput, output: llm.value.tokensOutput, cacheRead: llm.value.cacheRead ?? 0, cacheCreation: llm.value.cacheCreation ?? 0 },
     }));
   }
 }

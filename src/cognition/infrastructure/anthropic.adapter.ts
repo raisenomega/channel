@@ -7,6 +7,7 @@ import { Result, err, ok } from "../../shared/domain/result.ts";
 import type { AIProvider, AICompletionParams, AICompletionResult, AIError } from "../domain/ai-provider.ts";
 import { DEGRADATION_CHAIN } from "../domain/routing-table.ts";
 import type { ModelTier } from "../domain/routing-table.ts";
+import { usageDesde } from "../domain/model-pricing.ts";
 import { AnthropicModelResolver } from "./anthropic-model-resolver.ts";
 
 export class AnthropicAdapter implements AIProvider {
@@ -66,9 +67,8 @@ export class AnthropicAdapter implements AIProvider {
       const text = blocks.filter((b) => b.type === "text" && b.text).map((b) => b.text).join("\n").trim();
       return ok(Object.freeze({
         response: text,
-        tokensInput: (data.usage as Record<string, number>)?.input_tokens ?? 0,
-        tokensOutput: (data.usage as Record<string, number>)?.output_tokens ?? 0,
-        latencyMs: Date.now() - startMs, costUsd: 0, model,
+        ...usageDesde(data.usage as Record<string, number> | undefined, model),
+        latencyMs: Date.now() - startMs, model,
       }));
     } catch (e) { return err({ kind: "unknown", cause: String(e) }); }
   }
