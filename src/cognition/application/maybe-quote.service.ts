@@ -16,7 +16,7 @@ export class MaybeQuoteService {
   constructor(
     private readonly producer: QuoteProposalProducer,
     private readonly leerCatalogo: (tenantId: string) => Promise<CatalogItem[]>,
-    private readonly hayPendiente: (conversationId: string) => Promise<boolean>,
+    private readonly pendiente: (conversationId: string) => Promise<string | null>,
     private readonly persistir: (ref: QuoteConvRef, p: QuoteProposal) => Promise<string>,
     private readonly leerHilo: (conversationId: string) => Promise<readonly ThreadMsg[]>,
     private readonly datosCompletos: (contactId: string) => Promise<boolean>,
@@ -27,8 +27,9 @@ export class MaybeQuoteService {
     try {
       if (!ev.conversationId || !ev.contactId) return;
       if (!opportunity && !QUOTE_RE.test(ev.content)) return; // compra detectada O pide cotizar (follow-ups)
-      if (await this.hayPendiente(String(ev.conversationId))) return; // ya hay una pendiente de firma
       if (!(await this.datosCompletos(String(ev.contactId)))) { console.error(`[quote] LEY ABSOLUTA: datos base incompletos conv=${ev.conversationId}, no se crea cotizacion`); return; }
+      const pend = await this.pendiente(String(ev.conversationId));
+      if (pend) { if (mode === "autonomous" && this.enviar) await this.enviar(ev, "Aqui tienes tu cotizacion:", pend); return; } // LEY: siempre recibe el link, aunque ya haya tarjetas
       const catalogo = await this.leerCatalogo(ev.tenantId);
       if (catalogo.length === 0) return;
       const hilo = await this.leerHilo(String(ev.conversationId));

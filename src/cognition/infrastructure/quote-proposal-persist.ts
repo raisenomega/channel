@@ -42,9 +42,10 @@ export async function persistirPropuestaCotizacion(ref: QuoteConvRef, p: QuotePr
   return token;
 }
 
-// Dedup: ya hay una cotizacion del agente pendiente de firma en esta conversacion?
-export async function hayCotizacionPendiente(conversationId: string): Promise<boolean> {
-  const { data } = await supabase.from("agent_drafts").select("metadata").eq("conversation_id", conversationId).eq("status", "draft").limit(20);
-  const rows = (data ?? []) as Array<{ metadata?: { scope?: string } }>;
-  return rows.some((r) => r.metadata?.scope === "quote");
+// Token de la ultima cotizacion pendiente en la conversacion (o null). Para RE-ENVIAR su link sin duplicar.
+export async function cotizacionPendiente(conversationId: string): Promise<string | null> {
+  const { data } = await supabase.from("agent_drafts").select("metadata").eq("conversation_id", conversationId).eq("status", "draft").order("created_at", { ascending: false }).limit(20);
+  const rows = (data ?? []) as Array<{ metadata?: { scope?: string; token?: string } }>;
+  const q = rows.find((r) => r.metadata?.scope === "quote");
+  return q?.metadata?.token ?? null;
 }

@@ -5,18 +5,22 @@
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 
 export interface PublicQuoteItem { readonly description: string; readonly quantity: number; readonly unitPrice: number; readonly lineTotal: number; }
-export interface PublicQuote { readonly items: readonly PublicQuoteItem[]; readonly total: number; readonly conclusion: string; readonly decision: string | null; readonly business: string; }
+export interface PublicQuote {
+  readonly items: readonly PublicQuoteItem[]; readonly total: number; readonly conclusion: string;
+  readonly decision: string | null; readonly tenantId: string; readonly contactId: string | null; readonly createdAt: string;
+}
 
 export async function leerCotizacionPorToken(token: string): Promise<PublicQuote | null> {
   if (!token) return null;
-  const { data } = await supabase.from("agent_drafts").select("metadata").eq("metadata->>token", token).limit(1).maybeSingle();
+  const { data } = await supabase.from("agent_drafts").select("tenant_id, contact_id, created_at, metadata").eq("metadata->>token", token).limit(1).maybeSingle();
   if (!data) return null;
-  const m = ((data as { metadata?: Record<string, unknown> }).metadata ?? {});
+  const row = data as { tenant_id: string; contact_id: string | null; created_at: string; metadata?: Record<string, unknown> };
+  const m = row.metadata ?? {};
   const items = (((m["quoteItems"] as Array<Record<string, unknown>>) ?? [])).map((l) => ({
     description: String(l["description"] ?? ""), quantity: Number(l["quantity"] ?? 0),
     unitPrice: Number(l["unit_price"] ?? 0), lineTotal: Number(l["line_total"] ?? 0),
   }));
-  return { items, total: Number(m["total"] ?? 0), conclusion: String(m["conclusion"] ?? ""), decision: (m["clientDecision"] as string) ?? null, business: String(m["business"] ?? "Cotizacion") };
+  return { items, total: Number(m["total"] ?? 0), conclusion: String(m["conclusion"] ?? ""), decision: (m["clientDecision"] as string) ?? null, tenantId: row.tenant_id, contactId: row.contact_id, createdAt: row.created_at };
 }
 
 export async function decidirCotizacion(token: string, decision: "accepted" | "rejected"): Promise<boolean> {
