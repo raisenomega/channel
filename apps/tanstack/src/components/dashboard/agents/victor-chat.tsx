@@ -26,7 +26,8 @@ export function VictorChat({ lang, accent, onClose, full }: { lang: Idioma; acce
       const res = tid ? await apiFetch(`/tenants/${encodeURIComponent(tid)}/agents/victor/chat`, { method: "POST", body: JSON.stringify({ message: v }) }) : null;
       if (!res || !res.ok) {
         const st = res ? res.status : 0;
-        setMsgs((m) => [...m, { from: "victor", text: `${t(lang, "ag.victor.chatErr")} (${st})` }]); setBusy(false); return;
+        const aviso = st === 502 ? t(lang, "ag.victor.ctxLong") : `${t(lang, "ag.victor.chatErr")} (${st})`;
+        setMsgs((m) => [...m, { from: "victor", text: aviso }]); setBusy(false); return;
       }
       const d = (await res.json()) as { reply?: string };
       const reply = (d.reply ?? "").trim();

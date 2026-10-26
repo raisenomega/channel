@@ -23,7 +23,7 @@ export class AgentContextSourceSupabase implements AgentContextSource {
   async obtenerNegocio(tenantId: string): Promise<Result<NegocioContext, AgentContextError>> {
     const facts = buildFacts(await leerContexto(tenantId));
     const plat = await leerPlatformContext(tenantId);
-    const brandVoice = facts.length ? facts.join(" | ") : "(contexto del negocio aun vacio)";
+    const brandVoice = facts.length ? facts.join(" | ").slice(0, 4000) : "(contexto del negocio aun vacio)"; // cap 4k: ahorro de tokens + evita prompts gigantes
     const catalogContext = plat.catalog.length ? plat.catalog.join("; ") : "(catalogo vacio)";
     return ok({ brandVoice, catalogContext });
   }

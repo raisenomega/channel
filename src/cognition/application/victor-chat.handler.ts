@@ -14,7 +14,7 @@ export type VictorChatError = { readonly kind: "llm_failure"; readonly cause: st
 function systemPrompt(facts: readonly string[]): string {
   const p = PERSONA_VICTOR;
   const ctx = facts.length
-    ? `\nContexto del negocio (de la pagina Contexto): ${facts.join(" | ")}`
+    ? `\nContexto del negocio (de la pagina Contexto): ${facts.join(" | ").slice(0, 4000)}` // cap 4k: evita el 502/lentitud por contexto gigante
     : "\nContexto del negocio: aun vacio. Pide al dueno que llene la pagina Contexto; no inventes datos.";
   return [
     `Eres ${p.nombre_display}, ${p.rol}.`,
