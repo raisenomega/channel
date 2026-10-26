@@ -56,7 +56,7 @@ export const enOnboarding: Dict = {
   "agent.name.eco": "Eco",
   "agent.name.angel": "Angel",
   "agent.name.kelsy": "Kelsy",
-  "agent.status.online": "Online",
+  "agent.status.waiting": "waiting", "agent.status.online": "Online",
   "agent.status.standby": "Standby",
   "agent.lastAction": "Last: {action}",
   "agent.sinAccion": "No recent action",
