@@ -7,6 +7,7 @@ export interface ExtractedData {
   readonly name?: string; readonly phone?: string; readonly email?: string;
   readonly address?: string; readonly product?: string;
 }
+export interface DatosDuros { email?: string; phone?: string; address?: string; name?: string; }
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -26,16 +27,35 @@ export function parseExtracted(raw: string): ExtractedData {
 
 function str(x: unknown): string { return typeof x === "string" ? fixMojibake(x.trim()) : ""; }
 
-// Safety-net DETERMINISTICO (no depende del LLM): rescata email/telefono del texto del hilo. Junta espacios
-// alrededor de @ y " . " -> "Johanny . 121894@gmail.com" => "Johanny.121894@gmail.com". Valida igual.
-export function detectarEmailPhone(texto: string): { email?: string; phone?: string } {
+// Safety-net DETERMINISTICO (no depende del LLM): rescata los 4 datos del texto que dio el CLIENTE, este donde
+// este en el hilo. Junta espacios alrededor de @ y " . " ("Johanny . 12@gmail.com" => "Johanny.12@gmail.com").
+export function detectarDatos(texto: string): DatosDuros {
   const j = texto.replace(/\s*@\s*/g, "@").replace(/\s+\.\s+/g, ".");
   const em = j.match(/[\w.+-]+@[\w.-]+\.\w{2,}/);
   const ph = texto.match(/\+?\d[\d\s().-]{6,}\d/);
-  const out: { email?: string; phone?: string } = {};
+  const out: DatosDuros = {};
   if (em && EMAIL.test(em[0])) out.email = em[0].slice(0, 160);
   if (ph) { const p = ph[0].replace(/[^\d+]/g, ""); if (p.replace(/\D/g, "").length >= 7) out.phone = p.slice(0, 20); }
+  const dir = detDireccion(texto); if (dir) out.address = dir;
+  const nom = detNombre(texto); if (nom) out.name = nom;
   return out;
+}
+
+function detDireccion(texto: string): string | undefined { // desde el marcador de via hasta el proximo campo
+  const m = texto.match(/\b(calle|ave\.?|avenida|carr\.?|carretera|urb\.?|urbanizaci[oó]n|centro comercial|plaza|sector|barrio|bo\.?|bda\.?|cond\.?|condominio|km)\b/i);
+  if (!m || m.index === undefined) return undefined;
+  let seg = texto.slice(m.index, m.index + 110);
+  const cut = seg.search(/\n|\s+mi\s+|[\w.+-]+@|\btel[eé]fono\b|\bcorreo\b|\bemail\b|\bnumero\b/i);
+  if (cut >= 6) seg = seg.slice(0, cut);
+  seg = seg.trim();
+  return seg.length >= 6 ? seg.slice(0, 300) : undefined;
+}
+
+function detNombre(texto: string): string | undefined { // "me llamo X / mi nombre es X / nombre: X"
+  const m = texto.match(/\b(?:me llamo|mi nombre es|nombre:?)\s+([A-Za-zÁÉÍÓÚáéíóúÑñ'’.-]+(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñ'’.-]+){0,2})/i);
+  if (!m) return undefined;
+  const n = (m[1] ?? "").replace(/\s+(mi|de|y|en|el|la|es|soy|para|del)\b[\s\S]*$/i, "").trim();
+  return n.length >= 2 ? n.slice(0, 120) : undefined;
 }
 
 export function fixMojibake(s: string): string {
