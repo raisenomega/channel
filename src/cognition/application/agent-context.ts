@@ -8,6 +8,7 @@ import { Result, ok, err } from "../../shared/domain/result.ts";
 import type { AgentKnowledgeState } from "../domain/agent.service.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
 import type { ThreadMsg } from "./closing-draft.producer.ts";
+import type { ModelTier } from "../domain/routing-table.ts";
 
 export interface AgentContext {
   readonly knowledge: readonly AgentKnowledgeState[];
@@ -15,6 +16,7 @@ export interface AgentContext {
   readonly brandVoice: string;       // contexto real del negocio (facts) que usa el agente
   readonly catalogContext: string;   // catalogo/SKU real
   readonly contactProfile?: string | undefined; // B4: nombre + segmento (nuevo/recurrente/VIP) del contacto
+  readonly tier?: ModelTier; // modelo por persona (rutina=haiku, venta=sonnet)
 }
 export type AgentContextError = { readonly kind: "context_unavailable"; readonly cause: string };
 export interface NegocioContext { readonly brandVoice: string; readonly catalogContext: string; }

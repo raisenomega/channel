@@ -11,11 +11,8 @@ import { buildCapabilitiesBlock } from "../domain/agent-capabilities.ts";
 
 export type VictorChatError = { readonly kind: "llm_failure"; readonly cause: string };
 
-function systemPrompt(facts: readonly string[]): string {
+function staticPrompt(): string { // ESTATICO -> se cachea (persona/directorio/capacidades no cambian por turno)
   const p = PERSONA_VICTOR;
-  const ctx = facts.length
-    ? `\nContexto del negocio (de la pagina Contexto): ${facts.join(" | ").slice(0, 4000)}` // cap 4k: evita el 502/lentitud por contexto gigante
-    : "\nContexto del negocio: aun vacio. Pide al dueno que llene la pagina Contexto; no inventes datos.";
   return [
     `Eres ${p.nombre_display}, ${p.rol}.`,
     `Mision: ${p.mision}`,
@@ -24,15 +21,20 @@ function systemPrompt(facts: readonly string[]): string {
     buildAgentDirectory(),
     buildCapabilitiesBlock(),
     "Responde claro, breve y accionable, en espanol. Si no sabes un dato, dilo; nunca lo inventes.",
-    ctx,
   ].join("\n");
+}
+
+function ctxPrompt(facts: readonly string[]): string { // dinamico (cap 4k: evita el 502/lentitud)
+  return facts.length
+    ? `Contexto del negocio (de la pagina Contexto): ${facts.join(" | ").slice(0, 4000)}`
+    : "Contexto del negocio: aun vacio. Pide al dueno que llene la pagina Contexto; no inventes datos.";
 }
 
 export class VictorChatHandler {
   async ejecutar(provider: AIProvider, message: string, facts: readonly string[]): Promise<Result<{ reply: string; model: string }, VictorChatError>> {
-    const sp = systemPrompt(facts);
     const r = await provider.completar({
-      systemPrompt: sp,
+      systemPrompt: ctxPrompt(facts), // dinamico (el contexto cambia)
+      cachedSystem: staticPrompt(),   // ESTATICO -> prompt caching (~90% mas barato en relecturas)
       messages: [{ role: "user", content: message }],
       tools: null, maxTokens: 2048, temperature: 0.6, tier: "sonnet", // 2048: respuestas completas (audit de 6 secciones se cortaba en 1024)
     });

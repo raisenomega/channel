@@ -4,6 +4,7 @@ export type ProviderType = "anthropic" | "deepseek" | "qwen" | "openai";
 
 export interface AICompletionParams {
   readonly systemPrompt: string;
+  readonly cachedSystem?: string; // prefijo ESTATICO a cachear (prompt caching: ~90% mas barato en relecturas)
   readonly messages: readonly AIMessage[];
   readonly tools: readonly unknown[] | null;
   readonly maxTokens?: number;
