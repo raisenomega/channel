@@ -10,6 +10,7 @@ import { t } from "@/lib/i18n";
 import { ChartCell, EmptyChart } from "./chart-kit";
 import { GraficaUsoCanal } from "./grafica-uso-canal";
 import { GraficaConsumo } from "./grafica-consumo";
+import { GraficaAgentes } from "./grafica-agentes";
 
 export function GraficasPanel({ lang, porCanal }: {
   lang: Idioma;
@@ -28,7 +29,7 @@ export function GraficasPanel({ lang, porCanal }: {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <ChartCell title={t(lang, "dash.chart.ventas")}><EmptyChart label={vacio} /></ChartCell>
           <ChartCell title={t(lang, "dash.chart.mensajes")}><GraficaConsumo lang={lang} /></ChartCell>
-          <ChartCell title={t(lang, "dash.chart.agentes")}><EmptyChart label={vacio} /></ChartCell>
+          <ChartCell title={t(lang, "dash.chart.agentes")}><GraficaAgentes lang={lang} vacio={vacio} /></ChartCell>
           <ChartCell title={t(lang, "dash.chart.usoCanal")}><GraficaUsoCanal lang={lang} porCanal={porCanal} /></ChartCell>
         </div>
       </div>

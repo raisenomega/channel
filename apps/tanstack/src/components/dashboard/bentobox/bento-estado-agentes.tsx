@@ -5,9 +5,11 @@
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { useAgentStatus } from "@/hooks/useAgentStatus";
+import { useAgentActions } from "@/hooks/useAgentActions";
 
 export function BentoEstadoAgentes({ lang }: { lang: Idioma }) {
   const { agents } = useAgentStatus();
+  const acciones = useAgentActions();
   return (
     <div className="bento-card bento-col-3">
       <div className="bento-title">
@@ -21,7 +23,7 @@ export function BentoEstadoAgentes({ lang }: { lang: Idioma }) {
           <div key={a.name} className="flex items-center gap-2 text-xs">
             <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: a.online ? "hsl(var(--success))" : "hsl(var(--text-dim))" }} />
             <span className="w-14 shrink-0 font-semibold text-foreground">{t(lang, "agent.name." + a.name)}</span>
-            <span className="truncate text-muted-foreground">{a.online ? t(lang, "agent.status.online") : t(lang, "agent.status.standby")}</span>
+            <span className="truncate text-muted-foreground">{acciones[a.name]?.label ?? t(lang, "agent.status.waiting")}</span>
           </div>
         ))}
       </div>
