@@ -8,12 +8,12 @@ import { ok } from "../../../src/shared/domain/result.ts";
 function make(datosCompletos: boolean, sink: { creada: boolean; enviada: boolean }) {
   const producer = { producir: async () => ok({ worth: true, lines: [{ description: "x", quantity: 1, unitPrice: 10 }], conclusion: "", identified: "", confidence: 80 }) };
   const leerCatalogo = async () => [{ sku: "A", name: "A", price: 10 }];
-  const hayPendiente = async () => false;
+  const pendiente = async (): Promise<string | null> => null;
   const persistir = async () => { sink.creada = true; return "tok"; };
   const leerHilo = async () => [{ from: "cliente" as const, text: "quiero cotizar" }];
   const datos = async () => datosCompletos;
   const enviar = async () => { sink.enviada = true; };
-  return new MaybeQuoteService(producer as never, leerCatalogo as never, hayPendiente, persistir as never, leerHilo as never, datos, enviar);
+  return new MaybeQuoteService(producer as never, leerCatalogo as never, pendiente, persistir as never, leerHilo as never, datos, enviar);
 }
 const ev = { tenantId: "t1", conversationId: "c1", contactId: "k1", content: "quiero una cotizacion", from: "+1", channel: "whatsapp", contactName: "Juan" } as never;
 
