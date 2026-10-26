@@ -5,7 +5,7 @@
  */
 import type { AIProvider } from "../domain/ai-provider.ts";
 import type { ThreadMsg } from "./closing-draft.producer.ts";
-import { parseExtracted, type ExtractedData } from "../domain/contact-data.ts";
+import { parseExtracted, detectarEmailPhone, type ExtractedData } from "../domain/contact-data.ts";
 
 const PROMPT = [
   "Lee el HILO y extrae SOLO los datos que el CLIENTE dio EXPLICITAMENTE sobre si mismo. NO inventes, NO",
@@ -23,6 +23,9 @@ export class ContactDataProducer {
     if (thread.length === 0) return {};
     const hilo = thread.map((m) => `${m.from}: ${m.text}`).join("\n");
     const llm = await this.ai.completar({ systemPrompt: PROMPT, messages: [{ role: "user", content: hilo }], tools: null, maxTokens: 400, tier: "haiku" });
-    return llm.ok ? parseExtracted(llm.value.response) : {};
+    const base = llm.ok ? parseExtracted(llm.value.response) : {};
+    const det = detectarEmailPhone(hilo); // safety-net: si el LLM pierde el email/telefono, el regex lo rescata
+    const email = base.email ?? det.email; const phone = base.phone ?? det.phone;
+    return { ...base, ...(email ? { email } : {}), ...(phone ? { phone } : {}) };
   }
 }
