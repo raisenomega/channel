@@ -5,18 +5,18 @@
  */
 import { leerContexto } from "./context.repo.ts";
 import { buildFacts } from "../domain/business-facts.ts";
-import { leerPlatformContext } from "./platform-context.repo.ts";
+import { leerCatalogo } from "./platform-context.repo.ts";
 import { leerMemoria, memoriaVencida, guardarMemoria } from "./context-memory.query.ts";
 
 export interface ContextoNegocio { readonly brandVoice: string; readonly catalogContext: string; }
 
 export async function contextoMemorizado(tenantId: string): Promise<ContextoNegocio> {
+  const catalog = await leerCatalogo(tenantId); // catalogo SIEMPRE fresco: el SKU cambia sin guardar Contexto (antes: cache stale 15d)
+  const catalogContext = catalog.length ? catalog.join("; ") : "(catalogo vacio)";
   const mem = await leerMemoria(tenantId);
-  if (mem && !memoriaVencida(mem.refreshedAt)) return { brandVoice: mem.brandVoice, catalogContext: mem.catalogContext };
+  if (mem && !memoriaVencida(mem.refreshedAt)) return { brandVoice: mem.brandVoice, catalogContext };
   const facts = buildFacts(await leerContexto(tenantId)); // contexto COMPLETO byte a byte (sin tope)
-  const plat = await leerPlatformContext(tenantId);
   const brandVoice = facts.length ? facts.join(" | ") : "(contexto del negocio aun vacio)";
-  const catalogContext = plat.catalog.length ? plat.catalog.join("; ") : "(catalogo vacio)";
-  await guardarMemoria(tenantId, brandVoice, catalogContext); // persistente; se refresca a los 15 dias o al invalidar
+  await guardarMemoria(tenantId, brandVoice, catalogContext); // brandVoice persistente 15d; el catalogo ya no se sirve de cache
   return { brandVoice, catalogContext };
 }
