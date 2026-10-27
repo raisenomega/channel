@@ -35,7 +35,14 @@ describe("detectarEscalacion (flag para alertar al dueno)", () => {
     expect(detectarEscalacion("Con gusto.\n\n--- Nota interna: escalar_a_humano por precio no definido")).toBe(true);
     expect(detectarEscalacion("Debo pedir aprobacion humana antes de cotizar.")).toBe(true);
   });
-  it("NO marca una respuesta normal del agente", () => {
+  it("detecta la escalacion en LENGUAJE NATURAL del agente (no solo tokens internos)", () => {
+    expect(detectarEscalacion("Voy a escalar su caso a nuestra supervisora para que lo revise.")).toBe(true);
+    expect(detectarEscalacion("Ya dejé registrada su solicitud para que nuestra supervisora revise.")).toBe(true);
+    expect(detectarEscalacion("Paso su consulta a una persona de nuestro equipo.")).toBe(true);
+  });
+  it("NO marca una respuesta normal del agente (ni el flujo de cotizacion)", () => {
     expect(detectarEscalacion("Nuestro horario es de 9 a 5. Con gusto le ayudo.")).toBe(false);
+    expect(detectarEscalacion("Nuestro equipo preparara tu cotizacion de 3 zafacones.")).toBe(false);
+    expect(detectarEscalacion("Para preparar tu cotizacion necesito tu nombre completo.")).toBe(false);
   });
 });
