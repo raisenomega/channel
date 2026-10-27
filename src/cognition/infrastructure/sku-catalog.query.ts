@@ -6,9 +6,10 @@ import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 import type { CatalogItem } from "../domain/quote-proposal.ts";
 
 export async function leerCatalogoSku(tenantId: string): Promise<CatalogItem[]> {
-  const { data } = await supabase.from("items").select("name, unit_price, item_type").eq("tenant_id", tenantId).limit(200);
-  const rows = (data ?? []) as Array<{ name?: string; unit_price?: number; item_type?: string }>;
+  const { data } = await supabase.from("items").select("name, unit_price, item_type, stock, track_inventory, is_active").eq("tenant_id", tenantId).limit(200);
+  const rows = (data ?? []) as Array<{ name?: string; unit_price?: number; item_type?: string; stock?: number | null; track_inventory?: boolean; is_active?: boolean }>;
   return rows
-    .filter((r) => typeof r.name === "string" && r.name.trim() !== "")
-    .map((r) => ({ name: r.name as string, unitPrice: Number(r.unit_price ?? 0), itemType: r.item_type ?? "servicio" }));
+    .filter((r) => typeof r.name === "string" && r.name.trim() !== "" && r.is_active !== false) // no cotiza inactivos
+    .map((r) => ({ name: r.name as string, unitPrice: Number(r.unit_price ?? 0), itemType: r.item_type ?? "servicio",
+      stock: r.stock == null ? null : Number(r.stock), trackInventory: Boolean(r.track_inventory) }));
 }
