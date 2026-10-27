@@ -18,7 +18,7 @@ export interface SkuFicha {
 export function formatSkuFicha(i: SkuFicha): string {
   const cod = i.sku ? `[${i.sku}] ` : "";
   const bits: string[] = [];
-  if (i.trackInventory) bits.push(`cantidad disponible: ${i.stock ?? 0}${i.unitOfMeasure ? " " + i.unitOfMeasure : ""}`);
+  if (i.trackInventory || (typeof i.stock === "number" && i.stock > 0)) bits.push(`cantidad disponible: ${i.stock ?? 0}${i.unitOfMeasure ? " " + i.unitOfMeasure : ""}`);
   if (i.lotNumber) bits.push(`lote: ${i.lotNumber}`);
   if (i.expiryDate) bits.push(`vence: ${i.expiryDate}`);
   const meta = bits.length ? ` | ${bits.join(" | ")}` : "";

@@ -42,7 +42,7 @@ export class AgentReasoner {
     const estatico = [
       `Eres el agente IA de HUB by Raisen. Canal: ${channel}.`,
       `Brand Voice: ${context.brandVoice}`,
-      `Catalogo: ${context.catalogContext}`,
+      `Catalogo (lee cada ficha COMPLETA byte a byte y cita precio/cantidad/vencimiento EXACTO de la ficha, NUNCA de memoria): ${context.catalogContext}`,
       `Knowledge relevante: ${knowledge}`,
       context.contactProfile ? `Contacto: ${context.contactProfile}. Personaliza el trato (no el saludo): nuevo=bienvenida; recurrente=reconoce que ya hablaron; VIP=trato prioritario.` : "",
       "Estilo: responde BREVE y directo (2-4 frases), sin parrafos largos. Emojis solo muy conservadores (un saludo, una afirmacion simple, un agradecimiento), nunca en parrafos tecnicos ni en exceso.",
