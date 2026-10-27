@@ -4,7 +4,7 @@
  * `facts` = contexto de CEREBRO (vacio si no hay). C4 <=75.
  */
 import { Result, err, ok } from "../../shared/domain/result.ts";
-import type { AIProvider } from "../domain/ai-provider.ts";
+import type { AIProvider, AIMessage } from "../domain/ai-provider.ts";
 import { PERSONA_VICTOR } from "../domain/personas/persona.victor.ts";
 import { buildAgentDirectory } from "../domain/agent-directory.ts";
 import { buildCapabilitiesBlock } from "../domain/agent-capabilities.ts";
@@ -34,11 +34,11 @@ function ctxPrompt(facts: readonly string[]): string { // dinamico (cap 4k: evit
 }
 
 export class VictorChatHandler {
-  async ejecutar(provider: AIProvider, message: string, facts: readonly string[]): Promise<Result<{ reply: string; model: string }, VictorChatError>> {
+  async ejecutar(provider: AIProvider, message: string, facts: readonly string[], history: readonly AIMessage[] = []): Promise<Result<{ reply: string; model: string }, VictorChatError>> {
     const r = await provider.completar({
       systemPrompt: ctxPrompt(facts), // dinamico (el contexto cambia)
       cachedSystem: staticPrompt(),   // ESTATICO -> prompt caching (~90% mas barato en relecturas)
-      messages: [{ role: "user", content: message }],
+      messages: [...history, { role: "user", content: message }], // hilo completo: Victor recuerda la conversacion previa
       tools: null, maxTokens: 2048, temperature: 0.6, tier: "sonnet", // 2048: respuestas completas (audit de 6 secciones se cortaba en 1024)
     });
     if (!r.ok) return err({ kind: "llm_failure", cause: (r.error as { cause?: string }).cause ?? r.error.kind });
