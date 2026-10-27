@@ -57,3 +57,15 @@ export async function setPreferredChannel(contactId: string, channel: string): P
   if (!contactId || !channel) return;
   await supabase.from("contacts").update({ preferred_channel: channel }).eq("id", contactId).is("preferred_channel", null);
 }
+
+// Guard de ECO por CONTENIDO: el propio HUB reaparece como inbound (echo de Zernio que llega como
+// message.received, no message.sent). True si hay un SALIENTE con el MISMO texto en esta conversacion en
+// los ultimos 2 min -> el ingest ignora ese "entrante" (no persiste, no responde) y corta el loop.
+export async function esEcoReciente(convId: string, content: string): Promise<boolean> {
+  if (!convId || !content) return false;
+  const desde = new Date(Date.now() - 120000).toISOString();
+  const { data } = await supabase.from("messages").select("id")
+    .eq("conversation_id", convId).eq("direction", "outbound").eq("content", content)
+    .gte("created_at", desde).limit(1);
+  return Array.isArray(data) && data.length > 0;
+}
