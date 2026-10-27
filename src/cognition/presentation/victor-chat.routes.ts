@@ -21,12 +21,15 @@ export function rutaVictorChat(deps: VictorChatDeps): RouteDefinition {
     handler: async (ctx) => {
       const auth = await requireTenantAuth(ctx); // tenant del claim, no del path (evita mismatch de este owner)
       if (!auth.ok) return auth.error;
-      const body = (ctx.body ?? {}) as { message?: string };
+      const body = (ctx.body ?? {}) as { message?: string; history?: readonly { role?: string; content?: string }[] };
       const message = String(body.message ?? "").trim();
       if (!message) return jsonResponse(400, { ok: false, error: { kind: "mensaje_vacio" } });
+      const history = (body.history ?? [])
+        .filter((m) => (m?.role === "user" || m?.role === "assistant") && typeof m?.content === "string" && m.content.trim() !== "")
+        .slice(-12).map((m) => ({ role: m.role as "user" | "assistant", content: String(m.content).trim() })); // hilo saneado para que Victor recuerde
       const [neg, plat] = await Promise.all([contextoMemorizado(auth.value.tenantId), leerPlatformContext(auth.value.tenantId)]);
       const facts = [neg.brandVoice, neg.catalogContext, ...buildPlatformFacts(plat)]; // negocio MEMORIZADO + plataforma fresca (canales/humanos)
-      const r = await deps.chat.ejecutar(deps.provider, message, facts);
+      const r = await deps.chat.ejecutar(deps.provider, message, facts, history);
       if (!r.ok) return jsonResponse(502, { ok: false, error: r.error });
       return jsonResponse(200, { ok: true, reply: r.value.reply, model: r.value.model });
     },

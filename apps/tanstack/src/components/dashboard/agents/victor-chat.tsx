@@ -25,7 +25,8 @@ export function VictorChat({ lang, accent, onClose, full }: { lang: Idioma; acce
     setText(""); setMsgs((m) => [...m, { from: "me", text: v }]); setBusy(true);
     const tid = resolveTenantId();
     try {
-      const res = tid ? await apiFetch(`/tenants/${encodeURIComponent(tid)}/agents/victor/chat`, { method: "POST", body: JSON.stringify({ message: v }) }) : null;
+      const hist = msgs.slice(-12).map((m) => ({ role: m.from === "me" ? "user" : "assistant", content: m.text })); // hilo: Victor razona con TODO el contexto previo
+      const res = tid ? await apiFetch(`/tenants/${encodeURIComponent(tid)}/agents/victor/chat`, { method: "POST", body: JSON.stringify({ message: v, history: hist }) }) : null;
       if (!res || !res.ok) {
         const st = res ? res.status : 0;
         const aviso = st === 502 ? t(lang, "ag.victor.ctxLong") : `${t(lang, "ag.victor.chatErr")} (${st})`;
@@ -43,7 +44,7 @@ export function VictorChat({ lang, accent, onClose, full }: { lang: Idioma; acce
         <span className="text-xs font-bold" style={{ color: `hsl(${accent})` }}>{t(lang, "ag.victor.chatTitle")}</span>
         {onClose ? <button type="button" onClick={onClose} className="text-base text-muted-foreground hover:text-foreground" aria-label="x">{"×"}</button> : null}
       </div>
-      <div className={"space-y-2 overflow-y-auto p-3" + (full ? " flex-1" : " max-h-64 min-h-[120px]")}>
+      <div className={"space-y-2 overflow-y-auto p-3" + (full ? " min-h-0 flex-1" : " max-h-64 min-h-[120px]")}>
         {msgs.length === 0 ? <p className="text-xs text-muted-foreground">{t(lang, "ag.victor.chatEmpty")}</p> : msgs.map((m, i) => (
           <div key={i} className={"max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-1.5 text-sm text-foreground " + (m.from === "me" ? "ml-auto" : "mr-auto bg-muted/30")} style={m.from === "me" ? { background: `hsl(${accent} / 0.14)` } : undefined}>{m.text}</div>
         ))}
