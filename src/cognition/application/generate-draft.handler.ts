@@ -16,6 +16,7 @@ import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts
 import { RESPONSE_TIER } from "../domain/routing-table.ts";
 import { recordAgentUsage } from "../infrastructure/agent-usage.repo.ts";
 import { registrarEscalacion } from "../infrastructure/escalacion-activity.repo.ts";
+import { alertarDuenoWhatsApp } from "../infrastructure/owner-alert.repo.ts";
 
 export type GenerateDraftError =
   | { readonly kind: "ethics_violation" }
@@ -53,7 +54,11 @@ export class GenerateDraftHandler {
     const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, { ...contexto.value, contactProfile: cmd.contactProfile, tier: RESPONSE_TIER[cmd.personaSlug] ?? "sonnet" });
     if (!razonado.ok) return err({ kind: "llm_failure", cause: razonado.error.cause });
     await recordAgentUsage({ tenantId: String(cmd.tenantId), conversationId: cmd.conversationId ? String(cmd.conversationId) : null, personaSlug: cmd.personaSlug, model: razonado.value.model, costUsd: razonado.value.costUsd, tokens: razonado.value.tokens });
-    if (razonado.value.escalacion) void registrarEscalacion(String(cmd.tenantId), cmd.conversationId ? String(cmd.conversationId) : null, cmd.normalizedMessage.content); // alerta al dueno en Actividad Reciente; no bloquea
+    if (razonado.value.escalacion) {
+      const quien = cmd.contactName ?? cmd.contactLabel ?? cmd.normalizedMessage.from; // contacto para la alerta
+      void registrarEscalacion(String(cmd.tenantId), cmd.conversationId ? String(cmd.conversationId) : null, cmd.normalizedMessage.content); // Actividad Reciente; no bloquea
+      void alertarDuenoWhatsApp(String(cmd.tenantId), quien, cmd.normalizedMessage.content); // WhatsApp al dueno (plantilla alert_hub); no bloquea
+    }
     const d = await this.persist.ejecutar({
       tenantId: cmd.tenantId, conversationId: cmd.conversationId ?? null, contactId: cmd.contactId ?? null,
       personaSlug: cmd.personaSlug, inboundMessage: cmd.normalizedMessage.content,
