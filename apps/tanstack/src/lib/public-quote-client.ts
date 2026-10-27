@@ -8,8 +8,8 @@ import { supabaseRestBase, supabaseAuthHeaders, getAnonKey } from "@/lib/supabas
 export interface PublicQuoteItem { description: string; quantity: number; unit_price: number; line_total: number; }
 export interface PublicQuote {
   status: string;
-  quote?: { client_name: string; client_phone: string | null; client_email: string | null; client_address: string | null; items: PublicQuoteItem[]; subtotal: number; tax_total: number; total: number; service: string | null };
-  brand?: { name: string; logo_url: string | null; style: string };
+  quote?: { client_name: string; client_phone: string | null; client_email: string | null; client_address: string | null; items: PublicQuoteItem[]; subtotal: number; tax_total: number; total: number; service: string | null; quote_number: string | null };
+  brand?: { name: string; logo_url: string | null; style: string; phone?: string; email?: string; address?: string; tax?: { mode?: string; value?: number; currency?: string }; footer1?: string; terms?: string };
 }
 
 function anon(): Record<string, string> {

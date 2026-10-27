@@ -1,13 +1,29 @@
 /**
- * HUB by Raisen — Crea una cotizacion REAL (tabla quotes) con los 4 datos del cliente + items, y mintea el
- * token oficial (quote_approvals, hash SHA-256) para el link /q/<token> del FRONTEND (plantilla oficial, la
- * unica). Service-role directo (save_quote_with_items es authenticated-only). Devuelve el token. C4 <=75.
+ * HUB by Raisen — Crea una cotizacion REAL (tabla quotes) con los 4 datos del cliente + items, calcula el
+ * IMPUESTO configurado del negocio, asigna el NUMERO de secuencia ZR (RPC atomico) y mintea el token oficial
+ * (quote_approvals, hash SHA-256) para el link /q/<token>. Service-role directo. Devuelve el token. C4 <=75.
  */
 import { supabaseBase, supabaseHdrs } from "../../shared/infrastructure/supabase-rest.helper.ts";
 
 async function sha256hex(s: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function round2(n: number): number { return Math.round(n * 100) / 100; }
+
+// Impuesto del negocio (tenants.branding_config.pdf_tax): pct = % sobre subtotal; fixed = monto fijo; si no hay, 0.
+async function calcularImpuesto(base: string, hdrs: Record<string, string>, tenantId: string, subtotal: number): Promise<number> {
+  try {
+    const r = await fetch(`${base}/tenants?id=eq.${tenantId}&select=branding_config`, { headers: hdrs });
+    if (!r.ok) return 0;
+    const bc = (((await r.json()) as Array<{ branding_config?: { pdf_tax?: { mode?: string; value?: number } } }>)[0] ?? {}).branding_config ?? {};
+    const tx = bc.pdf_tax ?? {};
+    const val = Number(tx.value ?? 0);
+    if (tx.mode === "pct") return round2((subtotal * val) / 100);
+    if (tx.mode === "fixed") return round2(val);
+    return 0;
+  } catch { return 0; }
 }
 
 export interface QuoteItem { readonly description: string; readonly quantity: number; readonly unit_price: number; readonly line_total: number; }
@@ -21,14 +37,19 @@ export async function crearCotizacionOficial(i: CotizacionOficialInput): Promise
   const base = supabaseBase(); const hdrs = supabaseHdrs();
   if (!base || !hdrs) return null;
   try {
+    const taxTotal = await calcularImpuesto(base, hdrs, i.tenantId, i.subtotal);
+    const total = round2(i.subtotal + taxTotal);
     const qr = await fetch(`${base}/quotes`, { method: "POST", headers: { ...hdrs, Prefer: "return=representation" }, body: JSON.stringify({
       tenant_id: i.tenantId, contact_id: i.contactId, status: "sent", currency: "USD", sent_at: new Date().toISOString(),
       client_name: i.cliente.nombre, client_phone: i.cliente.telefono, client_email: i.cliente.email, client_address: i.cliente.direccion,
-      items: i.items, subtotal: i.subtotal, tax_total: 0, total: i.total, total_amount: i.total, notes: i.service,
+      items: i.items, subtotal: i.subtotal, tax_total: taxTotal, total, total_amount: total, notes: i.service,
     }) });
     if (!qr.ok) { console.error("[cotiz-oficial] quote FALLO", (await qr.text().catch(() => "")).slice(0, 150)); return null; }
     const quoteId = (((await qr.json()) as Array<{ id: string }>)[0] ?? {}).id;
     if (!quoteId) return null;
+    // Numero de secuencia ZR (atomico). Si falla, la cotizacion queda sin numero (el /q/ cae al hash): no bloquea.
+    await fetch(`${base}/rpc/assign_quote_number`, { method: "POST", headers: { ...hdrs, "content-type": "application/json" },
+      body: JSON.stringify({ p_quote_id: quoteId, p_tenant: i.tenantId }) }).catch(() => undefined);
     const token = [...crypto.getRandomValues(new Uint8Array(24))].map((b) => b.toString(16).padStart(2, "0")).join("");
     const ar = await fetch(`${base}/quote_approvals`, { method: "POST", headers: { ...hdrs, Prefer: "return=minimal" }, body: JSON.stringify({
       quote_id: quoteId, tenant_id: i.tenantId, token_hash: await sha256hex(token), expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
