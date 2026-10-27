@@ -19,12 +19,12 @@ export function PublicQuoteView({ lang, token, data }: { lang: Idioma; token: st
   if (done) return <Msg>{t(lang, done === "accepted" ? "public.accepted" : "public.rejected")}</Msg>;
   if (data.status !== "valid" || !data.quote || !data.brand) return <Msg>{t(lang, "public." + (["expired", "used", "not_found"].includes(data.status) ? data.status : "error"))}</Msg>;
   const q = data.quote, b = data.brand;
-  const biz: BizInfo = { name: b.name, phone: "", email: "", address: "", logoUrl: b.logo_url, style: b.style, tax: { mode: "pct", value: 0, currency: "USD" }, footer1: "", terms: "" };
+  const biz: BizInfo = { name: b.name, phone: b.phone ?? "", email: b.email ?? "", address: b.address ?? "", logoUrl: b.logo_url, style: b.style, tax: { mode: b.tax?.mode === "fixed" ? "fixed" : "pct", value: Number(b.tax?.value ?? 0), currency: b.tax?.currency ?? "USD" }, footer1: b.footer1 ?? "", terms: b.terms ?? "" };
   const items = q.items.map((i) => ({ description: i.description, quantity: Number(i.quantity), unitPrice: Number(i.unit_price), lineTotal: Number(i.line_total) }));
   const totals = { subtotal: Number(q.subtotal), tax: Number(q.tax_total), total: Number(q.total), currency: "USD" };
   const labels: DocLabels = { subtotal: t(lang, "doc.subtotal"), tax: t(lang, "doc.taxTotal"), total: t(lang, "quotes.total"), client: t(lang, "quotes.contact"), terms: t(lang, "quotes.tpl.terms") };
   const headers = [t(lang, "doc.description"), t(lang, "doc.qty"), t(lang, "doc.price"), t(lang, "doc.total")];
-  const cli = [q.service, q.client_phone, q.client_email, q.client_address].filter(Boolean) as string[];
+  const cli = [q.client_phone, q.client_email, q.client_address].filter(Boolean) as string[]; // contacto limpio: el servicio va como linea, no en el bloque CONTACTO
   const respond = async (d: "accepted" | "rejected") => {
     setBusy(true);
     const r = await respondPublicQuote(token, d, note);
@@ -33,7 +33,7 @@ export function PublicQuoteView({ lang, token, data }: { lang: Idioma; token: st
   };
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-4">
-      <BusinessDocument title={t(lang, "quotes.pdf.title")} style={styleOf(b.style)} biz={biz} refId={token.slice(0, 8)} client={{ name: q.client_name, lines: cli }} items={items} totals={totals} headers={headers} labels={labels} />
+      <BusinessDocument title={t(lang, "quotes.pdf.title")} style={styleOf(b.style)} biz={biz} refId={q.quote_number || token.slice(0, 8)} client={{ name: q.client_name, lines: cli }} items={items} totals={totals} headers={headers} labels={labels} />
       <textarea className="w-full rounded-xl border border-border/55 bg-card-soft p-2 text-sm text-foreground" rows={2} placeholder={t(lang, "public.note")} value={note} onChange={(e) => setNote(e.target.value)} />
       <div className="flex gap-2">
         <button type="button" className="chip flex-1 bg-green-600 py-2 font-bold text-white" disabled={busy} onClick={() => void respond("accepted")}>{t(lang, "public.accept")}</button>
