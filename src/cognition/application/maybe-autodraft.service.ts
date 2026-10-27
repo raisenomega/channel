@@ -32,7 +32,7 @@ export class MaybeAutodraftService {
     private readonly counter?: SentCounterPort,
     private readonly perfilContacto?: (contactId: string) => Promise<string | null>,
     private readonly calificar?: (contactId: string, opportunity: boolean) => Promise<string | null>,
-    private readonly postHook?: (ev: AutodraftEvent, opportunity: boolean, mode: string) => Promise<void>,
+    private readonly postHook?: (ev: AutodraftEvent, opportunity: boolean, mode: string) => Promise<string | null>,
   ) {}
 
   async ejecutar(ev: AutodraftEvent): Promise<AutodraftOutcome> {
@@ -42,7 +42,9 @@ export class MaybeAutodraftService {
       if (mode === "off") return { outcome: "no_send", reason: "off" };
       const intent = await this.classifier.clasificar(ev.content);
       if (ev.contactId && this.calificar) await this.calificar(String(ev.contactId), intent.opportunity);
-      if (this.postHook) await this.postHook(ev, intent.opportunity, mode);
+      const quoteUrl = this.postHook ? await this.postHook(ev, intent.opportunity, mode) : null;
+      // Lazo cerrado: si la cotizacion SALIO, el mensaje del link ES la respuesta -> no generamos reply redundante (ni "se la enviaremos")
+      if (quoteUrl) return { outcome: "responded", reason: "quote_sent" };
       const sentToday = mode === "autonomous" && this.counter ? await this.counter.contar(ev.tenantId) : 0;
       const complaint = intent.persona === "angel" || intent.kind === "queja";
       const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };

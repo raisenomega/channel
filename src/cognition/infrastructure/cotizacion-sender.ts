@@ -1,7 +1,7 @@
 /**
  * HUB by Raisen — Envia la cotizacion al cliente por su MISMO canal: crea la cotizacion REAL (plantilla
- * oficial) + mintea el token + envia el link /q/<token> del FRONTEND. Resuelve refs del proveedor.
- * Fail-safe (nunca rompe). Link base = PUBLIC_APP_URL (default channel-one-snowy.vercel.app). C4 <=75.
+ * oficial) + mintea el token + envia el link /q/<token> del FRONTEND. Devuelve la URL enviada (o null) para
+ * cerrar el lazo: si salio el link, el chat NO genera respuesta redundante. Fail-safe. C4 <=75.
  */
 import type { ChannelRouter } from "../../channels/application/channel.router.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
@@ -20,21 +20,24 @@ async function datosCliente(contactId: string): Promise<{ nombre: string; telefo
   return { nombre: c.display_name ?? "", telefono: c.primary_phone ?? "", email: c.primary_email ?? "", direccion: c.address ?? "" };
 }
 
-export type EnviarCotizacion = (ev: AutodraftEvent, items: readonly QuoteItem[], subtotal: number, total: number, service: string) => Promise<void>;
+export type EnviarCotizacion = (ev: AutodraftEvent, items: readonly QuoteItem[], subtotal: number, total: number, service: string) => Promise<string | null>;
 
 export function makeEnviarCotizacion(router: ChannelRouter): EnviarCotizacion {
   const convs = new ConversationRepositorySupabase();
-  return async (ev, items, subtotal, total, service) => {
+  return async (ev, items, subtotal, total, service): Promise<string | null> => {
     try {
-      if (!ev.contactId) return;
+      if (!ev.contactId) return null;
       const cli = await datosCliente(String(ev.contactId));
       const token = await crearCotizacionOficial({ tenantId: ev.tenantId, contactId: String(ev.contactId), cliente: cli, items, subtotal, total, service });
-      if (!token) { console.error("[quote-send] no se creo la cotizacion oficial"); return; }
+      if (!token) { console.error("[quote-send] no se creo la cotizacion oficial"); return null; }
       const refs: { conversationId?: string; accountId?: string } = {};
       if (ev.conversationId) { const c = await convs.buscar(ev.conversationId as ConversationId); if (c.ok && c.value) { if (c.value.providerConversationId) refs.conversationId = c.value.providerConversationId; if (c.value.providerAccountId) refs.accountId = c.value.providerAccountId; } }
-      const content = `Tu cotizacion por $${total.toFixed(2)}. Revisa y acepta aqui:\n${appUrl()}/q/${token}`;
+      const url = `${appUrl()}/q/${token}`;
+      const content = `Tu cotizacion por $${total.toFixed(2)}. Revisa y acepta aqui:\n${url}`;
       const r = await router.enviar({ to: ev.from, content, channel: ev.channel as ChannelType, ...refs });
-      if (!r.ok) console.error("[quote-send] FALLO envio", r.error); else console.error(`[quote-send] OK token=${token} to=${ev.from} ch=${ev.channel}`);
-    } catch (e) { console.error("[quote-send] ERROR", e instanceof Error ? e.message : e); }
+      if (!r.ok) { console.error("[quote-send] FALLO envio", r.error); return null; }
+      console.error(`[quote-send] OK token=${token} to=${ev.from} ch=${ev.channel}`);
+      return url;
+    } catch (e) { console.error("[quote-send] ERROR", e instanceof Error ? e.message : e); return null; }
   };
 }
