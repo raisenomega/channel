@@ -43,10 +43,13 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
   const atts = Array.isArray(m["attachments"]) ? (m["attachments"] as Record<string, unknown>[]) : [];
   const a0 = (atts[0] ?? {}) as Record<string, unknown>;
   const text = m["text"] != null ? String(m["text"]) : "";
-  const direction = String(m["direction"]) === "outgoing" ? "outbound" : "inbound";
+  const direction = (p["event"] === "message.sent" || String(m["direction"]) === "outgoing") ? "outbound" : "inbound"; // evento manda: el eco del negocio nunca se trata como entrante
   // #3: el contacto es el participante. En SALIENTE el sender es el NEGOCIO -> jamás usarlo como nombre
   // del contacto; solo en entrante el sender es la persona. Sin nombre -> neutral "Cliente" (no el negocio).
   const senderName = direction === "inbound" ? (sender["name"] ?? sender["username"]) : null;
+  const fallbackId = direction === "inbound" ? String(sender["id"] ?? "") : ""; // en saliente sender = NEGOCIO: jamas como contacto
+  const contactExternalId = String(conv["participantId"] ?? "") || fallbackId;
+  if (!contactExternalId) return null; // sin id confiable del contacto: no ingerir (evita 1 contacto por mensaje y colisiones de hilo)
   return {
     profileId,
     accountId: String(acct["id"] ?? acct["accountId"] ?? ""),
@@ -55,9 +58,9 @@ export function parseZernioMessage(payload: unknown): ZernioInbound | null {
     hasAttachments: atts.length > 0,
     providerMessageId,
     direction,
-    contactExternalId: String(conv["participantId"] ?? sender["id"] ?? providerMessageId),
+    contactExternalId,
     contactName: String(conv["participantName"] ?? senderName ?? "Cliente"),
-    contactPhone: String(m["platform"] ?? acct["platform"] ?? "") === "whatsapp" ? String(conv["participantId"] ?? sender["id"] ?? providerMessageId).replace(/[^\d+]/g, "") : "",
+    contactPhone: String(m["platform"] ?? acct["platform"] ?? "") === "whatsapp" ? contactExternalId.replace(/[^\d+]/g, "") : "",
     mediaUrl: String(a0["url"] ?? ""),
     mediaType: String(a0["type"] ?? ""),
     mediaMime: String(((a0["payload"] ?? {}) as Record<string, unknown>)["mimeType"] ?? ""),

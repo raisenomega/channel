@@ -107,7 +107,7 @@ test("#1 create: conv nueva -> guarda provider_conversation_id (conv.id) + provi
 
 test("#3 nombre: SALIENTE sin participantName -> contacto 'Cliente' (NUNCA el negocio/remitente)", async () => {
   const { d, contacts } = build();
-  const out = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: "outgoing", sender: { id: "biz", name: "Zafacones Ramos" } }, conversation: { id: "cv" } };
+  const out = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: "outgoing", sender: { id: "biz", name: "Zafacones Ramos" } }, conversation: { id: "cv", participantId: "1774346600215945" } };
   await new IngestZernioMessageHandler(d).ejecutar(out);
   const c = (contacts.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
   expect(c.displayName).toBe("Cliente");
@@ -143,6 +143,22 @@ test("Bloque 4 outbound: message.sent -> direction outbound + senderType human_a
   expect(r).toEqual({ ok: true, value: { persisted: true } });
   const msg = (msgs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
   expect(msg).toMatchObject({ direction: "outbound", senderType: "human_agent", status: "sent", content: { body: "respuesta" } });
+});
+
+test("ECO: message.sent SIN m.direction -> outbound (el evento manda; no se re-procesa como entrante)", async () => {
+  const { d, msgs } = build();
+  const eco = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: undefined, text: "respuesta del agente" } };
+  await new IngestZernioMessageHandler(d).ejecutar(eco);
+  const msg = (msgs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
+  expect(msg.direction).toBe("outbound"); // no dispara autodraft -> corta el loop
+});
+
+test("AISLAMIENTO: saliente SIN participantId -> shape_ignorado (jamas crea contacto con el id del negocio)", async () => {
+  const { d, contacts } = build();
+  const out = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: "outgoing", sender: { id: "biz" } }, conversation: { id: "cv" } };
+  const r = await new IngestZernioMessageHandler(d).ejecutar(out);
+  expect(r).toEqual({ ok: false, error: { kind: "shape_ignorado" } });
+  expect((contacts.guardar as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
 });
 
 test("Issue #3: migracion 055 (re)crea la politica RLS por tenant de messages (sin ella RLS niega todo -> inbox 200 [])", () => {
