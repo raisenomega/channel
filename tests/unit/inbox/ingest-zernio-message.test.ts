@@ -161,6 +161,15 @@ test("AISLAMIENTO: saliente SIN participantId -> shape_ignorado (jamas crea cont
   expect((contacts.guardar as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
 });
 
+test("GUARD ECO: inbound que coincide con un saliente reciente -> ignorado (no persiste, no responde)", async () => {
+  const maybeAutodraft = vi.fn();
+  const { d, msgs } = build({ esEcoReciente: vi.fn(async () => true), maybeAutodraft });
+  const r = await new IngestZernioMessageHandler(d).ejecutar(PAYLOAD);
+  expect(r).toEqual({ ok: true, value: { persisted: false } });
+  expect((msgs.guardar as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
+  expect(maybeAutodraft).not.toHaveBeenCalled();
+});
+
 test("Issue #3: migracion 055 (re)crea la politica RLS por tenant de messages (sin ella RLS niega todo -> inbox 200 [])", () => {
   const sql = readFileSync("supabase/migrations/055_messages_rls_policy_restore.sql", "utf8");
   expect(sql).toMatch(/CREATE POLICY "tenant_isolation_messages" ON public\.messages/);

@@ -24,6 +24,7 @@ export interface IngestDeps {
   readonly tenantPorProfile: (profileId: string) => Promise<TenantId | null>;
   readonly tenantPorAccount: (accountId: string) => Promise<TenantId | null>;
   readonly mensajeExiste: (t: TenantId, pmid: string) => Promise<boolean>;
+  readonly esEcoReciente?: (convId: string, content: string) => Promise<boolean>; // guard de eco por contenido
   readonly convExiste: (convId: string) => Promise<boolean>;
   readonly setConvRefs: (convId: string, participantExternalId: string, providerConversationId: string, providerAccountId: string) => Promise<void>; // 3o-b/#1: ids de envío Zernio
   readonly refreshContactName: (contactId: string, name: string) => Promise<void>; // #3: auto-update nombre real
@@ -41,12 +42,12 @@ export class IngestZernioMessageHandler {
   async ejecutar(payload: unknown): Promise<Result<{ persisted: boolean }, IngestError>> {
     const z = parseZernioMessage(payload);
     if (!z) return err({ kind: "shape_ignorado" });
-    // Issue C: primary = tenants.zernio_profile_id; fallback = channel_connections.zernio_account_id.
-    const tenantId = (await this.d.tenantPorProfile(z.profileId)) ?? (await this.d.tenantPorAccount(z.accountId));
+    const tenantId = (await this.d.tenantPorProfile(z.profileId)) ?? (await this.d.tenantPorAccount(z.accountId)); // Issue C: profile->tenant, fallback account
     if (!tenantId) return err({ kind: "tenant_no_encontrado" });
     if (await this.d.mensajeExiste(tenantId, z.providerMessageId)) return ok({ persisted: false }); // idempotente
     const contactId = this.d.detId(`ct:${tenantId}:${z.contactExternalId}`) as ContactId;
     const convId = this.d.detId(`cv:${tenantId}:${z.channel}:${z.contactExternalId}`) as ConversationId;
+    if (z.direction === "inbound" && z.content && this.d.esEcoReciente && await this.d.esEcoReciente(String(convId), z.content)) return ok({ persisted: false }); // ECO: el propio HUB devuelto como inbound -> ignorar (no persiste, no responde)
     const ch = z.channel as ChannelType;
     if (!(await this.d.convExiste(convId))) { // Issue A: crear 1 sola vez -> no resetea total_messages (lo maneja el trigger 054)
       let c = crearContacto(tenantId, z.contactName, undefined, z.contactPhone || undefined);
@@ -63,8 +64,7 @@ export class IngestZernioMessageHandler {
       id: crypto.randomUUID() as MessageId, tenantId, conversationId: convId, contactId,
       direction: z.direction, senderType: z.direction === "inbound" ? "contact" : "human_agent", senderUserId: null, channel: ch,
       provider: "zernio", providerMessageId: z.providerMessageId, content: { type: ctype, body: z.content, mediaUrl: z.mediaUrl || undefined, mediaMime: z.mediaMime || undefined },
-      hasAttachments: z.hasAttachments, status: z.direction === "inbound" ? "received" : "sent", aiMeta: { interactionId: null, confidence: null, mode: null, editedByHuman: false },
-      createdAt: new Date(),
+      hasAttachments: z.hasAttachments, status: z.direction === "inbound" ? "received" : "sent", aiMeta: { interactionId: null, confidence: null, mode: null, editedByHuman: false }, createdAt: new Date(),
     };
     const mr = await this.d.msgs.guardar(msg);
     if (!mr.ok) return fail(mr.error.cause ?? "mensaje"); // #171: propaga el error REAL de Postgres (diagnosticable)
