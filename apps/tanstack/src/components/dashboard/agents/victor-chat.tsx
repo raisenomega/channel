@@ -3,7 +3,7 @@
  * POST /tenants/:id/agents/victor/chat. Modo foco (`full` + `onClose`). Aun sin memoria de clientes
  * (eso llega con CEREBRO). C4 <=75.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { t, type Idioma } from "@/lib/i18n";
 import { apiFetch, resolveTenantId } from "@/lib/api-client";
 
@@ -17,6 +17,8 @@ export function VictorChat({ lang, accent, onClose, full }: { lang: Idioma; acce
   useEffect(() => { try { window.localStorage.setItem(chatKey, JSON.stringify(msgs)); } catch { /* storage bloqueado */ } }, [chatKey, msgs]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs, busy]); // auto-scroll: siempre lo reciente en vivo
   const send = async () => {
     const v = text.trim();
     if (!v || busy) return;
@@ -46,6 +48,7 @@ export function VictorChat({ lang, accent, onClose, full }: { lang: Idioma; acce
           <div key={i} className={"max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-1.5 text-sm text-foreground " + (m.from === "me" ? "ml-auto" : "mr-auto bg-muted/30")} style={m.from === "me" ? { background: `hsl(${accent} / 0.14)` } : undefined}>{m.text}</div>
         ))}
         {busy ? <p className="mr-auto text-xs text-muted-foreground">{t(lang, "ag.victor.thinking")}</p> : null}
+        <div ref={endRef} />
       </div>
       <div className="flex gap-2 border-t border-border/40 p-2">
         <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void send(); }} placeholder={t(lang, "ag.victor.chatPh")} className="flex-1 rounded border border-border/55 bg-card-soft p-2 text-sm text-foreground" />

@@ -20,6 +20,9 @@ function staticPrompt(): string { // ESTATICO -> se cachea (persona/directorio/c
     `Principios: ${p.principios_literales.P1_VERDAD_BRUTAL} ${p.principios_literales.P2_REPUTACION_CLIENTE_FINAL}`,
     buildAgentDirectory(),
     buildCapabilitiesBlock(),
+    "Para datos de PRODUCTOS (que incluye, precio, cantidad disponible, lote, vencimiento) tu FUENTE PRIMARIA es",
+    "el Catalogo/SKU del contexto: lee cada ficha COMPLETA byte a byte y cita de ahi, no de descripciones sueltas",
+    "del contexto general. Si el dueno pregunta por un producto, responde con lo que dice su ficha, exacto.",
     "Responde claro, breve y accionable, en espanol. Si no sabes un dato, dilo; nunca lo inventes.",
   ].join("\n");
 }
