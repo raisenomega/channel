@@ -5,7 +5,8 @@
  * C4: < 75 lineas. Pattern Result<T, E>. Sin any.
  */
 import { Result, ok, err } from "../../shared/domain/result.ts";
-import { sanitizarProsa } from "../domain/prose-sanitizer.ts";
+import { sanitizarProsa, detectarEscalacion } from "../domain/prose-sanitizer.ts";
+import { construirPromptEstatico } from "./agent-prompt.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
 import type { AgentAction } from "../domain/agent-executor.ts";
@@ -20,6 +21,7 @@ export interface AgentReasoningResult {
   readonly model: string;
   readonly costUsd: number;
   readonly tokens: { readonly input: number; readonly output: number; readonly cacheRead: number; readonly cacheCreation: number };
+  readonly escalacion: boolean; // el LLM quiso escalar/dejo instruccion interna (ya saneada del texto al cliente)
 }
 
 export class AgentReasoner {
@@ -34,24 +36,10 @@ export class AgentReasoner {
     channel: ChannelType,
     context: AgentContext,
   ): Promise<Result<AgentReasoningResult, AgentReasoningError>> {
-    const knowledge = context.knowledge.map((k) => k.knowledge).join(" | ") || "(sin knowledge)";
-
     const historial = context.history.length
       ? "HISTORIAL del hilo (usa estos datos; NUNCA vuelvas a pedir algo que el cliente YA dio):\n" + context.history.map((m) => `${m.from === "cliente" ? "Cliente" : "Tu"}: ${m.text}`).join("\n")
       : "(primer mensaje del hilo: puedes saludar una vez)";
-    const estatico = [
-      `Eres el agente IA de HUB by Raisen. Canal: ${channel}.`,
-      `Brand Voice: ${context.brandVoice}`,
-      `Catalogo (lee cada ficha COMPLETA byte a byte y cita precio/cantidad/vencimiento EXACTO de la ficha, NUNCA de memoria): ${context.catalogContext}`,
-      `Knowledge relevante: ${knowledge}`,
-      context.contactProfile ? `Contacto: ${context.contactProfile}. Personaliza el trato (no el saludo): nuevo=bienvenida; recurrente=reconoce que ya hablaron; VIP=trato prioritario.` : "",
-      "Estilo: responde BREVE y directo (2-4 frases), sin parrafos largos. Emojis solo muy conservadores (un saludo, una afirmacion simple, un agradecimiento), nunca en parrafos tecnicos ni en exceso.",
-      "Saluda SOLO si es el primer mensaje del hilo; si ya hay historial, continua sin repetir 'buenos dias'.",
-      "Usa los datos del cliente y del historial; continua desde donde quedaron, no reinicies la conversacion.",
-      "No uses herramientas, funciones ni etiquetas tipo <invoke>, <function_calls> o XML: responde SOLO texto normal para el cliente. Si hace falta un humano, dilo en palabras.",
-      "LEY ABSOLUTA DE DATOS (HUB): para avanzar a una cotizacion/orden DEBES tener nombre, telefono, direccion, email y el detalle del producto/servicio. Si falta ALGUNO, PIDELO primero y NO prometas cotizacion ni digas 'el equipo te contactara'. Nunca inventes acciones que no puedes ejecutar (marcar prioritario, contrato, agendar fecha). Cuando los datos esten COMPLETOS y pidan cotizacion, dile que se la envias por AQUI MISMO (por este chat); NUNCA menciones correo/email como medio de entrega: la entrega es siempre por esta red.",
-      "Reglas: nunca mentir sobre ser humano; no cobrar sin confirmacion; escalar ante queja, urgencia medica o riesgo legal.",
-    ].filter(Boolean).join("\n");
+    const estatico = construirPromptEstatico(channel, context);
 
     const llm = await this.provider.completar({
       systemPrompt: historial, // dinamico (cambia por turno)
@@ -71,6 +59,7 @@ export class AgentReasoner {
       model: llm.value.model,
       costUsd: llm.value.costUsd,
       tokens: { input: llm.value.tokensInput, output: llm.value.tokensOutput, cacheRead: llm.value.cacheRead ?? 0, cacheCreation: llm.value.cacheCreation ?? 0 },
+      escalacion: detectarEscalacion(llm.value.response),
     }));
   }
 }

@@ -22,3 +22,11 @@ export function sanitizarProsa(texto: string): string {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
+
+// Detecta (sin borrar) si la salida CRUDA del LLM traia una escalacion/instruccion interna,
+// para alertar al dueno. Regex SIN flag global (test() seguro sin lastIndex).
+const ESCALACION = /escalar_a_humano|escalate_to_human|aprobaci[oó]n humana|no se debe crear la cotizaci[oó]n|no est[aá] definido en el cat[aá]logo|nota\s+interna/i;
+
+export function detectarEscalacion(texto: string): boolean {
+  return ESCALACION.test(texto);
+}
