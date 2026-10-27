@@ -2,10 +2,10 @@
  * HUB by Raisen — Razonador del agente (BC Cognition).
  * Paso 4 del ciclo: ejecuta el LLM inyectando contexto (voice, catalogo,
  * knowledge y tools) y normaliza la salida a un AgentAction.
- *
  * C4: < 75 lineas. Pattern Result<T, E>. Sin any.
  */
 import { Result, ok, err } from "../../shared/domain/result.ts";
+import { sanitizarProsa } from "../domain/prose-sanitizer.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
 import type { AgentAction } from "../domain/agent-executor.ts";
@@ -63,7 +63,7 @@ export class AgentReasoner {
       tier: context.tier ?? "sonnet",
     });
     if (!llm.ok) return err({ kind: "llm_failure", cause: llm.error.kind });
-    const texto = llm.value.response.replace(/<invoke[\s\S]*?<\/invoke>/gi, "").replace(/<\/?(invoke|function_calls|parameter|antml)[^>]*>/gi, "").trim();
+    const texto = sanitizarProsa(llm.value.response); // tags de tool + prosa interna (nota interna/escalar_a_humano) NUNCA al cliente
 
     return ok(Object.freeze({
       response: texto,
