@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sanitizarProsa } from "../../../src/cognition/domain/prose-sanitizer.ts";
+import { sanitizarProsa, detectarEscalacion } from "../../../src/cognition/domain/prose-sanitizer.ts";
 
 describe("sanitizarProsa (guard de prosa interna hacia el cliente)", () => {
   it("elimina la NOTA INTERNA final y conserva la respuesta al cliente", () => {
@@ -27,5 +27,15 @@ describe("sanitizarProsa (guard de prosa interna hacia el cliente)", () => {
   it("no altera una respuesta normal del agente", () => {
     const ok = "Nuestro horario es de 9 a 5. Con gusto le preparo la cotizacion.";
     expect(sanitizarProsa(ok)).toBe(ok);
+  });
+});
+
+describe("detectarEscalacion (flag para alertar al dueno)", () => {
+  it("detecta nota interna / escalar_a_humano / aprobacion humana en la salida cruda", () => {
+    expect(detectarEscalacion("Con gusto.\n\n--- Nota interna: escalar_a_humano por precio no definido")).toBe(true);
+    expect(detectarEscalacion("Debo pedir aprobacion humana antes de cotizar.")).toBe(true);
+  });
+  it("NO marca una respuesta normal del agente", () => {
+    expect(detectarEscalacion("Nuestro horario es de 9 a 5. Con gusto le ayudo.")).toBe(false);
   });
 });
