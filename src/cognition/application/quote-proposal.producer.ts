@@ -14,6 +14,9 @@ const PROMPT = [
   "Honesto: si no hay intencion concreta o no calza ningun item del catalogo -> worth=false, lines=[].",
   "Usa SOLO items del catalogo (su nombre exacto como description, su precio exacto como unitPrice). NO inventes",
   "precios ni productos. quantity = la que pida el cliente (default 1).",
+  "FICHA: cada item trae su DESCRIPCION completa ('Incluye: ...') y su codigo [SKU]. LEELA ENTERA, byte a byte:",
+  "es tu fuente primaria para explicar al cliente que contiene ese SKU/precio. NO inventes ni omitas lo que incluye;",
+  "si el cliente pregunta que trae, responde con lo que dice la descripcion del item, nada mas.",
   "STOCK: si un item muestra [disponibles: N], NUNCA cotices una cantidad mayor a N; si disponibles: 0, NO lo",
   "ofrezcas (sin stock). Los items sin [disponibles] no controlan stock: cotiza normal.",
   "Responde SOLO JSON valido (sin texto extra) con este shape exacto:",
@@ -27,7 +30,12 @@ export class QuoteProposalProducer {
   async producir(thread: readonly ThreadMsg[], catalogo: readonly CatalogItem[], contexto: string): Promise<Result<QuoteProposal, { readonly kind: string }>> {
     if (catalogo.length === 0) return err({ kind: "catalogo_vacio" });
     const hilo = thread.map((m) => `${m.from}: ${m.text}`).join("\n");
-    const cat = catalogo.map((i) => `- ${i.name} ($${i.unitPrice})${i.trackInventory ? ` [disponibles: ${i.stock ?? 0}]` : ""}`).join("\n");
+    const cat = catalogo.map((i) => {
+      const sku = i.sku ? `[${i.sku}] ` : "";
+      const disp = i.trackInventory ? ` [disponibles: ${i.stock ?? 0}]` : "";
+      const inc = i.description && i.description.trim() ? `\n    Incluye: ${i.description.trim()}` : "";
+      return `- ${sku}${i.name} ($${i.unitPrice})${disp}${inc}`;
+    }).join("\n");
     const sys = `${PROMPT}\n\nContexto del negocio: ${contexto}\n\nCATALOGO:\n${cat}`;
     const llm = await this.ai.completar({ systemPrompt: sys, messages: [{ role: "user", content: hilo }], tools: null, maxTokens: 900, tier: "sonnet" });
     if (!llm.ok) return err({ kind: "llm_failure" });

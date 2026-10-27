@@ -5,7 +5,7 @@
 import { ok, err } from "../../shared/domain/result.ts";
 import type { Result } from "../../shared/domain/result.ts";
 
-export interface CatalogItem { readonly name: string; readonly unitPrice: number; readonly itemType: string; readonly stock?: number | null; readonly trackInventory?: boolean; }
+export interface CatalogItem { readonly name: string; readonly unitPrice: number; readonly itemType: string; readonly description?: string; readonly sku?: string; readonly stock?: number | null; readonly trackInventory?: boolean; }
 export interface QuoteLine { readonly description: string; readonly quantity: number; readonly unitPrice: number; }
 export interface QuoteProposal {
   readonly worth: boolean;      // vale proponer cotizacion?
