@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ChatThread, type ChatMsg } from "@/components/dashboard/chat-bubbles";
 
 export function ChatPanel({
-  conversationId, messages, language, onBack, composerText, setComposerText, onSend, sending, contactName, contactPhone,
+  conversationId, messages, language, onBack, composerText, setComposerText, onSend, sending, contactName, contactPhone, onEstado, resolving,
 }: {
   conversationId: string;
   messages: readonly Mensaje[];
@@ -21,6 +21,8 @@ export function ChatPanel({
   sending: boolean;
   contactName?: string;
   contactPhone?: string | null;
+  onEstado: (s: "resolved" | "open") => void;
+  resolving: boolean;
 }) {
   return (
     <div className="rounded-2xl glass-card" data-chat-thread>
@@ -59,6 +61,10 @@ export function ChatPanel({
         <Button data-chat-send variant="primary" size="sm" disabled={!composerText.trim() || sending} onClick={onSend}>
           {t(language, "chat.send")}
         </Button>
+      </div>
+      <div className="flex gap-2 border-t border-border/30 px-3 py-2">
+        <Button variant="ghost" size="sm" disabled={resolving} onClick={() => onEstado("open")}>{t(language, "chat.mantenerOpen")}</Button>
+        <Button variant="primary" size="sm" disabled={resolving} onClick={() => onEstado("resolved")}>{t(language, "chat.solucionado")}</Button>
       </div>
     </div>
   );

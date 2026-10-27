@@ -8,6 +8,8 @@ export const esMisc: Dict = {
   "chat.empty": "No hay mensajes en esta conversación.",
   "chat.placeholder": "Escribe un mensaje…",
   "chat.send": "Enviar",
+  "chat.mantenerOpen": "Mantener abierto",
+  "chat.solucionado": "Solucionado",
   "chat.hoy": "Hoy",
   "chat.ayer": "Ayer",
   "cf.agentes": "Agentes",

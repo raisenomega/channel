@@ -10,6 +10,7 @@ import type { Contact360 } from "@/lib/types";
 import { fetchMessages } from "./conversation/conversation-messages";
 import { resolveContact360 } from "./conversation/conversation-resolver";
 import { enviarMensajeConversacion } from "./conversation/conversation-send";
+import { cambiarEstadoTicket } from "./conversation/conversation-resolve";
 import { ChatPanel } from "./conversation/conversation-chat-panel";
 import { ContactPanel } from "./conversation/conversation-contact-panel";
 
@@ -25,6 +26,7 @@ function ConversationPage() {
   const navigate = useNavigate();
   const [composerText, setComposerText] = useState("");
   const [sending, setSending] = useState(false);
+  const [resolving, setResolving] = useState(false);
   const [contact360, setContact360] = useState<Contact360 | null | "loading">("loading");
 
   const { data: messages, refetch: refetchMessages } = useQuery({ queryKey: ["messages", conversationId], queryFn: () => fetchMessages(conversationId), staleTime: 10_000 });
@@ -38,6 +40,13 @@ function ConversationPage() {
     const ok = await enviarMensajeConversacion(conversationId, text); // endpoint real /api/message/send (persiste + envia por Zernio)
     if (ok) { setComposerText(""); void refetchMessages(); }
     setSending(false);
+  }
+
+  async function cambiarEstado(status: "resolved" | "open") {
+    setResolving(true);
+    const ok = await cambiarEstadoTicket(conversationId, status);
+    if (ok && status === "resolved") void navigate({ to: "/inbox" }); // resuelto -> vuelve a la lista
+    setResolving(false);
   }
 
   const c360 = contact360 !== "loading" && contact360 ? contact360 : null;
@@ -54,6 +63,8 @@ function ConversationPage() {
         setComposerText={setComposerText}
         onSend={handleSend}
         sending={sending}
+        onEstado={cambiarEstado}
+        resolving={resolving}
       />
       <ContactPanel contact={contact360} language={language} />
     </div>
