@@ -22,6 +22,7 @@ export class MessageRepositorySupabase implements MessageRepository {
         conversation_id: msg.conversationId, contact_id: msg.contactId,
         direction: msg.direction, sender_type: msg.senderType,
         channel: msg.channel, provider: msg.provider,
+        provider_message_id: msg.providerMessageId, // idempotencia REAL: antes quedaba NULL -> dedup no-op -> loop de eco
         content: msg.content.body, content_type: msg.content.type,
         media_url: msg.content.mediaUrl ?? null, media_mime: msg.content.mediaMime ?? null,
         status: msg.status,
@@ -29,7 +30,10 @@ export class MessageRepositorySupabase implements MessageRepository {
         ai_confidence: msg.aiMeta.confidence,
         ai_mode: msg.aiMeta.mode,
       });
-      if (error) return err({ kind: "persistence_failure", cause: error.message });
+      if (error) {
+        if ((error as { code?: string }).code === "23505") return ok(undefined); // defensivo: colision de unicidad -> idempotente (la dedup real la hace la app antes de insertar)
+        return err({ kind: "persistence_failure", cause: error.message });
+      }
       return ok(undefined);
     } catch (e) {
       return err({ kind: "persistence_failure", cause: String(e) });
