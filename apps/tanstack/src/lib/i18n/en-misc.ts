@@ -8,6 +8,8 @@ export const enMisc: Dict = {
   "chat.empty": "No messages in this conversation.",
   "chat.placeholder": "Type a message…",
   "chat.send": "Send",
+  "chat.mantenerOpen": "Keep open",
+  "chat.solucionado": "Resolved",
   "chat.hoy": "Today",
   "chat.ayer": "Yesterday",
   "cf.agentes": "Agents",
