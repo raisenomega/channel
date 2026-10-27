@@ -6,11 +6,10 @@ import { createRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
-import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import type { Contact360 } from "@/lib/types";
 import { fetchMessages } from "./conversation/conversation-messages";
 import { resolveContact360 } from "./conversation/conversation-resolver";
-import { makeAgentMessage } from "./conversation/conversation-format";
+import { enviarMensajeConversacion } from "./conversation/conversation-send";
 import { ChatPanel } from "./conversation/conversation-chat-panel";
 import { ContactPanel } from "./conversation/conversation-contact-panel";
 
@@ -36,18 +35,8 @@ function ConversationPage() {
     const text = composerText.trim();
     if (!text || sending) return;
     setSending(true);
-    const base = supabaseRestBase();
-    const headers = supabaseAuthHeaders();
-    if (base && headers) {
-      try {
-        const res = await fetch(`${base}/messages`, {
-          method: "POST",
-          headers: { ...headers, "content-type": "application/json" },
-          body: JSON.stringify(makeAgentMessage(conversationId, text)),
-        });
-        if (res.ok) { setComposerText(""); void refetchMessages(); }
-      } catch { /* Silencio: no mock data (N5). */ }
-    }
+    const ok = await enviarMensajeConversacion(conversationId, text); // endpoint real /api/message/send (persiste + envia por Zernio)
+    if (ok) { setComposerText(""); void refetchMessages(); }
     setSending(false);
   }
 
