@@ -1,7 +1,8 @@
 /**
  * HUB by Raisen — P2: al detectar intencion de compra/cotizar, el agente propone una COTIZACION leyendo el
- * HILO (no solo el mensaje) + el catalogo SKU. Dispara con opportunity O palabras de cotizar (atrapa
- * follow-ups tipo "hazme una nueva con 4"). Una por conversacion (dedup). NO envia: va a FIRMA. C4 <=75.
+ * HILO (no solo el mensaje) + el catalogo SKU. Dispara con pedido EXPLICITO (opportunity O palabras de cotizar)
+ * O cuando el contacto YA tiene los 4 datos (ley "si tiene los datos, dispara"). Dedup por conversacion SOLO
+ * para el disparo por datos-completos (un pedido explicito si crea nueva: "otra con 4"). C4 <=75.
  */
 import type { AutodraftEvent } from "./maybe-autodraft.service.ts";
 import type { QuoteProposalProducer } from "./quote-proposal.producer.ts";
@@ -26,21 +27,27 @@ export class MaybeQuoteService {
   async ejecutar(ev: AutodraftEvent, opportunity: boolean, mode?: string): Promise<void> {
     try {
       if (!ev.conversationId || !ev.contactId) return;
-      if (!opportunity && !QUOTE_RE.test(ev.content)) return; // compra detectada O pide cotizar (follow-ups)
-      if (!(await this.datosCompletos(String(ev.contactId)))) { console.error(`[quote] LEY ABSOLUTA: datos base incompletos conv=${ev.conversationId}, no se crea cotizacion`); return; }
+      const completo = await this.datosCompletos(String(ev.contactId));
+      const explicito = opportunity || QUOTE_RE.test(ev.content); // pedido explicito de cotizar/comprar
+      // LEY: dispara con pedido explicito O con los 4 datos ya completos (aunque el mensaje no pida nada)
+      if (!explicito && !completo) return;
+      if (!completo) { console.error(`[quote] LEY ABSOLUTA: datos base incompletos conv=${ev.conversationId}, no dispara`); return; }
+      // dedup SOLO para el disparo por datos-completos (no duplicar en cada "gracias"); explicito si crea nueva
+      if (!explicito && (await this.pendiente(String(ev.conversationId)))) { console.error(`[quote] ya hay cotizacion en conv=${ev.conversationId}, no se duplica por datos-completos`); return; }
       const catalogo = await this.leerCatalogo(ev.tenantId);
-      if (catalogo.length === 0) return;
+      if (catalogo.length === 0) { console.error(`[quote] catalogo SKU VACIO conv=${ev.conversationId}, no se puede cotizar`); return; }
       const hilo = await this.leerHilo(String(ev.conversationId));
       const thread = hilo.length ? hilo : [{ from: "cliente" as const, text: ev.content }];
       const prop = await this.producer.producir(thread, catalogo, ev.contactName ?? "");
-      if (!prop.ok || !prop.value.worth) { console.error(`[quote] no-worth conv=${ev.conversationId}`); return; }
+      if (!prop.ok || !prop.value.worth) { console.error(`[quote] no-worth (nada que cotizar del hilo) conv=${ev.conversationId}`); return; }
       await this.persistir({ tenantId: ev.tenantId, conversationId: String(ev.conversationId), contactId: String(ev.contactId), to: ev.from, channel: ev.channel }, prop.value);
-      console.error(`[quote] propuesta conv=${ev.conversationId} lineas=${prop.value.lines.length}`);
+      console.error(`[quote] propuesta conv=${ev.conversationId} lineas=${prop.value.lines.length} completo=${completo} explicito=${explicito}`);
       if (mode === "autonomous" && this.enviar) { // LEY: en autonomo el cliente recibe el link OFICIAL (cotizacion real)
         const { subtotal, total } = totales(prop.value.lines);
         const items = prop.value.lines.map((l) => ({ description: l.description, quantity: l.quantity, unit_price: l.unitPrice, line_total: Math.round(l.quantity * l.unitPrice * 100) / 100 }));
         await this.enviar(ev, items, subtotal, total, prop.value.conclusion);
-      }
+        console.error(`[quote] ENVIADO link OFICIAL conv=${ev.conversationId}`);
+      } else { console.error(`[quote] NO enviado (mode=${mode ?? "?"}: supervisado espera aprobacion o sin router) conv=${ev.conversationId}`); }
     } catch (e) { console.error(`[quote] ERROR`, e instanceof Error ? e.message : e); }
   }
 }
