@@ -1,5 +1,6 @@
 /**
- * HUB by Raisen — Bento Card: Actividad reciente (últimos 5 eventos).
+ * HUB by Raisen — Bento Card: Actividad reciente (ultimos 5 eventos).
+ * Una escalacion (type=escalation) parpadea en rojo; si trae conversationId, el click abre la conversacion.
  */
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
@@ -9,11 +10,13 @@ export interface ActivityEvent {
   readonly type: string;
   readonly label: string;
   readonly timestamp: string;
+  readonly conversationId?: string | null;
 }
 
-export function BentoActividadReciente({ lang, events }: {
+export function BentoActividadReciente({ lang, events, onOpen }: {
   lang: Idioma;
   events: readonly ActivityEvent[];
+  onOpen?: (conversationId: string) => void;
 }) {
   return (
     <div className="bento-card bento-col-3">
@@ -28,12 +31,8 @@ export function BentoActividadReciente({ lang, events }: {
       ) : (
         <ul className="flex flex-col">
           {events.slice(0, 5).map((e) => (
-            <li key={e.id} className="flex items-start gap-2 border-b border-border/20 py-1.5 last:border-0">
-              <Dot type={e.type} />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-foreground truncate">{e.label}</p>
-                <p className="text-[10px] text-dim">{e.timestamp}</p>
-              </div>
+            <li key={e.id} className="border-b border-border/20 last:border-0">
+              <Fila e={e} onOpen={onOpen} />
             </li>
           ))}
         </ul>
@@ -42,11 +41,31 @@ export function BentoActividadReciente({ lang, events }: {
   );
 }
 
+function Fila({ e, onOpen }: { e: ActivityEvent; onOpen?: (id: string) => void }) {
+  const inner = (
+    <>
+      <Dot type={e.type} />
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-foreground truncate">{e.label}</p>
+        <p className="text-[10px] text-dim">{e.timestamp}</p>
+      </div>
+    </>
+  );
+  if (e.conversationId && onOpen) {
+    const cid = e.conversationId;
+    return (
+      <button type="button" onClick={() => onOpen(cid)}
+        className="flex w-full items-start gap-2 py-1.5 text-left hover:text-primary">{inner}</button>
+    );
+  }
+  return <div className="flex items-start gap-2 py-1.5">{inner}</div>;
+}
+
 function Dot({ type }: { type: string }) {
-  const hue = type === "tenant_created" ? "var(--success)"
-    : type.startsWith("channel_connected") ? "var(--process)"
-    : type === "message_received" ? "var(--primary)"
-    : type.startsWith("draft_") ? "var(--high)"
-    : "var(--text-dim)";
+  if (type === "escalation") {
+    return <span className="inline-block mt-1 h-2 w-2 rounded-full shrink-0"
+      style={{ background: "hsl(var(--high))", boxShadow: "0 0 8px hsl(var(--high))", animation: "pulse-glow 1.2s ease-in-out infinite" }} />;
+  }
+  const hue = type === "tenant_created" ? "var(--success)" : type.startsWith("channel_connected") ? "var(--process)" : type === "message_received" ? "var(--primary)" : type.startsWith("draft_") ? "var(--high)" : "var(--text-dim)";
   return <span className="inline-block mt-1 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: `hsl(${hue})` }} />;
 }

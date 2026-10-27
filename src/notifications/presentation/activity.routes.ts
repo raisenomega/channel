@@ -14,7 +14,7 @@ export function rutaRecentActivity(): RouteDefinition {
       if (!auth.ok) return auth.error;
       const { data } = await supabase
         .from("activity_log")
-        .select("id, event_type, label, created_at")
+        .select("id, event_type, label, created_at, metadata")
         .eq("tenant_id", auth.value.tenantId)
         .order("created_at", { ascending: false })
         .limit(5);
@@ -23,6 +23,7 @@ export function rutaRecentActivity(): RouteDefinition {
         type: r.event_type as string,
         label: r.label as string,
         timestamp: r.created_at as string,
+        conversationId: (r.metadata as { conversationId?: string } | null)?.conversationId ?? null,
       }));
       return { ok: true, events };
     },
