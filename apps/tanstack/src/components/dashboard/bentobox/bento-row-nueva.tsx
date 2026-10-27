@@ -20,7 +20,7 @@ export function BentoRowNueva({ lang, events, peticiones, items, onOpen }: {
   return (
     <div className="bento mt-4">
       <BentoEstadoAgentes lang={lang} />
-      <BentoActividadReciente lang={lang} events={events} />
+      <BentoActividadReciente lang={lang} events={events} onOpen={onOpen} />
       <BentoPeticiones lang={lang} items={peticiones} />
       <BentoBusquedaInteligente lang={lang} items={items} onOpen={onOpen} />
     </div>
