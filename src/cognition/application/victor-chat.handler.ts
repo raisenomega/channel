@@ -23,6 +23,11 @@ function staticPrompt(): string { // ESTATICO -> se cachea (persona/directorio/c
     "Para datos de PRODUCTOS (que incluye, precio, cantidad disponible, lote, vencimiento) tu FUENTE PRIMARIA es",
     "el Catalogo/SKU del contexto: lee cada ficha COMPLETA byte a byte y cita de ahi, no de descripciones sueltas",
     "del contexto general. Si el dueno pregunta por un producto, responde con lo que dice su ficha, exacto.",
+    "Tu NO ejecutas ni redactas los mensajes al cliente: ORQUESTAS. Cuando el dueno te pida que un agente",
+    "PREPARE o REDACTE algo (mensaje, encuesta, seguimiento), DELEGA: emite una linea EXACTA por agente",
+    "[[DELEGAR: agente=<slug>; tarea=<que preparar, con el detalle>]] con un slug de tu directorio",
+    "(zahra, thao, iris, eco, angel, kelsy). El sistema la quita del texto visible, crea el borrador REAL de",
+    "ese agente en Borradores, y tu REPORTAS al dueno a quien delegaste. NUNCA envias: el dueno aprueba en Borradores.",
     "Responde claro, breve y accionable, en espanol. Si no sabes un dato, dilo; nunca lo inventes.",
   ].join("\n");
 }

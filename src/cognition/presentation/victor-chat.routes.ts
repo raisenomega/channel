@@ -6,6 +6,8 @@ import type { RouteDefinition } from "../../server/server-types.ts";
 import { requireTenantAuth, jsonResponse } from "../../server/auth-helpers.ts";
 import type { AIProvider } from "../domain/ai-provider.ts";
 import type { VictorChatHandler } from "../application/victor-chat.handler.ts";
+import type { GenerateDraftHandler } from "../application/generate-draft.handler.ts";
+import { procesarDelegaciones } from "../application/victor-delegar.ts";
 import { contextoMemorizado } from "../infrastructure/context-reader.ts";
 import { leerPlatformContext } from "../infrastructure/platform-context.repo.ts";
 import { buildPlatformFacts } from "../domain/platform-context.ts";
@@ -13,6 +15,7 @@ import { buildPlatformFacts } from "../domain/platform-context.ts";
 export interface VictorChatDeps {
   readonly chat: VictorChatHandler;
   readonly provider: AIProvider;
+  readonly generate: GenerateDraftHandler; // delegacion: crea el borrador del agente real
 }
 
 export function rutaVictorChat(deps: VictorChatDeps): RouteDefinition {
@@ -31,7 +34,9 @@ export function rutaVictorChat(deps: VictorChatDeps): RouteDefinition {
       const facts = [neg.brandVoice, neg.catalogContext, ...buildPlatformFacts(plat)]; // negocio MEMORIZADO + plataforma fresca (canales/humanos)
       const r = await deps.chat.ejecutar(deps.provider, message, facts, history);
       if (!r.ok) return jsonResponse(502, { ok: false, error: r.error });
-      return jsonResponse(200, { ok: true, reply: r.value.reply, model: r.value.model });
+      const d = await procesarDelegaciones(deps.generate, String(auth.value.tenantId), r.value.reply);
+      const reply = d.delegados.length ? `${d.reply}\n\n(Delegado a: ${d.delegados.join(", ")}. Revisa Borradores para aprobar; no se envia nada sin tu OK.)` : d.reply;
+      return jsonResponse(200, { ok: true, reply, model: r.value.model });
     },
   };
 }
