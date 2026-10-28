@@ -18,6 +18,7 @@ export interface WaMsg {
   text: string;
   time: string;
   status?: "sent" | "delivered" | "read";
+  messageType?: string; // image/audio/video/document/sticker -> render de media (foto/audio); text = texto plano
 }
 
 export interface WaContact {
