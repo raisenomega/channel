@@ -9,6 +9,7 @@ export type ChannelTab =
   | "cotizacion"
   | "factura"
   | "pagos"
+  | "borradores"
   | "plantillas"
   | "envios"
   | "contactos"
@@ -22,6 +23,7 @@ export const TABS: readonly ChannelTab[] = [
   "cotizacion",
   "factura",
   "pagos",
+  "borradores",
   "plantillas",
   "envios",
   "contactos",

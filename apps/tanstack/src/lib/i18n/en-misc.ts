@@ -19,7 +19,7 @@ export const enMisc: Dict = {
   "cf.plantillas": "Templates",
   "cf.cotizacion": "Quote",
   "cf.factura": "Invoice",
-  "cf.pagos": "Payments",
+  "cf.pagos": "Payments", "cf.borradores": "Drafts",
   "cf.documentos": "Documents",
   "cf.sku": "SKU", "cf.config": "Settings",
   "sku.name": "Name", "sku.desc": "Description", "sku.price": "Price", "sku.service": "Service", "sku.product": "Product", "sku.add": "Add item", "sku.catName": "Category", "sku.noCat": "No category", "sku.edit": "edit", "sku.pickShort": "Sku",

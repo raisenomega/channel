@@ -19,7 +19,7 @@ export const esMisc: Dict = {
   "cf.plantillas": "Plantillas",
   "cf.cotizacion": "Cotización",
   "cf.factura": "Factura",
-  "cf.pagos": "Pagos",
+  "cf.pagos": "Pagos", "cf.borradores": "Borradores",
   "cf.documentos": "Documentos",
   "cf.sku": "SKU", "cf.config": "Configuración",
   "sku.name": "Nombre", "sku.desc": "Descripción", "sku.price": "Precio", "sku.service": "Servicio", "sku.product": "Producto", "sku.add": "Añadir item", "sku.catName": "Categoría", "sku.noCat": "Sin categoría", "sku.edit": "editar", "sku.pickShort": "Sku",
