@@ -10,6 +10,8 @@ export const enMisc: Dict = {
   "chat.send": "Send",
   "chat.mantenerOpen": "Keep open",
   "chat.solucionado": "Resolved",
+  "escaladas.title": "Human escalations", "escaladas.abiertas": "open", "escaladas.resueltas": "resolved",
+  "escaladas.vacio": "No escalations.", "escaladas.abierto": "Open", "escaladas.resuelto": "Resolved",
   "chat.hoy": "Today",
   "chat.ayer": "Yesterday",
   "cf.agentes": "Agents",

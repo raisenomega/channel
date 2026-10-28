@@ -23,12 +23,14 @@ import { TemplatesRoute } from "@/routes/templates";
 import { PdfTemplatesRoute } from "@/routes/pdf-templates";
 import { PublicQuoteRoute } from "@/routes/q.$token";
 import { PublicInvoiceRoute } from "@/routes/i.$token";
+import { EscaladasRoute } from "@/routes/escaladas";
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
   LoginRoute,
   InboxRoute,
   ConversationRoute,
+  EscaladasRoute,
   ChannelsRoute,
   ZernioReturnRoute,
   ZernioCallbackForwardRoute,

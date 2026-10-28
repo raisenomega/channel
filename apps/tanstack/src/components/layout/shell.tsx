@@ -10,7 +10,7 @@ import { LINKS } from "./nav-items";
 import { LogoutButton } from "./logout-button";
 
 // Header CRM: ruta -> clave de alerta. Al entrar a la ruta se marca visto (badge a 0).
-const CRM_KEY: Record<string, string> = { "/orders": "crm:orders", "/payments": "crm:payments", "/quotes": "crm:quotes" };
+const CRM_KEY: Record<string, string> = { "/orders": "crm:orders", "/payments": "crm:payments", "/quotes": "crm:quotes", "/escaladas": "escaladas" };
 
 // Z-3: el nav del header es PERMANENTE en toda ruta de app. Solo se oculta en /login y en las
 // paginas-popup de OAuth (return/callback). NO depende de la sesion (useSession es reactivo y flaky:
