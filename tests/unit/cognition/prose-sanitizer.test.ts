@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sanitizarProsa, detectarEscalacion } from "../../../src/cognition/domain/prose-sanitizer.ts";
+import { sanitizarProsa, detectarEscalacion, detectarMarcador } from "../../../src/cognition/domain/prose-sanitizer.ts";
 
 describe("sanitizarProsa (guard de prosa interna hacia el cliente)", () => {
   it("elimina la NOTA INTERNA final y conserva la respuesta al cliente", () => {
@@ -44,5 +44,21 @@ describe("detectarEscalacion (flag para alertar al dueno)", () => {
     expect(detectarEscalacion("Nuestro horario es de 9 a 5. Con gusto le ayudo.")).toBe(false);
     expect(detectarEscalacion("Nuestro equipo preparara tu cotizacion de 3 zafacones.")).toBe(false);
     expect(detectarEscalacion("Para preparar tu cotizacion necesito tu nombre completo.")).toBe(false);
+  });
+});
+
+describe("detectarMarcador + saneo del marcador explicito", () => {
+  it("parsea [[ESCALAR: ...]] y [[CONSULTA: ...]] con su motivo", () => {
+    expect(detectarMarcador("Un momento. [[ESCALAR: el cliente pide humano]]")).toEqual({ tipo: "escalar", motivo: "el cliente pide humano" });
+    expect(detectarMarcador("Reviso. [[CONSULTA: precio de soterrado]]")).toEqual({ tipo: "consulta", motivo: "precio de soterrado" });
+  });
+  it("respaldo: frase natural de escalada -> escalar", () => {
+    expect(detectarMarcador("Voy a escalar su caso a la supervisora.")).toEqual({ tipo: "escalar", motivo: "" });
+  });
+  it("respuesta normal -> tipo null", () => {
+    expect(detectarMarcador("Con gusto le ayudo con su cotizacion.")).toEqual({ tipo: null, motivo: "" });
+  });
+  it("el saneador BORRA el marcador del texto al cliente", () => {
+    expect(sanitizarProsa("Claro, un momento. [[CONSULTA: precio soterrado]]")).toBe("Claro, un momento.");
   });
 });

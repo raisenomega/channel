@@ -13,7 +13,7 @@ import { ok } from "../../../src/shared/domain/result.ts";
 
 const nm = { providerMessageId: "m1", from: "+1787", channel: "whatsapp", content: "cuanto cuesta?", attachments: [] } as unknown as NormalizedMessage;
 const fakeCtx = { obtener: async () => ok({ knowledge: [], history: [], brandVoice: "VOZ", catalogContext: "CAT" }) } as unknown as AgentContextService;
-const fakeReasoner = { razonar: async () => ok({ response: "Hola, el servicio es $525.", action: {}, model: "claude", costUsd: 0 }) } as unknown as AgentReasoner;
+const fakeReasoner = { razonar: async () => ok({ response: "Hola, el servicio es $525.", action: {}, model: "claude", costUsd: 0, marcador: { tipo: null, motivo: "" } }) } as unknown as AgentReasoner;
 
 test("S3-01 contexto->reason->persist: draft con texto del reasoner + to/channel/persona", async () => {
   let captured: PersistDraftCommand | null = null;

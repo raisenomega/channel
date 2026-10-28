@@ -62,9 +62,10 @@ function Fila({ e, onOpen }: { e: ActivityEvent; onOpen?: (id: string) => void }
 }
 
 function Dot({ type }: { type: string }) {
-  if (type === "escalation") {
+  if (type === "escalation" || type === "consulta") {
+    const col = type === "escalation" ? "--high" : "--process"; // cliente=rojo, consulta de agente=color proceso
     return <span className="inline-block mt-1 h-2 w-2 rounded-full shrink-0"
-      style={{ background: "hsl(var(--high))", boxShadow: "0 0 8px hsl(var(--high))", animation: "pulse-glow 1.2s ease-in-out infinite" }} />;
+      style={{ background: `hsl(var(${col}))`, boxShadow: `0 0 8px hsl(var(${col}))`, animation: "pulse-glow 1.2s ease-in-out infinite" }} />;
   }
   const hue = type === "tenant_created" ? "var(--success)" : type.startsWith("channel_connected") ? "var(--process)" : type === "message_received" ? "var(--primary)" : type.startsWith("draft_") ? "var(--high)" : "var(--text-dim)";
   return <span className="inline-block mt-1 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: `hsl(${hue})` }} />;

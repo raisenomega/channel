@@ -8,14 +8,17 @@ import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 export async function registrarEscalacion(
   tenantId: string,
   conversationId: string | null,
-  resumen: string,
+  tipo: "escalar" | "consulta",
+  detalle: string,
 ): Promise<void> {
+  const esConsulta = tipo === "consulta";
+  const label = (esConsulta ? "AGENTE necesita a humano: " : "Escalacion a humano: ") + detalle;
   try {
     await supabase.from("activity_log").insert({
       tenant_id: tenantId,
-      event_type: "escalation",
-      label: ("Escalacion a humano: " + resumen).slice(0, 160),
-      metadata: conversationId ? { conversationId } : {},
+      event_type: esConsulta ? "consulta" : "escalation",
+      label: label.slice(0, 160),
+      metadata: conversationId ? { conversationId, tipo } : { tipo },
     });
   } catch {
     /* fail-safe: la alerta al dueno nunca bloquea la respuesta */

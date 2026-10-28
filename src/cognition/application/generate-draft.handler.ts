@@ -54,10 +54,12 @@ export class GenerateDraftHandler {
     const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, { ...contexto.value, contactProfile: cmd.contactProfile, tier: RESPONSE_TIER[cmd.personaSlug] ?? "sonnet" });
     if (!razonado.ok) return err({ kind: "llm_failure", cause: razonado.error.cause });
     await recordAgentUsage({ tenantId: String(cmd.tenantId), conversationId: cmd.conversationId ? String(cmd.conversationId) : null, personaSlug: cmd.personaSlug, model: razonado.value.model, costUsd: razonado.value.costUsd, tokens: razonado.value.tokens });
-    if (razonado.value.escalacion) {
+    const mk = razonado.value.marcador;
+    if (mk?.tipo) {
       const quien = cmd.contactName ?? cmd.contactLabel ?? cmd.normalizedMessage.from; // contacto para la alerta
-      void registrarEscalacion(String(cmd.tenantId), cmd.conversationId ? String(cmd.conversationId) : null, cmd.normalizedMessage.content); // Actividad Reciente; no bloquea
-      void alertarDuenoWhatsApp(String(cmd.tenantId), quien, cmd.normalizedMessage.content); // WhatsApp al dueno (plantilla alert_hub); no bloquea
+      const detalle = mk.motivo || cmd.normalizedMessage.content; // motivo explicito del agente, o el mensaje
+      void registrarEscalacion(String(cmd.tenantId), cmd.conversationId ? String(cmd.conversationId) : null, mk.tipo, detalle); // Actividad Reciente; no bloquea
+      void alertarDuenoWhatsApp(String(cmd.tenantId), quien, detalle); // WhatsApp al dueno; no bloquea
     }
     const d = await this.persist.ejecutar({
       tenantId: cmd.tenantId, conversationId: cmd.conversationId ?? null, contactId: cmd.contactId ?? null,
