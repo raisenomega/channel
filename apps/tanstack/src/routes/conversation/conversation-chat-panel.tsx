@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ChatThread, type ChatMsg } from "@/components/dashboard/chat-bubbles";
 
 export function ChatPanel({
-  conversationId, messages, language, onBack, composerText, setComposerText, onSend, sending, contactName, contactPhone, onEstado, resolving, scope = "cliente",
+  conversationId, messages, language, onBack, composerText, setComposerText, onSend, sending, contactName, contactPhone, onEstado, resolving, cerrado = false,
 }: {
   conversationId: string;
   messages: readonly Mensaje[];
@@ -23,7 +23,7 @@ export function ChatPanel({
   contactPhone?: string | null;
   onEstado: (s: "resolved" | "open") => void;
   resolving: boolean;
-  scope?: "cliente" | "agente";
+  cerrado?: boolean;
 }) {
   return (
     <div className="rounded-2xl glass-card flex h-[72vh] flex-col" data-chat-thread>
@@ -31,7 +31,8 @@ export function ChatPanel({
         <div className="flex items-center gap-3">
           <Avatar name={contactName || "Contacto"} size="sm" />
           <div className="nm">
-            <p className="text-sm font-semibold text-foreground">{contactName || ("#" + (conversationId.length > 8 ? conversationId.slice(0, 8) + "..." : conversationId))}</p>
+            <p className="text-sm font-semibold text-foreground">{contactName || ("#" + (conversationId.length > 8 ? conversationId.slice(0, 8) + "..." : conversationId))}
+              {cerrado ? <span className="ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))" }}>{language === "en" ? "Closed" : "Cerrado"}</span> : null}</p>
             <p className="text-xs text-muted-foreground">{contactPhone || t(language, "dash.conversaciones")}</p>
           </div>
         </div>
@@ -63,12 +64,10 @@ export function ChatPanel({
           {t(language, "chat.send")}
         </Button>
       </div>
-      {scope !== "agente" && (
-        <div className="flex gap-2 border-t border-border/30 px-3 py-2">
-          <Button variant="ghost" size="sm" disabled={resolving} onClick={() => onEstado("open")}>{t(language, "chat.mantenerOpen")}</Button>
-          <Button variant="primary" size="sm" disabled={resolving} onClick={() => onEstado("resolved")}>{t(language, "chat.solucionado")}</Button>
-        </div>
-      )}
+      <div className="flex gap-2 border-t border-border/30 px-3 py-2">
+        <Button variant="ghost" size="sm" disabled={resolving} onClick={() => onEstado("open")}>{t(language, "chat.mantenerOpen")}</Button>
+        <Button variant="primary" size="sm" disabled={resolving} onClick={() => onEstado("resolved")}>{t(language, "chat.solucionado")}</Button>
+      </div>
     </div>
   );
 }
