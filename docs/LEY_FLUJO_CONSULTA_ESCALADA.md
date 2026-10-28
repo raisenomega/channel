@@ -41,6 +41,7 @@
 
 ## Firma
 
-- **SHA firmado por Jorge Ibrain:** `__________________________________________`
+- **SHA firmado por Jorge Ibrain:** `3c3262cb617365f18fd49069f7263af8abbe5fc3`
+- **Firmado por:** Jorge Ibrain — dueño absoluto de Raisen Dev.
 - Fecha de congelación: 2026-10-28.
 - Cualquier cambio futuro requiere su autorización explícita citada en el PR.
