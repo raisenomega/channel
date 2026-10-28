@@ -17,6 +17,7 @@ export interface AgentContext {
   readonly catalogContext: string;   // catalogo/SKU real
   readonly contactProfile?: string | undefined; // B4: nombre + segmento (nuevo/recurrente/VIP) del contacto
   readonly tier?: ModelTier; // modelo por persona (rutina=haiku, venta=sonnet)
+  readonly mediaUrl?: string | undefined; readonly mediaMime?: string | undefined; // vision: si el inbound es imagen, el agente la VE
 }
 export type AgentContextError = { readonly kind: "context_unavailable"; readonly cause: string };
 export interface NegocioContext { readonly brandVoice: string; readonly catalogContext: string; }

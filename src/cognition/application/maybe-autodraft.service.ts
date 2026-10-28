@@ -21,6 +21,7 @@ export interface AutodraftEvent {
   readonly tenantId: string; readonly conversationId?: string | null; readonly contactId?: string | null;
   readonly channel: string; readonly from: string; readonly content: string;
   readonly contactName?: string; readonly contactPhone?: string; readonly persona?: string;
+  readonly mediaUrl?: string | undefined; readonly mediaMime?: string | undefined; readonly contentType?: string | undefined; // vision: imagen del inbound -> el agente la VE
 }
 
 export class MaybeAutodraftService {
@@ -59,6 +60,7 @@ export class MaybeAutodraftService {
         contactId: (ev.contactId ?? null) as ContactId | null, channel: ev.channel as ChannelType, personaSlug: ev.persona ?? intent.persona,
         normalizedMessage: nm, contactLabel: ev.from, contactName: ev.contactName, contactPhone: ev.contactPhone,
         scope: intent.opportunity ? "opportunity" : "targeted", autoSendReason: dec.reason, contactProfile: perfil ?? undefined,
+        mediaUrl: ev.contentType === "image" ? ev.mediaUrl : undefined, mediaMime: ev.mediaMime, // vision: solo imagenes se bajan al LLM
       });
       const dReason = Date.now() - tg;
       console.error(`[autodraft-timing] quote=${dQuote}ms reason=${dReason}ms total=${Date.now() - t0}ms ch=${ev.channel} send=${dec.send}`);

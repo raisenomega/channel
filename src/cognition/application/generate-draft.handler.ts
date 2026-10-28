@@ -37,6 +37,7 @@ export interface GenerateDraftCommand {
   readonly scope?: string | undefined;         // targeted | generic
   readonly autoSendReason?: string | undefined; // por que se auto-envio o no (observabilidad)
   readonly contactProfile?: string | undefined; // B4: perfil del contacto para personalizar
+  readonly mediaUrl?: string | undefined; readonly mediaMime?: string | undefined; // vision: imagen del inbound para que el agente la VEA
 }
 
 export class GenerateDraftHandler {
@@ -51,7 +52,7 @@ export class GenerateDraftHandler {
     if (!ethics.ok) return err({ kind: "ethics_violation" });
     const contexto = await this.ctx.obtener(cmd.normalizedMessage, cmd.tenantId, cmd.conversationId ? String(cmd.conversationId) : undefined);
     if (!contexto.ok) return err({ kind: "context_failed", cause: contexto.error.cause });
-    const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, { ...contexto.value, contactProfile: cmd.contactProfile, tier: RESPONSE_TIER[cmd.personaSlug] ?? "sonnet" });
+    const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, { ...contexto.value, contactProfile: cmd.contactProfile, tier: RESPONSE_TIER[cmd.personaSlug] ?? "sonnet", mediaUrl: cmd.mediaUrl, mediaMime: cmd.mediaMime });
     if (!razonado.ok) return err({ kind: "llm_failure", cause: razonado.error.cause });
     await recordAgentUsage({ tenantId: String(cmd.tenantId), conversationId: cmd.conversationId ? String(cmd.conversationId) : null, personaSlug: cmd.personaSlug, model: razonado.value.model, costUsd: razonado.value.costUsd, tokens: razonado.value.tokens });
     const mk = razonado.value.marcador;
