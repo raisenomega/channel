@@ -4,7 +4,7 @@
  */
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
 import { requireTenantAuth, jsonResponse } from "../../server/auth-helpers.ts";
-import { resolverConversacion, reabrirConversacion } from "../infrastructure/conversation-resolve.repo.ts";
+import { resolverConversacion, reabrirConversacion, listarResueltos } from "../infrastructure/conversation-resolve.repo.ts";
 
 export function rutaResolverConversacion(): RouteDefinition {
   return {
@@ -20,6 +20,18 @@ export function rutaResolverConversacion(): RouteDefinition {
         ? await reabrirConversacion(t, cid)
         : await resolverConversacion(t, cid, String(b.atendio ?? ""), String(b.nota ?? ""), String(auth.value.userId ?? ""));
       return jsonResponse(ok ? 200 : 400, { ok });
+    },
+  };
+}
+
+export function rutaListarResueltos(): RouteDefinition {
+  return {
+    method: "GET", path: "/api/conversation/resueltos",
+    handler: async (ctx: RequestContext) => {
+      const auth = await requireTenantAuth(ctx);
+      if (!auth.ok) return auth.error;
+      const rows = await listarResueltos(String(auth.value.tenantId));
+      return jsonResponse(200, { ok: true, rows });
     },
   };
 }
