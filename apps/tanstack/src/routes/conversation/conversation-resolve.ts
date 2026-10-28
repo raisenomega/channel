@@ -30,6 +30,19 @@ async function registrarResolucion(conversationId: string, id: { tenantId: strin
   } catch { /* best-effort: el record no bloquea */ }
 }
 
+// Tu respuesta a una consulta de agente se guarda como conocimiento -> el agente la CITA en adelante.
+async function guardarKnowledge(tenantId: string, texto: string): Promise<void> {
+  const base = supabaseRestBase(); const headers = supabaseAuthHeaders();
+  if (!base || !headers) return;
+  try {
+    await fetch(`${base}/agent_knowledge`, {
+      method: "POST",
+      headers: { ...headers, "content-type": "application/json", prefer: "return=minimal" },
+      body: JSON.stringify({ tenant_id: tenantId, category: "context", knowledge: texto, source: "manual", confidence: 0.8, status: "active" }),
+    });
+  } catch { /* best-effort: el aprendizaje no bloquea */ }
+}
+
 export async function cambiarEstadoTicket(conversationId: string, status: "resolved" | "open", atendio = "", nota = ""): Promise<boolean> {
   const base = supabaseRestBase(); const headers = supabaseAuthHeaders(); const id = identity();
   if (!base || !headers) return false;
@@ -40,7 +53,7 @@ export async function cambiarEstadoTicket(conversationId: string, status: "resol
       body: JSON.stringify({ status }),
     });
     if (!res.ok) return false;
-    if (status === "resolved" && id) await registrarResolucion(conversationId, id, atendio, nota);
+    if (status === "resolved" && id) { await registrarResolucion(conversationId, id, atendio, nota); if (nota) await guardarKnowledge(id.tenantId, nota); }
     return true;
   } catch { return false; }
 }

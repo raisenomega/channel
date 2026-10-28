@@ -9,10 +9,11 @@ import type { AgentKnowledgeState } from "../domain/agent.service.ts";
 import { leerHilo } from "./strategic-queries.ts";
 import type { ThreadMsg } from "../application/closing-draft.producer.ts";
 import { contextoMemorizado } from "./context-reader.ts";
+import { leerKnowledge } from "./agent-knowledge.query.ts";
 
 export class AgentContextSourceSupabase implements AgentContextSource {
-  async obtenerKnowledge(): Promise<Result<readonly AgentKnowledgeState[], AgentContextError>> {
-    return ok(Object.freeze([])); // honesto: sin repo de agent_knowledge aun
+  async obtenerKnowledge(tenantId: string): Promise<Result<readonly AgentKnowledgeState[], AgentContextError>> {
+    return ok(Object.freeze(await leerKnowledge(tenantId))); // conocimiento ACTIVO que el dueno enseno -> el agente lo cita
   }
   async obtenerHistorial(conversationId: string): Promise<Result<readonly ThreadMsg[], AgentContextError>> {
     if (!conversationId) return ok(Object.freeze([]));
