@@ -22,7 +22,7 @@ export type AgentContextError = { readonly kind: "context_unavailable"; readonly
 export interface NegocioContext { readonly brandVoice: string; readonly catalogContext: string; }
 
 export interface AgentContextSource {
-  obtenerKnowledge(): Promise<Result<readonly AgentKnowledgeState[], AgentContextError>>;
+  obtenerKnowledge(tenantId: string): Promise<Result<readonly AgentKnowledgeState[], AgentContextError>>;
   obtenerHistorial(conversationId: string): Promise<Result<readonly ThreadMsg[], AgentContextError>>;
   obtenerNegocio(tenantId: string): Promise<Result<NegocioContext, AgentContextError>>;
 }
@@ -38,7 +38,7 @@ export class AgentContextService {
       return ok(Object.freeze({ knowledge: Object.freeze([]), history: Object.freeze([]), ...FALLBACK }));
     }
     const [k, h, n] = await Promise.all([
-      this.source.obtenerKnowledge(), this.source.obtenerHistorial(conversationId ?? ""), this.source.obtenerNegocio(tenantId),
+      this.source.obtenerKnowledge(tenantId), this.source.obtenerHistorial(conversationId ?? ""), this.source.obtenerNegocio(tenantId),
     ]);
     if (!k.ok) return err(k.error);
     if (!h.ok) return err(h.error);
