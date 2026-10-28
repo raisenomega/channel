@@ -3,7 +3,7 @@
  * Reutilizable para CUALQUIER canal: burbujas, checkmarks, timestamp,
  * agrupación por día y avatar.
  */
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import type { Idioma } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/avatar";
 import { dayLabel, timeLabel, Ticks, type ChatMsg } from "./chat-bubbles-helpers";
@@ -18,6 +18,7 @@ export function ChatThread({ messages, lang, accentColor }: {
   lang: Idioma;
   accentColor?: string;
 }) {
+  const endRef = useRef<HTMLDivElement>(null);
   const grouped = useMemo(() => {
     const out: { day: string; msgs: ChatMsg[] }[] = [];
     for (const m of messages) {
@@ -28,6 +29,7 @@ export function ChatThread({ messages, lang, accentColor }: {
     }
     return out;
   }, [messages, lang]);
+  useEffect(() => { endRef.current?.scrollIntoView({ block: "end" }); }, [messages]); // siempre al ultimo
 
   return (
     <div className="chat-messages chat-thread-view">
@@ -52,6 +54,7 @@ export function ChatThread({ messages, lang, accentColor }: {
           })}
         </div>
       ))}
+      <div ref={endRef} />
     </div>
   );
 }

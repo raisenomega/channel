@@ -25,7 +25,7 @@ export function ChatPanel({
   resolving: boolean;
 }) {
   return (
-    <div className="rounded-2xl glass-card" data-chat-thread>
+    <div className="rounded-2xl glass-card flex h-[72vh] flex-col" data-chat-thread>
       <div className="flex items-center justify-between gap-3 border-b border-border/30 p-3">
         <div className="flex items-center gap-3">
           <Avatar name={contactName || "Contacto"} size="sm" />
