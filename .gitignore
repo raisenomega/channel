@@ -69,3 +69,6 @@ REPORTE_R22_AUDITOR.md
 
 # Gate self-test backups (test-gates.sh) — nunca al repo
 *.bak
+
+# Claude Code local settings
+.claude/settings.local.json

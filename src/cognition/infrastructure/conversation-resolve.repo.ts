@@ -25,3 +25,25 @@ export async function reabrirConversacion(tenantId: string, conversationId: stri
     return false;
   }
 }
+
+export interface ResueltoRow { conversationId: string; atendio: string; createdAt: string; label: string }
+
+// Lectura via SERVICE-ROLE: el frontend NO puede leer activity_log (su RLS usa auth.jwt()->>'tenant_id'
+// top-level, y el tenant del usuario vive en app_metadata -> NULL). Dedup por conversacion (ultimo resuelto).
+export async function listarResueltos(tenantId: string): Promise<ResueltoRow[]> {
+  try {
+    const { data } = await supabase.from("activity_log").select("label,created_at,metadata").eq("tenant_id", tenantId).eq("event_type", "resolved").order("created_at", { ascending: false }).limit(100);
+    const seen = new Set<string>();
+    const out: ResueltoRow[] = [];
+    for (const x of (data ?? []) as Array<{ label?: string; created_at?: string; metadata?: { conversationId?: string; atendio?: string } | null }>) {
+      const m = x.metadata ?? {};
+      const c = String(m.conversationId ?? "");
+      if (!c || seen.has(c)) continue;
+      seen.add(c);
+      out.push({ conversationId: c, atendio: String(m.atendio ?? ""), createdAt: String(x.created_at ?? ""), label: String(x.label ?? "") });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}

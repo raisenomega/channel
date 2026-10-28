@@ -41,10 +41,9 @@ export class SendMessageHandler {
     const conv = convResult.value;
     if (!conv) return err({ kind: "conversacion_no_encontrada" });
 
-    // Regla de negocio: no se envían mensajes a conversación resuelta
-    if (conv.status === "resolved") {
-      return err({ kind: "conversacion_resuelta" });
-    }
+    // Un envío HUMANO retoma el ticket resuelto (lo reabre) y continúa; IA/system sí se bloquean.
+    if (conv.status === "resolved" && cmd.senderType !== "human_agent") return err({ kind: "conversacion_resuelta" });
+    if (conv.status === "resolved") await this.convRepo.guardar(Object.freeze({ ...conv, status: "open" as typeof conv.status }));
 
     const aiMeta = cmd.senderType === "ai_agent"
       ? { interactionId: cmd.aiInteractionId ?? null, confidence: cmd.aiConfidence ?? null, mode: cmd.aiMode ?? null, editedByHuman: false }
@@ -66,7 +65,7 @@ export class SendMessageHandler {
     // 3o-b/#1: entrega real por el inbox de Zernio (conversationId=ruta, accountId=body; ambos del webhook).
     // Best-effort: si faltan (hilo viejo) o falla, el mensaje queda persistido/visible (el adapter dead-letterea).
     if (this.dispatcher && conv.providerConversationId && conv.providerAccountId && cmd.content.body) {
-      await this.dispatcher.enviar({ to: conv.participantExternalId ?? "", content: cmd.content.body, channel: cmd.channel, conversationId: conv.providerConversationId, accountId: conv.providerAccountId });
+      try { await this.dispatcher.enviar({ to: conv.participantExternalId ?? "", content: cmd.content.body, channel: cmd.channel, conversationId: conv.providerConversationId, accountId: conv.providerAccountId }); } catch { /* best-effort: ya persistio; el adapter dead-letterea */ }
     }
     return ok(undefined);
   }

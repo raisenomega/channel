@@ -147,12 +147,34 @@ test("SendMessageHandler â€” debe fallar si conversacion esta resuelta", as
     channel: "whatsapp",
     provider: "zernio",
     content: { type: "text", body: "Hola" },
-    senderType: "human_agent",
+    senderType: "ai_agent",
   };
   const result = await handler.ejecutar(cmd);
 
   expect(!result.ok).toBe(true);
   expect(result.error.kind).toBe("conversacion_resuelta");
+});
+
+test("SendMessageHandler â€” un envio HUMANO reabre la conversacion resuelta", async () => {
+  let reabierto = false;
+  const mockConvRepo: ConversationRepository = {
+    buscar: async (_id) => ok(convResuelta),
+    guardar: async (c) => { if (c.status === "open") reabierto = true; return ok(undefined); },
+    buscarPorContacto: async (_tid, _cid) => ok([]),
+    buscarActivos: async (_tid) => ok([]),
+  };
+  const mockMsgRepo: MessageRepository = {
+    guardar: async (_m) => ok(undefined),
+    buscar: async (_id) => ok(null),
+    buscarPorConversacion: async (_cid, _limit) => ok([]),
+  };
+  const handler = new SendMessageHandler(mockConvRepo, mockMsgRepo);
+  const result = await handler.ejecutar({
+    tenantId: TID, conversationId: COID, contactId: CID, channel: "whatsapp",
+    provider: "zernio", content: { type: "text", body: "Hola" }, senderType: "human_agent",
+  });
+  expect(result.ok).toBe(true);
+  expect(reabierto).toBe(true);
 });
 
 test("SendMessageHandler â€” debe fallar con contenido_vacio si body es vacio", async () => {
