@@ -1,14 +1,13 @@
 /**
- * HUB by Raisen — Data del scope AGENTE (consulta). Reusa el endpoint backend (service-role):
- * GET /api/agent-consulta/:id (hilo) y POST /api/agent-consulta/resolve (respuesta del dueno ->
- * resolved + agent_knowledge). Mapea el hilo a Mensaje[] y al Contact360 del AGENTE para reusar
- * ChatPanel y ContactPanel sin cambios. C4 <=75.
+ * HUB by Raisen — Data del scope AGENTE (consulta). Reusa los endpoints backend (service-role):
+ * GET /api/agent-consulta/:id (hilo), POST /api/agent-consulta/mensaje (seguir el hilo), POST
+ * /api/agent-consulta/resolve (cierre -> resolved + agent_knowledge). Mapea el hilo a Mensaje[] y al
+ * Contact360 del AGENTE para reusar ChatPanel y ContactPanel sin cambios. C4 <=75.
  */
 import { apiFetch } from "@/lib/api-client";
-import { readLocalSession } from "@/lib/auth";
 import type { Mensaje, Contact360 } from "@/lib/types";
 
-export interface ConsultaThread { consultaId: string; agentSlug: string; pregunta: string; respuesta: string; resuelta: boolean; createdAt: string; conversationId: string }
+export interface ConsultaThread { consultaId: string; agentSlug: string; pregunta: string; respuestas: { texto: string; createdAt: string }[]; resuelta: boolean; createdAt: string; conversationId: string }
 
 export async function fetchConsultaThread(consultaId: string): Promise<ConsultaThread | null> {
   try {
@@ -21,13 +20,18 @@ export async function fetchConsultaThread(consultaId: string): Promise<ConsultaT
   }
 }
 
-export async function responderConsulta(consultaId: string, agentSlug: string, pregunta: string, respuesta: string): Promise<boolean> {
+export async function agregarMensajeConsulta(consultaId: string, texto: string): Promise<boolean> {
   try {
-    const atendio = readLocalSession()?.user?.email ?? "";
-    const res = await apiFetch("/api/agent-consulta/resolve", {
-      method: "POST",
-      body: JSON.stringify({ consultaId, agentSlug, pregunta, respuesta, atendio }),
-    });
+    const res = await apiFetch("/api/agent-consulta/mensaje", { method: "POST", body: JSON.stringify({ consultaId, texto }) });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function resolverConsulta(consultaId: string, agentSlug: string, pregunta: string, respuesta: string, atendio: string): Promise<boolean> {
+  try {
+    const res = await apiFetch("/api/agent-consulta/resolve", { method: "POST", body: JSON.stringify({ consultaId, agentSlug, pregunta, respuesta, atendio }) });
     return res.ok;
   } catch {
     return false;
@@ -37,7 +41,7 @@ export async function responderConsulta(consultaId: string, agentSlug: string, p
 export function consultaAMensajes(thread: ConsultaThread | null): Mensaje[] {
   if (!thread) return [];
   const out: Mensaje[] = [{ id: thread.consultaId + ":q", conversationId: thread.consultaId, senderType: "contact", senderId: null, content: thread.pregunta, messageType: "text", createdAt: thread.createdAt }];
-  if (thread.resuelta && thread.respuesta) out.push({ id: thread.consultaId + ":a", conversationId: thread.consultaId, senderType: "agent", senderId: null, content: thread.respuesta, messageType: "text", createdAt: thread.createdAt });
+  thread.respuestas.forEach((r, i) => out.push({ id: thread.consultaId + ":a" + i, conversationId: thread.consultaId, senderType: "agent", senderId: null, content: r.texto, messageType: "text", createdAt: r.createdAt }));
   return out;
 }
 

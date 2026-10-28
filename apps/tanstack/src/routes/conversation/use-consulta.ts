@@ -1,0 +1,40 @@
+/**
+ * HUB by Raisen — Hook del scope AGENTE: mismo flujo que el cliente. El composer agrega mensajes al
+ * hilo (seguir); [Solucionado] abre el modal de firma; [Guardar] cierra -> resolved + agent_knowledge
+ * y aterriza en Tickets Resueltos. Reabrir el hilo desde Resueltos permite seguir. C4 <=75.
+ */
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { readLocalSession } from "@/lib/auth";
+import { fetchConsultaThread, agregarMensajeConsulta, resolverConsulta } from "./consulta-data";
+
+export function useConsulta(consultaId: string) {
+  const qc = useQueryClient();
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { data: thread } = useQuery({ queryKey: ["consulta", consultaId], queryFn: () => fetchConsultaThread(consultaId), staleTime: 5_000 });
+  const refrescar = () => { void qc.invalidateQueries({ queryKey: ["consulta", consultaId] }); void qc.invalidateQueries({ queryKey: ["tickets-resueltos"] }); };
+
+  async function onSend(): Promise<void> {
+    const txt = text.trim();
+    if (!txt || sending) return;
+    setSending(true);
+    const ok = await agregarMensajeConsulta(consultaId, txt);
+    if (ok) { setText(""); refrescar(); }
+    setSending(false);
+  }
+
+  function onEstado(s: "resolved" | "open"): void { if (s === "resolved") setDialogOpen(true); }
+
+  async function guardar(atendio: string, nota: string): Promise<void> {
+    if (!thread) return;
+    setSaving(true);
+    const ok = await resolverConsulta(consultaId, thread.agentSlug, thread.pregunta, nota, atendio || readLocalSession()?.user?.email || "");
+    if (ok) { setDialogOpen(false); refrescar(); }
+    setSaving(false);
+  }
+
+  return { thread, text, setText, sending, onSend, dialogOpen, setDialogOpen, saving, onEstado, guardar };
+}

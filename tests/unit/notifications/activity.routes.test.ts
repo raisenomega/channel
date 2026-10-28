@@ -9,7 +9,7 @@ vi.mock("../../../src/shared/infrastructure/supabase.client.ts", () => {
   const chain: Record<string, unknown> = {};
   const self = (): Record<string, unknown> => chain;
   Object.assign(chain, {
-    from: self, select: self, order: self, limit: self,
+    from: self, select: self, order: self, limit: self, neq: self,
     eq: (col: string, val: unknown) => { db.filtros.push([col, val]); return chain; },
     then: (resolve: (v: unknown) => void) => resolve({ data: db.rows, error: null }),
   });

@@ -16,6 +16,7 @@ export function rutaRecentActivity(): RouteDefinition {
         .from("activity_log")
         .select("id, event_type, label, created_at, metadata")
         .eq("tenant_id", auth.value.tenantId)
+        .neq("event_type", "consulta_msg")
         .order("created_at", { ascending: false })
         .limit(5);
       const events = (data ?? []).map((r) => {
