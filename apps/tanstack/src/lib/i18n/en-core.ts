@@ -8,7 +8,7 @@ export const enCore: Dict = {
   "nav.contacts": "CRM",
   "nav.quotes": "Quotes", "nav.pdfTemplates": "PDF Template",
   "nav.orders": "Orders",
-  "nav.payments": "Payments",
+  "nav.payments": "Payments", "nav.borradores": "Drafts",
   "nav.automation": "Automation",
   "nav.reports": "Reports",
   "nav.agent": "AI",

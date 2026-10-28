@@ -4,6 +4,7 @@ import { LoginRoute } from "@/routes/login";
 import { InboxRoute } from "@/routes/inbox";
 import { ConversationRoute } from "@/routes/inbox.$conversationId";
 import { ActividadRoute } from "@/routes/actividad";
+import { BorradoresRoute } from "@/routes/borradores";
 import { ChannelsRoute } from "@/routes/channels";
 import { ZernioReturnRoute } from "@/routes/zernio-return";
 import { ZernioCallbackForwardRoute } from "@/routes/channels.zernio.callback";
@@ -31,6 +32,7 @@ export const routeTree = rootRoute.addChildren([
   InboxRoute,
   ConversationRoute,
   ActividadRoute,
+  BorradoresRoute,
   ChannelsRoute,
   ZernioReturnRoute,
   ZernioCallbackForwardRoute,
