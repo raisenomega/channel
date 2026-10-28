@@ -15,9 +15,23 @@ function mapear(data: unknown): Array<Record<string, unknown>> {
   });
 }
 
+type Fila = { id: string; event_type: string; label: string; created_at: string; metadata: { consultaId?: string; conversationId?: string } | null };
+
+// La tarjeta muestra pendientes + feed, NUNCA los resueltos: saca las filas 'resolved' y las
+// consulta/escalada que ya tienen un resolved que las cierra (mismo criterio que contarPendientes).
 async function leer(tenantId: string, limit: number): Promise<Array<Record<string, unknown>>> {
-  const { data } = await supabase.from("activity_log").select("id, event_type, label, created_at, metadata").eq("tenant_id", tenantId).neq("event_type", "consulta_msg").order("created_at", { ascending: false }).limit(limit);
-  return mapear(data);
+  const { data } = await supabase.from("activity_log").select("id, event_type, label, created_at, metadata").eq("tenant_id", tenantId).neq("event_type", "consulta_msg").order("created_at", { ascending: false }).limit(300);
+  const rows = (data ?? []) as Fila[];
+  const rCons = new Set<string>(); const rConv = new Set<string>();
+  for (const r of rows) if (r.event_type === "resolved") { const m = r.metadata ?? {}; if (m.consultaId) rCons.add(m.consultaId); if (m.conversationId) rConv.add(m.conversationId); }
+  const visibles = rows.filter((r) => {
+    if (r.event_type === "resolved") return false; // resueltos viven en Tickets Resueltos, no en la tarjeta
+    const m = r.metadata ?? {};
+    if (r.event_type === "consulta" && m.consultaId && rCons.has(m.consultaId)) return false; // consulta ya atendida
+    if (r.event_type === "escalation" && m.conversationId && rConv.has(m.conversationId)) return false; // escalada ya atendida
+    return true;
+  });
+  return mapear(visibles.slice(0, limit));
 }
 
 export function rutaRecentActivity(): RouteDefinition {

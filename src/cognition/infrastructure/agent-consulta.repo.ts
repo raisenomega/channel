@@ -38,9 +38,18 @@ export async function agregarMensaje(tenantId: string, consultaId: string, texto
 export async function resolverConsulta(tenantId: string, consultaId: string, agentSlug: string, pregunta: string, respuesta: string, atendio: string, userId: string): Promise<boolean> {
   try {
     await supabase.from("activity_log").insert({ tenant_id: tenantId, event_type: "resolved", label: ("Consulta de " + (agentSlug || "agente") + " resuelta").slice(0, 160), metadata: { consultaId, kind: "consulta", agentSlug, atendio, respuesta, resolvedBy: userId } });
-    if (respuesta) await supabase.from("agent_knowledge").insert({ tenant_id: tenantId, category: "context", knowledge: (pregunta ? pregunta + " -> " : "") + respuesta, source: "manual", confidence: 0.85, status: "active" });
+    const aprendido = await aprendizajeConsulta(tenantId, consultaId, pregunta, respuesta);
+    if (aprendido) await supabase.from("agent_knowledge").insert({ tenant_id: tenantId, category: "context", knowledge: aprendido, source: "manual", confidence: 0.85, status: "active" });
     return true;
   } catch {
     return false;
   }
+}
+
+// Aprende TODO lo escrito en el hilo (los consulta_msg del dueno) + la nota de cierre, no solo la nota.
+async function aprendizajeConsulta(tenantId: string, consultaId: string, pregunta: string, nota: string): Promise<string> {
+  const { data } = await supabase.from("activity_log").select("metadata").eq("tenant_id", tenantId).eq("event_type", "consulta_msg").eq("metadata->>consultaId", consultaId).order("created_at", { ascending: true }).limit(50);
+  const msgs = ((data ?? []) as Array<{ metadata?: { texto?: string } | null }>).map((x) => String(x.metadata?.texto ?? "")).filter(Boolean);
+  const respuestas = [...msgs, nota].filter(Boolean).join(" | ");
+  return respuestas ? ((pregunta ? pregunta + " -> " : "") + respuestas).slice(0, 1200) : "";
 }

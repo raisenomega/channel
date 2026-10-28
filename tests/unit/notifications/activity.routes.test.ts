@@ -70,3 +70,17 @@ test("A-09b metadata.conversationId se mapea al evento (para abrir la conversaci
   const r = await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1"))) as EventsOk;
   expect(r.events[0]).toMatchObject({ type: "escalation", conversationId: "conv-9" });
 });
+
+test("ALERTA-FIX: consulta/escalada YA resuelta NO aparece en la tarjeta; la pendiente SI (sin ruido)", async () => {
+  db.rows = [
+    { id: "r1", event_type: "resolved", label: "Consulta resuelta", created_at: "2026-10-16T03:00:00Z", metadata: { consultaId: "c1" } },
+    { id: "r2", event_type: "resolved", label: "Atendio", created_at: "2026-10-16T02:30:00Z", metadata: { conversationId: "conv-7" } },
+    { id: "c1row", event_type: "consulta", label: "Consulta de eco", created_at: "2026-10-16T02:00:00Z", metadata: { consultaId: "c1", agentSlug: "eco" } },
+    { id: "esc7", event_type: "escalation", label: "Escalada atendida", created_at: "2026-10-16T01:30:00Z", metadata: { conversationId: "conv-7" } },
+    { id: "escPend", event_type: "escalation", label: "Escalada PENDIENTE", created_at: "2026-10-16T01:00:00Z", metadata: { conversationId: "conv-8" } },
+  ];
+  const r = await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1"))) as EventsOk;
+  const ids = r.events.map((e) => e["id"]);
+  expect(ids).toEqual(["escPend"]); // solo la pendiente; resueltos + ya-atendidas fuera
+  expect(r.events.every((e) => e["type"] !== "resolved")).toBe(true); // ninguna fila 'resolved' en la tarjeta
+});
