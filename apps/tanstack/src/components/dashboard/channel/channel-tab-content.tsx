@@ -21,7 +21,7 @@ import { AgendaCalendar } from "@/components/dashboard/agenda/agenda-calendar";
 import { ChannelQuoteTab } from "./channel-quote-tab";
 import { ChannelInvoiceTab } from "./channel-invoice-tab";
 import { ChannelSkuTab } from "./channel-sku-tab"; import { ChannelConfigTab } from "./channel-config-tab";
-import { AgentNavigator } from "@/components/dashboard/agents/agent-navigator";
+import { AgentNavigator } from "@/components/dashboard/agents/agent-navigator"; import { BorradoresPage } from "@/components/dashboard/agents/borradores-page";
 
 function useTabData(contactId: string | null) {
   const agents = useQuery({ queryKey: ["channel-agents"], queryFn: fetchAgents, staleTime: 30_000 });
@@ -48,6 +48,7 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
 
   switch (activeTab) {
     case "agentes": return <AgentNavigator lang={lang} accent={accent} />;
+    case "borradores": return <BorradoresPage lang={lang} />;
     case "contactos":
       if (!hasHilo || !contactInfo) return sinHilo;
       return (
@@ -64,10 +65,8 @@ export function TabContent({ lang, activeTab, accent, contactId, contactInfo }: 
       return hasHilo && contactId ? <ChannelInvoiceTab lang={lang} contactId={contactId} /> : sinHilo;
     case "pagos":
       return hasHilo ? <CardGrid title={t(lang, "cf.pagos")} empty={t(lang, "payments.empty")} accent={accent} cards={paymentsToCards(data.payments, lang)} /> : sinHilo;
-    case "agenda": return <AgendaCalendar lang={lang} accent={accent} />;
-    case "sku": return <ChannelSkuTab lang={lang} accent={accent} />;
-    case "config": return <ChannelConfigTab lang={lang} />;
-    case "envios": return <SimpleListView title={t(lang, "cf.envios")} empty={empty} accent={accent} items={[]} />;
+    case "agenda": return <AgendaCalendar lang={lang} accent={accent} />; case "sku": return <ChannelSkuTab lang={lang} accent={accent} />;
+    case "config": return <ChannelConfigTab lang={lang} />; case "envios": return <SimpleListView title={t(lang, "cf.envios")} empty={empty} accent={accent} items={[]} />;
     case "documentos":
       return <SimpleListView title={t(lang, "cf.documentos")} empty={empty} accent={accent} items={docsToItems(data.documents)} />;
     default:

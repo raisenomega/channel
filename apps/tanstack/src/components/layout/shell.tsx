@@ -4,7 +4,6 @@ import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
 import { useSession } from "@/lib/use-session";
 import { AlertBadge } from "@/components/ui/alert-badge";
-import { BorradoresBadge } from "./borradores-badge";
 import { useMarkRead } from "@/lib/alerts/alerts-context";
 import { BottomNav } from "./bottom-nav";
 import { LINKS } from "./nav-items";
@@ -45,7 +44,7 @@ export function Shell() {
               {LINKS.map((l) => (
                 <Link key={l.to} to={l.to} aria-selected={pathname.startsWith(l.to)} className="nav-item">
                   {t(language, l.label)}
-                  {l.to === "/borradores" ? <BorradoresBadge /> : <AlertBadge keyName={CRM_KEY[l.to]} />}
+                  <AlertBadge keyName={CRM_KEY[l.to]} />
                 </Link>
               ))}
             </nav>

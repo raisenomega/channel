@@ -4,6 +4,7 @@
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { TABS, type ChannelTab } from "./channel-tabs";
+import { BorradoresBadge } from "@/components/layout/borradores-badge";
 
 export function ChannelTabs({ lang, accent, active, onTabChange }: {
   lang: Idioma;
@@ -22,6 +23,7 @@ export function ChannelTabs({ lang, accent, active, onTabChange }: {
           style={active === tab ? { color: `hsl(${accent})`, borderColor: `hsl(${accent})` } : undefined}
         >
           <span className="chip-name">{t(lang, "cf." + tab)}</span>
+          {tab === "borradores" ? <BorradoresBadge /> : null}
         </button>
       ))}
     </nav>

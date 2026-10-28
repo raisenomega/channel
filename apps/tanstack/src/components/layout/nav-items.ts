@@ -10,7 +10,6 @@ export const LINKS: NavItem[] = [
   { to: "/quotes", label: "nav.quotes" },
   { to: "/orders", label: "nav.orders" },
   { to: "/payments", label: "nav.payments" },
-  { to: "/borradores", label: "nav.borradores" },
   { to: "/automation", label: "nav.automation" },
   { to: "/reports", label: "nav.reports" },
   { to: "/agent", label: "nav.agent" },
