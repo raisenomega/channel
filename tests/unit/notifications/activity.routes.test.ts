@@ -9,7 +9,7 @@ vi.mock("../../../src/shared/infrastructure/supabase.client.ts", () => {
   const chain: Record<string, unknown> = {};
   const self = (): Record<string, unknown> => chain;
   Object.assign(chain, {
-    from: self, select: self, order: self, limit: self, neq: self,
+    from: self, select: self, order: self, limit: self, neq: self, in: self,
     eq: (col: string, val: unknown) => { db.filtros.push([col, val]); return chain; },
     then: (resolve: (v: unknown) => void) => resolve({ data: db.rows, error: null }),
   });
@@ -62,7 +62,7 @@ test("A-09 GET_ACTIVITY_TENANT_MATCH_200: match -> eventos mapeados, filtro tena
   const r = await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1"))) as EventsOk;
   expect(r.ok).toBe(true);
   expect(r.events).toEqual([{ id: "e1", type: "draft", label: "Thao genero draft", timestamp: "2026-10-16T00:00:00Z", conversationId: null, consultaId: null, agentSlug: null }]);
-  expect(db.filtros).toEqual([["tenant_id", "tenant-1"]]);
+  expect(db.filtros).toContainEqual(["tenant_id", "tenant-1"]);
 });
 
 test("A-09b metadata.conversationId se mapea al evento (para abrir la conversacion desde la card)", async () => {

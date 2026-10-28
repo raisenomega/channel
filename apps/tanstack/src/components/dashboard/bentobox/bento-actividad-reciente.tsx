@@ -1,6 +1,7 @@
 /**
- * HUB by Raisen — Bento Card: Actividad reciente (ultimos 5 eventos).
- * Una escalacion (type=escalation) parpadea en rojo; si trae conversationId, el click abre la conversacion.
+ * HUB by Raisen — Bento Card: Actividad reciente (ultimos 5). ALERTA parpadea (gris<->rojo) mientras
+ * haya consulta de agente o escalada SIN atender; "Ver todas" abre la lista completa (/actividad).
+ * consulta -> scope agente (c:{consultaId}); cliente -> conversacion. CONGELADO (LEY, ver docs).
  */
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
@@ -15,10 +16,12 @@ export interface ActivityEvent {
   readonly agentSlug?: string | null;
 }
 
-export function BentoActividadReciente({ lang, events, onOpen }: {
+export function BentoActividadReciente({ lang, events, alertas = 0, onOpen, onVerTodas }: {
   lang: Idioma;
   events: readonly ActivityEvent[];
+  alertas?: number;
   onOpen?: (conversationId: string) => void;
+  onVerTodas?: () => void;
 }) {
   return (
     <div className="bento-card bento-col-3">
@@ -27,23 +30,23 @@ export function BentoActividadReciente({ lang, events, onOpen }: {
           <circle cx="10" cy="10" r="7" /><polyline points="10,5 10,10 14,12" />
         </svg>
         <span>{t(lang, "dash.actividadReciente")}</span>
+        {alertas > 0 ? <span className="alerta-blink" style={{ marginLeft: "auto" }}>ALERTA</span> : null}
       </div>
       {events.length === 0 ? (
         <p className="text-xs text-muted-foreground">{t(lang, "dash.sinActividad")}</p>
       ) : (
         <ul className="flex flex-col">
           {events.slice(0, 5).map((e) => (
-            <li key={e.id} className="border-b border-border/20 last:border-0">
-              <Fila e={e} onOpen={onOpen} />
-            </li>
+            <li key={e.id} className="border-b border-border/20 last:border-0"><ActivityRow e={e} onOpen={onOpen} /></li>
           ))}
         </ul>
       )}
+      <button type="button" onClick={onVerTodas} className="mt-2 block text-[11px] text-primary hover:underline">{lang === "en" ? "See all" : "Ver todas"}</button>
     </div>
   );
 }
 
-function Fila({ e, onOpen }: { e: ActivityEvent; onOpen?: (id: string) => void }) {
+export function ActivityRow({ e, onOpen }: { e: ActivityEvent; onOpen?: (id: string) => void }) {
   const inner = (
     <>
       <Dot type={e.type} />
@@ -53,22 +56,17 @@ function Fila({ e, onOpen }: { e: ActivityEvent; onOpen?: (id: string) => void }
       </div>
     </>
   );
-  // consulta de agente -> scope AGENTE (prefijo c:); cliente -> conversacion normal. Reusa el mismo onOpen.
   const target = e.type === "consulta" && e.consultaId ? "c:" + e.consultaId : (e.conversationId ?? null);
   if (target && onOpen) {
-    return (
-      <button type="button" onClick={() => onOpen(target)}
-        className="flex w-full items-start gap-2 py-1.5 text-left hover:text-primary">{inner}</button>
-    );
+    return <button type="button" onClick={() => onOpen(target)} className="flex w-full items-start gap-2 py-1.5 text-left hover:text-primary">{inner}</button>;
   }
   return <div className="flex items-start gap-2 py-1.5">{inner}</div>;
 }
 
 function Dot({ type }: { type: string }) {
   if (type === "escalation" || type === "consulta") {
-    const col = type === "escalation" ? "--high" : "--process"; // cliente=rojo, consulta de agente=color proceso
-    return <span className="inline-block mt-1 h-2 w-2 rounded-full shrink-0"
-      style={{ background: `hsl(var(${col}))`, boxShadow: `0 0 8px hsl(var(${col}))`, animation: "pulse-glow 1.2s ease-in-out infinite" }} />;
+    const col = type === "escalation" ? "--high" : "--process"; // cliente=rojo, consulta=proceso
+    return <span className="inline-block mt-1 h-2 w-2 rounded-full shrink-0" style={{ background: `hsl(var(${col}))`, boxShadow: `0 0 8px hsl(var(${col}))`, animation: "pulse-glow 1.2s ease-in-out infinite" }} />;
   }
   const hue = type === "tenant_created" ? "var(--success)" : type.startsWith("channel_connected") ? "var(--process)" : type === "message_received" ? "var(--primary)" : type.startsWith("draft_") ? "var(--high)" : "var(--text-dim)";
   return <span className="inline-block mt-1 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: `hsl(${hue})` }} />;
