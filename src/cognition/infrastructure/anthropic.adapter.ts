@@ -8,7 +8,7 @@ import type { AIProvider, AICompletionParams, AICompletionResult, AIError } from
 import { DEGRADATION_CHAIN } from "../domain/routing-table.ts";
 import type { ModelTier } from "../domain/routing-table.ts";
 import { usageDesde } from "../domain/model-pricing.ts";
-import { AnthropicModelResolver } from "./anthropic-model-resolver.ts";
+import { AnthropicModelResolver } from "./anthropic-model-resolver.ts"; import { construirMensajes } from "./anthropic-messages.ts";
 
 export class AnthropicAdapter implements AIProvider {
   readonly provider = "anthropic" as const;
@@ -56,7 +56,7 @@ export class AnthropicAdapter implements AIProvider {
           model, system: params.cachedSystem
             ? [{ type: "text", text: params.cachedSystem, cache_control: { type: "ephemeral" } }, { type: "text", text: params.systemPrompt }]
             : params.systemPrompt,
-          messages: params.messages.map((m) => ({ role: m.role, content: m.content })),
+          messages: construirMensajes(params),
           max_tokens: params.maxTokens ?? 4096,
         }),
       });

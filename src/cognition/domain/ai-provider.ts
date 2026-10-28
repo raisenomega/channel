@@ -10,6 +10,7 @@ export interface AICompletionParams {
   readonly maxTokens?: number;
   readonly temperature?: number;
   readonly tier?: "haiku" | "sonnet" | "opus";
+  readonly images?: readonly { readonly mediaType: string; readonly dataBase64: string }[] | undefined; // vision: imagenes base64 -> bloque image en el ultimo user
 }
 
 export interface AIMessage {

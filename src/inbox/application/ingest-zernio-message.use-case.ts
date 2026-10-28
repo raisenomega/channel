@@ -31,7 +31,7 @@ export interface IngestDeps {
   readonly setPreferredChannel?: (contactId: string, channel: string) => Promise<void>; // etiqueta de red social
   readonly detId: (seed: string) => string;
   readonly emitCerebro?: (e: CerebroEvent) => void; // CEREBRO: enriquece, no bloquea (fire-and-forget)
-  readonly maybeAutodraft?: (ev: { tenantId: string; conversationId?: string | null; contactId?: string | null; channel: string; from: string; content: string; contactName?: string; contactPhone?: string }) => void; // S6: genera borrador al entrar (fire-and-forget)
+  readonly maybeAutodraft?: (ev: { tenantId: string; conversationId?: string | null; contactId?: string | null; channel: string; from: string; content: string; contactName?: string; contactPhone?: string; mediaUrl?: string | undefined; mediaMime?: string | undefined; contentType?: string | undefined }) => void; // S6: genera borrador al entrar (fire-and-forget); media -> vision
 }
 export type IngestError = { kind: "shape_ignorado" } | { kind: "tenant_no_encontrado" } | { kind: "persistence_failure"; cause: string };
 const fail = (cause: string): Result<never, IngestError> => err({ kind: "persistence_failure", cause });
@@ -69,7 +69,7 @@ export class IngestZernioMessageHandler {
     const mr = await this.d.msgs.guardar(msg);
     if (!mr.ok) return fail(mr.error.cause ?? "mensaje"); // #171: propaga el error REAL de Postgres (diagnosticable)
     this.d.emitCerebro?.(cerebroMessageEvent(String(tenantId), String(contactId), z)); // CEREBRO async
-    if (z.direction === "inbound") this.d.maybeAutodraft?.({ tenantId: String(tenantId), conversationId: String(convId), contactId: String(contactId), channel: ch, from: z.contactExternalId, content: z.content, contactName: z.contactName, contactPhone: z.contactPhone }); // S6 fire-and-forget
+    if (z.direction === "inbound") this.d.maybeAutodraft?.({ tenantId: String(tenantId), conversationId: String(convId), contactId: String(contactId), channel: ch, from: z.contactExternalId, content: z.content, contactName: z.contactName, contactPhone: z.contactPhone, mediaUrl: z.mediaUrl || undefined, mediaMime: z.mediaMime || undefined, contentType: ctype }); // S6 fire-and-forget + vision (imagen del inbound)
     return ok({ persisted: true });
   }
 }
