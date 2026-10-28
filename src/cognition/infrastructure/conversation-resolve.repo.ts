@@ -10,11 +10,20 @@ export async function resolverConversacion(tenantId: string, conversationId: str
     const { error } = await supabase.from("conversations").update({ status: "resolved" }).eq("id", conversationId).eq("tenant_id", tenantId);
     if (error) return false;
     await supabase.from("activity_log").insert({ tenant_id: tenantId, event_type: "resolved", label: ("Atendio " + (atendio || "-")).slice(0, 160), metadata: { conversationId, resolvedBy: userId, atendio, nota } });
-    if (nota) await supabase.from("agent_knowledge").insert({ tenant_id: tenantId, category: "context", knowledge: nota, source: "manual", confidence: 0.8, status: "active" });
+    const aprendido = await aprendizajeCliente(tenantId, conversationId, nota);
+    if (aprendido) await supabase.from("agent_knowledge").insert({ tenant_id: tenantId, category: "context", knowledge: aprendido, source: "manual", confidence: 0.8, status: "active" });
     return true;
   } catch {
     return false;
   }
+}
+
+// Aprende lo que el HUMANO escribio al cliente (sus respuestas en el hilo) + la nota, no solo la nota.
+async function aprendizajeCliente(tenantId: string, conversationId: string, nota: string): Promise<string> {
+  const { data } = await supabase.from("messages").select("content").eq("tenant_id", tenantId).eq("conversation_id", conversationId).eq("sender_type", "human_agent").order("created_at", { ascending: false }).limit(10);
+  const msgs = ((data ?? []) as Array<{ content?: string | null }>).map((x) => String(x.content ?? "")).filter(Boolean).reverse();
+  const todo = [...msgs, nota].filter(Boolean).join(" | ");
+  return todo ? todo.slice(0, 1200) : "";
 }
 
 export async function reabrirConversacion(tenantId: string, conversationId: string): Promise<boolean> {
