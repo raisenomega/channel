@@ -29,19 +29,19 @@ function navigateCard(e: React.KeyboardEvent, navigate: ReturnType<typeof useNav
 }
 
 export function ChannelCard({
-  language, kind, canal, esAbierto, onToggleExpand, disabled = false, onToggled,
+  language, kind, canal, connectedLive, esAbierto, onToggleExpand, disabled = false, onToggled,
 }: {
   language: Idioma;
   kind: ChannelKind;
   canal: Channel | undefined;
+  connectedLive: boolean; // VERDAD VIVA (Zernio), no el flag guardado: el chip ya no miente
   esAbierto: boolean;
   onToggleExpand: () => void;
-  /** L-2: sin tenant la card se ve pero no navega al detalle (nada que configurar aun). */
   disabled?: boolean;
-  onToggled?: () => void; // tras togglear, refetch de la lista para reflejar el chip
+  onToggled?: () => void;
 }) {
   const navigate = useNavigate();
-  const state = canal?.state ?? "desconectado";
+  const state: Channel["state"] = connectedLive ? "conectado" : "desconectado"; // chip = verdad viva, no el flag
 
   // O-8-bis: layout compacto (match /reportes). Header icono+nombre+engrane; chip+switch inline.
   return (
@@ -63,11 +63,11 @@ export function ChannelCard({
       <div className="mt-2 flex items-center justify-between">
         <Badge tone={TONE[state]} dot>{t(language, "channels.state." + state)}</Badge>
         <span aria-label={t(language, "channels.active")} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-          <Switch checked={state === "conectado"} disabled={!canal} onChange={(v) => { void onToggleCanal(canal, v).then(() => onToggled?.()); }} />
+          <Switch checked={connectedLive} disabled={!canal} onChange={(v) => { void onToggleCanal(canal, v).then(() => onToggled?.()); }} />
         </span>
       </div>
-      {!disabled && state === "desconectado" ? (
-        <div className="mt-2"><ConnectCta language={language} kind={kind} /></div>
+      {!disabled ? (
+        <div className="mt-2"><ConnectCta language={language} kind={kind} conectado={connectedLive} /></div>
       ) : null}
       {esAbierto ? <CardBody className="mt-2 border-t border-border/40 pt-2"><ConfigRows language={language} canal={canal} kind={kind} /></CardBody> : null}
     </Card>

@@ -7,7 +7,7 @@
  */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { listarCanales, toggleCanal } from "@/lib/channels-client";
+import { listarCanales, toggleCanal, listarCuentasVivas } from "@/lib/channels-client";
 import { handleFetcherError } from "@/lib/redirect-on-error";
 import { readLocalSession } from "@/lib/auth";
 import type { Channel, ChannelError } from "@/lib/channels-client";
@@ -37,6 +37,12 @@ export function useCanales() {
   });
 
   return { ...query, errKind, err: errKind !== null };
+}
+
+// VERDAD VIVA: que canales tiene Zernio AHORA (no el flag guardado). Alimenta el chip honesto.
+export function useCuentasVivas() {
+  const query = useQuery({ queryKey: ["connected-accounts"], queryFn: listarCuentasVivas, staleTime: 15_000 });
+  return { vivas: new Set(query.data ?? []), refetchVivas: query.refetch };
 }
 
 // El Switch pasa `connected` (on/off). Devuelve promesa para que la card refetchee y refleje el chip.

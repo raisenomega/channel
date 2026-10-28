@@ -60,9 +60,13 @@ test("A-01/A-11 sin tenant: 9 cards + banner CTA y la URL NO cambia", async () =
 test("A-04 con tenant: 9 cards con el estado real de cada canal, sin banner", async () => {
   const loc = location();
   window.localStorage.setItem("hub.tenant_id", "t-1");
-  globalThis.fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({
-    ok: true, channels: [{ id: "c1", platform: "whatsapp", status: "connected", isPaused: false }],
-  }), { status: 200 }));
+  // El chip "Conectado" sale de la VERDAD VIVA (/connected-accounts), no del flag guardado de /channels.
+  globalThis.fetch = vi.fn().mockImplementation((url: string) => {
+    const body = String(url).includes("/connected-accounts")
+      ? { ok: true, items: [{ platform: "whatsapp" }] }
+      : { ok: true, channels: [{ id: "c1", platform: "whatsapp", status: "connected", isPaused: false }] };
+    return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
+  });
   pintar();
   await waitFor(() => expect(screen.getAllByTestId("channel-card")).toHaveLength(9));
   expect(screen.queryByTestId("need-tenant-banner")).toBeNull();
