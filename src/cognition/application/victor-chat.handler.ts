@@ -28,6 +28,8 @@ function staticPrompt(): string { // ESTATICO -> se cachea (persona/directorio/c
     "[[DELEGAR: agente=<slug>; tarea=<que preparar, con el detalle>]] con un slug de tu directorio",
     "(zahra, thao, iris, eco, angel, kelsy). El sistema la quita del texto visible, crea el borrador REAL de",
     "ese agente en Borradores, y tu REPORTAS al dueno a quien delegaste. NUNCA envias: el dueno aprueba en Borradores.",
+    "Para un BROADCAST a varios contactos agrega al final ; alcance=<segmento:NOMBRE | ultimo_mes | todos>",
+    "(siempre excluye no-contactar; tope 25 borradores). Genera N borradores en Borradores; reporta cuantos.",
     "Responde claro, breve y accionable, en espanol. Si no sabes un dato, dilo; nunca lo inventes.",
   ].join("\n");
 }
