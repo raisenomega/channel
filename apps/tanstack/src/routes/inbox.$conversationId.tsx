@@ -1,5 +1,5 @@
 /**
- * HUB by Raisen — Hilo de chat + ficha 360. /inbox/$conversationId. N5, C4.
+ * HUB by Raisen — Conversacion: chat + ficha 360 + tickets resueltos (global). /inbox/$conversationId.
  */
 import { useState, useEffect } from "react";
 import { createRoute, useParams, useNavigate } from "@tanstack/react-router";
@@ -10,9 +10,11 @@ import type { Contact360 } from "@/lib/types";
 import { fetchMessages } from "./conversation/conversation-messages";
 import { resolveContact360 } from "./conversation/conversation-resolver";
 import { enviarMensajeConversacion } from "./conversation/conversation-send";
-import { cambiarEstadoTicket } from "./conversation/conversation-resolve";
+import { useResolve } from "./conversation/use-resolve";
 import { ChatPanel } from "./conversation/conversation-chat-panel";
 import { ContactPanel } from "./conversation/conversation-contact-panel";
+import { ResueltosPanel } from "./conversation/resueltos-panel";
+import { ResolveDialog } from "./conversation/resolve-dialog";
 
 const ConversationRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -26,9 +28,8 @@ function ConversationPage() {
   const navigate = useNavigate();
   const [composerText, setComposerText] = useState("");
   const [sending, setSending] = useState(false);
-  const [resolving, setResolving] = useState(false);
   const [contact360, setContact360] = useState<Contact360 | null | "loading">("loading");
-
+  const { dialogOpen, setDialogOpen, saving, onEstado, guardar } = useResolve(conversationId);
   const { data: messages, refetch: refetchMessages } = useQuery({ queryKey: ["messages", conversationId], queryFn: () => fetchMessages(conversationId), staleTime: 10_000 });
 
   useEffect(() => { setContact360("loading"); void resolveContact360(conversationId).then((c) => setContact360(c ?? null)); }, [conversationId]);
@@ -37,37 +38,24 @@ function ConversationPage() {
     const text = composerText.trim();
     if (!text || sending) return;
     setSending(true);
-    const ok = await enviarMensajeConversacion(conversationId, text); // endpoint real /api/message/send (persiste + envia por Zernio)
+    const ok = await enviarMensajeConversacion(conversationId, text);
     if (ok) { setComposerText(""); void refetchMessages(); }
     setSending(false);
   }
 
-  async function cambiarEstado(status: "resolved" | "open") {
-    setResolving(true);
-    const ok = await cambiarEstadoTicket(conversationId, status);
-    if (ok && status === "resolved") void navigate({ to: "/inbox" }); // resuelto -> vuelve a la lista
-    setResolving(false);
-  }
-
   const c360 = contact360 !== "loading" && contact360 ? contact360 : null;
   return (
-    <div className="dash-grid grid gap-4 mt-4">
-      <ChatPanel
-        conversationId={conversationId}
-        contactName={c360?.displayName}
-        contactPhone={c360?.primaryPhone}
-        messages={messages ?? []}
-        language={language}
-        onBack={() => void navigate({ to: "/inbox" })}
-        composerText={composerText}
-        setComposerText={setComposerText}
-        onSend={handleSend}
-        sending={sending}
-        onEstado={cambiarEstado}
-        resolving={resolving}
-      />
-      <ContactPanel contact={contact360} language={language} />
-    </div>
+    <>
+      <div className="grid gap-4 mt-4 lg:grid-cols-3">
+        <ChatPanel conversationId={conversationId} contactName={c360?.displayName} contactPhone={c360?.primaryPhone}
+          messages={messages ?? []} language={language} onBack={() => void navigate({ to: "/inbox" })}
+          composerText={composerText} setComposerText={setComposerText} onSend={handleSend} sending={sending}
+          onEstado={onEstado} resolving={saving} />
+        <ContactPanel contact={contact360} language={language} />
+        <ResueltosPanel language={language} onOpen={(cid) => void navigate({ to: "/inbox/" + cid })} />
+      </div>
+      <ResolveDialog open={dialogOpen} language={language} saving={saving} onGuardar={guardar} onClose={() => setDialogOpen(false)} />
+    </>
   );
 }
 

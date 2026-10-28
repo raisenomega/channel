@@ -6,7 +6,6 @@ import type { NavItem } from "./bottom-nav";
 
 export const LINKS: NavItem[] = [
   { to: "/inbox", label: "nav.dashboard" },
-  { to: "/escaladas", label: "nav.escaladas" },
   { to: "/contacts", label: "nav.contacts" },
   { to: "/quotes", label: "nav.quotes" },
   { to: "/orders", label: "nav.orders" },

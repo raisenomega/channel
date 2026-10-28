@@ -18,19 +18,19 @@ function identity(): { tenantId: string; userId: string } | null {
   } catch { return null; }
 }
 
-async function registrarResolucion(conversationId: string, id: { tenantId: string; userId: string }): Promise<void> {
+async function registrarResolucion(conversationId: string, id: { tenantId: string; userId: string }, atendio: string, nota: string): Promise<void> {
   const base = supabaseRestBase(); const headers = supabaseAuthHeaders();
   if (!base || !headers) return;
   try {
     await fetch(`${base}/activity_log`, {
       method: "POST",
       headers: { ...headers, "content-type": "application/json", prefer: "return=minimal" },
-      body: JSON.stringify({ tenant_id: id.tenantId, event_type: "resolved", label: "Ticket resuelto", metadata: { conversationId, resolvedBy: id.userId } }),
+      body: JSON.stringify({ tenant_id: id.tenantId, event_type: "resolved", label: atendio ? `Atendio ${atendio}` : "Ticket resuelto", metadata: { conversationId, resolvedBy: id.userId, atendio, nota } }),
     });
   } catch { /* best-effort: el record no bloquea */ }
 }
 
-export async function cambiarEstadoTicket(conversationId: string, status: "resolved" | "open"): Promise<boolean> {
+export async function cambiarEstadoTicket(conversationId: string, status: "resolved" | "open", atendio = "", nota = ""): Promise<boolean> {
   const base = supabaseRestBase(); const headers = supabaseAuthHeaders(); const id = identity();
   if (!base || !headers) return false;
   try {
@@ -40,7 +40,7 @@ export async function cambiarEstadoTicket(conversationId: string, status: "resol
       body: JSON.stringify({ status }),
     });
     if (!res.ok) return false;
-    if (status === "resolved" && id) await registrarResolucion(conversationId, id);
+    if (status === "resolved" && id) await registrarResolucion(conversationId, id, atendio, nota);
     return true;
   } catch { return false; }
 }
