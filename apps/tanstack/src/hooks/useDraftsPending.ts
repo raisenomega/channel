@@ -16,7 +16,7 @@ function mapRejected(x: { id: string; metadata?: RawMeta }): DraftItem {
   return { id: x.id, status: "rejected", scope: "quote", personaSlug: "", draftContent: "", inboundMessage: "", confidence: 0, label: x.metadata?.label, conclusion: x.metadata?.conclusion, contactName: x.metadata?.contactName, quoteItems: x.metadata?.quoteItems, quoteTotal: x.metadata?.total, quoteContactId: x.metadata?.contactId, clientDecision: x.metadata?.clientDecision };
 }
 
-export function useDraftsPending(): { drafts: readonly DraftItem[]; count: number; reload: () => void } {
+export function useDraftsPending(): { drafts: readonly DraftItem[]; count: number; visibleCount: number; reload: () => void } {
   const [drafts, setDrafts] = useState<readonly DraftItem[]>([]);
   const load = useCallback(async () => {
     const tid = resolveTenantId();
@@ -30,5 +30,7 @@ export function useDraftsPending(): { drafts: readonly DraftItem[]; count: numbe
     } catch { setDrafts([]); }
   }, []);
   useEffect(() => { load(); const id = setInterval(load, 15_000); return () => clearInterval(id); }, [load]);
-  return { drafts, count: drafts.length, reload: load };
+  // visibleCount = lo que REALMENTE se ve en Borradores (no-cotizacion + cotizaciones rechazadas); el badge/chip usa esto (honesto).
+  const visibleCount = drafts.filter((d) => d.scope !== "quote" || d.status === "rejected").length;
+  return { drafts, count: drafts.length, visibleCount, reload: load };
 }

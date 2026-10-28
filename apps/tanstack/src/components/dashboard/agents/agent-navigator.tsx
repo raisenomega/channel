@@ -6,22 +6,18 @@ import { useState } from "react";
 import { t, type Idioma } from "@/lib/i18n";
 import { useAgentStatus } from "@/hooks/useAgentStatus";
 import { useContextStatus } from "@/hooks/useContextStatus";
-import { useDraftsPending } from "@/hooks/useDraftsPending";
 import { AGENTS } from "./agent-roster";
 import { AgentPage } from "./agent-page";
 import { VictorPage } from "./victor-page";
 import { ContextoPage } from "./contexto-page";
-import { BorradoresPage } from "./borradores-page";
 import { ModeControl } from "./mode-control";
 
 const CTX_ACCENT = "45 90% 55%";
-const DR_ACCENT = "265 80% 60%";
-type View = "agent" | "contexto" | "borradores";
+type View = "agent" | "contexto";
 
 export function AgentNavigator({ lang, accent }: { lang: Idioma; accent: string }) {
   const { agents: status } = useAgentStatus();
   const ctx = useContextStatus();
-  const { count } = useDraftsPending();
   const [idx, setIdx] = useState(0);
   const [view, setView] = useState<View>("agent");
   const active = AGENTS[idx];
@@ -42,11 +38,9 @@ export function AgentNavigator({ lang, accent }: { lang: Idioma; accent: string 
           </button>
         ))}
         {chip("contexto", CTX_ACCENT, ctx.green, t(lang, "ctx.chip"))}
-        {chip("borradores", DR_ACCENT, count > 0, count > 0 ? `${t(lang, "dr.chip")} (${count})` : t(lang, "dr.chip"))}
         <ModeControl lang={lang} />
       </div>
       {view === "contexto" ? <ContextoPage lang={lang} accent={CTX_ACCENT} />
-        : view === "borradores" ? <BorradoresPage lang={lang} />
         : active.code === "victor" ? <VictorPage lang={lang} agent={active} online={isOn(active.code)} channelAccent={accent} />
         : <AgentPage lang={lang} agent={active} online={isOn(active.code)} />}
     </div>
