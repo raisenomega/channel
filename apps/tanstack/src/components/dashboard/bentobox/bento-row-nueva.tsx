@@ -10,17 +10,19 @@ import { BentoActividadReciente, type ActivityEvent } from "./bento-actividad-re
 import { BentoPeticiones, type Peticion } from "./bento-peticiones";
 import { BentoBusquedaInteligente } from "./bento-busqueda-inteligente";
 
-export function BentoRowNueva({ lang, events, peticiones, items, onOpen }: {
+export function BentoRowNueva({ lang, events, alertas, peticiones, items, onOpen, onVerTodas }: {
   lang: Idioma;
   events: readonly ActivityEvent[];
+  alertas?: number;
   peticiones: readonly Peticion[];
   items: readonly InboxItem[];
   onOpen: (conversationId: string) => void;
+  onVerTodas?: () => void;
 }) {
   return (
     <div className="bento mt-4">
       <BentoEstadoAgentes lang={lang} />
-      <BentoActividadReciente lang={lang} events={events} onOpen={onOpen} />
+      <BentoActividadReciente lang={lang} events={events} alertas={alertas} onOpen={onOpen} onVerTodas={onVerTodas} />
       <BentoPeticiones lang={lang} items={peticiones} />
       <BentoBusquedaInteligente lang={lang} items={items} onOpen={onOpen} />
     </div>

@@ -28,7 +28,7 @@ function InboxPage() {
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [filtroSLA, setFiltroSLA] = useState<boolean | null>(null);
   const { data: items, isPending } = useQuery({ queryKey: ["inbox"], queryFn: fetchInbox, staleTime: 5_000, refetchInterval: 8000, refetchOnWindowFocus: true });
-  const { events } = useRecentActivity(); // hooks antes del early return (rules-of-hooks)
+  const { events, alertas } = useRecentActivity(); // hooks antes del early return (rules-of-hooks)
   const { peticiones } = useQuoteResponses(language);
   const itemsFiltrados = (items ?? []).filter((i) => {
     if (filtroEstado && i.status !== filtroEstado) return false;
@@ -58,8 +58,9 @@ function InboxPage() {
       <KpiRow language={language} stats={stats} total={items?.length ?? 0} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={items === undefined || items.length === 0} />
       <BentoRowNueva
-        lang={language} events={events} peticiones={peticiones} items={itemsFiltrados}
+        lang={language} events={events} alertas={alertas} peticiones={peticiones} items={itemsFiltrados}
         onOpen={(id) => void navigate({ to: "/inbox/" + encodeURIComponent(id) })}
+        onVerTodas={() => void navigate({ to: "/actividad" })}
       />
       <TrilogiaBar language={language} />
       <GraficasPanel lang={language} porCanal={stats.porCanal} />

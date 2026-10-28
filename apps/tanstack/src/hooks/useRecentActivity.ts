@@ -6,8 +6,9 @@ import { useState, useEffect, useCallback } from "react";
 import type { ActivityEvent } from "@/components/dashboard/bentobox/bento-actividad-reciente";
 import { apiFetch, resolveTenantId } from "@/lib/api-client";
 
-export function useRecentActivity(): { events: readonly ActivityEvent[] } {
+export function useRecentActivity(): { events: readonly ActivityEvent[]; alertas: number } {
   const [events, setEvents] = useState<readonly ActivityEvent[]>([]);
+  const [alertas, setAlertas] = useState(0);
 
   const fetchEvents = useCallback(async () => {
     const tenantId = resolveTenantId();
@@ -15,8 +16,9 @@ export function useRecentActivity(): { events: readonly ActivityEvent[] } {
     try {
       const res = await apiFetch(`/tenants/${encodeURIComponent(tenantId)}/activity/recent`);
       if (res.ok) {
-        const data = (await res.json()) as { events: ActivityEvent[] };
+        const data = (await res.json()) as { events: ActivityEvent[]; alertas?: number };
         setEvents(data.events ?? []);
+        setAlertas(data.alertas ?? 0);
       }
     } catch { /* sin sesion o red: lista vacia honesta */ }
   }, []);
@@ -27,5 +29,5 @@ export function useRecentActivity(): { events: readonly ActivityEvent[] } {
     return () => clearInterval(id);
   }, [fetchEvents]);
 
-  return { events };
+  return { events, alertas };
 }
