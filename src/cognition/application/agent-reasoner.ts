@@ -5,7 +5,7 @@
  * C4: < 75 lineas. Pattern Result<T, E>. Sin any.
  */
 import { Result, ok, err } from "../../shared/domain/result.ts";
-import { sanitizarProsa, detectarEscalacion } from "../domain/prose-sanitizer.ts";
+import { sanitizarProsa, detectarMarcador, type Marcador } from "../domain/prose-sanitizer.ts";
 import { construirPromptEstatico } from "./agent-prompt.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
@@ -21,7 +21,7 @@ export interface AgentReasoningResult {
   readonly model: string;
   readonly costUsd: number;
   readonly tokens: { readonly input: number; readonly output: number; readonly cacheRead: number; readonly cacheCreation: number };
-  readonly escalacion: boolean; // el LLM quiso escalar/dejo instruccion interna (ya saneada del texto al cliente)
+  readonly marcador: Marcador; // ESCALAR (cliente) o CONSULTA (duda de negocio); saneado del texto al cliente
 }
 
 export class AgentReasoner {
@@ -59,7 +59,7 @@ export class AgentReasoner {
       model: llm.value.model,
       costUsd: llm.value.costUsd,
       tokens: { input: llm.value.tokensInput, output: llm.value.tokensOutput, cacheRead: llm.value.cacheRead ?? 0, cacheCreation: llm.value.cacheCreation ?? 0 },
-      escalacion: detectarEscalacion(llm.value.response),
+      marcador: detectarMarcador(llm.value.response),
     }));
   }
 }

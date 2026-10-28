@@ -6,6 +6,7 @@
  */
 const TAG_INVOKE = /<invoke[\s\S]*?<\/invoke>/gi;
 const TAG_SUELTO = /<\/?(invoke|function_calls|parameter|antml)[^>]*>/gi;
+const MARCADOR_G = /\[\[(?:ESCALAR|CONSULTA):[^\]]*\]\]/gi; // marcador explicito del agente: fuera del texto al cliente
 // La "nota interna" suele venir al final, a veces precedida por un separador (--- / ***) y/o en italica.
 const NOTA_INTERNA = /(?:\n|^)\s*(?:[-*_]{2,}\s*)?\*{0,2}\s*nota\s+interna\b[\s\S]*$/i;
 // Frases sueltas que delatan instruccion interna (se borra la oracion completa que las contiene).
@@ -15,6 +16,7 @@ export function sanitizarProsa(texto: string): string {
   return texto
     .replace(TAG_INVOKE, "")
     .replace(TAG_SUELTO, "")
+    .replace(MARCADOR_G, "")
     .replace(NOTA_INTERNA, "")
     .replace(FRASE_INTERNA, "")
     .replace(/[ \t]{2,}/g, " ")
@@ -29,4 +31,16 @@ const ESCALACION = /escalar_a_humano|escalate_to_human|aprobaci[oó]n humana|no 
 
 export function detectarEscalacion(texto: string): boolean {
   return ESCALACION.test(texto);
+}
+
+export interface Marcador { readonly tipo: "escalar" | "consulta" | null; readonly motivo: string }
+const MARCADOR = /\[\[(ESCALAR|CONSULTA):\s*([^\]]*)\]\]/i;
+
+// Marcador EXPLICITO del agente (deterministico): [[ESCALAR: ...]] (cliente) / [[CONSULTA: ...]] (duda de
+// negocio). Respaldo: frases naturales de escalada -> escalar.
+export function detectarMarcador(texto: string): Marcador {
+  const m = MARCADOR.exec(texto);
+  if (m) return { tipo: (m[1] ?? "").toUpperCase() === "CONSULTA" ? "consulta" : "escalar", motivo: (m[2] ?? "").trim() };
+  if (ESCALACION.test(texto)) return { tipo: "escalar", motivo: "" };
+  return { tipo: null, motivo: "" };
 }
