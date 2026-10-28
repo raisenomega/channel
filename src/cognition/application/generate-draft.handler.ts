@@ -58,7 +58,7 @@ export class GenerateDraftHandler {
     if (mk?.tipo) {
       const quien = cmd.contactName ?? cmd.contactLabel ?? cmd.normalizedMessage.from; // contacto para la alerta
       const detalle = mk.motivo || cmd.normalizedMessage.content; // motivo explicito del agente, o el mensaje
-      void registrarEscalacion(String(cmd.tenantId), cmd.conversationId ? String(cmd.conversationId) : null, mk.tipo, detalle); // Actividad Reciente; no bloquea
+      void registrarEscalacion(String(cmd.tenantId), cmd.conversationId ? String(cmd.conversationId) : null, mk.tipo, detalle, cmd.personaSlug, mk.tipo === "consulta" ? crypto.randomUUID() : ""); // Actividad Reciente + scope agente; no bloquea
       void alertarDuenoWhatsApp(String(cmd.tenantId), quien, detalle); // WhatsApp al dueno; no bloquea
     }
     const d = await this.persist.ejecutar({

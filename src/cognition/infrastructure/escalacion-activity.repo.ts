@@ -10,15 +10,21 @@ export async function registrarEscalacion(
   conversationId: string | null,
   tipo: "escalar" | "consulta",
   detalle: string,
+  agentSlug = "",
+  consultaId = "",
 ): Promise<void> {
   const esConsulta = tipo === "consulta";
-  const label = (esConsulta ? "AGENTE necesita a humano: " : "Escalacion a humano: ") + detalle;
+  const label = (esConsulta ? ("Consulta de " + (agentSlug || "agente") + ": ") : "Escalacion a humano: ") + detalle;
   try {
     await supabase.from("activity_log").insert({
       tenant_id: tenantId,
       event_type: esConsulta ? "consulta" : "escalation",
       label: label.slice(0, 160),
-      metadata: conversationId ? { conversationId, tipo } : { tipo },
+      metadata: {
+        ...(conversationId ? { conversationId } : {}), tipo,
+        ...(agentSlug ? { agentSlug } : {}),
+        ...(esConsulta ? { consultaId, pregunta: detalle } : {}),
+      },
     });
   } catch {
     /* fail-safe: la alerta al dueno nunca bloquea la respuesta */

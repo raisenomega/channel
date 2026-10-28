@@ -11,6 +11,8 @@ export interface ActivityEvent {
   readonly label: string;
   readonly timestamp: string;
   readonly conversationId?: string | null;
+  readonly consultaId?: string | null;
+  readonly agentSlug?: string | null;
 }
 
 export function BentoActividadReciente({ lang, events, onOpen }: {
@@ -51,10 +53,11 @@ function Fila({ e, onOpen }: { e: ActivityEvent; onOpen?: (id: string) => void }
       </div>
     </>
   );
-  if (e.conversationId && onOpen) {
-    const cid = e.conversationId;
+  // consulta de agente -> scope AGENTE (prefijo c:); cliente -> conversacion normal. Reusa el mismo onOpen.
+  const target = e.type === "consulta" && e.consultaId ? "c:" + e.consultaId : (e.conversationId ?? null);
+  if (target && onOpen) {
     return (
-      <button type="button" onClick={() => onOpen(cid)}
+      <button type="button" onClick={() => onOpen(target)}
         className="flex w-full items-start gap-2 py-1.5 text-left hover:text-primary">{inner}</button>
     );
   }

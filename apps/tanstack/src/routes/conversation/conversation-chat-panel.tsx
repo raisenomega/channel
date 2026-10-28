@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ChatThread, type ChatMsg } from "@/components/dashboard/chat-bubbles";
 
 export function ChatPanel({
-  conversationId, messages, language, onBack, composerText, setComposerText, onSend, sending, contactName, contactPhone, onEstado, resolving,
+  conversationId, messages, language, onBack, composerText, setComposerText, onSend, sending, contactName, contactPhone, onEstado, resolving, scope = "cliente",
 }: {
   conversationId: string;
   messages: readonly Mensaje[];
@@ -23,6 +23,7 @@ export function ChatPanel({
   contactPhone?: string | null;
   onEstado: (s: "resolved" | "open") => void;
   resolving: boolean;
+  scope?: "cliente" | "agente";
 }) {
   return (
     <div className="rounded-2xl glass-card flex h-[72vh] flex-col" data-chat-thread>
@@ -62,10 +63,12 @@ export function ChatPanel({
           {t(language, "chat.send")}
         </Button>
       </div>
-      <div className="flex gap-2 border-t border-border/30 px-3 py-2">
-        <Button variant="ghost" size="sm" disabled={resolving} onClick={() => onEstado("open")}>{t(language, "chat.mantenerOpen")}</Button>
-        <Button variant="primary" size="sm" disabled={resolving} onClick={() => onEstado("resolved")}>{t(language, "chat.solucionado")}</Button>
-      </div>
+      {scope !== "agente" && (
+        <div className="flex gap-2 border-t border-border/30 px-3 py-2">
+          <Button variant="ghost" size="sm" disabled={resolving} onClick={() => onEstado("open")}>{t(language, "chat.mantenerOpen")}</Button>
+          <Button variant="primary" size="sm" disabled={resolving} onClick={() => onEstado("resolved")}>{t(language, "chat.solucionado")}</Button>
+        </div>
+      )}
     </div>
   );
 }

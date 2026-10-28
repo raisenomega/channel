@@ -18,13 +18,18 @@ export function rutaRecentActivity(): RouteDefinition {
         .eq("tenant_id", auth.value.tenantId)
         .order("created_at", { ascending: false })
         .limit(5);
-      const events = (data ?? []).map((r) => ({
-        id: r.id as string,
-        type: r.event_type as string,
-        label: r.label as string,
-        timestamp: r.created_at as string,
-        conversationId: (r.metadata as { conversationId?: string } | null)?.conversationId ?? null,
-      }));
+      const events = (data ?? []).map((r) => {
+        const m = (r.metadata as { conversationId?: string; consultaId?: string; agentSlug?: string } | null) ?? {};
+        return {
+          id: r.id as string,
+          type: r.event_type as string,
+          label: r.label as string,
+          timestamp: r.created_at as string,
+          conversationId: m.conversationId ?? null,
+          consultaId: m.consultaId ?? null,
+          agentSlug: m.agentSlug ?? null,
+        };
+      });
       return { ok: true, events };
     },
   };
