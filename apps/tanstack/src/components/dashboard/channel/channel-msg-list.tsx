@@ -8,6 +8,9 @@ import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import type { WaMsg } from "@/components/dashboard/whatsapp-phone";
 import type { ChannelMeta } from "./channel-meta";
+import { MediaBubble } from "@/components/dashboard/media-bubble";
+
+const MEDIA = ["image", "audio", "video", "document", "sticker"]; // tipos que se renderizan via media-proxy (no como texto)
 
 function dayKey(iso: string): string { return new Date(iso).toDateString(); }
 function dayLabel(iso: string): string {
@@ -44,7 +47,7 @@ export function MsgList({ msgs, meta, lang, onLoadOlder, hasMore, loadingOlder }
             {showDay ? <div style={{ textAlign: "center", fontSize: 11, color: meta.muted, margin: "6px 0" }}>{dayLabel(m.time)}</div> : null}
             <div style={{ display: "flex", justifyContent: m.out ? "flex-end" : "flex-start" }}>
               <div style={{ maxWidth: "72%", padding: "7px 11px", borderRadius: 10, fontSize: 14, wordBreak: "break-word", background: m.out ? meta.bubbleOut : meta.bubbleIn, color: meta.fg, boxShadow: "0 1px 2px rgba(0,0,0,0.08)", lineHeight: 1.4 }}>
-                {m.text}
+                {MEDIA.includes(m.messageType ?? "") ? <MediaBubble messageId={m.id} kind={m.messageType ?? ""} fallback={m.text} /> : m.text}
                 <span style={{ float: "right", margin: "4px 0 -2px 8px", fontSize: 10, color: meta.muted, opacity: 0.85 }}>
                   {new Date(m.time).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}
                 </span>

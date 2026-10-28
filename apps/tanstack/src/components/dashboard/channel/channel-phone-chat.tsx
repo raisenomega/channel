@@ -8,13 +8,14 @@ import type { WaChat, WaMsg, WaContact } from "@/components/dashboard/whatsapp-p
 import type { ChannelMeta } from "./channel-meta";
 import { initials } from "./channel-meta";
 
-export function toWaMsg(m: { senderType: string; content: string; createdAt: string; id: string }): WaMsg {
+export function toWaMsg(m: { senderType: string; content: string; createdAt: string; id: string; messageType?: string }): WaMsg {
   return {
     id: m.id,
     out: m.senderType !== "contact", // inbound=contact=izquierda; human_agent/ai_agent/system=outbound=derecha
     text: m.content,
     time: m.createdAt,
     status: m.senderType === "contact" ? "read" : "delivered",
+    messageType: m.messageType, // propaga el tipo para render de media (foto/audio) en el inbox del canal
   };
 }
 
