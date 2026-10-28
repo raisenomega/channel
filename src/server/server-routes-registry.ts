@@ -31,7 +31,7 @@ import { rutaCrearTemplate, rutaListarTemplates, rutaPatchTemplate, rutaImportLi
 
 export function registrarRutas(h: ServerHandlers): RouteDefinition[] {
   return [
-    rutaHealth(), rutaMediaProxy(), rutaVictorChat({ chat: new VictorChatHandler(), provider: new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "") }), rutaContextoGet(), rutaContextoPut(), rutaAgentModeGet(), rutaAgentModePut(), rutaAgentConfigGet(), rutaAgentConfigPut(), rutaGenerateDraft({ generate: new GenerateDraftHandler(new AgentContextService(new AgentContextSourceSupabase()), new AgentReasoner(new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "")), new PersistDraftHandler(new AgentDraftsRepository())), conversations: new ConversationRepositorySupabase(), messages: new MessageRepositorySupabase() }), handleWebhook(h),
+    rutaHealth(), rutaMediaProxy(), rutaVictorChat({ chat: new VictorChatHandler(), provider: new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? ""), generate: new GenerateDraftHandler(new AgentContextService(new AgentContextSourceSupabase()), new AgentReasoner(new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "")), new PersistDraftHandler(new AgentDraftsRepository())) }), rutaContextoGet(), rutaContextoPut(), rutaAgentModeGet(), rutaAgentModePut(), rutaAgentConfigGet(), rutaAgentConfigPut(), rutaGenerateDraft({ generate: new GenerateDraftHandler(new AgentContextService(new AgentContextSourceSupabase()), new AgentReasoner(new AnthropicAdapter(getEnv("ANTHROPIC_API_KEY") ?? "")), new PersistDraftHandler(new AgentDraftsRepository())), conversations: new ConversationRepositorySupabase(), messages: new MessageRepositorySupabase() }), handleWebhook(h),
     handleReceive(h),
     handleSend(h),
     handleQuote(h),
