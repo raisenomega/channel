@@ -61,7 +61,7 @@ test("A-09 GET_ACTIVITY_TENANT_MATCH_200: match -> eventos mapeados, filtro tena
   db.rows = [{ id: "e1", event_type: "draft", label: "Thao genero draft", created_at: "2026-10-16T00:00:00Z" }];
   const r = await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1"))) as EventsOk;
   expect(r.ok).toBe(true);
-  expect(r.events).toEqual([{ id: "e1", type: "draft", label: "Thao genero draft", timestamp: "2026-10-16T00:00:00Z", conversationId: null }]);
+  expect(r.events).toEqual([{ id: "e1", type: "draft", label: "Thao genero draft", timestamp: "2026-10-16T00:00:00Z", conversationId: null, consultaId: null, agentSlug: null }]);
   expect(db.filtros).toEqual([["tenant_id", "tenant-1"]]);
 });
 

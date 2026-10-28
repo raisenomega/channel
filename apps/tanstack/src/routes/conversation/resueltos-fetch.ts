@@ -6,7 +6,7 @@
  */
 import { apiFetch } from "@/lib/api-client";
 
-export interface ResueltoRow { conversationId: string; atendio: string; createdAt: string; label: string }
+export interface ResueltoRow { conversationId: string; consultaId: string; agentSlug: string; tipo: "cliente" | "consulta"; atendio: string; createdAt: string; label: string }
 
 export async function fetchTicketsResueltos(): Promise<ResueltoRow[]> {
   try {
