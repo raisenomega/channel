@@ -36,15 +36,16 @@ export class MaybeAutodraftService {
   ) {}
 
   async ejecutar(ev: AutodraftEvent): Promise<AutodraftOutcome> {
+    const t0 = Date.now(); // #4 instrumentacion (solo medicion, sin cambiar logica)
     try {
       if (!ev.content || !ev.content.trim() || !ev.from) return { outcome: "no_send", reason: "vacio" };
       const { mode, config, timeZone } = await this.flag.leer(ev.tenantId);
       if (mode === "off") return { outcome: "no_send", reason: "off" };
       const intent = await this.classifier.clasificar(ev.content);
       if (ev.contactId && this.calificar) await this.calificar(String(ev.contactId), intent.opportunity);
-      const quoteUrl = this.postHook ? await this.postHook(ev, intent.opportunity, mode) : null;
+      const tq = Date.now(); const quoteUrl = this.postHook ? await this.postHook(ev, intent.opportunity, mode) : null; const dQuote = Date.now() - tq;
       // Lazo cerrado: si la cotizacion SALIO, el mensaje del link ES la respuesta -> no generamos reply redundante (ni "se la enviaremos")
-      if (quoteUrl) return { outcome: "responded", reason: "quote_sent" };
+      if (quoteUrl) { console.error(`[autodraft-timing] quote=${dQuote}ms total=${Date.now() - t0}ms ch=${ev.channel} -> quote_sent`); return { outcome: "responded", reason: "quote_sent" }; }
       const sentToday = mode === "autonomous" && this.counter ? await this.counter.contar(ev.tenantId) : 0;
       const complaint = intent.persona === "angel" || intent.kind === "queja";
       const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };
@@ -52,12 +53,15 @@ export class MaybeAutodraftService {
       if (mode === "autonomous" && !dec.send) return { outcome: "no_send", reason: dec.reason };
       const perfil = ev.contactId && this.perfilContacto ? await this.perfilContacto(String(ev.contactId)) : null;
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };
+      const tg = Date.now();
       const draft = await this.generate.ejecutar({
         tenantId: ev.tenantId as unknown as TenantId, conversationId: (ev.conversationId ?? null) as ConversationId | null,
         contactId: (ev.contactId ?? null) as ContactId | null, channel: ev.channel as ChannelType, personaSlug: ev.persona ?? intent.persona,
         normalizedMessage: nm, contactLabel: ev.from, contactName: ev.contactName, contactPhone: ev.contactPhone,
         scope: intent.opportunity ? "opportunity" : "targeted", autoSendReason: dec.reason, contactProfile: perfil ?? undefined,
       });
+      const dReason = Date.now() - tg;
+      console.error(`[autodraft-timing] quote=${dQuote}ms reason=${dReason}ms total=${Date.now() - t0}ms ch=${ev.channel} send=${dec.send}`);
       if (!draft.ok) return { outcome: "error", reason: `generate:${draft.error.kind}` }; // fallo transitorio -> reintentar
       if (dec.send && this.autoSend) { const sent = await this.autoSend.enviar(draft.value, ev.from, ev.channel); return sent ? { outcome: "responded", reason: dec.reason } : { outcome: "error", reason: "send_failed" }; }
       return { outcome: "no_send", reason: "borrador_sin_envio" };

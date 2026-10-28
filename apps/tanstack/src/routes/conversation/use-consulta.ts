@@ -3,7 +3,7 @@
  * hilo (seguir); [Solucionado] abre el modal de firma; [Guardar] cierra -> resolved + agent_knowledge
  * y aterriza en Tickets Resueltos. Reabrir el hilo desde Resueltos permite seguir. C4 <=75.
  */
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { readLocalSession } from "@/lib/auth";
 import { fetchConsultaThread, agregarMensajeConsulta, resolverConsulta } from "./consulta-data";
@@ -12,6 +12,7 @@ export function useConsulta(consultaId: string) {
   const qc = useQueryClient();
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const enviandoRef = useRef(false); // guard SINCRONO anti doble-submit
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const { data: thread } = useQuery({ queryKey: ["consulta", consultaId], queryFn: () => fetchConsultaThread(consultaId), staleTime: 5_000 });
@@ -19,11 +20,11 @@ export function useConsulta(consultaId: string) {
 
   async function onSend(): Promise<void> {
     const txt = text.trim();
-    if (!txt || sending) return;
-    setSending(true);
+    if (!txt || enviandoRef.current) return;
+    enviandoRef.current = true; setSending(true);
     const ok = await agregarMensajeConsulta(consultaId, txt);
     if (ok) { setText(""); refrescar(); }
-    setSending(false);
+    setSending(false); enviandoRef.current = false;
   }
 
   function onEstado(s: "resolved" | "open"): void { if (s === "resolved") setDialogOpen(true); }
