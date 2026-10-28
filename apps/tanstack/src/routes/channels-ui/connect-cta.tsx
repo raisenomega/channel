@@ -12,7 +12,7 @@ import { t, type Idioma } from "@/lib/i18n";
 
 const stop = (e: { stopPropagation: () => void }): void => e.stopPropagation();
 
-export function ConnectCta({ language, kind }: { language: Idioma; kind: string }) {
+export function ConnectCta({ language, kind, conectado = false }: { language: Idioma; kind: string; conectado?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -24,10 +24,12 @@ export function ConnectCta({ language, kind }: { language: Idioma; kind: string 
     window.location.href = r.value;
   }
 
+  // conectado -> "Reconectar" discreto (siempre disponible, aunque el chip ya este verde: cubre el
+  // caso Meta 100/33 en que Zernio aun lista la cuenta pero ya no puede leerla/enviar).
   return (
     <div onClick={stop} onKeyDown={stop}>
-      <Button variant="primary" disabled={busy} onClick={() => void abrir()}>
-        {busy ? t(language, "channels.awaitingVerify") : t(language, "channels.connect")}
+      <Button variant={conectado ? "ghost" : "primary"} size="sm" disabled={busy} onClick={() => void abrir()}>
+        {busy ? t(language, "channels.awaitingVerify") : t(language, conectado ? "channels.reconnect" : "channels.connect")}
       </Button>
       {err ? <p className="mt-1 text-xs text-critical">{err}</p> : null}
     </div>

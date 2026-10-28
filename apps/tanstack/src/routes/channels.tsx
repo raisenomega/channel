@@ -9,7 +9,7 @@ import { rootRoute } from "@/app/root";
 import { usePreferences } from "@/app/preferences";
 import { t } from "@/lib/i18n";
 import { CATALOGO } from "./channels-ui/channels-data";
-import { useCanales } from "./channels-ui/channels-fetchers";
+import { useCanales, useCuentasVivas } from "./channels-ui/channels-fetchers";
 import { ChannelCard } from "./channels-ui/channel-card";
 import { ChannelsNotice, LoadingNotice } from "./channels-ui/channels-notices";
 import { FacebookPagePicker } from "./channels-ui/facebook-page-picker";
@@ -26,9 +26,9 @@ function ChannelsPage() {
   const [abierto, setAbierto] = useState<string | null>(null);
   const [fbPicker, setFbPicker] = useState(false);
   const { data, isPending, errKind, refetch } = useCanales();
-
-  // W (same-tab): retorno OAuth por query param /channels?oauth=<status> (sin popup). P1: verde del fetch real.
-  useOauthReturn(refetch, setFbPicker);
+  const { vivas, refetchVivas } = useCuentasVivas(); // verdad viva de Zernio (el chip honesto)
+  const refrescar = () => { void refetch(); void refetchVivas(); };
+  useOauthReturn(refrescar, setFbPicker); // retorno OAuth same-tab -> refetch de la verdad viva
 
   if (isPending) return <LoadingNotice language={language} />;
 
@@ -56,10 +56,11 @@ function ChannelsPage() {
             language={language}
             kind={kind}
             canal={porKind.get(kind)}
+            connectedLive={vivas.has(kind)}
             esAbierto={abierto === kind}
             onToggleExpand={() => setAbierto(abierto === kind ? null : kind)}
             disabled={sinTenant}
-            onToggled={() => void refetch()}
+            onToggled={refrescar}
           />
         ))}
       </div>

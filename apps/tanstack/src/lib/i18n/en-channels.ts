@@ -6,6 +6,7 @@ import type { Dict } from "./i18n-types";
 export const enChannels: Dict = {
   "channels.connected": "Connected channels",
   "channels.connect": "Connect",
+  "channels.reconnect": "Reconnect",
   "channels.fbPickerTitle": "Choose your Facebook page",
   "channels.fbNoPages": "No pending pages",
   "channels.fbConnectPage": "Connect page",
