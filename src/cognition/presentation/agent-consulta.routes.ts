@@ -32,7 +32,7 @@ export function rutaMensajeConsulta(): RouteDefinition {
   };
 }
 
-export function rutaResolverConsulta(): RouteDefinition {
+export function rutaResolverConsulta(reconectar?: (tenantId: string, consultaId: string) => void): RouteDefinition {
   return {
     method: "POST", path: "/api/agent-consulta/resolve",
     handler: async (ctx: RequestContext) => {
@@ -40,6 +40,7 @@ export function rutaResolverConsulta(): RouteDefinition {
       if (!auth.ok) return auth.error;
       const b = (ctx.body ?? {}) as { consultaId?: string; agentSlug?: string; pregunta?: string; respuesta?: string; atendio?: string };
       const ok = await resolverConsulta(String(auth.value.tenantId), String(b.consultaId ?? ""), String(b.agentSlug ?? ""), String(b.pregunta ?? ""), String(b.respuesta ?? ""), String(b.atendio ?? ""), String(auth.value.userId ?? ""));
+      if (ok && reconectar) reconectar(String(auth.value.tenantId), String(b.consultaId ?? "")); // D: el agente le responde al cliente (Borrador)
       return jsonResponse(ok ? 200 : 400, { ok });
     },
   };

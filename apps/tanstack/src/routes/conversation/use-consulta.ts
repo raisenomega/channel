@@ -3,9 +3,11 @@
  * hilo (seguir); [Solucionado] abre el modal de firma; [Guardar] cierra -> resolved + agent_knowledge
  * y aterriza en Tickets Resueltos. Reabrir el hilo desde Resueltos permite seguir. C4 <=75.
  */
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { readLocalSession } from "@/lib/auth";
+import type { Contact360 } from "@/lib/types";
+import { resolveContact360 } from "./conversation-resolver";
 import { fetchConsultaThread, agregarMensajeConsulta, resolverConsulta } from "./consulta-data";
 
 export function useConsulta(consultaId: string) {
@@ -15,7 +17,10 @@ export function useConsulta(consultaId: string) {
   const enviandoRef = useRef(false); // guard SINCRONO anti doble-submit
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [fichaCliente, setFichaCliente] = useState<Contact360 | null>(null); // escalada/consulta ligada a cliente -> su Ficha360
   const { data: thread } = useQuery({ queryKey: ["consulta", consultaId], queryFn: () => fetchConsultaThread(consultaId), staleTime: 5_000 });
+  const convId = thread?.conversationId ?? "";
+  useEffect(() => { if (!convId) { setFichaCliente(null); return; } void resolveContact360(convId).then((c) => setFichaCliente(c ?? null)); }, [convId]);
   const refrescar = () => { void qc.invalidateQueries({ queryKey: ["consulta", consultaId] }); void qc.invalidateQueries({ queryKey: ["tickets-resueltos"] }); };
 
   async function onSend(): Promise<void> {
@@ -37,5 +42,5 @@ export function useConsulta(consultaId: string) {
     setSaving(false);
   }
 
-  return { thread, text, setText, sending, onSend, dialogOpen, setDialogOpen, saving, onEstado, guardar };
+  return { thread, text, setText, sending, onSend, dialogOpen, setDialogOpen, saving, onEstado, guardar, fichaCliente };
 }
