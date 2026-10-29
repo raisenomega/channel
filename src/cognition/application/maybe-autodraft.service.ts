@@ -54,7 +54,7 @@ export class MaybeAutodraftService {
       const complaint = intent.persona === "angel" || intent.kind === "queja";
       const signals = { opportunity: intent.opportunity, complaint, newContact: false, confidence: intent.confidence, channel: ev.channel, sentToday };
       const dec = razonAutoEnvio(mode, config, signals, new Date(), timeZone);
-      if (mode === "autonomous" && !dec.send) return { outcome: "no_send", reason: dec.reason };
+      if (mode === "autonomous" && !dec.send && !config.channels.includes(ev.channel)) return { outcome: "no_send", reason: dec.reason }; // canal no autorizado -> dropea (anti-ruido). Revision/confianza NO dropea: sigue y deja BORRADOR
       const perfil = ev.contactId && this.perfilContacto ? await this.perfilContacto(String(ev.contactId)) : null;
       const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: contenido, attachments: [] };
       const tg = Date.now();

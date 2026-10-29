@@ -52,6 +52,14 @@ test("S7b-04 autonomo + bloqueado (canal no autorizado) -> NO responde y NO deja
   expect(calls).toHaveLength(0); expect(sent).toHaveLength(0);
 });
 
+test("S7b-05 autonomo + OPORTUNIDAD a-revision (review.opportunities ON) -> NO envia pero DEJA BORRADOR (no se cae)", async () => {
+  const calls: { personaSlug: string }[] = []; const sent: string[] = [];
+  const cfg: AgentsConfig = { ...DEFAULT_CONFIG, review: { ...DEFAULT_CONFIG.review, opportunities: true } };
+  await new MaybeAutodraftService(flagOf("autonomous", cfg), genSpy(calls), clf({ persona: "zahra", opportunity: true, kind: "venta", confidence: 9 }), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1", content: "quiero los zafacones soterrados" });
+  expect(calls).toHaveLength(1); // borrador creado (a tu revision), ya no se cae
+  expect(sent).toHaveLength(0);  // NO auto-enviado
+});
+
 test("VOZ: nota de voz -> se transcribe y el agente LEE '[Nota de voz] ...' (STT)", async () => {
   const caps: Array<{ normalizedMessage?: { content: string } }> = [];
   const gen = { ejecutar: async (c: { normalizedMessage?: { content: string } }) => { caps.push(c); return ok({ id: "d1" }); } } as unknown as GenerateDraftHandler;
