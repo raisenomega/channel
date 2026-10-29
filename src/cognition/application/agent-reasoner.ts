@@ -41,10 +41,11 @@ export class AgentReasoner {
       ? "HISTORIAL del hilo (usa estos datos; NUNCA vuelvas a pedir algo que el cliente YA dio):\n" + context.history.map((m) => `${m.from === "cliente" ? "Cliente" : "Tu"}: ${m.text}`).join("\n")
       : "(primer mensaje del hilo: puedes saludar una vez)";
     const estatico = construirPromptEstatico(channel, context);
+    const mem = context.memoria?.length ? "MEMORIA del cliente (CEREBRO, de conversaciones/plataformas previas; usala para no re-preguntar ni contradecirte, no la cites literal):\n" + context.memoria.join("\n") + "\n\n" : "";
     const img = context.mediaUrl ? await bajarImagenBase64(context.mediaUrl, context.mediaMime ?? "") : null; // vision: el agente VE la foto
 
     const llm = await this.provider.completar({
-      systemPrompt: historial, // dinamico (cambia por turno)
+      systemPrompt: mem + historial, // dinamico (memoria CEREBRO + historial del hilo)
       cachedSystem: estatico,  // ESTATICO -> prompt caching (~90% mas barato en relecturas)
       messages: [{ role: "user" as const, content: message.content }],
       images: img ? [img] : undefined,
