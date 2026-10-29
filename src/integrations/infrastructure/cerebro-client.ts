@@ -14,13 +14,18 @@ function cfg(): { url: string; token: string } | null {
   return url && token ? { url, token } : null;
 }
 
+// Mapea el evento (dominio camelCase) al contrato REAL de cerebro (snake_case, @raisen/cerebro-contracts).
+function eventoWire(e: CerebroEvent): Record<string, unknown> {
+  return { event: e.event, source_platform: "hub", tenant_id: e.tenantId, occurred_at: e.occurredAt, identity: { id_type: e.identity.idType, id_value: e.identity.idValue }, payload: e.payload };
+}
+
 export function cerebroIngest(event: CerebroEvent): void {
   const c = cfg();
   if (!c) return;
   void fetch(`${c.url}/cerebro/ingest`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${c.token}` },
-    body: JSON.stringify({ ...event, source_platform: "hub" }),
+    body: JSON.stringify(eventoWire(event)),
   }).catch(() => { /* fire-and-forget: nunca bloquea ni lanza */ });
 }
 
@@ -29,15 +34,16 @@ export async function cerebroRetrieve(params: CerebroRetrieveParams): Promise<Ce
   if (!c) return EMPTY;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 800);
+  const body = { identity: { id_type: params.identity.idType, id_value: params.identity.idValue }, query: params.query, requesting_agent: params.requestingAgent, requesting_platform: "hub", tenant_id: params.tenantId, max_chunks: params.maxChunks ?? 6 };
   try {
     const res = await fetch(`${c.url}/cerebro/retrieve`, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${c.token}` },
-      body: JSON.stringify({ ...params, requesting_platform: "hub" }),
+      body: JSON.stringify(body),
       signal: ctrl.signal,
     });
     if (!res.ok) return EMPTY;
-    const d = (await res.json()) as Partial<CerebroContext>;
-    return { personId: d.personId ?? null, chunks: d.chunks ?? [], facts: d.facts ?? [], degraded: d.degraded ?? false };
+    const d = (await res.json()) as { person_id?: string | null; chunks?: Array<{ kind: string; content: string; source_platform: string; score: number }>; facts?: Array<{ text: string }>; degraded?: boolean };
+    return { personId: d.person_id ?? null, chunks: (d.chunks ?? []).map((ch) => ({ kind: ch.kind, content: ch.content, sourcePlatform: ch.source_platform, score: ch.score })), facts: (d.facts ?? []).map((f) => ({ text: f.text })), degraded: d.degraded ?? false };
   } catch { return EMPTY; } finally { clearTimeout(timer); }
 }
