@@ -52,7 +52,7 @@ export function VictorChat({ lang, accent, onClose, full }: { lang: Idioma; acce
         <div ref={endRef} />
       </div>
       <div className="flex gap-2 border-t border-border/40 p-2">
-        <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void send(); }} placeholder={t(lang, "ag.victor.chatPh")} className="flex-1 rounded border border-border/55 bg-card-soft p-2 text-sm text-foreground" />
+        <input autoFocus value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void send(); }} placeholder={t(lang, "ag.victor.chatPh")} className="flex-1 rounded border border-border/55 bg-card-soft p-2 text-sm text-foreground" />
         <button type="button" onClick={() => void send()} disabled={busy} className="chip font-bold text-white" style={{ background: `hsl(${accent})` }}>{t(lang, "agenda.enviar")}</button>
       </div>
     </div>
