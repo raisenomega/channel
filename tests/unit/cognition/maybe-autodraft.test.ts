@@ -60,6 +60,31 @@ test("S7b-05 autonomo + OPORTUNIDAD a-revision (review.opportunities ON) -> NO e
   expect(sent).toHaveLength(0);  // NO auto-enviado
 });
 
+const presencia = (p: { humano: boolean; ia: boolean }) => async () => p;
+
+test("B-01 autonomo + HUMANO presente -> NO auto-envia (callo; borrador silencioso)", async () => {
+  const sent: string[] = [];
+  const r = await new MaybeAutodraftService(flagOf("autonomous"), genSpy([]), clf(thao), sender(sent), counter(0), undefined, undefined, undefined, presencia({ humano: true, ia: false }))
+    .ejecutar({ tenantId: "t1", conversationId: "cv1", channel: "whatsapp", from: "+1787", content: "a que hora abren?" });
+  expect(sent).toHaveLength(0);
+  expect(r).toEqual({ outcome: "no_send", reason: "humano_presente" });
+});
+
+test("B-02 autonomo + yo (IA) respondi hace <45s -> debounce, NO duplico", async () => {
+  const sent: string[] = [];
+  const r = await new MaybeAutodraftService(flagOf("autonomous"), genSpy([]), clf(thao), sender(sent), counter(0), undefined, undefined, undefined, presencia({ humano: false, ia: true }))
+    .ejecutar({ tenantId: "t1", conversationId: "cv1", channel: "whatsapp", from: "+1787", content: "y el sabado?" });
+  expect(sent).toHaveLength(0);
+  expect(r.reason).toBe("debounce_ia");
+});
+
+test("B-03 autonomo + sin presencia (nadie respondio) -> AUTO-ENVIA normal", async () => {
+  const sent: string[] = [];
+  await new MaybeAutodraftService(flagOf("autonomous"), genSpy([]), clf(thao), sender(sent), counter(0), undefined, undefined, undefined, presencia({ humano: false, ia: false }))
+    .ejecutar({ tenantId: "t1", conversationId: "cv1", channel: "whatsapp", from: "+1787", content: "a que hora abren?" });
+  expect(sent).toEqual(["+1787|whatsapp"]);
+});
+
 test("VOZ: nota de voz -> se transcribe y el agente LEE '[Nota de voz] ...' (STT)", async () => {
   const caps: Array<{ normalizedMessage?: { content: string } }> = [];
   const gen = { ejecutar: async (c: { normalizedMessage?: { content: string } }) => { caps.push(c); return ok({ id: "d1" }); } } as unknown as GenerateDraftHandler;

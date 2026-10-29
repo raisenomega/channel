@@ -33,6 +33,7 @@ import { ContactDataProducer } from "../cognition/application/contact-data.produ
 import { MaybeCaptureService } from "../cognition/application/maybe-capture.service.ts";
 import { leerHilo } from "../cognition/infrastructure/strategic-queries.ts";
 import { guardarDatosContacto } from "../cognition/infrastructure/contact-data.persist.ts";
+import { presenciaSaliente } from "../cognition/infrastructure/presencia-saliente.query.ts";
 
 // approved_by es UUID (migr 039, sin FK); "autonomous" NO es UUID -> el PATCH daba 400 y el approve fallaba
 // en silencio -> el draft quedaba en status=draft -> el send daba STATUS_NOT_APPROVED. Nil UUID = aprobador autonomo.
@@ -54,5 +55,10 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
   const cap = (getEnv("AGENT_CAPTURE_ENABLED") ?? "") === "true" ? new MaybeCaptureService(new ContactDataProducer(adapter), leerHilo, guardarDatosContacto, datosBaseCompletos) : null;
   const q = (getEnv("QUOTE_PROPOSAL_ENABLED") ?? "") === "true" ? new MaybeQuoteService(new QuoteProposalProducer(adapter), leerCatalogoSku, cotizacionPendiente, persistirPropuestaCotizacion, leerHilo, datosBaseCompletos, router ? makeEnviarCotizacion(router) : undefined) : null;
   const postHook = (cap || q) ? async (ev: AutodraftEvent, opp: boolean, mode: string): Promise<string | null> => { if (cap) await cap.ejecutar(ev); return q ? await q.ejecutar(ev, opp, mode) : null; } : undefined;
-  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, postHook);
+  // B (coherencia): gate de presencia humana + debounce IA. Kill-switch por env (=off lo apaga sin redeploy). Fail-open en la query.
+  const gateOn = (getEnv("AUTODRAFT_COHERENCE_GATE") ?? "on") !== "off";
+  const vHum = Number(getEnv("AUTODRAFT_HUMAN_WINDOW_MIN") ?? "10") * 60000;
+  const vIa = Number(getEnv("AUTODRAFT_IA_DEBOUNCE_SEC") ?? "45") * 1000;
+  const presencia = gateOn && router ? (convId: string) => presenciaSaliente(convId, vHum, vIa) : undefined;
+  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, postHook, presencia);
 }
