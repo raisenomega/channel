@@ -1,7 +1,8 @@
 /**
  * HUB by Raisen — Bento Card: Actividad reciente (ultimos 5). ALERTA parpadea (gris<->rojo) mientras
  * haya consulta de agente o escalada SIN atender; "Ver todas" abre la lista completa (/actividad).
- * consulta -> scope agente (c:{consultaId}); cliente -> conversacion. CONGELADO (LEY, ver docs).
+ * consulta Y escalada -> scope AGENTE (c:{consultaId}, lo que respondes NO va al cliente); cliente ->
+ * conversacion. Escalada agente-only autorizada por Jorge (firma). CONGELADO (LEY, ver docs).
  */
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
@@ -56,7 +57,7 @@ export function ActivityRow({ e, onOpen }: { e: ActivityEvent; onOpen?: (id: str
       </div>
     </>
   );
-  const target = e.type === "consulta" && e.consultaId ? "c:" + e.consultaId : (e.conversationId ?? null);
+  const target = (e.type === "consulta" || e.type === "escalation") && e.consultaId ? "c:" + e.consultaId : (e.conversationId ?? null); // escalada con hilo -> scope AGENTE (tu respuesta NO va al cliente); legada sin hilo -> conversacion
   if (target && onOpen) {
     return <button type="button" onClick={() => onOpen(target)} className="flex w-full items-start gap-2 py-1.5 text-left hover:text-primary">{inner}</button>;
   }

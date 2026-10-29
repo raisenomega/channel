@@ -16,6 +16,7 @@ export async function registrarEscalacion(
 ): Promise<void> {
   const esConsulta = tipo === "consulta";
   const label = (esConsulta ? ("Consulta de " + (agentSlug || "agente") + ": ") : "Escalacion a humano: ") + detalle;
+  const cid = consultaId || crypto.randomUUID(); // consulta Y escalada tienen hilo de AGENTE (lo que respondes NO va al cliente)
   try {
     await supabase.from("activity_log").insert({
       tenant_id: tenantId,
@@ -24,7 +25,7 @@ export async function registrarEscalacion(
       metadata: {
         ...(conversationId ? { conversationId } : {}), tipo,
         ...(agentSlug ? { agentSlug } : {}),
-        ...(esConsulta ? { consultaId, pregunta: detalle } : {}),
+        consultaId: cid, pregunta: detalle,
       },
     });
     // CEREBRO: ademas de HUB (activity_log), guarda en la memoria compartida (identidad de negocio). Nada se pierde.
