@@ -11,7 +11,7 @@ export interface CerebroIdentity {
 }
 
 export interface CerebroEvent {
-  readonly event: "message.received" | "conversation.resolved" | "contact.updated";
+  readonly event: "message.received" | "conversation.resolved" | "contact.updated" | "agent.consulta" | "agent.escalation";
   readonly sourcePlatform: "hub";
   readonly tenantId: string;
   readonly occurredAt: string;

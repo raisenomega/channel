@@ -4,6 +4,7 @@
  * NUNCA bloquea ni rompe la respuesta al cliente. C4 <=75. Sin any.
  */
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
+import { cerebroIngest } from "../../integrations/infrastructure/cerebro-client.ts";
 
 export async function registrarEscalacion(
   tenantId: string,
@@ -26,6 +27,8 @@ export async function registrarEscalacion(
         ...(esConsulta ? { consultaId, pregunta: detalle } : {}),
       },
     });
+    // CEREBRO: ademas de HUB (activity_log), guarda en la memoria compartida (identidad de negocio). Nada se pierde.
+    cerebroIngest({ event: esConsulta ? "agent.consulta" : "agent.escalation", sourcePlatform: "hub", tenantId, occurredAt: new Date().toISOString(), identity: { idType: "local_id", idValue: tenantId }, payload: { tipo, detalle, agente: agentSlug, conversationId: conversationId ?? "" } });
   } catch {
     /* fail-safe: la alerta al dueno nunca bloquea la respuesta */
   }
