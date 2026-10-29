@@ -66,8 +66,8 @@ export class MaybeAutodraftService {
       console.error(`[autodraft-timing] quote=${dQuote}ms reason=${dReason}ms total=${Date.now() - t0}ms ch=${ev.channel} send=${dec.send}`);
       if (!draft.ok) return { outcome: "error", reason: `generate:${draft.error.kind}` }; // fallo transitorio -> reintentar
       if (dec.send && this.autoSend) {
-        const pr = this.presencia && ev.conversationId ? await this.presencia(String(ev.conversationId)) : { humano: false, ia: false }; // B: ¿humano o yo ya respondí hace poco?
-        if (pr.humano || pr.ia) return { outcome: "no_send", reason: pr.humano ? "humano_presente" : "debounce_ia" }; // humano presente -> callo (borrador silencioso ya persistido); debounce -> no duplico
+        const pr = this.presencia && ev.conversationId ? await this.presencia(String(ev.conversationId)) : { humano: false, ia: false }; // B pres. humana/debounce; C: escalado = consulta/escalar en curso -> no mando "voy a confirmar"
+        const esc = this.presencia && (draft.value.metadata as { escalado?: string } | undefined)?.escalado ? "consulta_en_curso" : pr.humano ? "humano_presente" : pr.ia ? "debounce_ia" : ""; if (esc) return { outcome: "no_send", reason: esc };
         const sent = await this.autoSend.enviar(draft.value, ev.from, ev.channel); return sent ? { outcome: "responded", reason: dec.reason } : { outcome: "error", reason: "send_failed" }; }
       return { outcome: "no_send", reason: "borrador_sin_envio" };
     } catch (e) { return { outcome: "error", reason: e instanceof Error ? e.message : String(e) }; }

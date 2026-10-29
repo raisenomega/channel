@@ -68,7 +68,7 @@ export class GenerateDraftHandler {
       draftContent: razonado.value.response, confidence: 0.5,
       reason: "supervisado: borrador IA para revision humana", aiDisclosureIncluded: false,
       traceId: crypto.randomUUID(), to: cmd.normalizedMessage.from, channel: cmd.channel,
-      contactLabel: cmd.contactLabel, contactName: cmd.contactName, contactPhone: cmd.contactPhone, scope: cmd.scope ?? "targeted", autoSendReason: cmd.autoSendReason,
+      contactLabel: cmd.contactLabel, contactName: cmd.contactName, contactPhone: cmd.contactPhone, scope: cmd.scope ?? "targeted", autoSendReason: cmd.autoSendReason, escalado: mk?.tipo ?? undefined,
     });
     return d.ok ? ok(d.value) : err({ kind: "persist_failed", cause: (d.error as { causa?: string }).causa ?? (d.error as { kind: string }).kind });
   }
