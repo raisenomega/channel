@@ -12,6 +12,7 @@ import { procesarDelegaciones } from "../application/victor-delegar.ts";
 import { contextoMemorizado } from "../infrastructure/context-reader.ts";
 import { leerPlatformContext } from "../infrastructure/platform-context.repo.ts";
 import { buildPlatformFacts } from "../domain/platform-context.ts";
+import { cerebroRetrieve } from "../../integrations/infrastructure/cerebro-client.ts";
 
 export interface VictorChatDeps {
   readonly chat: VictorChatHandler;
@@ -32,8 +33,10 @@ export function rutaVictorChat(deps: VictorChatDeps): RouteDefinition {
       const history = (body.history ?? [])
         .filter((m) => (m?.role === "user" || m?.role === "assistant") && typeof m?.content === "string" && m.content.trim() !== "")
         .slice(-12).map((m) => ({ role: m.role as "user" | "assistant", content: String(m.content).trim() })); // hilo saneado para que Victor recuerde
-      const [neg, plat] = await Promise.all([contextoMemorizado(auth.value.tenantId), leerPlatformContext(auth.value.tenantId)]);
-      const facts = [neg.brandVoice, neg.catalogContext, ...buildPlatformFacts(plat)]; // negocio MEMORIZADO + plataforma fresca (canales/humanos)
+      const tid = auth.value.tenantId;
+      const [neg, plat, mem] = await Promise.all([contextoMemorizado(tid), leerPlatformContext(tid),
+        cerebroRetrieve({ identity: { idType: "local_id", idValue: tid }, query: message, requestingAgent: "victor", tenantId: tid, maxChunks: 6 }).then((c) => c.chunks.map((x) => x.content)).catch(() => [] as string[])]);
+      const facts = [neg.brandVoice, neg.catalogContext, ...buildPlatformFacts(plat), ...mem]; // negocio + plataforma + MEMORIA CEREBRO (consultas/escaladas/aprendizaje)
       const r = await deps.chat.ejecutar(deps.provider, message, facts, history);
       if (!r.ok) return jsonResponse(502, { ok: false, error: r.error });
       const d = await procesarDelegaciones(deps.generate, deps.persist, String(auth.value.tenantId), r.value.reply);

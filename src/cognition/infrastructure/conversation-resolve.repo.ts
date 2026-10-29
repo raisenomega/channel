@@ -4,6 +4,7 @@
  * agent_knowledge (el agente la cita). [Mantener abierto]: status=open. C4 <=75. Sin any.
  */
 import { supabase } from "../../shared/infrastructure/supabase.client.ts";
+import { cerebroIngest } from "../../integrations/infrastructure/cerebro-client.ts";
 
 export async function resolverConversacion(tenantId: string, conversationId: string, atendio: string, nota: string, userId: string): Promise<boolean> {
   try {
@@ -11,7 +12,8 @@ export async function resolverConversacion(tenantId: string, conversationId: str
     if (error) return false;
     await supabase.from("activity_log").insert({ tenant_id: tenantId, event_type: "resolved", label: ("Atendio " + (atendio || "-")).slice(0, 160), metadata: { conversationId, resolvedBy: userId, atendio, nota } });
     const aprendido = await aprendizajeCliente(tenantId, conversationId, nota);
-    if (aprendido) await supabase.from("agent_knowledge").insert({ tenant_id: tenantId, category: "context", knowledge: aprendido, source: "manual", confidence: 0.8, status: "active" });
+    if (aprendido) { await supabase.from("agent_knowledge").insert({ tenant_id: tenantId, category: "context", knowledge: aprendido, source: "manual", confidence: 0.8, status: "active" });
+      cerebroIngest({ event: "conversation.resolved", sourcePlatform: "hub", tenantId, occurredAt: new Date().toISOString(), identity: { idType: "local_id", idValue: tenantId }, payload: { conversationId, learned: aprendido } }); } // HUB + cerebro
     return true;
   } catch {
     return false;
