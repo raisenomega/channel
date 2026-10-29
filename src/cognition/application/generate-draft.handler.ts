@@ -50,7 +50,7 @@ export class GenerateDraftHandler {
   async ejecutar(cmd: GenerateDraftCommand): Promise<Result<AgentDraft, GenerateDraftError>> {
     const ethics = EthicsGuard.evaluar(cmd.normalizedMessage.content, "");
     if (!ethics.ok) return err({ kind: "ethics_violation" });
-    const contexto = await this.ctx.obtener(cmd.normalizedMessage, cmd.tenantId, cmd.conversationId ? String(cmd.conversationId) : undefined);
+    const contexto = await this.ctx.obtener(cmd.normalizedMessage, cmd.tenantId, cmd.conversationId ? String(cmd.conversationId) : undefined, cmd.personaSlug);
     if (!contexto.ok) return err({ kind: "context_failed", cause: contexto.error.cause });
     const razonado = await this.reasoner.razonar(cmd.normalizedMessage, cmd.channel, { ...contexto.value, contactProfile: cmd.contactProfile, tier: RESPONSE_TIER[cmd.personaSlug] ?? "sonnet", mediaUrl: cmd.mediaUrl, mediaMime: cmd.mediaMime });
     if (!razonado.ok) return err({ kind: "llm_failure", cause: razonado.error.cause });

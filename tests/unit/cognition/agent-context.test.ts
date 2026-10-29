@@ -26,3 +26,15 @@ test("ACX-02 sin source: fallback honesto, no bloquea", async () => {
   expect(r.ok).toBe(true);
   if (r.ok) { expect(r.value.brandVoice).toContain("Profesional"); expect(r.value.history).toEqual([]); }
 });
+
+test("ACX-03 CEREBRO: obtener trae la memoria del source (chunks/facts) con la identidad del cliente", async () => {
+  const calls: Array<{ idType: string; idValue: string; query: string; agent: string }> = [];
+  const src: AgentContextSource = {
+    ...fakeSource,
+    obtenerMemoria: async (_t, idType, idValue, query, agent) => { calls.push({ idType, idValue, query, agent }); return Object.freeze(["cliente pidio 4 zafacones soterrados", "acepto oferta $19.99"]); },
+  };
+  const r = await new AgentContextService(src).obtener(cmd, "t1", undefined, "zahra");
+  expect(r.ok).toBe(true);
+  if (r.ok) expect(r.value.memoria).toEqual(["cliente pidio 4 zafacones soterrados", "acepto oferta $19.99"]);
+  expect(calls[0]).toEqual({ idType: "phone", idValue: "+1", query: "hola", agent: "zahra" }); // identidad + persona correctas
+});
