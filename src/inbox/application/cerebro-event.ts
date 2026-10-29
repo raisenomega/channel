@@ -17,6 +17,6 @@ export function cerebroMessageEvent(tenantId: string, contactId: string, z: Zern
       idValue: wa ? z.contactPhone : z.contactExternalId,
       localId: contactId,
     },
-    payload: { channel: z.channel, direction: z.direction, hasText: z.content.length > 0 },
+    payload: { channel: z.channel, direction: z.direction, text: z.content, contact_name: z.contactName }, // texto REAL -> cerebro lo embebe como chunk
   };
 }
