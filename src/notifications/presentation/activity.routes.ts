@@ -27,8 +27,8 @@ async function leer(tenantId: string, limit: number): Promise<Array<Record<strin
   const visibles = rows.filter((r) => {
     if (r.event_type === "resolved") return false; // resueltos viven en Tickets Resueltos, no en la tarjeta
     const m = r.metadata ?? {};
-    if (r.event_type === "consulta" && m.consultaId && rCons.has(m.consultaId)) return false; // consulta ya atendida
-    if (r.event_type === "escalation" && m.conversationId && rConv.has(m.conversationId)) return false; // escalada ya atendida
+    if ((r.event_type === "consulta" || r.event_type === "escalation") && m.consultaId && rCons.has(m.consultaId)) return false; // consulta/escalada (hilo agente) ya atendida
+    if (r.event_type === "escalation" && m.conversationId && rConv.has(m.conversationId)) return false; // escalada legada (sin consultaId) ya atendida
     return true;
   });
   return mapear(visibles.slice(0, limit));

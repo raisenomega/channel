@@ -16,7 +16,7 @@ export async function contarPendientes(tenantId: string): Promise<number> {
       const m = r.metadata ?? {};
       if (r.event_type === "resolved") { if (m.consultaId) resueltoConsulta.add(m.consultaId); if (m.conversationId) resueltoConv.add(m.conversationId); }
       else if (r.event_type === "consulta") { if (m.consultaId) consultas.add(m.consultaId); }
-      else if (r.event_type === "escalation") { if (m.conversationId) escalaciones.add(m.conversationId); }
+      else if (r.event_type === "escalation") { if (m.consultaId) consultas.add(m.consultaId); else if (m.conversationId) escalaciones.add(m.conversationId); } // nueva = hilo agente (consultaId); legado = conversationId
     }
     let n = 0;
     for (const id of consultas) if (!resueltoConsulta.has(id)) n++;

@@ -84,3 +84,14 @@ test("ALERTA-FIX: consulta/escalada YA resuelta NO aparece en la tarjeta; la pen
   expect(ids).toEqual(["escPend"]); // solo la pendiente; resueltos + ya-atendidas fuera
   expect(r.events.every((e) => e["type"] !== "resolved")).toBe(true); // ninguna fila 'resolved' en la tarjeta
 });
+
+test("ESCALADA agente-only: con consultaId, resuelta por consultaId -> fuera; pendiente con consultaId -> dentro + mapea consultaId", async () => {
+  db.rows = [
+    { id: "rc", event_type: "resolved", label: "Escalada resuelta", created_at: "2026-10-16T03:00:00Z", metadata: { consultaId: "ec1", conversationId: "cv1" } },
+    { id: "escDone", event_type: "escalation", label: "Escalada atendida (hilo agente)", created_at: "2026-10-16T02:00:00Z", metadata: { consultaId: "ec1", conversationId: "cv1", agentSlug: "angel" } },
+    { id: "escNew", event_type: "escalation", label: "Escalada PENDIENTE (hilo agente)", created_at: "2026-10-16T01:00:00Z", metadata: { consultaId: "ec2", conversationId: "cv2", agentSlug: "angel" } },
+  ];
+  const r = await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1"))) as EventsOk;
+  expect(r.events.map((e) => e["id"])).toEqual(["escNew"]); // la resuelta por consultaId sale; la pendiente queda
+  expect(r.events[0]).toMatchObject({ type: "escalation", consultaId: "ec2" }); // lleva consultaId -> la card abre el scope AGENTE (c:ec2)
+});
