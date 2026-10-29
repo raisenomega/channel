@@ -11,6 +11,7 @@ import { importarLibraryZernio as importarZernioLibrary } from "../infrastructur
 export interface ImportTemplateLibraryCommand {
   readonly tenantId: TenantId;
   readonly libraryTemplateName: string;
+  readonly category: string | undefined;
   readonly language: string;
   readonly body: string | undefined;
 }
@@ -25,11 +26,15 @@ export class ImportTemplateLibraryHandler {
   constructor(
     private readonly repo: WhatsAppTemplateRepository,
     private readonly apiKeyFn: () => string,
+    private readonly accountIdFn: (tenantId: string) => Promise<string | null>,
   ) {}
 
   async ejecutar(cmd: ImportTemplateLibraryCommand): Promise<Result<WhatsAppTemplateState, ImportError>> {
     const apiKey = this.apiKeyFn();
-    const zr = await importarZernioLibrary(apiKey, cmd.libraryTemplateName, cmd.language);
+    const accountId = await this.accountIdFn(String(cmd.tenantId));
+    if (!accountId) return err({ kind: "zernio_error", cause: "whatsapp_no_conectado" });
+    const category = cmd.category ?? "utility";
+    const zr = await importarZernioLibrary(apiKey, accountId, cmd.libraryTemplateName, category, cmd.language);
     if (!zr.ok) {
       if (zr.error.kind === "http_failure" && zr.error.status === 404) {
         return err({ kind: "library_template_not_found" });
@@ -38,7 +43,7 @@ export class ImportTemplateLibraryHandler {
     }
 
     const created = crearWhatsAppTemplate(
-      cmd.tenantId, cmd.libraryTemplateName, cmd.language, "utility",
+      cmd.tenantId, cmd.libraryTemplateName, cmd.language, category as never,
       cmd.body ?? "Plantilla de biblioteca",
     );
     if (!created.ok) return err(created.error);

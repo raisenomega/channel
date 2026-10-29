@@ -20,7 +20,7 @@ function repoSpy() {
 function build() {
   const repo = repoSpy();
   const inner = new CreateTemplateHandler(repo);
-  return { h: new CreateTemplateWithZernioHandler(inner, repo, () => "key") };
+  return { h: new CreateTemplateWithZernioHandler(inner, repo, () => "key", async () => "acc1") };
 }
 
 test("A-01 invalid_template_name si name no es ^[a-z_]{1,512}$", async () => {
@@ -58,4 +58,13 @@ test("zernio http_failure -> zernio_error", async () => {
   const r = await h.ejecutar(BASE);
   expect(r.ok).toBe(false);
   if (!r.ok) expect(r.error.kind).toBe("zernio_error");
+});
+
+test("sin WhatsApp conectado (accountId null) -> zernio_error whatsapp_no_conectado", async () => {
+  const repo = repoSpy();
+  const inner = new CreateTemplateHandler(repo);
+  const h = new CreateTemplateWithZernioHandler(inner, repo, () => "key", async () => null);
+  const r = await h.ejecutar(BASE);
+  expect(r.ok).toBe(false);
+  if (!r.ok && r.error.kind === "zernio_error") expect(r.error.cause).toBe("whatsapp_no_conectado");
 });
