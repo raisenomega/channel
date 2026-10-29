@@ -24,7 +24,7 @@ export interface IngestDeps {
   readonly tenantPorProfile: (profileId: string) => Promise<TenantId | null>;
   readonly tenantPorAccount: (accountId: string) => Promise<TenantId | null>;
   readonly mensajeExiste: (t: TenantId, pmid: string) => Promise<boolean>;
-  readonly esEcoReciente?: (convId: string, content: string) => Promise<boolean>; // guard de eco por contenido
+  readonly esEcoReciente?: (convId: string, content: string) => Promise<boolean>; readonly esEnvioAgente?: (convId: string, content: string) => Promise<boolean>; // guard de eco + origen agente (ai vs humano)
   readonly convExiste: (convId: string) => Promise<boolean>;
   readonly setConvRefs: (convId: string, participantExternalId: string, providerConversationId: string, providerAccountId: string) => Promise<void>; // 3o-b/#1: ids de envío Zernio
   readonly refreshContactName: (contactId: string, name: string) => Promise<void>; // #3: auto-update nombre real
@@ -62,7 +62,7 @@ export class IngestZernioMessageHandler {
     const ctype = (z.hasAttachments && ["image", "video", "audio", "document", "sticker"].includes(z.mediaType) ? z.mediaType : "text") as MessageState["content"]["type"];
     const msg: MessageState = {
       id: crypto.randomUUID() as MessageId, tenantId, conversationId: convId, contactId,
-      direction: z.direction, senderType: z.direction === "inbound" ? "contact" : "human_agent", senderUserId: null, channel: ch,
+      direction: z.direction, senderType: z.direction === "inbound" ? "contact" : (z.content && this.d.esEnvioAgente && await this.d.esEnvioAgente(String(convId), z.content)) ? "ai_agent" : "human_agent", senderUserId: null, channel: ch,
       provider: "zernio", providerMessageId: z.providerMessageId, content: { type: ctype, body: z.content, mediaUrl: z.mediaUrl || undefined, mediaMime: z.mediaMime || undefined },
       hasAttachments: z.hasAttachments, status: z.direction === "inbound" ? "received" : "sent", aiMeta: { interactionId: null, confidence: null, mode: null, editedByHuman: false }, createdAt: new Date(),
     };

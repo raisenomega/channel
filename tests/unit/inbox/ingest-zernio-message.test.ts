@@ -145,6 +145,23 @@ test("Bloque 4 outbound: message.sent -> direction outbound + senderType human_a
   expect(msg).toMatchObject({ direction: "outbound", senderType: "human_agent", status: "sent", content: { body: "respuesta" } });
 });
 
+test("ORIGEN: saliente que coincide con un borrador del agente ENVIADO -> senderType ai_agent", async () => {
+  const esEnvioAgente = vi.fn(async () => true);
+  const { d, msgs } = build({ esEnvioAgente });
+  const out = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: "outgoing", text: "respuesta del agente" } };
+  await new IngestZernioMessageHandler(d).ejecutar(out);
+  const msg = (msgs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0];
+  expect(msg.senderType).toBe("ai_agent");
+  expect(esEnvioAgente).toHaveBeenCalledWith(expect.any(String), "respuesta del agente");
+});
+
+test("ORIGEN: saliente SIN match de borrador (humano) -> senderType human_agent", async () => {
+  const { d, msgs } = build({ esEnvioAgente: vi.fn(async () => false) });
+  const out = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: "outgoing", text: "lo escribio un humano" } };
+  await new IngestZernioMessageHandler(d).ejecutar(out);
+  expect((msgs.guardar as ReturnType<typeof vi.fn>).mock.calls[0][0].senderType).toBe("human_agent");
+});
+
 test("ECO: message.sent SIN m.direction -> outbound (el evento manda; no se re-procesa como entrante)", async () => {
   const { d, msgs } = build();
   const eco = { ...PAYLOAD, event: "message.sent", message: { ...PAYLOAD.message, direction: undefined, text: "respuesta del agente" } };
