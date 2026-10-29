@@ -12,8 +12,7 @@ import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { NeedTenantBanner } from "@/components/ui/need-tenant-banner";
 import { useTemplates } from "./templates-ui/templates-fetchers";
-import { TemplatesList } from "./templates-ui/templates-list";
-import { TemplateCreateModal } from "./templates-ui/template-create-modal";
+import { MisPlantillasLive } from "./templates-ui/mis-plantillas-live";
 import { LibraryImport } from "./templates-ui/library-import";
 
 export const TemplatesRoute = createRoute({
@@ -27,7 +26,6 @@ type TabKey = "mine" | "library";
 function TemplatesPage() {
   const { language } = usePreferences();
   const [tab, setTab] = useState<TabKey>("mine");
-  const [crear, setCrear] = useState(false);
   const query = useTemplates();
   const vista = query.data;
 
@@ -57,15 +55,7 @@ function TemplatesPage() {
           {t(language, "templates.loading")}
         </div>
       ) : tab === "mine" ? (
-        <>
-          <div className="mb-3 flex justify-end">
-            <Button variant="primary" size="sm" onClick={() => setCrear(true)}>
-              {t(language, "templates.create.title")}
-            </Button>
-          </div>
-          <TemplatesList language={language} templates={vista?.templates ?? []} syncFailed={vista?.syncFailed ?? false} />
-          {crear ? <TemplateCreateModal language={language} onClose={() => setCrear(false)} onCreated={() => void query.refetch()} /> : null}
-        </>
+        <MisPlantillasLive language={language} />
       ) : (
         <LibraryImport language={language} onImported={() => void query.refetch()} />
       )}

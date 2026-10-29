@@ -9,6 +9,14 @@ export interface ZernioTplStatus {
   readonly language: string;
   readonly status: string;
   readonly category: string;
+  readonly body: string;
+  readonly rejectionReason: string | null;
+}
+
+function cuerpoDe(x: Record<string, unknown>): string {
+  const comps = Array.isArray(x.components) ? x.components as Array<Record<string, unknown>> : [];
+  const bodyComp = comps.find((c) => String(c?.type ?? "").toUpperCase() === "BODY");
+  return bodyComp ? String(bodyComp.text ?? "") : "";
 }
 
 export async function listarEstadoZernio(apiKey: string, accountId: string): Promise<ZernioTplStatus[]> {
@@ -23,6 +31,8 @@ export async function listarEstadoZernio(apiKey: string, accountId: string): Pro
     return arr.map((x) => ({
       name: String(x.name ?? ""), language: String(x.language ?? ""),
       status: String(x.status ?? ""), category: String(x.category ?? ""),
+      body: cuerpoDe(x),
+      rejectionReason: x.rejected_reason ? String(x.rejected_reason) : (x.rejection_reason ? String(x.rejection_reason) : null),
     }));
   } catch {
     return [];

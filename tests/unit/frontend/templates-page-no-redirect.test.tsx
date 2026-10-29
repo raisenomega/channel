@@ -48,7 +48,7 @@ afterEach(() => { globalThis.fetch = ORIGINAL_FETCH; window.localStorage.clear()
 
 test("A-05/A-12 sin tenant: tabs visibles + banner CTA + lista vacia, URL intacta", async () => {
   const loc = location();
-  globalThis.fetch = vi.fn().mockResolvedValue(new Response("[]", { status: 200 }));
+  globalThis.fetch = vi.fn().mockImplementation(() => Promise.resolve(new Response("[]", { status: 200 })));
   pintar();
   expect(screen.getByTestId("templates-tabs")).toBeDefined();
   await waitFor(() => expect(screen.getByTestId("need-tenant-banner")).toBeDefined());
@@ -59,9 +59,12 @@ test("A-05/A-12 sin tenant: tabs visibles + banner CTA + lista vacia, URL intact
 test("A-06 con tenant: lista las plantillas reales, sin banner", async () => {
   const loc = location();
   window.localStorage.setItem("hub.tenant_id", "t-1");
-  globalThis.fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({
-    ok: true, templates: [{ id: "tp1", name: "recordatorio_cita", language: "es", category: "utility", status: "approved", body: "Hola" }],
-  }), { status: 200 }));
+  const payload = JSON.stringify({
+    ok: true,
+    templates: [{ id: "tp1", name: "recordatorio_cita", language: "es", category: "utility", status: "approved", body: "Hola" }],
+    statuses: [{ name: "recordatorio_cita", language: "es", category: "utility", status: "APPROVED", body: "Hola", rejectionReason: null }],
+  });
+  globalThis.fetch = vi.fn().mockImplementation(() => Promise.resolve(new Response(payload, { status: 200 })));
   pintar();
   await waitFor(() => expect(screen.getByText("recordatorio_cita")).toBeDefined());
   expect(screen.queryByTestId("need-tenant-banner")).toBeNull();
