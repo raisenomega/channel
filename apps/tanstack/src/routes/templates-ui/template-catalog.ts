@@ -14,7 +14,7 @@ export interface CatalogItem {
 export const TEMPLATE_CATALOG: readonly CatalogItem[] = [
   { name: "order_delivered", cat: "utility", desc: "Pedido entregado (Meta)", body: "", imp: true },
   { name: "order_shipped", cat: "utility", desc: "Pedido enviado (Meta)", body: "", imp: true },
-  { name: "payment_due_reminder", cat: "utility", desc: "Recordatorio de pago (Meta)", body: "", imp: true },
+  { name: "seguimiento_postventa", cat: "utility", desc: "Seguimiento postventa", body: "Queremos asegurarnos de que todo haya quedado bien con tu compra. Si necesitas algo mas, escribenos por aqui." },
   { name: "appointment_reminder", cat: "utility", desc: "Recordatorio de cita (Meta)", body: "", imp: true },
   { name: "appointment_rescheduled", cat: "utility", desc: "Cita reprogramada (Meta)", body: "", imp: true },
   { name: "confirmacion_pedido", cat: "utility", desc: "Confirmacion de pedido", body: "Gracias por tu pedido. Lo recibimos y ya lo estamos preparando. Te avisamos por aqui cuando este listo." },
