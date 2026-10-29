@@ -1,7 +1,8 @@
 /**
  * HUB by Raisen — S6/S7b: genera borrador si no esta 'off'; auto-envia SOLO si autonomo + guardrails pasan.
  */
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
+vi.mock("../../../src/cognition/infrastructure/audio-transcribe.ts", () => ({ transcribirAudio: async () => "necesito una cotizacion de limpieza" }));
 import { MaybeAutodraftService, type AutodraftFlagPort, type AutoSendPort, type SentCounterPort } from "../../../src/cognition/application/maybe-autodraft.service.ts";
 import type { GenerateDraftHandler } from "../../../src/cognition/application/generate-draft.handler.ts";
 import type { IntentClassifier, IntentResult } from "../../../src/cognition/application/intent-classifier.ts";
@@ -49,4 +50,11 @@ test("S7b-04 autonomo + bloqueado (canal no autorizado) -> NO responde y NO deja
   const calls: { personaSlug: string }[] = []; const sent: string[] = [];
   await new MaybeAutodraftService(flagOf("autonomous"), genSpy(calls), clf(thao), sender(sent), counter(0)).ejecutar({ tenantId: "t1", channel: "telegram", from: "+1", content: "hola" });
   expect(calls).toHaveLength(0); expect(sent).toHaveLength(0);
+});
+
+test("VOZ: nota de voz -> se transcribe y el agente LEE '[Nota de voz] ...' (STT)", async () => {
+  const caps: Array<{ normalizedMessage?: { content: string } }> = [];
+  const gen = { ejecutar: async (c: { normalizedMessage?: { content: string } }) => { caps.push(c); return ok({ id: "d1" }); } } as unknown as GenerateDraftHandler;
+  await new MaybeAutodraftService(flagOf("supervised"), gen, clf(thao)).ejecutar({ tenantId: "t1", channel: "whatsapp", from: "+1", content: "[Audio]", contentType: "audio", mediaUrl: "https://zernio/x", mediaMime: "audio/ogg" });
+  expect(caps[0]?.normalizedMessage?.content).toBe("[Nota de voz] necesito una cotizacion de limpieza");
 });

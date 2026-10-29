@@ -11,6 +11,7 @@ import type { AgentDraft } from "../domain/agent-draft.entity.ts";
 import type { TenantId, ConversationId, ContactId } from "../../shared/domain/ids.ts";
 import type { ChannelType } from "../../shared/domain/types.ts";
 import type { NormalizedMessage } from "../../channels/domain/channel.adapter.ts";
+import { transcribirAudio } from "../infrastructure/audio-transcribe.ts";
 
 export interface AutodraftFlagPort { leer(tenantId: string): Promise<{ mode: string; config: AgentsConfig; timeZone?: string | undefined }>; }
 export interface AutoSendPort { enviar(draft: AgentDraft, to: string, channel: string): Promise<boolean>; } // true = enviado
@@ -42,7 +43,9 @@ export class MaybeAutodraftService {
       if (!ev.content || !ev.content.trim() || !ev.from) return { outcome: "no_send", reason: "vacio" };
       const { mode, config, timeZone } = await this.flag.leer(ev.tenantId);
       if (mode === "off") return { outcome: "no_send", reason: "off" };
-      const intent = await this.classifier.clasificar(ev.content);
+      const voz = ev.contentType === "audio" && ev.mediaUrl ? await transcribirAudio(ev.mediaUrl, ev.mediaMime ?? "") : ""; // STT: nota de voz -> texto
+      const contenido = voz ? "[Nota de voz] " + voz : ev.content; // el agente LEE lo que el cliente dijo por audio
+      const intent = await this.classifier.clasificar(contenido);
       if (ev.contactId && this.calificar) await this.calificar(String(ev.contactId), intent.opportunity);
       const tq = Date.now(); const quoteUrl = this.postHook ? await this.postHook(ev, intent.opportunity, mode) : null; const dQuote = Date.now() - tq;
       // Lazo cerrado: si la cotizacion SALIO, el mensaje del link ES la respuesta -> no generamos reply redundante (ni "se la enviaremos")
@@ -53,7 +56,7 @@ export class MaybeAutodraftService {
       const dec = razonAutoEnvio(mode, config, signals, new Date(), timeZone);
       if (mode === "autonomous" && !dec.send) return { outcome: "no_send", reason: dec.reason };
       const perfil = ev.contactId && this.perfilContacto ? await this.perfilContacto(String(ev.contactId)) : null;
-      const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: ev.content, attachments: [] };
+      const nm: NormalizedMessage = { providerMessageId: crypto.randomUUID(), from: ev.from, channel: ev.channel as ChannelType, content: contenido, attachments: [] };
       const tg = Date.now();
       const draft = await this.generate.ejecutar({
         tenantId: ev.tenantId as unknown as TenantId, conversationId: (ev.conversationId ?? null) as ConversationId | null,
