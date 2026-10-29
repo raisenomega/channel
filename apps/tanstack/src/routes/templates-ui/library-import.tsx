@@ -1,14 +1,17 @@
 /**
- * HUB by Raisen — Catalogo HUB de plantillas (lote 1 = 25): "Usar" crea o importa.
- * imp -> import instantaneo (Meta); si no -> crea con cuerpo estatico. C4 <=75.
+ * HUB by Raisen — Catalogo HUB (pre-aprobada): tarjetas estilo Borradores (4/fila) con estado REAL
+ * de Meta. "Usar" crea/importa + marca el badge del chip de Canales + toast honesto. C4 <=75.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Idioma } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
 import { importarLibrary } from "@/lib/templates-client/library-functions";
 import { crearTemplate } from "@/lib/templates-client/functions";
-import type { TemplateError } from "@/lib/templates-client/types";
+import { estadoPlantillas } from "@/lib/templates-client/status-functions";
+import { marcarPlantillaNueva } from "@/lib/plantillas-badge";
 import { TEMPLATE_CATALOG, type CatalogItem } from "./template-catalog";
+import { CatalogCard } from "./catalog-card";
 
 function submitItem(item: CatalogItem, lang: string) {
   return item.imp
@@ -17,54 +20,47 @@ function submitItem(item: CatalogItem, lang: string) {
 }
 
 export function LibraryImport({ onImported }: { language?: Idioma; onImported: () => void }) {
-  const [usarLang, setUsarLang] = useState("es");
-  const [loading, setLoading] = useState<string | null>(null);
-  const [error, setError] = useState<TemplateError | null>(null);
-  const [feedback, setFeedback] = useState("");
+  const [statuses, setStatuses] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const [toast, setToast] = useState("");
+  const refetch = () => void estadoPlantillas().then(setStatuses);
+  useEffect(() => { refetch(); }, []);
+  const aprobadas = TEMPLATE_CATALOG.filter((i) => statuses[i.name] === "APPROVED").length;
 
-  async function usarUna(item: CatalogItem): Promise<void> {
-    setError(null); setFeedback(""); setLoading(item.name);
-    const r = await submitItem(item, usarLang);
-    setLoading(null);
-    if (!r.ok) { setError(r.error); return; }
-    setFeedback(`"${item.name}" enviada a revision de Meta`); onImported();
+  async function usar(item: CatalogItem): Promise<void> {
+    setBusy(item.name);
+    const r = await submitItem(item, "es");
+    setBusy(null);
+    if (!r.ok) { setToast(`No se pudo enviar "${item.name}". Reintenta.`); return; }
+    marcarPlantillaNueva(item.name);
+    setToast(`"${item.name}" enviada. La veras en Canales > Plantillas cuando Meta la apruebe.`);
+    onImported(); refetch();
   }
 
   async function usarTodas(): Promise<void> {
-    setError(null); setLoading("__all__"); let okN = 0; let bad = 0;
+    setBusy("__all__"); let ok = 0;
     for (const item of TEMPLATE_CATALOG) {
-      const r = await submitItem(item, usarLang);
-      if (r.ok) { okN++; } else { bad++; }
-      setFeedback(`Enviando ${okN + bad}/${TEMPLATE_CATALOG.length} (${okN} ok, ${bad} con error)`);
+      const r = await submitItem(item, "es");
+      if (r.ok) { ok++; marcarPlantillaNueva(item.name); }
     }
-    setLoading(null); onImported();
+    setBusy(null);
+    setToast(`${ok}/${TEMPLATE_CATALOG.length} enviadas. En Canales > Plantillas cuando Meta apruebe.`);
+    onImported(); refetch();
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-1 gap-2">
-        <h3 className="text-sm font-bold">Catalogo HUB — {TEMPLATE_CATALOG.length} plantillas</h3>
-        <Button size="sm" loading={loading === "__all__"} onClick={() => void usarTodas()}>Usar todas</Button>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="text-sm font-bold text-foreground">Catalogo HUB — {aprobadas} de {TEMPLATE_CATALOG.length} aprobadas</h3>
+        <Button size="sm" loading={busy === "__all__"} onClick={() => void usarTodas()}>Usar todas</Button>
       </div>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs text-muted-foreground">Idioma:</span>
-        <input type="text" value={usarLang} onInput={(e) => setUsarLang(e.currentTarget.value)}
-          className="rounded-xl glass-card px-2 py-1 text-sm w-20" />
-      </div>
-      <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
         {TEMPLATE_CATALOG.map((item) => (
-          <div key={item.name} className="flex items-center gap-3 rounded-2xl glass-card px-4 py-3">
-            <div className="flex-1 min-w-0">
-              <strong className="text-sm">{item.name}</strong>
-              <span className="ml-2 text-[10px] uppercase text-muted-foreground">{item.cat}{item.imp ? " - meta" : ""}</span>
-              <span className="block text-xs text-muted-foreground truncate">{item.desc}</span>
-            </div>
-            <Button variant="outline" size="sm" loading={loading === item.name} onClick={() => void usarUna(item)}>Usar</Button>
-          </div>
+          <CatalogCard key={item.name} item={item} status={statuses[item.name]}
+            busy={busy === item.name || busy === "__all__"} onUsar={(i) => void usar(i)} />
         ))}
       </div>
-      {error ? <p className="text-xs text-critical mt-2">{error.kind === "validation" ? `No se pudo (${error.cause ?? "revisa"})` : "Error al enviar."}</p> : null}
-      {feedback ? <p className="text-xs text-success mt-2">{feedback}</p> : null}
+      {toast ? <Toast message={toast} onHide={() => setToast("")} ms={4000} /> : null}
     </div>
   );
 }
