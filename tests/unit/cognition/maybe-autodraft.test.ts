@@ -85,6 +85,23 @@ test("B-03 autonomo + sin presencia (nadie respondio) -> AUTO-ENVIA normal", asy
   expect(sent).toEqual(["+1787|whatsapp"]);
 });
 
+test("C-01 autonomo + draft con escalado (consulta/escalar) -> NO auto-envia el ruido al cliente", async () => {
+  const sent: string[] = [];
+  const gen = { ejecutar: async () => ok({ id: "d1", metadata: { escalado: "consulta" } }) } as unknown as GenerateDraftHandler;
+  const r = await new MaybeAutodraftService(flagOf("autonomous"), gen, clf(thao), sender(sent), counter(0), undefined, undefined, undefined, presencia({ humano: false, ia: false }))
+    .ejecutar({ tenantId: "t1", conversationId: "cv1", channel: "whatsapp", from: "+1787", content: "se puede el mismo dia?" });
+  expect(sent).toHaveLength(0);
+  expect(r).toEqual({ outcome: "no_send", reason: "consulta_en_curso" });
+});
+
+test("C-02 draft con escalado PERO gate off (sin presencia) -> envia igual (kill-switch respeta)", async () => {
+  const sent: string[] = [];
+  const gen = { ejecutar: async () => ok({ id: "d1", metadata: { escalado: "consulta" } }) } as unknown as GenerateDraftHandler;
+  await new MaybeAutodraftService(flagOf("autonomous"), gen, clf(thao), sender(sent), counter(0))
+    .ejecutar({ tenantId: "t1", conversationId: "cv1", channel: "whatsapp", from: "+1787", content: "se puede el mismo dia?" });
+  expect(sent).toEqual(["+1787|whatsapp"]);
+});
+
 test("VOZ: nota de voz -> se transcribe y el agente LEE '[Nota de voz] ...' (STT)", async () => {
   const caps: Array<{ normalizedMessage?: { content: string } }> = [];
   const gen = { ejecutar: async (c: { normalizedMessage?: { content: string } }) => { caps.push(c); return ok({ id: "d1" }); } } as unknown as GenerateDraftHandler;
