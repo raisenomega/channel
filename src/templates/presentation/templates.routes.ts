@@ -10,6 +10,7 @@ import type { PatchTemplateHandler } from "../application/patch-template.handler
 import type { ImportTemplateLibraryHandler } from "../application/import-template-library.handler.ts";
 import type { SyncTemplateStatusHandler } from "../application/sync-template-status.handler.ts";
 import type { WhatsAppTemplateRepository } from "../domain/template.repository.ts";
+import type { ZernioTplStatus } from "../infrastructure/zernio-status.client.ts";
 
 export interface TemplatesDeps {
   readonly create: CreateTemplateWithZernioHandler;
@@ -17,6 +18,7 @@ export interface TemplatesDeps {
   readonly patch: PatchTemplateHandler;
   readonly import: ImportTemplateLibraryHandler;
   readonly syncStatus: SyncTemplateStatusHandler;
+  readonly estadoLive: (tenantId: string) => Promise<readonly ZernioTplStatus[]>;
   readonly webhookSecret: string;
   readonly repo: WhatsAppTemplateRepository;
 }
@@ -50,6 +52,14 @@ export function rutaPatchTemplate(d: TemplatesDeps): RouteDefinition {
     return jsonResponse(200, { ok: true, template: r.value });
   } };
 }
+export function rutaEstadoTemplates(d: TemplatesDeps): RouteDefinition {
+  return { method: "GET", path: "/tenants/:id/templates/status", handler: async (ctx) => {
+    const auth = await requireTenantAuth(ctx, tid(ctx.path)); if (!auth.ok) return auth.error;
+    const statuses = await d.estadoLive(String(auth.value.tenantId));
+    return jsonResponse(200, { ok: true, statuses });
+  } };
+}
+
 export function rutaImportLibrary(d: TemplatesDeps): RouteDefinition {
   return { method: "POST", path: "/tenants/:id/templates/:templateName/import-library", handler: async (ctx) => {
     const auth = await requireTenantAuth(ctx, tid(ctx.path)); if (!auth.ok) return auth.error;

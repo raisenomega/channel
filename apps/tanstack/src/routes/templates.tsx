@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { NeedTenantBanner } from "@/components/ui/need-tenant-banner";
 import { useTemplates } from "./templates-ui/templates-fetchers";
 import { TemplatesList } from "./templates-ui/templates-list";
-import { TemplateCreateForm } from "./templates-ui/template-create-form";
+import { TemplateCreateModal } from "./templates-ui/template-create-modal";
 import { LibraryImport } from "./templates-ui/library-import";
 
 export const TemplatesRoute = createRoute({
@@ -27,6 +27,7 @@ type TabKey = "mine" | "library";
 function TemplatesPage() {
   const { language } = usePreferences();
   const [tab, setTab] = useState<TabKey>("mine");
+  const [crear, setCrear] = useState(false);
   const query = useTemplates();
   const vista = query.data;
 
@@ -57,10 +58,13 @@ function TemplatesPage() {
         </div>
       ) : tab === "mine" ? (
         <>
-          <TemplatesList language={language} templates={vista?.templates ?? []} syncFailed={vista?.syncFailed ?? false} />
-          <div className="mt-4">
-            <TemplateCreateForm language={language} onCreated={() => void query.refetch()} />
+          <div className="mb-3 flex justify-end">
+            <Button variant="primary" size="sm" onClick={() => setCrear(true)}>
+              {t(language, "templates.create.title")}
+            </Button>
           </div>
+          <TemplatesList language={language} templates={vista?.templates ?? []} syncFailed={vista?.syncFailed ?? false} />
+          {crear ? <TemplateCreateModal language={language} onClose={() => setCrear(false)} onCreated={() => void query.refetch()} /> : null}
         </>
       ) : (
         <LibraryImport language={language} onImported={() => void query.refetch()} />

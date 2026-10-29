@@ -12,6 +12,7 @@ import { SyncTemplateStatusHandler } from "../templates/application/sync-templat
 import { ZernioCredentialsRepository } from "../channels/infrastructure/zernio.credentials.ts";
 import { getEnv } from "../shared/infrastructure/supabase-rest.helper.ts";
 import { obtenerWhatsAppAccountId } from "../templates/infrastructure/wa-account.query.ts";
+import { listarEstadoZernio } from "../templates/infrastructure/zernio-status.client.ts";
 import type { TemplatesDeps } from "../templates/presentation/templates.routes.ts";
 
 export async function buildTemplatesDeps(): Promise<TemplatesDeps> {
@@ -21,12 +22,17 @@ export async function buildTemplatesDeps(): Promise<TemplatesDeps> {
   const secret = creds.ok ? creds.value.webhookSecret : (getEnv("ZERNIO_WEBHOOK_SECRET") ?? "");
   const apiKeyFn = () => apiKey;
   const accountIdFn = (tenantId: string) => obtenerWhatsAppAccountId(tenantId);
+  const estadoLive = async (tenantId: string) => {
+    const acc = await obtenerWhatsAppAccountId(tenantId);
+    return acc ? listarEstadoZernio(apiKey, acc) : [];
+  };
   return {
     create: new CreateTemplateWithZernioHandler(new CreateTemplateHandler(repo), repo, apiKeyFn, accountIdFn),
     list: new ListTemplatesQuery(repo),
     patch: new PatchTemplateHandler(repo, apiKeyFn),
     import: new ImportTemplateLibraryHandler(repo, apiKeyFn, accountIdFn),
     syncStatus: new SyncTemplateStatusHandler(repo),
+    estadoLive,
     webhookSecret: secret,
     repo,
   };
