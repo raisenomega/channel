@@ -9,7 +9,7 @@ import { importarLibraryZernio } from "../../../src/templates/infrastructure/zer
 function build() {
   const guardado: unknown[] = [];
   const repo = { guardar: vi.fn(async (t: unknown) => { guardado.push(t); return ok(undefined); }) } as never;
-  return { h: new ImportTemplateLibraryHandler(repo, () => "key"), guardado };
+  return { h: new ImportTemplateLibraryHandler(repo, () => "key", async () => "acc1"), guardado };
 }
 
 test("ok path -> template creado como approved", async () => {

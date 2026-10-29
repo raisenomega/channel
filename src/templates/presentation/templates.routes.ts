@@ -54,7 +54,7 @@ export function rutaImportLibrary(d: TemplatesDeps): RouteDefinition {
   return { method: "POST", path: "/tenants/:id/templates/:templateName/import-library", handler: async (ctx) => {
     const auth = await requireTenantAuth(ctx, tid(ctx.path)); if (!auth.ok) return auth.error;
     const b = body(ctx);
-    const r = await d.import.ejecutar({ tenantId: auth.value.tenantId as never, libraryTemplateName: ctx.params["templateName"] ?? "", language: String(b.language ?? "en"), body: b.body as string | undefined });
+    const r = await d.import.ejecutar({ tenantId: auth.value.tenantId as never, libraryTemplateName: ctx.params["templateName"] ?? "", category: b.category as string | undefined, language: String(b.language ?? "en"), body: b.body as string | undefined });
     if (!r.ok) { const k = r.error.kind; const st = k === "library_template_not_found" ? 404 : k === "zernio_error" ? 502 : 400; return jsonResponse(st, { ok: false, error: { kind: k } }); }
     return jsonResponse(201, { ok: true, template: r.value });
   } };

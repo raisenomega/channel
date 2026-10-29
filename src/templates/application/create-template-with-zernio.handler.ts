@@ -24,6 +24,7 @@ export class CreateTemplateWithZernioHandler {
     private readonly inner: CreateTemplateHandler,
     private readonly repo: WhatsAppTemplateRepository,
     private readonly apiKeyFn: () => string,
+    private readonly accountIdFn: (tenantId: string) => Promise<string | null>,
   ) {}
 
   async ejecutar(cmd: CreateTemplateCommand): Promise<Result<CreateWithZernioResult, CreateWithZernioError>> {
@@ -33,12 +34,15 @@ export class CreateTemplateWithZernioHandler {
     if (cmd.body.length > 1024) return err({ kind: "invalid_template_name" });
     if (!cmd.body?.length) return err({ kind: "invalid_template_name" });
 
+    const accountId = await this.accountIdFn(String(cmd.tenantId));
+    if (!accountId) return err({ kind: "zernio_error", cause: "whatsapp_no_conectado" });
+
     const local = await this.inner.ejecutar(cmd);
     if (!local.ok) return err(local.error);
 
     const apiKey = this.apiKeyFn();
     const zr = await crearTemplateZernio(apiKey, {
-      name: cmd.name, language: cmd.language, category: cmd.category, body: cmd.body,
+      accountId, name: cmd.name, language: cmd.language, category: cmd.category, body: cmd.body,
     });
     if (!zr.ok) {
       return err({ kind: "zernio_error", cause: zr.error.kind === "red" ? zr.error.causa : zr.error.kind });
