@@ -18,7 +18,7 @@ export function ConsultaView({ consultaId, language, onBack, onOpenResuelto }: {
   onBack: () => void;
   onOpenResuelto: (id: string) => void;
 }) {
-  const { thread, text, setText, sending, onSend, dialogOpen, setDialogOpen, saving, onEstado, guardar } = useConsulta(consultaId);
+  const { thread, text, setText, sending, onSend, dialogOpen, setDialogOpen, saving, onEstado, guardar, fichaCliente } = useConsulta(consultaId);
   return (
     <>
       <div className="grid gap-4 mt-4 lg:grid-cols-3">
@@ -26,7 +26,7 @@ export function ConsultaView({ consultaId, language, onBack, onOpenResuelto }: {
           messages={consultaAMensajes(thread ?? null)} language={language} onBack={onBack}
           composerText={text} setComposerText={setText} onSend={onSend} sending={sending}
           onEstado={(s) => (s === "open" ? onBack() : onEstado(s))} resolving={saving} />
-        <ContactPanel contact={agentFicha(thread ?? null)} language={language} />
+        <ContactPanel contact={fichaCliente ?? agentFicha(thread ?? null)} language={language} />
         <ResueltosPanel language={language} onOpen={onOpenResuelto} />
       </div>
       <ResolveDialog open={dialogOpen} language={language} saving={saving} onGuardar={guardar} onClose={() => setDialogOpen(false)} />
