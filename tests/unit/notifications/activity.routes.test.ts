@@ -85,6 +85,22 @@ test("ALERTA-FIX: consulta/escalada YA resuelta NO aparece en la tarjeta; la pen
   expect(r.events.every((e) => e["type"] !== "resolved")).toBe(true); // ninguna fila 'resolved' en la tarjeta
 });
 
+test("ALERTA honesta: escalada con consultaId (backfill) resuelta por conversationId (legado) -> alertas 0", async () => {
+  db.rows = [
+    { id: "res", event_type: "resolved", label: "Atendio Jorge", created_at: "2026-10-16T03:00:00Z", metadata: { conversationId: "cvX" } },
+    { id: "esc", event_type: "escalation", label: "Escalacion a humano: caso", created_at: "2026-10-16T02:00:00Z", metadata: { consultaId: "ec-backfill", conversationId: "cvX" } },
+  ];
+  const r = await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1"))) as { ok: boolean; events: Array<Record<string, string>>; alertas: number };
+  expect(r.alertas).toBe(0); // cerrada via conversationId aunque tenga consultaId -> ALERTA no parpadea
+  expect(r.events.map((e) => e["id"])).toEqual([]); // y no aparece en la tarjeta
+});
+
+test("ALERTA honesta: escalada con consultaId NO resuelta -> alertas 1 (si enciende cuando toca)", async () => {
+  db.rows = [{ id: "esc2", event_type: "escalation", label: "Escalacion a humano: pendiente", created_at: "2026-10-16T02:00:00Z", metadata: { consultaId: "ec-2", conversationId: "cvY" } }];
+  const r = await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1"))) as { ok: boolean; alertas: number };
+  expect(r.alertas).toBe(1);
+});
+
 test("ESCALADA agente-only: con consultaId, resuelta por consultaId -> fuera; pendiente con consultaId -> dentro + mapea consultaId", async () => {
   db.rows = [
     { id: "rc", event_type: "resolved", label: "Escalada resuelta", created_at: "2026-10-16T03:00:00Z", metadata: { consultaId: "ec1", conversationId: "cv1" } },
