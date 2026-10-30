@@ -59,8 +59,7 @@ export class GenerateDraftHandler {
     if (mk?.tipo) {
       const quien = cmd.contactName ?? cmd.contactLabel ?? cmd.normalizedMessage.from; // contacto para la alerta
       const detalle = mk.motivo || cmd.normalizedMessage.content; // motivo explicito del agente, o el mensaje
-      void registrarEscalacion(String(cmd.tenantId), cmd.conversationId ? String(cmd.conversationId) : null, mk.tipo, detalle, cmd.personaSlug, mk.tipo === "consulta" ? crypto.randomUUID() : ""); // Actividad Reciente + scope agente; no bloquea
-      void alertarDuenoWhatsApp(String(cmd.tenantId), quien, detalle); // WhatsApp al dueno; no bloquea
+      void registrarEscalacion(String(cmd.tenantId), cmd.conversationId ? String(cmd.conversationId) : null, mk.tipo, detalle, cmd.personaSlug, mk.tipo === "consulta" ? crypto.randomUUID() : "").then((r) => { if (r.created) void alertarDuenoWhatsApp(String(cmd.tenantId), quien, detalle); }); // dedup anti-rafaga: fila + alerta solo si es escalada nueva
     }
     const d = await this.persist.ejecutar({
       tenantId: cmd.tenantId, conversationId: cmd.conversationId ?? null, contactId: cmd.contactId ?? null,
