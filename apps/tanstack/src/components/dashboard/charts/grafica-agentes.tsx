@@ -1,23 +1,30 @@
 /**
- * HUB by Raisen — Grafica "Rendimiento de agentes" (Dashboard): actividad REAL de los agentes por dia (14d)
- * desde las metricas. Vacio honesto si no hay actividad. recharts, animada. C4 <=75.
+ * HUB by Raisen — Grafica "Rendimiento de agentes" (Dashboard): UNA barra por agente. Alto = % de
+ * INTERVENCION real (parte del total de actividad de cada agente, 14d, suma 100). Nombre abajo (eje X),
+ * % en el lateral (eje Y). Color por agente. Vacio honesto si no hay actividad. recharts. C4 <=75.
  */
-import { ResponsiveContainer, LineChart, Line, XAxis, Tooltip } from "recharts";
-import type { Idioma } from "@/lib/i18n";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
+import { t, type Idioma } from "@/lib/i18n";
 import { useAgentMetrics } from "@/hooks/useAgentMetrics";
+import { AGENTS } from "../agents/agent-roster";
 import { EmptyChart } from "./chart-kit";
 
-export function GraficaAgentes({ vacio }: { lang: Idioma; vacio: string }) {
-  const { serie } = useAgentMetrics();
-  const data = serie.map((s) => ({ day: s.day, v: Object.values(s.counts).reduce((x, y) => x + y, 0) }));
-  if (data.every((d) => d.v === 0)) return <EmptyChart label={vacio} />;
+export function GraficaAgentes({ lang, vacio }: { lang: Idioma; vacio: string }) {
+  const { agents } = useAgentMetrics();
+  const totales = AGENTS.map((a) => ({ a, total: agents[a.code]?.total ?? 0 }));
+  const suma = totales.reduce((s, x) => s + x.total, 0);
+  if (suma === 0) return <EmptyChart label={vacio} />;
+  const data = totales.map(({ a, total }) => ({ name: t(lang, "agent.name." + a.code).slice(0, 5), pct: Math.round((total / suma) * 100), color: `hsl(${a.accent})` }));
   return (
     <ResponsiveContainer width="100%" height={140}>
-      <LineChart data={data} margin={{ top: 6, right: 6, left: -26, bottom: 0 }}>
-        <XAxis dataKey="day" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} interval={3} />
-        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
-        <Line type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} isAnimationActive animationDuration={800} />
-      </LineChart>
+      <BarChart data={data} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
+        <XAxis dataKey="name" tick={{ fontSize: 8, fill: "hsl(var(--foreground))" }} axisLine={false} tickLine={false} interval={0} />
+        <YAxis unit="%" width={26} tick={{ fontSize: 8, fill: "hsl(var(--foreground))" }} axisLine={false} tickLine={false} />
+        <Tooltip cursor={{ fill: "hsl(var(--muted) / 0.2)" }} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`${v}%`, t(lang, "am.intervencion")]} />
+        <Bar dataKey="pct" radius={[3, 3, 0, 0]} isAnimationActive animationDuration={800}>
+          {data.map((d, i) => <Cell key={i} fill={d.color} />)}
+        </Bar>
+      </BarChart>
     </ResponsiveContainer>
   );
 }
