@@ -12,7 +12,7 @@ export function ChartCell({ title, children }: { title: string; children: ReactN
   return (
     <div className="flex flex-col items-center">
       <div className="h-[150px] w-full">{children}</div>
-      <span className="mt-2 text-center text-xs font-semibold text-muted-foreground">{title}</span>
+      <span className="mt-2 text-center text-xs font-semibold text-foreground">{title}</span>
     </div>
   );
 }
