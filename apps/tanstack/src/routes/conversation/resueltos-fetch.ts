@@ -21,14 +21,15 @@ export async function fetchTicketsResueltos(): Promise<ResueltoRow[]> {
 
 export interface HistorialPage { rows: ResueltoRow[]; total: number; page: number; pageSize: number }
 
-// Historial COMPLETO paginado (18/pagina, desde el dia uno). Nunca se pierde ninguno.
-export async function fetchHistorial(page: number): Promise<HistorialPage> {
-  const vacio = { rows: [] as ResueltoRow[], total: 0, page, pageSize: 18 };
+// Historial COMPLETO paginado (desde el dia uno). Nunca se pierde ninguno. size = filas por pagina
+// (18 en la pagina /historial; 12 en el modal de la conversacion para que no pase abajo de pantalla).
+export async function fetchHistorial(page: number, size = 18): Promise<HistorialPage> {
+  const vacio = { rows: [] as ResueltoRow[], total: 0, page, pageSize: size };
   try {
-    const res = await apiFetch(`/api/conversation/resueltos/historial?page=${page}`);
+    const res = await apiFetch(`/api/conversation/resueltos/historial?page=${page}&size=${size}`);
     if (!res.ok) return vacio;
     const d = (await res.json()) as Partial<HistorialPage>;
-    return { rows: d.rows ?? [], total: d.total ?? 0, page: d.page ?? page, pageSize: d.pageSize ?? 18 };
+    return { rows: d.rows ?? [], total: d.total ?? 0, page: d.page ?? page, pageSize: d.pageSize ?? size };
   } catch {
     return vacio;
   }
