@@ -36,7 +36,7 @@ export interface GenerateDraftCommand {
   readonly contactPhone?: string | undefined;  // telefono si existe
   readonly scope?: string | undefined;         // targeted | generic
   readonly autoSendReason?: string | undefined; // por que se auto-envio o no (observabilidad)
-  readonly contactProfile?: string | undefined; // B4: perfil del contacto para personalizar
+  readonly contactProfile?: string | undefined; readonly origen?: string | undefined; // B4 perfil + origen (reconexion D: consulta/escalada)
   readonly mediaUrl?: string | undefined; readonly mediaMime?: string | undefined; // vision: imagen del inbound para que el agente la VEA
 }
 
@@ -68,7 +68,7 @@ export class GenerateDraftHandler {
       draftContent: razonado.value.response, confidence: 0.5,
       reason: "supervisado: borrador IA para revision humana", aiDisclosureIncluded: false,
       traceId: crypto.randomUUID(), to: cmd.normalizedMessage.from, channel: cmd.channel,
-      contactLabel: cmd.contactLabel, contactName: cmd.contactName, contactPhone: cmd.contactPhone, scope: cmd.scope ?? "targeted", autoSendReason: cmd.autoSendReason, escalado: mk?.tipo ?? undefined,
+      contactLabel: cmd.contactLabel, contactName: cmd.contactName, contactPhone: cmd.contactPhone, scope: cmd.scope ?? "targeted", autoSendReason: cmd.autoSendReason, escalado: mk?.tipo ?? undefined, origen: cmd.origen,
     });
     return d.ok ? ok(d.value) : err({ kind: "persist_failed", cause: (d.error as { causa?: string }).causa ?? (d.error as { kind: string }).kind });
   }

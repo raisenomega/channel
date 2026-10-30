@@ -8,7 +8,7 @@ import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 import { cerebroIngest } from "../../integrations/infrastructure/cerebro-client.ts";
 
 export interface ConsultaRespuesta { texto: string; createdAt: string }
-export interface ConsultaThread { consultaId: string; agentSlug: string; pregunta: string; respuestas: ConsultaRespuesta[]; resuelta: boolean; createdAt: string; conversationId: string }
+export interface ConsultaThread { consultaId: string; agentSlug: string; pregunta: string; respuestas: ConsultaRespuesta[]; resuelta: boolean; createdAt: string; conversationId: string; tipo: string }
 
 export async function leerConsulta(tenantId: string, consultaId: string): Promise<ConsultaThread | null> {
   try {
@@ -17,7 +17,7 @@ export async function leerConsulta(tenantId: string, consultaId: string): Promis
     for (const x of (data ?? []) as Array<{ event_type?: string; created_at?: string; metadata?: { agentSlug?: string; pregunta?: string; texto?: string; respuesta?: string; conversationId?: string } | null }>) {
       const m = x.metadata ?? {};
       const at = String(x.created_at ?? "");
-      if (x.event_type === "consulta" || x.event_type === "escalation") base = { consultaId, agentSlug: String(m.agentSlug ?? ""), pregunta: String(m.pregunta ?? ""), respuestas: [], resuelta: false, createdAt: at, conversationId: String(m.conversationId ?? "") };
+      if (x.event_type === "consulta" || x.event_type === "escalation") base = { consultaId, agentSlug: String(m.agentSlug ?? ""), pregunta: String(m.pregunta ?? ""), respuestas: [], resuelta: false, createdAt: at, conversationId: String(m.conversationId ?? ""), tipo: x.event_type === "escalation" ? "escalada" : "consulta" };
       else if (x.event_type === "consulta_msg" && base) base.respuestas.push({ texto: String(m.texto ?? ""), createdAt: at });
       else if (x.event_type === "resolved" && base) { if (m.respuesta) base.respuestas.push({ texto: String(m.respuesta), createdAt: at }); base.resuelta = true; }
     }

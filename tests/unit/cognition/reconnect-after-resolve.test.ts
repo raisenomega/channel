@@ -8,7 +8,7 @@ import { reconectarCliente, type ReconexionPorts } from "../../../src/cognition/
 function ports(over: Partial<ReconexionPorts> = {}): { p: ReconexionPorts; disparos: unknown[] } {
   const disparos: unknown[] = [];
   const p: ReconexionPorts = {
-    leerThread: async () => ({ conversationId: "cv1", agentSlug: "zahra" }),
+    leerThread: async () => ({ conversationId: "cv1", agentSlug: "zahra", tipo: "consulta" }),
     datos: async () => ({ from: "+1787", channel: "whatsapp", contactId: "ct1", content: "se puede el mismo dia?" }),
     disparar: (ev) => { disparos.push(ev); },
     ...over,
@@ -20,11 +20,11 @@ test("D-01 consulta con cliente + destinatario -> dispara borrador con persona d
   const { p, disparos } = ports();
   await reconectarCliente(p, "t1", "c1");
   expect(disparos).toHaveLength(1);
-  expect(disparos[0]).toMatchObject({ tenantId: "t1", conversationId: "cv1", from: "+1787", channel: "whatsapp", content: "se puede el mismo dia?", persona: "zahra" });
+  expect(disparos[0]).toMatchObject({ tenantId: "t1", conversationId: "cv1", from: "+1787", channel: "whatsapp", content: "se puede el mismo dia?", persona: "zahra", origen: "consulta" });
 });
 
 test("D-02 consulta SIN conversationId (duda general) -> NO dispara", async () => {
-  const { p, disparos } = ports({ leerThread: async () => ({ conversationId: "", agentSlug: "iris" }) });
+  const { p, disparos } = ports({ leerThread: async () => ({ conversationId: "", agentSlug: "iris", tipo: "escalada" }) });
   await reconectarCliente(p, "t1", "c1");
   expect(disparos).toHaveLength(0);
 });

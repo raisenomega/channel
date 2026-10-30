@@ -11,7 +11,7 @@ import type { ApproveDraftHandler } from "../application/approve-draft.handler.t
 import type { RejectDraftHandler } from "../application/reject-draft.handler.ts";
 import type { SendApprovedDraftService } from "../application/send-approved-draft.service.ts";
 import type { WasCorrectFeedbackHandler } from "../application/was-correct-feedback.handler.ts";
-import type { AgentDraftsRepository } from "../infrastructure/agent-drafts.repository.ts";
+import type { AgentDraftsRepository } from "../infrastructure/agent-drafts.repository.ts"; import { listarEvidenciaReconexion } from "../infrastructure/evidencia-reconexion.query.ts";
 import { aprobarYEnviar } from "./drafts-approve-send.ts";
 import { registrarAprendizaje } from "../application/draft-feedback.ts";
 import type { CerebroEvent } from "../../integrations/domain/cerebro.types.ts";
@@ -32,8 +32,8 @@ const kindOf = (e: unknown): string => (e as { kind: string }).kind;
 export function rutaDraftsPending(deps: DraftsDeps): RouteDefinition {
   return { method: "GET", path: "/tenants/:id/drafts/pending", handler: async (ctx) => {
     const auth = await requireTenantAuth(ctx, pathTenant(ctx)); if (!auth.ok) return auth.error;
-    const r = await deps.repo.listarPendientes(tid(auth.value.tenantId) as never);
-    return r.ok ? { ok: true, drafts: r.value } : { ok: false, error: { kind: "persistence_error" } };
+    const [r, enviados] = await Promise.all([deps.repo.listarPendientes(tid(auth.value.tenantId) as never), listarEvidenciaReconexion(String(tid(auth.value.tenantId)))]);
+    return r.ok ? { ok: true, drafts: r.value, enviados } : { ok: false, error: { kind: "persistence_error" } };
   } };
 }
 
