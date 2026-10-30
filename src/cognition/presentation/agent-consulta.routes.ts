@@ -19,7 +19,7 @@ export function rutaLeerConsulta(): RouteDefinition {
   };
 }
 
-export function rutaMensajeConsulta(): RouteDefinition {
+export function rutaMensajeConsulta(evaluar?: (tenantId: string, consultaId: string) => void): RouteDefinition {
   return {
     method: "POST", path: "/api/agent-consulta/mensaje",
     handler: async (ctx: RequestContext) => {
@@ -27,6 +27,7 @@ export function rutaMensajeConsulta(): RouteDefinition {
       if (!auth.ok) return auth.error;
       const b = (ctx.body ?? {}) as { consultaId?: string; texto?: string };
       const ok = await agregarMensaje(String(auth.value.tenantId), String(b.consultaId ?? ""), String(b.texto ?? ""));
+      if (ok && evaluar) evaluar(String(auth.value.tenantId), String(b.consultaId ?? "")); // PR4 lazo: el agente lee tu respuesta y confirma o pregunta en el hilo
       return jsonResponse(ok ? 200 : 400, { ok });
     },
   };

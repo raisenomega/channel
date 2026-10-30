@@ -7,7 +7,8 @@
 import { apiFetch } from "@/lib/api-client";
 import type { Mensaje, Contact360 } from "@/lib/types";
 
-export interface ConsultaThread { consultaId: string; agentSlug: string; pregunta: string; respuestas: { texto: string; createdAt: string }[]; resuelta: boolean; createdAt: string; conversationId: string }
+export interface ConsultaAgenteMsg { texto: string; satisfecho: boolean; createdAt: string }
+export interface ConsultaThread { consultaId: string; agentSlug: string; pregunta: string; respuestas: { texto: string; createdAt: string }[]; mensajesAgente?: ConsultaAgenteMsg[]; listoParaCerrar?: boolean; resuelta: boolean; createdAt: string; conversationId: string }
 
 export async function fetchConsultaThread(consultaId: string): Promise<ConsultaThread | null> {
   try {
@@ -42,7 +43,9 @@ export function consultaAMensajes(thread: ConsultaThread | null): Mensaje[] {
   if (!thread) return [];
   const out: Mensaje[] = [{ id: thread.consultaId + ":q", conversationId: thread.consultaId, senderType: "contact", senderId: null, content: thread.pregunta, messageType: "text", createdAt: thread.createdAt }];
   thread.respuestas.forEach((r, i) => out.push({ id: thread.consultaId + ":a" + i, conversationId: thread.consultaId, senderType: "agent", senderId: null, content: r.texto, messageType: "text", createdAt: r.createdAt }));
-  return out;
+  // PR4: la confirmacion/seguimiento del agente (mismo lado que la pregunta); ordenado cronologico con el resto.
+  (thread.mensajesAgente ?? []).forEach((m, i) => out.push({ id: thread.consultaId + ":g" + i, conversationId: thread.consultaId, senderType: "contact", senderId: null, content: (m.satisfecho ? "[LISTO PARA CERRAR] " : "") + m.texto, messageType: "text", createdAt: m.createdAt }));
+  return out.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
 }
 
 export function agentFicha(thread: ConsultaThread | null): Contact360 | null {

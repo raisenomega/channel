@@ -21,6 +21,11 @@ export function ConsultaView({ consultaId, language, onBack, onOpenResuelto }: {
   const { thread, text, setText, sending, onSend, dialogOpen, setDialogOpen, saving, onEstado, guardar, fichaCliente } = useConsulta(consultaId);
   return (
     <>
+      {thread?.listoParaCerrar && !thread.resuelta ? (
+        <div className="mt-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm text-foreground">
+          El agente confirmo que recibio y entendio todo: <strong>listo para cerrar</strong>. Puedes cerrar esta consulta con seguridad.
+        </div>
+      ) : null}
       <div className="grid gap-4 mt-4 lg:grid-cols-3">
         <ChatPanel conversationId={consultaId} contactName={"Agente " + (thread?.agentSlug ?? "")} cerrado={thread?.resuelta ?? false}
           messages={consultaAMensajes(thread ?? null)} language={language} onBack={onBack}
