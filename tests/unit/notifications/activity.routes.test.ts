@@ -10,6 +10,7 @@ vi.mock("../../../src/shared/infrastructure/supabase.client.ts", () => {
   const self = (): Record<string, unknown> => chain;
   Object.assign(chain, {
     from: self, select: self, order: self, limit: self, neq: self, in: self,
+    not: (col: string, op: string, val: unknown) => { db.filtros.push(["not", col, op, val]); return chain; },
     eq: (col: string, val: unknown) => { db.filtros.push([col, val]); return chain; },
     then: (resolve: (v: unknown) => void) => resolve({ data: db.rows, error: null }),
   });
@@ -110,4 +111,9 @@ test("ESCALADA agente-only: con consultaId, resuelta por consultaId -> fuera; pe
   const r = await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1"))) as EventsOk;
   expect(r.events.map((e) => e["id"])).toEqual(["escNew"]); // la resuelta por consultaId sale; la pendiente queda
   expect(r.events[0]).toMatchObject({ type: "escalation", consultaId: "ec2" }); // lleva consultaId -> la card abre el scope AGENTE (c:ec2)
+});
+
+test("CARD-SOLO-NUEVOS: la query excluye consulta_msg (dueno) y consulta_agent_msg (agente) -> la tarjeta solo trae lo nuevo", async () => {
+  await rutaRecentActivity().handler(ctx("tenant-1", await bearer("tenant-1")));
+  expect(db.filtros).toContainEqual(["not", "event_type", "in", "(consulta_msg,consulta_agent_msg)"]);
 });

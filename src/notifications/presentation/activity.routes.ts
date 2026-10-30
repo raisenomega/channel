@@ -1,7 +1,8 @@
 /**
  * HUB by Raisen — Rutas HTTP de actividad. GET /tenants/:id/activity/recent (ultimos 5 + alertas
  * pendientes) y /tenants/:id/activity/all (lista completa). JWT obligatorio + tenant del path == claim
- * (Compuerta #17). Excluye consulta_msg (ruido del hilo). C4 <=75.
+ * (Compuerta #17). Excluye los mensajes del hilo (consulta_msg + consulta_agent_msg): la tarjeta solo
+ * muestra lo NUEVO (consulta/escalada de 1a vez); el seguimiento y el cierre viven en el chat. C4 <=75.
  */
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
 import { requireTenantAuth } from "../../server/auth-helpers.ts";
@@ -20,7 +21,7 @@ type Fila = { id: string; event_type: string; label: string; created_at: string;
 // La tarjeta muestra pendientes + feed, NUNCA los resueltos: saca las filas 'resolved' y las
 // consulta/escalada que ya tienen un resolved que las cierra (mismo criterio que contarPendientes).
 async function leer(tenantId: string, limit: number): Promise<Array<Record<string, unknown>>> {
-  const { data } = await supabase.from("activity_log").select("id, event_type, label, created_at, metadata").eq("tenant_id", tenantId).neq("event_type", "consulta_msg").order("created_at", { ascending: false }).limit(300);
+  const { data } = await supabase.from("activity_log").select("id, event_type, label, created_at, metadata").eq("tenant_id", tenantId).not("event_type", "in", "(consulta_msg,consulta_agent_msg)").order("created_at", { ascending: false }).limit(300);
   const rows = (data ?? []) as Fila[];
   const rCons = new Set<string>(); const rConv = new Set<string>();
   for (const r of rows) if (r.event_type === "resolved") { const m = r.metadata ?? {}; if (m.consultaId) rCons.add(m.consultaId); if (m.conversationId) rConv.add(m.conversationId); }
