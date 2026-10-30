@@ -43,9 +43,11 @@ export function rutaHistorialResueltos(): RouteDefinition {
     handler: async (ctx: RequestContext) => {
       const auth = await requireTenantAuth(ctx);
       if (!auth.ok) return auth.error;
-      const page = parseInt(new URL(ctx.path, "http://localhost").searchParams.get("page") ?? "0", 10) || 0;
-      const { rows, total } = await listarHistorial(String(auth.value.tenantId), page);
-      return jsonResponse(200, { ok: true, rows, total, page, pageSize: 18 });
+      const q = new URL(ctx.path, "http://localhost").searchParams;
+      const page = parseInt(q.get("page") ?? "0", 10) || 0;
+      const size = Math.min(50, Math.max(1, parseInt(q.get("size") ?? "18", 10) || 18));
+      const { rows, total } = await listarHistorial(String(auth.value.tenantId), page, size);
+      return jsonResponse(200, { ok: true, rows, total, page, pageSize: size });
     },
   };
 }
