@@ -33,6 +33,7 @@ export interface PersistDraftCommand {
   readonly scope?: string | undefined;         // "targeted" | "generic"
   readonly autoSendReason?: string | undefined;
   readonly escalado?: string | undefined;       // C: "consulta"|"escalar" -> no auto-enviar el texto al cliente
+  readonly origen?: string | undefined;          // D: "consulta"|"escalada" -> etiqueta de evidencia en Borradores
 }
 
 export class PersistDraftHandler {
@@ -49,6 +50,7 @@ export class PersistDraftHandler {
     if (cmd.contactPhone) base["contactPhone"] = cmd.contactPhone;
     if (cmd.autoSendReason) base["autoSendReason"] = cmd.autoSendReason;
     if (cmd.escalado) base["escalado"] = cmd.escalado;
+    if (cmd.origen) base["origen"] = cmd.origen;
     const metadata = marcarSupervisado(base);
     const draft: AgentDraft = {
       id: crypto.randomUUID(),

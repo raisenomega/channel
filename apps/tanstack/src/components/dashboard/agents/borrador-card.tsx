@@ -13,6 +13,7 @@ export function BorradorCard({ lang, draft, busy, onOpen, onApprove, onReject }:
         <span className="shrink-0">{t(lang, "dr.from")} {t(lang, "agent.name." + draft.personaSlug)}</span>
         <span className="truncate normal-case">{draft.scope === "generic" ? t(lang, "dr.generic") : `${t(lang, "dr.to")} ${paraCorto(draft)}`}</span>
       </div>
+      {draft.origen ? <span className="self-start rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: "hsl(210 80% 55% / 0.18)", color: "hsl(210 75% 60%)" }}>{t(lang, draft.origen === "escalada" ? "dr.origenEscalada" : "dr.origenConsulta")}</span> : null}
       {draft.scope === "opportunity" ? <span className="self-start rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: "hsl(45 90% 55% / 0.2)", color: "hsl(40 85% 48%)" }}>{t(lang, "dr.opportunity")}</span> : null}
       {draft.scope === "strategic" ? (
         <div className="rounded-lg border border-border/40 p-2 text-[10px]" style={{ background: "hsl(265 60% 55% / 0.08)" }}>
@@ -37,6 +38,8 @@ export function BorradorCard({ lang, draft, busy, onOpen, onApprove, onReject }:
       <span className="text-[10px] font-semibold text-muted-foreground">{t(lang, "dr.readMore")}</span>
       {draft.status === "rejected"
         ? <span className="self-start rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: "hsl(0 72% 55% / 0.18)", color: "hsl(0 72% 55%)" }}>{t(lang, "dr.quoteRejected")}</span>
+        : draft.status === "sent"
+        ? <span className="self-start rounded-full px-2 py-0.5 text-[9px] font-bold uppercase" style={{ background: "hsl(var(--success) / 0.18)", color: "hsl(var(--success))" }}>{t(lang, "dr.enviado")}</span>
         : (
           <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
             <button type="button" disabled={busy} onClick={() => onApprove(draft.id)} className="chip flex-1 font-bold text-white disabled:opacity-50" style={{ background: "hsl(var(--success))" }}>{t(lang, draft.scope === "quote" ? "dr.sign" : "dr.approve")}</button>

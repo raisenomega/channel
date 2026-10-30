@@ -7,11 +7,11 @@
  */
 export interface ReconexionEvento {
   readonly tenantId: string; readonly conversationId: string; readonly contactId: string;
-  readonly channel: string; readonly from: string; readonly content: string; readonly persona?: string;
+  readonly channel: string; readonly from: string; readonly content: string; readonly persona?: string; readonly origen?: string;
 }
 
 export interface ReconexionPorts {
-  readonly leerThread: (tenantId: string, consultaId: string) => Promise<{ conversationId: string; agentSlug: string } | null>;
+  readonly leerThread: (tenantId: string, consultaId: string) => Promise<{ conversationId: string; agentSlug: string; tipo: string } | null>;
   readonly datos: (convId: string) => Promise<{ from: string; channel: string; contactId: string; content: string } | null>;
   readonly disparar: (ev: ReconexionEvento) => void;
 }
@@ -24,7 +24,8 @@ export async function reconectarCliente(p: ReconexionPorts, tenantId: string, co
     if (!d || !d.from) return; // sin destinatario -> no se puede responder al cliente
     p.disparar({
       tenantId, conversationId: th.conversationId, contactId: d.contactId, channel: d.channel, from: d.from,
-      content: d.content || "El cliente quedo esperando una respuesta.", ...(th.agentSlug ? { persona: th.agentSlug } : {}),
+      content: d.content || "El cliente quedo esperando una respuesta.", origen: th.tipo || "consulta",
+      ...(th.agentSlug ? { persona: th.agentSlug } : {}),
     });
   } catch {
     /* fire-and-forget: la reconexion jamas rompe el cierre de la consulta */
