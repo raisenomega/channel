@@ -1,9 +1,11 @@
 /**
  * HUB by Raisen — Fila de widgets del dashboard /inbox (distribución, SLA, pendientes).
  */
+import { useQuery } from "@tanstack/react-query";
 import type { Idioma } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import type { InboxItem, DashboardStats } from "@/lib/types";
+import { fetchKpiCounts } from "@/lib/reports-client";
 import { BentoTitle, BentoKpi, DistribucionCanales, AnilloSLA, Pendientes } from "@/components/dashboard/bentobox-dashboard";
 import { IconBars, IconDona, IconFlag } from "./inbox-icons";
 
@@ -12,13 +14,15 @@ export function KpiRow({ language, stats, total }: {
   stats: DashboardStats;
   total: number;
 }) {
+  // COUNT REAL del tenant (no la muestra de 50 del inbox). Fallback a la muestra mientras carga.
+  const { data } = useQuery({ queryKey: ["kpi-counts"], queryFn: fetchKpiCounts, staleTime: 30_000, refetchInterval: 30_000 });
   return (
     <div className="bento">
-      {/* Balance: cero honesto (sin endpoint de balance aún); el nombre del negocio vive en la barra WhatsApp. */}
+      {/* Balance: cero honesto (sin endpoint de balance/finanzas aún); el nombre del negocio vive en la barra WhatsApp. */}
       <BentoKpi label={t(language, "kpi.balance")} num="0" />
-      <BentoKpi label={t(language, "dash.activas")} num={stats.abiertas} trend={t(language, "dash.vivas")} />
-      <BentoKpi label={t(language, "dash.sinAsignar")} num={stats.sinAsignar} trend={t(language, "dash.pend.asignar")} down />
-      <BentoKpi label={t(language, "inbox.total")} num={total} unit={t(language, "inbox.min")} />
+      <BentoKpi label={t(language, "dash.activas")} num={data?.abiertas ?? stats.abiertas} trend={t(language, "dash.vivas")} />
+      <BentoKpi label={t(language, "dash.sinAsignar")} num={data?.sinAsignar ?? stats.sinAsignar} trend={t(language, "dash.pend.asignar")} down />
+      <BentoKpi label={t(language, "inbox.total")} num={data?.total ?? total} unit={t(language, "inbox.min")} />
     </div>
   );
 }
