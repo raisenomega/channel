@@ -10,7 +10,7 @@ export const enMisc: Dict = {
   "chat.send": "Send",
   "chat.mantenerOpen": "Keep open",
   "chat.solucionado": "Resolved",
-  "resueltos.titulo": "Resolved tickets", "resueltos.vacio": "No resolved yet.", "resueltos.dialogoTitulo": "Mark as resolved",
+  "resueltos.titulo": "Resolved tickets", "resueltos.vacio": "No resolved yet.", "resueltos.dialogoTitulo": "Mark as resolved", "hist.titulo": "Closed tickets history", "hist.vacio": "No closed tickets yet.", "hist.prev": "Previous", "hist.next": "Next", "hist.pagina": "Page", "dash.historial": "History",
   "resueltos.quienAtendio": "Who handled it?", "resueltos.nota": "Note (optional)", "resueltos.cancelar": "Cancel", "resueltos.guardar": "Save",
   "chat.hoy": "Today",
   "chat.ayer": "Yesterday",

@@ -17,12 +17,13 @@ export interface ActivityEvent {
   readonly agentSlug?: string | null;
 }
 
-export function BentoActividadReciente({ lang, events, alertas = 0, onOpen, onVerTodas }: {
+export function BentoActividadReciente({ lang, events, alertas = 0, onOpen, onVerTodas, onHistorial }: {
   lang: Idioma;
   events: readonly ActivityEvent[];
   alertas?: number;
   onOpen?: (conversationId: string) => void;
   onVerTodas?: () => void;
+  onHistorial?: () => void;
 }) {
   return (
     <div className="bento-card bento-col-3">
@@ -42,7 +43,7 @@ export function BentoActividadReciente({ lang, events, alertas = 0, onOpen, onVe
           ))}
         </ul>
       )}
-      <button type="button" onClick={onVerTodas} className="mt-2 block text-[11px] text-primary hover:underline">{lang === "en" ? "See all" : "Ver todas"}</button>
+      <div className="mt-2 flex items-center justify-between text-[11px] text-primary"><button type="button" onClick={onVerTodas} className="hover:underline">{lang === "en" ? "See all" : "Ver todas"}</button>{onHistorial ? <button type="button" onClick={onHistorial} className="hover:underline">{t(lang, "dash.historial")}</button> : null}</div>
     </div>
   );
 }

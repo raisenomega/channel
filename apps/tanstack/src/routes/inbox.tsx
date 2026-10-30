@@ -61,6 +61,7 @@ function InboxPage() {
         lang={language} events={events} alertas={alertas} peticiones={peticiones} items={itemsFiltrados}
         onOpen={(id) => void navigate({ to: "/inbox/" + encodeURIComponent(id) })}
         onVerTodas={() => void navigate({ to: "/actividad" })}
+        onHistorial={() => void navigate({ to: "/historial" })}
       />
       <TrilogiaBar language={language} />
       <GraficasPanel lang={language} porCanal={stats.porCanal} />
