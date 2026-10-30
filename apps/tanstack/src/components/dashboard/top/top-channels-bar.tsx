@@ -16,15 +16,19 @@ const COLOR: Record<string, string> = {
 const GRIS = "#4b5563";
 const TIKTOK = "M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z";
 
-export function TopChannelsBar({ onCanalNav }: { onCanalNav: (c: string) => void }) {
-  const { data } = useQuery({ queryKey: ["dash-channels"], queryFn: listarCanales, staleTime: 30_000 });
+export function TopChannelsBar({ onCanalNav, onBarNav }: { onCanalNav: (c: string) => void; onBarNav?: () => void }) {
+  // refetchOnMount "always" + retry: el estado de canales NO se queda pegado en gris tras navegar (SPA); antes
+  // un {ok:false} temprano (tenant aun no listo) quedaba cacheado 30s y solo un hard refresh lo limpiaba.
+  const { data } = useQuery({ queryKey: ["dash-channels"], queryFn: listarCanales, staleTime: 30_000, refetchOnMount: "always", retry: 2 });
   const on = new Set<string>((data?.ok ? data.value : []).filter((c) => c.state === "conectado").map((c) => c.kind));
   return (
-    <div className="bento-col-3 flex items-center justify-around gap-1 rounded-2xl glass-card p-3.5">
+    <div role="button" tabIndex={0} title="Canales" onClick={() => onBarNav?.()}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onBarNav?.(); }}
+      className="bento-col-3 flex cursor-pointer items-center justify-around gap-1 rounded-2xl glass-card p-3.5">
       {BAR.map((k) => {
         const activo = on.has(k);
         return (
-          <button key={k} type="button" onClick={() => onCanalNav(k)} title={k} aria-label={k}
+          <button key={k} type="button" onClick={(e) => { e.stopPropagation(); onCanalNav(k); }} title={k} aria-label={k}
             className="relative grid place-items-center rounded-lg p-1 transition hover:bg-foreground/5">
             {k === "whatsapp"
               ? <WhatsAppIcon size={22} className={activo ? "" : "opacity-40 grayscale"} />

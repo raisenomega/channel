@@ -12,7 +12,7 @@ import { TopChannelsBar } from "./top-channels-bar";
 import { TopStatusBar } from "./top-status-bar";
 import { TopCallBar } from "./top-call-bar";
 
-export function DashboardTopRow({ language, filtroEstado, filtroSLA, onEstado, onSLA, onClean, onCanalNav }: {
+export function DashboardTopRow({ language, filtroEstado, filtroSLA, onEstado, onSLA, onClean, onCanalNav, onCanalBar }: {
   language: Idioma;
   filtroEstado: string | null;
   filtroSLA: boolean | null;
@@ -20,6 +20,7 @@ export function DashboardTopRow({ language, filtroEstado, filtroSLA, onEstado, o
   onSLA: () => void;
   onClean: () => void;
   onCanalNav: (c: string) => void;
+  onCanalBar?: () => void;
 }) {
   const { data: miTenant, refetch } = useQuery({ queryKey: ["mi-tenant"], queryFn: fetchMiTenantInfo, staleTime: 60_000 });
   const { data: logoUrl } = useQuery({ queryKey: ["mi-logo", miTenant?.tenantId], queryFn: () => fetchLogoUrl(miTenant?.tenantId ?? ""), enabled: !!miTenant?.tenantId, staleTime: 60_000 });
@@ -30,7 +31,7 @@ export function DashboardTopRow({ language, filtroEstado, filtroSLA, onEstado, o
           tenant={miTenant ? { id: miTenant.tenantId, name: miTenant.name, plan: miTenant.plan } : null}
           onDone={() => void refetch()} />
       </div>
-      <TopChannelsBar onCanalNav={onCanalNav} />
+      <TopChannelsBar onCanalNav={onCanalNav} onBarNav={onCanalBar} />
       <TopStatusBar lang={language} filtroEstado={filtroEstado} filtroSLA={filtroSLA} onEstado={onEstado} onSLA={onSLA} onClean={onClean} />
       <TopCallBar lang={language} />
     </div>
