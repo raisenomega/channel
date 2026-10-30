@@ -5,6 +5,7 @@
 import type { RouteDefinition, RequestContext } from "../../server/server-types.ts";
 import { requireTenantAuth, jsonResponse } from "../../server/auth-helpers.ts";
 import { resolverConversacion, reabrirConversacion, listarResueltos } from "../infrastructure/conversation-resolve.repo.ts";
+import { listarHistorial } from "../infrastructure/historial-resueltos.query.ts";
 
 export function rutaResolverConversacion(): RouteDefinition {
   return {
@@ -32,6 +33,19 @@ export function rutaListarResueltos(): RouteDefinition {
       if (!auth.ok) return auth.error;
       const rows = await listarResueltos(String(auth.value.tenantId));
       return jsonResponse(200, { ok: true, rows });
+    },
+  };
+}
+
+export function rutaHistorialResueltos(): RouteDefinition {
+  return {
+    method: "GET", path: "/api/conversation/resueltos/historial",
+    handler: async (ctx: RequestContext) => {
+      const auth = await requireTenantAuth(ctx);
+      if (!auth.ok) return auth.error;
+      const page = parseInt(new URL(ctx.path, "http://localhost").searchParams.get("page") ?? "0", 10) || 0;
+      const { rows, total } = await listarHistorial(String(auth.value.tenantId), page);
+      return jsonResponse(200, { ok: true, rows, total, page, pageSize: 18 });
     },
   };
 }
