@@ -42,6 +42,7 @@ function InboxPage() {
   const toggleSLA = () => setFiltroSLA(filtroSLA === true ? null : true);
   const cleanFilters = () => { setFiltroEstado(null); setFiltroSLA(null); };
   const onCanalNav = (c: string) => void navigate({ to: "/channels/$channelId", params: { channelId: c } });
+  const onCanalBar = () => void navigate({ to: "/channels" }); // clic en la barra (no en un icono) -> pagina de canales
 
   if (isPending) {
     return (
@@ -54,7 +55,7 @@ function InboxPage() {
   return (
     <div className="view">
       <DashboardTopRow language={language} filtroEstado={filtroEstado} filtroSLA={filtroSLA}
-        onEstado={toggleEstado} onSLA={toggleSLA} onClean={cleanFilters} onCanalNav={onCanalNav} />
+        onEstado={toggleEstado} onSLA={toggleSLA} onClean={cleanFilters} onCanalNav={onCanalNav} onCanalBar={onCanalBar} />
       <KpiRow language={language} stats={stats} total={items?.length ?? 0} />
       <WidgetsRow language={language} stats={stats} items={itemsFiltrados} sinDatos={items === undefined || items.length === 0} />
       <BentoRowNueva
