@@ -45,3 +45,13 @@ export async function buscarEscaladaDuplicada(tenantId: string, conversationId: 
     return null;
   } catch { return null; }
 }
+
+// PR4 consultar-antes-de-preguntar: hay knowledge ACTIVO que YA cubre este tema? (umbral alto 0.5). Si si, el
+// agente no necesita volver a consultar lo mismo -> aplica lo aprendido. Solo para DUDAS de negocio (consulta).
+export async function knowledgeCubre(tenantId: string, detalle: string): Promise<boolean> {
+  try {
+    if (temaSignature(detalle).size < 2) return false;
+    const { data } = await supabase.from("agent_knowledge").select("knowledge").eq("tenant_id", tenantId).eq("status", "active").limit(60);
+    return ((data ?? []) as Array<{ knowledge?: string }>).some((r) => mismoTema(detalle, String(r.knowledge ?? ""), 0.5));
+  } catch { return false; }
+}
