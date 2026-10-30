@@ -11,8 +11,16 @@ import { supabase } from "../../shared/infrastructure/supabase.client.ts";
 import { getEnv } from "../../shared/infrastructure/supabase-rest.helper.ts";
 import type { AutodraftEvent } from "../application/maybe-autodraft.service.ts";
 import { crearCotizacionOficial, type QuoteItem } from "./crear-cotizacion-oficial.ts";
+import { calcularDeposito } from "../domain/deposito-soterrados.ts";
 
 function appUrl(): string { return (getEnv("PUBLIC_APP_URL") ?? "https://channel-one-snowy.vercel.app").replace(/\/+$/, ""); }
+
+// E: nota de deposito (monto DETERMINISTA de las lineas; solo venta/instalacion de soterrados). Kill-switch off.
+function notaDeposito(items: readonly QuoteItem[]): string {
+  if ((getEnv("DEPOSITO_SOTERRADOS") ?? "on") === "off") return "";
+  const d = calcularDeposito(items);
+  return d ? `\n\nPara asegurar tu fecha de instalacion con nuestros instaladores se requiere un deposito de $${d.monto} a ${d.destino} (por ahora directo al dueno).` : "";
+}
 
 async function datosCliente(contactId: string): Promise<{ nombre: string; telefono: string; email: string; direccion: string }> {
   const { data } = await supabase.from("contacts").select("display_name, primary_phone, primary_email, address").eq("id", contactId).maybeSingle();
@@ -33,7 +41,7 @@ export function makeEnviarCotizacion(router: ChannelRouter): EnviarCotizacion {
       const refs: { conversationId?: string; accountId?: string } = {};
       if (ev.conversationId) { const c = await convs.buscar(ev.conversationId as ConversationId); if (c.ok && c.value) { if (c.value.providerConversationId) refs.conversationId = c.value.providerConversationId; if (c.value.providerAccountId) refs.accountId = c.value.providerAccountId; } }
       const url = `${appUrl()}/q/${token}`;
-      const content = `Tu cotizacion por $${total.toFixed(2)}. Revisa y acepta aqui:\n${url}`;
+      const content = `Tu cotizacion por $${total.toFixed(2)}. Revisa y acepta aqui:\n${url}${notaDeposito(items)}`;
       const r = await router.enviar({ to: ev.from, content, channel: ev.channel as ChannelType, ...refs });
       if (!r.ok) { console.error("[quote-send] FALLO envio", r.error); return null; }
       console.error(`[quote-send] OK token=${token} to=${ev.from} ch=${ev.channel}`);
