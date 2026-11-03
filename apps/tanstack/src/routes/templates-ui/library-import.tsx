@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import type { Idioma } from "@/lib/i18n";
 import { guardarPreparada } from "@/lib/templates-client/template-prepared";
+import { enviarAprobacion } from "@/lib/templates-client/submit-aprobacion";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { importarLibrary } from "@/lib/templates-client/library-functions";
@@ -66,7 +67,7 @@ export function LibraryImport({ onImported }: { language?: Idioma; onImported: (
         ))}
       </div>
       {abrir ? <TemplateUsageModal item={abrir} aprobada={statuses[abrir.name] === "APPROVED"} onClose={() => setAbrir(null)}
-        onGuardar={(d, reqApr) => { setAbrir(null); if (reqApr) { setToast("Cambios enviados a aprobacion de Meta. Quedara lista cuando la aprueben."); return; } guardarPreparada(d.body); void navigate({ to: "/channels/$channelId", params: { channelId: "whatsapp" } }); }} /> : null}
+        onGuardar={(d, reqApr) => { const cat = abrir?.cat ?? "utility"; setAbrir(null); if (reqApr) { void enviarAprobacion(d, cat).then((okAp) => { setToast(okAp ? "Enviada a aprobacion de Meta. La veras aprobada en Canales cuando Meta responda." : "No se pudo enviar a aprobacion. Revisa los campos/nombre e intenta de nuevo."); refetch(); }); return; } guardarPreparada(d.body); void navigate({ to: "/channels/$channelId", params: { channelId: "whatsapp" } }); }} /> : null}
       {toast ? <Toast message={toast} onHide={() => setToast("")} ms={4000} /> : null}
     </div>
   );
