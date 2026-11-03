@@ -34,6 +34,8 @@ import { MaybeCaptureService } from "../cognition/application/maybe-capture.serv
 import { leerHilo } from "../cognition/infrastructure/strategic-queries.ts";
 import { guardarDatosContacto } from "../cognition/infrastructure/contact-data.persist.ts";
 import { presenciaSaliente } from "../cognition/infrastructure/presencia-saliente.query.ts";
+import { gastoLlmHoy } from "../cognition/infrastructure/llm-budget.query.ts";
+import { LIMITS } from "../cognition/domain/limits.ts";
 
 // approved_by es UUID (migr 039, sin FK); "autonomous" NO es UUID -> el PATCH daba 400 y el approve fallaba
 // en silencio -> el draft quedaba en status=draft -> el send daba STATUS_NOT_APPROVED. Nil UUID = aprobador autonomo.
@@ -60,5 +62,8 @@ export function buildAutodraft(router?: ChannelRouter): MaybeAutodraftService {
   const vHum = Number(getEnv("AUTODRAFT_HUMAN_WINDOW_MIN") ?? "10") * 60000;
   const vIa = Number(getEnv("AUTODRAFT_IA_DEBOUNCE_SEC") ?? "45") * 1000;
   const presencia = gateOn && router ? (convId: string) => presenciaSaliente(convId, vHum, vIa) : undefined;
-  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, postHook, presencia);
+  // #7: presupuesto LLM/dia por tenant. Antes de llamar al LLM, si el tenant supero su gasto del dia -> degrada.
+  const budgetUsd = parseFloat(getEnv("LLM_BUDGET_USD_DIARIO") ?? "") || LIMITS.MAX_USD_DIARIO_API_POR_TENANT;
+  const presupuesto = (getEnv("LLM_BUDGET_GATE") ?? "on") === "off" ? undefined : async (tenantId: string): Promise<boolean> => (await gastoLlmHoy(tenantId)) >= budgetUsd;
+  return new MaybeAutodraftService(new AutodraftFlagSupabase(), generate, new IntentClassifier(adapter), autoSend, router ? new SentCounterSupabase() : undefined, perfilContacto, calificarContacto, postHook, presencia, presupuesto);
 }
