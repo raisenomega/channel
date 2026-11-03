@@ -12,6 +12,7 @@ import { estadoPlantillas } from "@/lib/templates-client/status-functions";
 import { marcarPlantillaNueva } from "@/lib/plantillas-badge";
 import { TEMPLATE_CATALOG, type CatalogItem } from "./template-catalog";
 import { CatalogCard } from "./catalog-card";
+import { TemplateUsageModal } from "./template-usage-modal";
 
 function submitItem(item: CatalogItem, lang: string) {
   return item.imp
@@ -23,6 +24,7 @@ export function LibraryImport({ onImported }: { language?: Idioma; onImported: (
   const [statuses, setStatuses] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState("");
+  const [abrir, setAbrir] = useState<CatalogItem | null>(null); // plantilla abierta en el modal de uso
   const refetch = () => void estadoPlantillas().then(setStatuses);
   useEffect(() => { refetch(); }, []);
   const aprobadas = TEMPLATE_CATALOG.filter((i) => statuses[i.name] === "APPROVED").length;
@@ -57,9 +59,11 @@ export function LibraryImport({ onImported }: { language?: Idioma; onImported: (
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
         {TEMPLATE_CATALOG.map((item) => (
           <CatalogCard key={item.name} item={item} status={statuses[item.name]}
-            busy={busy === item.name || busy === "__all__"} onUsar={(i) => void usar(i)} />
+            busy={busy === item.name || busy === "__all__"} onUsar={(i) => void usar(i)} onAbrir={setAbrir} />
         ))}
       </div>
+      {abrir ? <TemplateUsageModal item={abrir} aprobada={statuses[abrir.name] === "APPROVED"} onClose={() => setAbrir(null)}
+        onGuardar={(_d, reqApr) => { setAbrir(null); setToast(reqApr ? "Cambios enviados a aprobacion de Meta. Quedara lista cuando la aprueben." : "Plantilla lista para usar. Insertala desde el chat (celular shell)."); }} /> : null}
       {toast ? <Toast message={toast} onHide={() => setToast("")} ms={4000} /> : null}
     </div>
   );
