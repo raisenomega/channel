@@ -13,7 +13,7 @@ export function OrderRow({ lang, order, onStatus, onOpen }: {
   return (
     <div onClick={() => onOpen(order)} className="flex w-full cursor-pointer items-center gap-3 border-b border-border/30 px-3 py-2 hover:bg-muted/30">
       <span className="w-16 shrink-0 text-xs text-muted-foreground">{fecha}</span>
-      <span className="flex-1 truncate text-sm font-medium text-foreground">{order.clientName || "—"}</span>
+      <span className="flex-1 truncate text-sm font-medium text-foreground">{order.clientName || "—"}{order.orderNumber ? ` · ${order.orderNumber}` : ""}</span>
       <span className="shrink-0 text-xs text-muted-foreground">{order.currency} {order.totalAmount.toFixed(2)}</span>
       <div className="flex shrink-0 gap-1">
         {["pending", "paid", "cancelled"].map((s) => (

@@ -15,7 +15,7 @@ interface RawOrder {
   status: string;
   total_amount: number;
   currency: string;
-  created_at: string; paid_at: string | null;
+  created_at: string; paid_at: string | null; order_number: string | null;
 }
 
 export interface OrderListItem {
@@ -26,7 +26,7 @@ export interface OrderListItem {
   status: string;
   totalAmount: number;
   currency: string;
-  createdAt: string; paidAt: string | null;
+  createdAt: string; paidAt: string | null; orderNumber: string | null;
 }
 
 function mapear(r: RawOrder): OrderListItem {
@@ -39,7 +39,7 @@ function mapear(r: RawOrder): OrderListItem {
     totalAmount: r.total_amount,
     currency: r.currency ?? "USD",
     createdAt: r.created_at,
-    paidAt: r.paid_at,
+    paidAt: r.paid_at, orderNumber: r.order_number,
   };
 }
 
@@ -47,7 +47,7 @@ export async function listarOrdenes(): Promise<Result<OrderListItem[]>> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
-  const cols = ["id", "quote_id", "contact_id", "client_name", "status", "total_amount", "currency", "created_at", "paid_at"];
+  const cols = ["id", "quote_id", "contact_id", "client_name", "status", "total_amount", "currency", "created_at", "paid_at", "order_number"];
   const url = `${base}/orders?select=${encodeURIComponent(cols.join(","))}&order=created_at.desc`;
   try {
     const res = await fetch(url, { headers });

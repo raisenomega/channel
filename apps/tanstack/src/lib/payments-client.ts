@@ -14,7 +14,7 @@ interface RawPayment {
   amount: number;
   currency: string;
   provider: string | null;
-  created_at: string;
+  created_at: string; orders: { order_number: string | null } | null;
 }
 
 export interface PaymentListItem {
@@ -24,7 +24,7 @@ export interface PaymentListItem {
   amount: number;
   currency: string;
   provider: string | null;
-  createdAt: string;
+  createdAt: string; orderNumber: string | null;
 }
 
 function mapear(r: RawPayment): PaymentListItem {
@@ -35,7 +35,7 @@ function mapear(r: RawPayment): PaymentListItem {
     amount: r.amount,
     currency: r.currency ?? "USD",
     provider: r.provider,
-    createdAt: r.created_at,
+    createdAt: r.created_at, orderNumber: r.orders?.order_number ?? null,
   };
 }
 
@@ -43,7 +43,7 @@ export async function listarPagos(): Promise<Result<PaymentListItem[]>> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return { ok: false, error: { kind: "config_incompleta" } };
-  const cols = ["id", "order_id", "status", "amount", "currency", "provider", "created_at"];
+  const cols = ["id", "order_id", "status", "amount", "currency", "provider", "created_at", "orders(order_number)"];
   const url = `${base}/payments?select=${encodeURIComponent(cols.join(","))}&order=created_at.desc`;
   try {
     const res = await fetch(url, { headers });
