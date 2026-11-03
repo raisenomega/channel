@@ -17,6 +17,7 @@ import { PhoneApp } from "@/components/dashboard/channel/channel-phone-app";
 import { TabContent } from "@/components/dashboard/channel/channel-tab-content";
 import { AmplifiedChat } from "@/components/dashboard/channel/channel-amplified-chat";
 import { useMarkRead } from "@/lib/alerts/alerts-context";
+import { tomarPreparada } from "@/lib/templates-client/template-prepared";
 
 export const CanalRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -36,6 +37,7 @@ function CanalViewPage() {
 
   const [contactBarOpen, setContactBarOpen] = useState(false);
   const [composer, setComposer] = useState("");
+  useEffect(() => { const p = tomarPreparada(); if (p) setComposer(p); }, []); // C10: plantilla preparada -> pre-llena el composer
   const [activeTab, setActiveTab] = useState<ChannelTab | undefined>(undefined);
 
   const { send, pending } = useChannelSend(channelId, activeId, threadContactId);
