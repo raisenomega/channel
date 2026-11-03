@@ -3,7 +3,9 @@
  * de Meta. "Usar" crea/importa + marca el badge del chip de Canales + toast honesto. C4 <=75.
  */
 import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import type { Idioma } from "@/lib/i18n";
+import { guardarPreparada } from "@/lib/templates-client/template-prepared";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { importarLibrary } from "@/lib/templates-client/library-functions";
@@ -25,6 +27,7 @@ export function LibraryImport({ onImported }: { language?: Idioma; onImported: (
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState("");
   const [abrir, setAbrir] = useState<CatalogItem | null>(null); // plantilla abierta en el modal de uso
+  const navigate = useNavigate();
   const refetch = () => void estadoPlantillas().then(setStatuses);
   useEffect(() => { refetch(); }, []);
   const aprobadas = TEMPLATE_CATALOG.filter((i) => statuses[i.name] === "APPROVED").length;
@@ -63,7 +66,7 @@ export function LibraryImport({ onImported }: { language?: Idioma; onImported: (
         ))}
       </div>
       {abrir ? <TemplateUsageModal item={abrir} aprobada={statuses[abrir.name] === "APPROVED"} onClose={() => setAbrir(null)}
-        onGuardar={(_d, reqApr) => { setAbrir(null); setToast(reqApr ? "Cambios enviados a aprobacion de Meta. Quedara lista cuando la aprueben." : "Plantilla lista para usar. Insertala desde el chat (celular shell)."); }} /> : null}
+        onGuardar={(d, reqApr) => { setAbrir(null); if (reqApr) { setToast("Cambios enviados a aprobacion de Meta. Quedara lista cuando la aprueben."); return; } guardarPreparada(d.body); void navigate({ to: "/channels/$channelId", params: { channelId: "whatsapp" } }); }} /> : null}
       {toast ? <Toast message={toast} onHide={() => setToast("")} ms={4000} /> : null}
     </div>
   );
