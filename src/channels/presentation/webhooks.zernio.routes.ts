@@ -17,10 +17,15 @@ function parseBody(ctx: RequestContext): { sig: string; bodyRaw: string; parsed:
   return { sig, bodyRaw, parsed };
 }
 
-/** Resumen del payload para el log (SOLO shape, nunca contenido/secretos): keys + event + #messages. */
+/** Resumen del payload para el log (SOLO shape, nunca contenido/secretos): keys + event + #messages.
+ * PROBE avatar (temporal): en entrantes loguea los NOMBRES DE CAMPO de conversation/sender (sin valores)
+ * para descubrir si Zernio envia foto de perfil (campo tipo picture/profilePic). Se retira tras confirmar. */
 function shapeOf(p: Record<string, unknown>): string {
   const msgs = Array.isArray(p["messages"]) ? (p["messages"] as unknown[]).length : "n/a";
-  return `keys=[${Object.keys(p).join(",")}] event=${String(p["event"] ?? "-")} messages=${msgs}`;
+  const conv = (p["conversation"] ?? {}) as Record<string, unknown>;
+  const sender = ((p["message"] ?? {}) as Record<string, unknown>)["sender"] as Record<string, unknown> | undefined;
+  const probe = p["event"] === "message.received" ? ` convKeys=[${Object.keys(conv).join(",")}] senderKeys=[${sender ? Object.keys(sender).join(",") : ""}]` : "";
+  return `keys=[${Object.keys(p).join(",")}] event=${String(p["event"] ?? "-")} messages=${msgs}${probe}`;
 }
 
 async function manejarTemplate(h: ServerHandlers, reqId: string, parsed: Record<string, unknown>, bodyRaw: string, sig: string) {
