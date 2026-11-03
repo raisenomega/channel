@@ -32,7 +32,7 @@ function mapearModo(m: string | null): InboxItem["mode"] {
 
 function desdeRow(r: RowConv): InboxItem {
   const contactId = r.contact_id ? String(r.contact_id) : null;
-  const contactName = contactId && contactId.length > 8 ? "Contacto" : (contactId ?? "Contacto");
+  const c = (r as { contacts?: { display_name?: string | null; primary_phone?: string | null } | null }).contacts; const contactName = c?.display_name || c?.primary_phone || "Contacto"; // nombre REAL (antes hardcode "Contacto")
   return {
     conversationId: String(r.id),
     contactId,
@@ -52,7 +52,7 @@ export async function fetchInbox(): Promise<InboxItem[]> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers) return [];
-  const cols = ["id", "contact_id", "status", "operation_mode", "primary_channel", "last_message_at", "assigned_agent_id", "sla_violated", "total_messages", "subject"];
+  const cols = ["id", "contact_id", "status", "operation_mode", "primary_channel", "last_message_at", "assigned_agent_id", "sla_violated", "total_messages", "subject", "contacts(display_name,primary_phone)"];
   const url = `${base}/conversations?select=${encodeURIComponent(cols.join(","))}&order=last_message_at.desc&limit=50`;
   try {
     const res = await fetch(url, { headers });
