@@ -42,7 +42,7 @@ function InboxPage() {
   const toggleSLA = () => setFiltroSLA(filtroSLA === true ? null : true);
   const cleanFilters = () => { setFiltroEstado(null); setFiltroSLA(null); };
   const onCanalNav = (c: string) => void navigate({ to: "/channels/$channelId", params: { channelId: c } });
-  const onCanalBar = () => void navigate({ to: "/channels" }); // clic en la barra (no en un icono) -> pagina de canales
+  const onCanalBar = () => void navigate({ to: "/channels/$channelId", params: { channelId: "whatsapp" } }); // clic en barra vacia -> celular shell de WhatsApp (no la pagina de conectar)
 
   if (isPending) {
     return (
