@@ -5,18 +5,19 @@
  */
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import type { Mensaje } from "@/lib/types";
+import { tipoMedia } from "@/lib/media-type";
 
-const COLS = "id,conversation_id,sender_type,sender_user_id,direction,content,content_type,created_at";
+const COLS = "id,conversation_id,sender_type,sender_user_id,direction,content,content_type,created_at,media_url,media_mime";
 export const MSG_PAGE = 30;
 function enc(v: string): string { return encodeURIComponent(v); }
 
-interface Row { id: string; conversation_id: string; sender_type: string; sender_user_id: string | null; direction: string | null; content: string | null; content_type: string | null; created_at: string; }
+interface Row { id: string; conversation_id: string; sender_type: string; sender_user_id: string | null; direction: string | null; content: string | null; content_type: string | null; created_at: string; media_url?: string | null; media_mime?: string | null; }
 function toMensaje(r: Row): Mensaje {
   return {
     id: String(r.id), conversationId: String(r.conversation_id),
     senderType: String(r.sender_type) as Mensaje["senderType"],
     senderId: r.sender_user_id ? String(r.sender_user_id) : null,
-    content: String(r.content ?? ""), messageType: String(r.content_type ?? "text"),
+    content: String(r.content ?? ""), messageType: tipoMedia(r.content_type, r.media_mime, r.media_url),
     createdAt: r.created_at ?? new Date().toISOString(),
   };
 }

@@ -4,8 +4,9 @@
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import type { Mensaje } from "@/lib/types";
 import { enc } from "./conversation-format";
+import { tipoMedia } from "@/lib/media-type";
 
-const MESSAGE_COLS = ["id", "conversation_id", "sender_type", "sender_user_id", "content", "content_type", "created_at"];
+const MESSAGE_COLS = ["id", "conversation_id", "sender_type", "sender_user_id", "content", "content_type", "created_at", "media_url", "media_mime"];
 
 export async function fetchMessages(conversationId: string): Promise<Mensaje[]> {
   const base = supabaseRestBase();
@@ -18,7 +19,7 @@ export async function fetchMessages(conversationId: string): Promise<Mensaje[]> 
     if (!res.ok) return [];
     const filas = (await res.json()) as Array<{
       id: string; conversation_id: string; sender_type: string;
-      sender_user_id: string | null; content: string; content_type: string; created_at: string;
+      sender_user_id: string | null; content: string; content_type: string; created_at: string; media_url?: string | null; media_mime?: string | null;
     }>;
     return filas.map((r) => ({
       id: String(r.id),
@@ -26,7 +27,7 @@ export async function fetchMessages(conversationId: string): Promise<Mensaje[]> 
       senderType: String(r.sender_type) as Mensaje["senderType"],
       senderId: r.sender_user_id ? String(r.sender_user_id) : null,
       content: String(r.content),
-      messageType: String(r.content_type ?? "text"),
+      messageType: tipoMedia(r.content_type, r.media_mime, r.media_url),
       createdAt: r.created_at ?? new Date().toISOString(),
     }));
   } catch { return []; }
