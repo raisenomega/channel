@@ -1,39 +1,40 @@
 /**
- * HUB by Raisen — Lineas de una cotizacion (quote_line_items) + totales con tax a nivel documento
- * (porcentaje del subtotal o cantidad fija). C4 <=75.
+ * HUB by Raisen — Lineas de una cotizacion + totales con tax a nivel documento. Lee quotes.items (jsonb)
+ * DIRECTO via RLS (mismo camino que el listado que SI funciona): el RPC get_quote_items resolvia el tenant
+ * por auth.uid()->users y devolvia vacio para algunos tokens -> editor/PDF en cero. El snapshot jsonb lo
+ * llenan AMBOS paths (save_quote_with_items y el agente), asi que es la fuente consistente. C4 <=75.
  */
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 import type { QuoteLine } from "@/lib/quotes-client";
 import type { DocItem, DocTotals, TaxConfig } from "./doc-types";
 
-interface Row { description: string; quantity: number; unit_price: number; discount_pct?: number; }
+interface Row { description?: string; quantity?: number; unit_price?: number; discount_pct?: number; line_total?: number; }
 
-export async function fetchQuoteLines(quoteId: string): Promise<QuoteLine[]> {
+async function leerItems(quoteId: string): Promise<Row[]> {
   const base = supabaseRestBase();
   const headers = supabaseAuthHeaders();
   if (!base || !headers || !quoteId) return [];
   try {
-    const res = await fetch(`${base}/rpc/get_quote_items`, { method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify({ p_quote_id: quoteId }) });
+    const res = await fetch(`${base}/quotes?id=eq.${quoteId}&select=items`, { headers });
     if (!res.ok) return [];
-    const rows = (await res.json()) as Row[];
-    return rows.map((r) => { const q = Number(r.quantity), p = Number(r.unit_price), d = Number(r.discount_pct ?? 0); return { description: r.description, quantity: q, unitPrice: p, discountPct: d, lineTotal: q * p * (1 - d / 100) }; });
+    const rows = (await res.json()) as Array<{ items?: Row[] }>;
+    return Array.isArray(rows[0]?.items) ? (rows[0]!.items as Row[]) : [];
   } catch {
     return [];
   }
 }
 
+function lineTotalDe(r: Row): number {
+  const q = Number(r.quantity ?? 0), p = Number(r.unit_price ?? 0), d = Number(r.discount_pct ?? 0);
+  return r.line_total != null ? Number(r.line_total) : q * p * (1 - d / 100);
+}
+
+export async function fetchQuoteLines(quoteId: string): Promise<QuoteLine[]> {
+  return (await leerItems(quoteId)).map((r) => ({ description: String(r.description ?? ""), quantity: Number(r.quantity ?? 0), unitPrice: Number(r.unit_price ?? 0), discountPct: Number(r.discount_pct ?? 0), lineTotal: lineTotalDe(r) }));
+}
+
 export async function fetchQuoteItems(quoteId: string): Promise<DocItem[]> {
-  const base = supabaseRestBase();
-  const headers = supabaseAuthHeaders();
-  if (!base || !headers || !quoteId) return [];
-  try {
-    const res = await fetch(`${base}/rpc/get_quote_items`, { method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify({ p_quote_id: quoteId }) });
-    if (!res.ok) return [];
-    const rows = (await res.json()) as Row[];
-    return rows.map((r) => ({ description: r.description, quantity: Number(r.quantity), unitPrice: Number(r.unit_price), lineTotal: Number(r.quantity) * Number(r.unit_price) * (1 - Number(r.discount_pct ?? 0) / 100) }));
-  } catch {
-    return [];
-  }
+  return (await leerItems(quoteId)).map((r) => ({ description: String(r.description ?? ""), quantity: Number(r.quantity ?? 0), unitPrice: Number(r.unit_price ?? 0), lineTotal: lineTotalDe(r) }));
 }
 
 export function computeTotals(items: DocItem[], fallbackSubtotal: number, tax: TaxConfig): DocTotals {
