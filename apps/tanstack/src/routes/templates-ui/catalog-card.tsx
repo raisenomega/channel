@@ -11,11 +11,12 @@ const BADGE: Record<string, { bg: string; fg: string; label: string }> = {
   REJECTED: { bg: "hsl(0 72% 55% / 0.18)", fg: "hsl(0 72% 55%)", label: "Rechazada" },
 };
 
-export function CatalogCard({ item, status, busy, onUsar }: {
+export function CatalogCard({ item, status, busy, onUsar, onAbrir }: {
   item: CatalogItem;
   status: string | undefined;
   busy: boolean;
   onUsar: (i: CatalogItem) => void;
+  onAbrir: (i: CatalogItem) => void;
 }) {
   const b = status ? BADGE[status] : undefined;
   const cuerpo = item.imp ? "Plantilla pre-aprobada de Meta (contenido oficial)." : item.body;
@@ -30,8 +31,8 @@ export function CatalogCard({ item, status, busy, onUsar }: {
       </div>
       <span className="text-[10px] font-bold uppercase text-muted-foreground">{item.cat}{item.imp ? " - meta" : ""}</span>
       <p className="line-clamp-4 flex-1 whitespace-pre-wrap text-[11px] text-muted-foreground">{cuerpo}</p>
-      <Button variant={aprobada ? "ghost" : "outline"} size="sm" loading={busy}
-        onClick={() => onUsar(item)}>{aprobada ? "Usar en Canales" : "Usar"}</Button>
+      <Button variant={aprobada ? "primary" : "outline"} size="sm" loading={busy}
+        onClick={() => (aprobada ? onAbrir(item) : onUsar(item))}>{aprobada ? "Usar en Canales" : "Usar"}</Button>
     </div>
   );
 }
