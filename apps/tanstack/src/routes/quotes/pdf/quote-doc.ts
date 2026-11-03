@@ -1,6 +1,8 @@
 /**
- * HUB by Raisen — Lee los datos del cliente de una cotizacion (telefono/email/direccion de entrega) +
- * servicio, via RPC get_quote_doc (determinista por users.tenant_id). Para el PDF. C4 <=75.
+ * HUB by Raisen — Lee los datos del cliente de una cotizacion (telefono/email/direccion + servicio +
+ * numero) para el editor y el PDF. Lee quotes DIRECTO via RLS (mismo camino que el listado que SI
+ * funciona); el RPC get_quote_doc resolvia por auth.uid()->users y devolvia vacio para algunos tokens
+ * -> editor/PDF en cero. service = notes (el agente/guardado dejan el servicio ahi). C4 <=75.
  */
 import { supabaseRestBase, supabaseAuthHeaders } from "@/lib/supabase";
 
@@ -11,12 +13,12 @@ export async function fetchQuoteDoc(quoteId: string): Promise<QuoteDoc | null> {
   const headers = supabaseAuthHeaders();
   if (!base || !headers || !quoteId) return null;
   try {
-    const res = await fetch(`${base}/rpc/get_quote_doc`, { method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify({ p_quote_id: quoteId }) });
+    const res = await fetch(`${base}/quotes?id=eq.${quoteId}&select=client_phone,client_email,client_address,notes,quote_number`, { headers });
     if (!res.ok) return null;
-    const rows = (await res.json()) as { client_phone?: string; client_email?: string; client_address?: string; service?: string; quote_number?: string }[];
+    const rows = (await res.json()) as { client_phone?: string; client_email?: string; client_address?: string; notes?: string; quote_number?: string }[];
     const r = rows[0];
     if (!r) return null;
-    return { phone: r.client_phone ?? "", email: r.client_email ?? "", address: r.client_address ?? "", service: r.service ?? "", quoteNumber: r.quote_number ?? "" };
+    return { phone: r.client_phone ?? "", email: r.client_email ?? "", address: r.client_address ?? "", service: r.notes ?? "", quoteNumber: r.quote_number ?? "" };
   } catch {
     return null;
   }

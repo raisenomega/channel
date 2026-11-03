@@ -27,15 +27,29 @@ export async function saveInvoiceWithItems(inv: InvoiceSave, lines: QuoteLine[])
   return typeof id === "string" ? id : null;
 }
 
+// Lecturas DIRECTAS de invoices via RLS (mismo camino que listarInvoices que SI funciona): los RPC
+// get_invoice_doc/get_invoice_items resolvian por auth.uid()->users y devolvian vacio para algunos tokens
+// -> editor/PDF de factura en cero. items jsonb lo llena convert_quote_to_invoice (y el guardado).
+async function leerFactura(invoiceId: string, cols: string): Promise<Record<string, unknown> | null> {
+  const base = supabaseRestBase();
+  const headers = supabaseAuthHeaders();
+  if (!base || !headers || !invoiceId) return null;
+  try {
+    const res = await fetch(`${base}/invoices?id=eq.${invoiceId}&select=${cols}`, { headers });
+    if (!res.ok) return null;
+    return ((await res.json()) as Record<string, unknown>[])[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchInvoiceDoc(invoiceId: string): Promise<InvoiceDoc | null> {
-  if (!invoiceId) return null;
-  const rows = (await rpc("get_invoice_doc", { p_invoice_id: invoiceId })) as { client_phone?: string; client_email?: string; client_address?: string; service?: string }[] | null;
-  const r = rows?.[0];
-  return r ? { phone: r.client_phone ?? "", email: r.client_email ?? "", address: r.client_address ?? "", service: r.service ?? "" } : null;
+  const r = await leerFactura(invoiceId, "phone,email,client_address,notes");
+  return r ? { phone: String(r["phone"] ?? ""), email: String(r["email"] ?? ""), address: String(r["client_address"] ?? ""), service: String(r["notes"] ?? "") } : null;
 }
 
 export async function fetchInvoiceLines(invoiceId: string): Promise<QuoteLine[]> {
-  if (!invoiceId) return [];
-  const rows = (await rpc("get_invoice_items", { p_invoice_id: invoiceId })) as { description: string; quantity: number; unit_price: number; discount_pct?: number }[] | null;
-  return (rows ?? []).map((r) => { const q = Number(r.quantity), p = Number(r.unit_price), d = Number(r.discount_pct ?? 0); return { description: r.description, quantity: q, unitPrice: p, discountPct: d, lineTotal: q * p * (1 - d / 100) }; });
+  const r = await leerFactura(invoiceId, "items");
+  const items = Array.isArray(r?.["items"]) ? (r!["items"] as Array<{ description?: string; quantity?: number; unit_price?: number; discount_pct?: number; line_total?: number }>) : [];
+  return items.map((it) => { const q = Number(it.quantity ?? 0), p = Number(it.unit_price ?? 0), d = Number(it.discount_pct ?? 0); return { description: String(it.description ?? ""), quantity: q, unitPrice: p, discountPct: d, lineTotal: it.line_total != null ? Number(it.line_total) : q * p * (1 - d / 100) }; });
 }
