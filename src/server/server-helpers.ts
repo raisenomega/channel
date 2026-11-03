@@ -27,11 +27,22 @@ export function resultToJson<T, E>(result: Result<T, E>): Record<string, unknown
   return { ok: false, error: result.error as Record<string, unknown> };
 }
 
+const MAX_BODY_BYTES = 1_048_576; // 1 MB: evita OOM por body gigante / slow-loris
+
 export function readBody(req: http.IncomingMessage): Promise<string> {
-  return new Promise((resolvePromise) => {
+  return new Promise((resolvePromise, reject) => {
     const chunks: Buffer[] = [];
-    req.on("data", (chunk: Buffer) => chunks.push(chunk));
-    req.on("end", () => resolvePromise(Buffer.concat(chunks).toString("utf-8")));
+    let size = 0;
+    const to = setTimeout(() => reject(new Error("body_timeout")), 15000);
+    const done = (): void => { clearTimeout(to); };
+    req.on("data", (chunk: Buffer) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) { done(); reject(new Error("body_too_large")); return; }
+      chunks.push(chunk);
+    });
+    req.on("end", () => { done(); resolvePromise(Buffer.concat(chunks).toString("utf-8")); });
+    req.on("error", (e) => { done(); reject(e instanceof Error ? e : new Error("body_error")); });
+    req.on("aborted", () => { done(); reject(new Error("body_aborted")); });
   });
 }
 

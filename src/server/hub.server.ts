@@ -13,11 +13,11 @@ import * as http from "node:http";
 import { buildHandlers } from "./server-routes.ts";
 import { registrarRutas } from "./server-routes-registry.ts";
 import { matchRoute } from "./server-route-matcher.ts";
-import { extractJwt, parseBody, readBody } from "./server-helpers.ts";
+import { extractJwt, parseBody } from "./server-helpers.ts";
 import { sendResponse } from "./server-response.ts";
 import "./tenant-fallback.supabase.ts"; // M-6: registra fallback sub->users.tenant_id en auth-helpers
 import { assertCriticalEnv } from "./fail-fast-env.ts";
-import { startFollowupTimer } from "./followup-timer.ts"; import type { RequestContext } from "./server-types.ts";
+import { startFollowupTimer } from "./followup-timer.ts"; import type { RequestContext } from "./server-types.ts"; import { leerBodyOResponder, configurarTimeouts, instalarGracefulShutdown } from "./server-lifecycle.ts";
 
 const PORT = parseInt(nodeProcess.env["PORT"] ?? "8080", 10);
 const HOST = nodeProcess.env["HOST"] ?? "0.0.0.0";
@@ -36,7 +36,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  const rawBody = await readBody(req);
+  const rawBody = await leerBodyOResponder(req, res); if (rawBody === null) return; // limite/timeout de body -> ya respondio 413/408
   const thePath = req.url ?? "/";
   const theMethod = req.method ?? "GET";
 
@@ -68,7 +68,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`[HUB] Server escuchando en http://${HOST}:${PORT}`); startFollowupTimer();
+  console.log(`[HUB] Server escuchando en http://${HOST}:${PORT}`); startFollowupTimer(); configurarTimeouts(server); instalarGracefulShutdown(server);
   console.log("[HUB] Rutas registradas:");
   for (const r of routes) {
     console.log(`       ${r.method} ${r.path}`);
