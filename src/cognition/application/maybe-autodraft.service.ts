@@ -31,7 +31,7 @@ export class MaybeAutodraftService {
     private readonly autoSend?: AutoSendPort, private readonly counter?: SentCounterPort,
     private readonly perfilContacto?: (contactId: string) => Promise<string | null>, private readonly calificar?: (contactId: string, opportunity: boolean) => Promise<string | null>,
     private readonly postHook?: (ev: AutodraftEvent, opportunity: boolean, mode: string) => Promise<string | null>,
-    private readonly presencia?: (convId: string) => Promise<{ humano: boolean; ia: boolean }>, // B: gate de coherencia (presencia humana + debounce IA)
+    private readonly presencia?: (convId: string) => Promise<{ humano: boolean; ia: boolean }>, private readonly presupuesto?: (tenantId: string) => Promise<boolean>, // B: gate coherencia; #7: presupuesto LLM/dia por tenant (true = excedido)
   ) {}
 
   async ejecutar(ev: AutodraftEvent): Promise<AutodraftOutcome> {
@@ -39,7 +39,7 @@ export class MaybeAutodraftService {
     try {
       if (!ev.content || !ev.content.trim() || !ev.from) return { outcome: "no_send", reason: "vacio" };
       const { mode, config, timeZone } = await this.flag.leer(ev.tenantId);
-      if (mode === "off") return { outcome: "no_send", reason: "off" };
+      if (mode === "off") return { outcome: "no_send", reason: "off" }; if (this.presupuesto && await this.presupuesto(ev.tenantId)) return { outcome: "no_send", reason: "presupuesto_llm" }; // #7 tope gasto LLM/dia
       const voz = ev.contentType === "audio" && ev.mediaUrl ? await transcribirAudio(ev.mediaUrl, ev.mediaMime ?? "") : ""; // STT: nota de voz -> texto
       const contenido = voz ? "[Nota de voz] " + voz : ev.content; // el agente LEE lo que el cliente dijo por audio
       const intent = await this.classifier.clasificar(contenido);
