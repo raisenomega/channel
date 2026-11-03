@@ -30,7 +30,7 @@ export function rutaCrearTemplate(d: TemplatesDeps): RouteDefinition {
   return { method: "POST", path: "/tenants/:id/templates", handler: async (ctx) => {
     const auth = await requireTenantAuth(ctx, tid(ctx.path)); if (!auth.ok) return auth.error;
     const b = body(ctx);
-    const r = await d.create.ejecutar({ tenantId: auth.value.tenantId as never, name: String(b.name ?? ""), language: String(b.language ?? ""), category: String(b.category ?? "") as never, body: String(b.body ?? "") });
+    const r = await d.create.ejecutar({ tenantId: auth.value.tenantId as never, name: String(b.name ?? ""), language: String(b.language ?? ""), category: String(b.category ?? "") as never, body: String(b.body ?? ""), header: b.header as never, footer: b.footer as never, buttons: b.buttons as never });
     if (!r.ok) { const k = r.error.kind; const st = k === "zernio_error" || k === "persistence_failure" ? 502 : 400; return jsonResponse(st, { ok: false, error: { kind: k } }); }
     return jsonResponse(201, { ok: true, template: r.value });
   } };

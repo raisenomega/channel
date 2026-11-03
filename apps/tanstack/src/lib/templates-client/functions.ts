@@ -41,6 +41,8 @@ export async function listarTemplates(): Promise<Result<{ templates: WhatsAppTem
 
 export async function crearTemplate(input: {
   name: string; language: string; category: string; body: string;
+  header?: { type: "text" | "image"; content: string };
+  buttons?: ReadonlyArray<{ type: "url"; text: string; url: string }>;
 }): Promise<Result<{ id: string; status: string } | null, TemplateError>> {
   const tenantId = await ensureTenantId();
   if (!tenantId) return { ok: false, error: errorSinTenant() };

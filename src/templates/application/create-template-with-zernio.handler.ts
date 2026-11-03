@@ -43,6 +43,7 @@ export class CreateTemplateWithZernioHandler {
     const apiKey = this.apiKeyFn();
     const zr = await crearTemplateZernio(apiKey, {
       accountId, name: cmd.name, language: cmd.language, category: cmd.category, body: cmd.body,
+      header: cmd.header, buttons: cmd.buttons, // forma verificada: foto via header_handle, link via button url
     });
     if (!zr.ok) {
       return err({ kind: "zernio_error", cause: zr.error.kind === "red" ? zr.error.causa : zr.error.kind });
