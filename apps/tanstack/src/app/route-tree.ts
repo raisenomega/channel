@@ -15,6 +15,7 @@ import { LegalRoute } from "@/routes/settings.legal";
 import { IntegrationsRoute } from "@/routes/settings.integrations";
 import { ContactsRoute } from "@/routes/contacts";
 import { QuotesRoute } from "@/routes/quotes";
+import { InvoicesRoute } from "@/routes/invoices";
 import { OrdersRoute } from "@/routes/orders";
 import { PaymentsRoute } from "@/routes/payments";
 import { AutomationRoute } from "@/routes/automation";
@@ -40,6 +41,7 @@ export const routeTree = rootRoute.addChildren([
   AgentRoute,
   ContactsRoute,
   QuotesRoute,
+  InvoicesRoute,
   OrdersRoute,
   PaymentsRoute,
   AutomationRoute,

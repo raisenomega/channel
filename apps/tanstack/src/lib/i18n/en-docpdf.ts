@@ -29,7 +29,7 @@ export const enDocPdf: Dict = {
   "quotes.tpl.inUse": "In use",
   "quotes.convertInvoice": "Convert to invoice",
   "quotes.convertOrder": "Convert to order",
-  "invoices.empty": "No invoices",
+  "invoices.empty": "No invoices", "invoices.title": "Invoices", "invoices.stats.count": "Invoices", "invoices.stats.total": "Total", "invoices.stats.paid": "Paid", "invoices.stats.pending": "Pending",
   "invoices.editTitle": "Edit invoice",
   "invoices.pdfTitle": "INVOICE",
   "invoices.send": "Send", "invoices.sendTitle": "Send invoice",

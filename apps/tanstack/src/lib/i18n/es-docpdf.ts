@@ -29,7 +29,7 @@ export const esDocPdf: Dict = {
   "quotes.tpl.inUse": "En uso",
   "quotes.convertInvoice": "Convertir a factura",
   "quotes.convertOrder": "Convertir en Orden",
-  "invoices.empty": "Sin facturas",
+  "invoices.empty": "Sin facturas", "invoices.title": "Facturas", "invoices.stats.count": "Facturas", "invoices.stats.total": "Total", "invoices.stats.paid": "Pagadas", "invoices.stats.pending": "Pendientes",
   "invoices.editTitle": "Editar factura",
   "invoices.pdfTitle": "FACTURA",
   "invoices.send": "Enviar", "invoices.sendTitle": "Enviar factura",
