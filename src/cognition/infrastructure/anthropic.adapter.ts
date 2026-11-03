@@ -8,7 +8,7 @@ import type { AIProvider, AICompletionParams, AICompletionResult, AIError } from
 import { DEGRADATION_CHAIN } from "../domain/routing-table.ts";
 import type { ModelTier } from "../domain/routing-table.ts";
 import { usageDesde } from "../domain/model-pricing.ts";
-import { AnthropicModelResolver } from "./anthropic-model-resolver.ts"; import { construirMensajes } from "./anthropic-messages.ts";
+import { AnthropicModelResolver } from "./anthropic-model-resolver.ts"; import { construirMensajes } from "./anthropic-messages.ts"; import { fetchConTimeout, esAbort } from "../../shared/infrastructure/fetch-timeout.ts";
 
 export class AnthropicAdapter implements AIProvider {
   readonly provider = "anthropic" as const;
@@ -36,7 +36,7 @@ export class AnthropicAdapter implements AIProvider {
 
   async ping(): Promise<Result<boolean, AIError>> {
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/models");
+      const resp = await fetchConTimeout("https://api.anthropic.com/v1/models", {}, 10000);
       return ok(resp.ok);
     } catch { return err({ kind: "provider_unavailable" }); }
   }
@@ -49,7 +49,7 @@ export class AnthropicAdapter implements AIProvider {
     const startMs = Date.now();
     try {
       const apiKey = this.apiKeyValue;
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      const resp = await fetchConTimeout("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" }, // caching GA: cache_control basta, sin header beta (evita 400 por beta retirado)
         body: JSON.stringify({
@@ -59,7 +59,7 @@ export class AnthropicAdapter implements AIProvider {
           messages: construirMensajes(params),
           max_tokens: params.maxTokens ?? 4096,
         }),
-      });
+      }, 20000);
       if (resp.status === 503 || resp.status === 429) return err({ kind: "provider_unavailable", cause: `http_${resp.status}` });
       if (!resp.ok) { const b = await resp.text().catch(() => ""); return err({ kind: "provider_unavailable", cause: `http_${resp.status}:${b.slice(0, 180)}` }); }
       const data = await resp.json() as Record<string, unknown>;
@@ -70,6 +70,6 @@ export class AnthropicAdapter implements AIProvider {
         ...usageDesde(data.usage as Record<string, number> | undefined, model),
         latencyMs: Date.now() - startMs, model,
       }));
-    } catch (e) { return err({ kind: "unknown", cause: String(e) }); }
+    } catch (e) { return err({ kind: esAbort(e) ? "timeout" : "unknown", cause: String(e) }); }
   }
 }

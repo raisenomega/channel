@@ -5,6 +5,7 @@
 import { Result, ok } from "../../shared/domain/result.ts";
 import type { AIError } from "../domain/ai-provider.ts";
 import type { ModelTier } from "../domain/routing-table.ts";
+import { fetchConTimeout } from "../../shared/infrastructure/fetch-timeout.ts";
 
 const CACHE_TTL_MS = 24 * 3600 * 1000;
 const SAFETY_NET: Record<ModelTier, string> = {
@@ -28,8 +29,8 @@ export class AnthropicModelResolver {
 
   private async consultarModelos(tier: ModelTier): Promise<void> {
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/models",
-        { headers: { "x-api-key": this.apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" } });
+      const resp = await fetchConTimeout("https://api.anthropic.com/v1/models",
+        { headers: { "x-api-key": this.apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" } }, 10000);
       if (!resp.ok) { this.cache.set(tier, { model: SAFETY_NET[tier], expiresAt: Date.now() + CACHE_TTL_MS }); return; }
       const data = await resp.json() as { data: Array<{ id: string; created_at: string }> };
       const latest = this.pickLatestForTier(data.data ?? [], tier);
